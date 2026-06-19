@@ -21,6 +21,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private static final String HIT_COUNT_TAG = "HitCount";
     private static final String MATERIAL_ID_TAG = "MaterialId";
     private static final String MATERIAL_ITEM_ID_TAG = "MaterialItemId";
+    private static final String DISPLAY_ROTATION_TAG = "DisplayRotation";
 
     @Nullable
     private ForgeTemplate template;
@@ -30,6 +31,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private ResourceLocation materialItemId;
     private int materialCount;
     private int hitCount;
+    private float displayRotationDegrees;
 
     public ToolForgeBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.TOOL_WORKSTATION.get(), pos, blockState);
@@ -46,6 +48,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     public int hitCount() {
         return hitCount;
+    }
+
+    public float displayRotationDegrees() {
+        return displayRotationDegrees;
     }
 
     @Nullable
@@ -80,6 +86,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         materialItemId = null;
         materialCount = 0;
         hitCount = 0;
+        displayRotationDegrees = 0.0F;
         sync();
         return true;
     }
@@ -117,6 +124,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
             return false;
         }
         hitCount++;
+        randomizeDisplayRotation();
         sync();
         return true;
     }
@@ -156,7 +164,28 @@ public class ToolForgeBlockEntity extends BlockEntity {
         materialItemId = null;
         materialCount = 0;
         hitCount = 0;
+        displayRotationDegrees = 0.0F;
         sync();
+    }
+
+    private void randomizeDisplayRotation() {
+        if (level == null) {
+            return;
+        }
+        float direction = level.random.nextBoolean() ? 1.0F : -1.0F;
+        float amount = 4.0F + level.random.nextFloat() * 8.0F;
+        displayRotationDegrees = wrapDegrees(displayRotationDegrees + direction * amount);
+    }
+
+    private static float wrapDegrees(float degrees) {
+        float wrapped = degrees % 360.0F;
+        if (wrapped >= 180.0F) {
+            wrapped -= 360.0F;
+        }
+        if (wrapped < -180.0F) {
+            wrapped += 360.0F;
+        }
+        return wrapped;
     }
 
     public void sync() {
@@ -181,6 +210,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         }
         tag.putInt(MATERIAL_COUNT_TAG, materialCount);
         tag.putInt(HIT_COUNT_TAG, hitCount);
+        tag.putFloat(DISPLAY_ROTATION_TAG, displayRotationDegrees);
     }
 
     @Override
@@ -191,6 +221,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         materialItemId = tag.contains(MATERIAL_ITEM_ID_TAG) ? ResourceLocation.parse(tag.getString(MATERIAL_ITEM_ID_TAG)) : null;
         materialCount = tag.getInt(MATERIAL_COUNT_TAG);
         hitCount = tag.getInt(HIT_COUNT_TAG);
+        displayRotationDegrees = tag.getFloat(DISPLAY_ROTATION_TAG);
     }
 
     @Nullable

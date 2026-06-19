@@ -55,6 +55,7 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         poseStack.translate(0.5F, 1.05F, 0.5F);
         poseStack.mulPose(Axis.YP.rotationDegrees(-facingRotation));
         poseStack.translate(localX, 0.0F, localZ);
+        poseStack.mulPose(Axis.YP.rotationDegrees(forge.displayRotationDegrees()));
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.scale(scale, scale, scale);
         itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
