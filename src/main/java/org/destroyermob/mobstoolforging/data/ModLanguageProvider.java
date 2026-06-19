@@ -104,8 +104,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.trait.sturdy.desc", "adds durability at the cost of speed");
         add("tooltip.mobstoolforging.trait.swift", "Swift");
         add("tooltip.mobstoolforging.trait.swift.desc", "speeds up handling with lighter durability");
-        add("tooltip.mobstoolforging.trait.nether_touched", "Nether-Touched");
-        add("tooltip.mobstoolforging.trait.nether_touched.desc", "favours fire and Nether magic");
+        add("tooltip.mobstoolforging.trait.kindled", "Kindled");
+        add("tooltip.mobstoolforging.trait.kindled.desc", "evades fire's grasp");
         add("tooltip.mobstoolforging.trait.reinforced", "Reinforced");
         add("tooltip.mobstoolforging.trait.reinforced.desc", "adds structural durability");
         add("tooltip.mobstoolforging.trait.resonant", "Resonant");

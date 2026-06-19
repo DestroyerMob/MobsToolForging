@@ -41,20 +41,21 @@ public final class ToolTooltipBuilder {
     }
 
     private static void addNormalTooltip(List<Component> lines, ToolStatProfile profile) {
-        if (profile.traits().isEmpty()) {
+        List<ResourceLocation> displayTraits = ToolTraitDisplay.resolve(profile.traits());
+        if (displayTraits.isEmpty()) {
             return;
         }
         MutableComponent traitLine = Component.translatable("tooltip.mobstoolforging.traits")
                 .withStyle(ChatFormatting.GRAY)
                 .append(Component.literal(": ").withStyle(ChatFormatting.GRAY));
-        int shown = Math.min(profile.traits().size(), NORMAL_TRAIT_LIMIT);
+        int shown = Math.min(displayTraits.size(), NORMAL_TRAIT_LIMIT);
         for (int index = 0; index < shown; index++) {
             if (index > 0) {
                 traitLine.append(Component.literal(" \u2022 ").withStyle(ChatFormatting.DARK_GRAY));
             }
-            traitLine.append(traitName(profile.traits().get(index)));
+            traitLine.append(traitName(displayTraits.get(index)));
         }
-        int hidden = profile.traits().size() - shown;
+        int hidden = displayTraits.size() - shown;
         if (hidden > 0) {
             traitLine.append(Component.literal(" +" + hidden).withStyle(ChatFormatting.DARK_GRAY));
         }
@@ -71,10 +72,11 @@ public final class ToolTooltipBuilder {
         lines.add(partLine("tooltip.mobstoolforging.part.focus", construction.focusMaterial()));
         lines.add(partLine("tooltip.mobstoolforging.part.treatment", construction.treatment()));
 
-        if (!profile.traits().isEmpty()) {
+        List<ResourceLocation> displayTraits = ToolTraitDisplay.resolve(profile.traits());
+        if (!displayTraits.isEmpty()) {
             lines.add(Component.empty());
             lines.add(Component.translatable("tooltip.mobstoolforging.traits").withStyle(ChatFormatting.GRAY));
-            for (ResourceLocation traitId : profile.traits()) {
+            for (ResourceLocation traitId : displayTraits) {
                 lines.add(traitDescriptionLine(traitId));
             }
         }
@@ -112,7 +114,7 @@ public final class ToolTooltipBuilder {
     private static Component traitDescriptionLine(ResourceLocation traitId) {
         MutableComponent line = Component.empty()
                 .append(traitName(traitId))
-                .append(Component.literal(" - ").withStyle(ChatFormatting.DARK_GRAY));
+                .append(Component.literal(" \u2014 ").withStyle(ChatFormatting.DARK_GRAY));
         ToolTrait.byId(traitId)
                 .map(ToolTrait::description)
                 .ifPresentOrElse(line::append, () -> line.append(Component.literal(traitId.toString()).withStyle(ChatFormatting.GRAY)));

@@ -32,6 +32,7 @@ public final class ToolStatBuilder {
     public static final ResourceLocation AFFINITY_SCULK = affinity("sculk");
     public static final ResourceLocation AFFINITY_SILENCE = affinity("silence");
     public static final ResourceLocation AFFINITY_ECHO = affinity("echo");
+    private static final ResourceLocation LEGACY_NETHER_TOUCHED_TRAIT = affinity("nether_touched");
 
     private ToolStatBuilder() {
     }
@@ -91,7 +92,7 @@ public final class ToolStatBuilder {
 
     public static ToolStatProfile profileForTooltip(ItemStack stack, ToolKind toolKind, ToolConstructionData construction) {
         return profile(stack)
-                .filter(profile -> !profile.traits().isEmpty())
+                .filter(profile -> !profile.traits().isEmpty() && !profile.traits().contains(LEGACY_NETHER_TOUCHED_TRAIT))
                 .orElseGet(() -> build(toolKind, construction));
     }
 
@@ -101,6 +102,20 @@ public final class ToolStatBuilder {
 
     public static boolean hasEnchantAffinity(ItemStack stack, ResourceLocation affinity) {
         return profile(stack).map(profile -> profile.hasAffinity(affinity)).orElse(false);
+    }
+
+    public static boolean shouldBeFireResistant(ItemStack stack, ToolKind toolKind) {
+        ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
+        if (construction != null) {
+            return build(toolKind, construction).fireResistant();
+        }
+        return profile(stack).map(ToolStatProfile::fireResistant).orElseGet(() -> stack.has(DataComponents.FIRE_RESISTANT));
+    }
+
+    public static void ensureFireResistanceComponent(ItemStack stack, ToolKind toolKind) {
+        if (shouldBeFireResistant(stack, toolKind) && !stack.has(DataComponents.FIRE_RESISTANT)) {
+            stack.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
+        }
     }
 
     private static void applyHandle(WorkingStats stats, ResourceLocation handle) {
@@ -113,8 +128,9 @@ public final class ToolStatBuilder {
         } else if (MaterialCatalog.BLAZE.equals(handle)) {
             stats.durabilityMultiplier *= 0.95F;
             stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
-            stats.addTrait(ToolTrait.NETHER_TOUCHED);
-            stats.addDebug(line("Handle", handle, "+Nether, -Durability"));
+            stats.fireResistant = true;
+            stats.addTrait(ToolTrait.KINDLED);
+            stats.addDebug(line("Handle", handle, "+Fireproof, -Durability"));
         } else if (MaterialCatalog.BREEZE.equals(handle)) {
             stats.attackSpeedBonus += 0.15F;
             stats.durabilityMultiplier *= 0.90F;

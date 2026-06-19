@@ -16,7 +16,7 @@ import org.destroyermob.mobstoolforging.MobsToolForging;
 public enum ToolTrait {
     STURDY("sturdy", ChatFormatting.BLUE, "handling"),
     SWIFT("swift", ChatFormatting.AQUA, "handling"),
-    NETHER_TOUCHED("nether_touched", ChatFormatting.GOLD, "affinity"),
+    KINDLED("kindled", ChatFormatting.GOLD, "handling"),
     REINFORCED("reinforced", ChatFormatting.GRAY, "structure"),
     RESONANT("resonant", ChatFormatting.LIGHT_PURPLE, "affinity"),
     CONDUCTIVE("conductive", ChatFormatting.YELLOW, "affinity"),
