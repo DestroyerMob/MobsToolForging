@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
@@ -30,6 +31,7 @@ public class MobsToolForging {
         ModRecipeSerializers.register(modEventBus);
         ModNetworking.register(modEventBus);
         ModDataGenerators.register(modEventBus);
+        modContainer.registerConfig(ModConfig.Type.COMMON, MobsToolForgingConfig.COMMON_SPEC);
 
         modEventBus.addListener(this::addCreativeTabContents);
 
@@ -45,6 +47,12 @@ public class MobsToolForging {
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.SMITHING_HAMMER);
+            event.accept(ModItems.PICKAXE_HEAD_PATTERN);
+            event.accept(ModItems.AXE_HEAD_PATTERN);
+            event.accept(ModItems.SHOVEL_HEAD_PATTERN);
+            event.accept(ModItems.HOE_HEAD_PATTERN);
+            event.accept(ModItems.SWORD_BLADE_PATTERN);
+            event.accept(ModItems.SWORD_GUARD_PATTERN);
         }
     }
 }

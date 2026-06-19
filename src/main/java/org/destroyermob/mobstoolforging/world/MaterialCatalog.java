@@ -123,6 +123,13 @@ public final class MaterialCatalog {
         return Component.literal(toTitleCase(materialId.getPath()));
     }
 
+    public static String displayNameText(ResourceLocation materialId) {
+        if (DEFINITIONS.containsKey(materialId) || materialId.getNamespace().equals(MobsToolForging.MOD_ID)) {
+            return toTitleCase(materialId.getPath());
+        }
+        return toTitleCase(materialId.getPath());
+    }
+
     public static List<ResourceLocation> starterMaterialIds() {
         return STARTER_MATERIALS;
     }

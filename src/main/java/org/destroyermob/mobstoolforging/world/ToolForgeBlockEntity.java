@@ -74,11 +74,19 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return template != null && materialCount >= template.requiredMaterials() && hitCount >= template.requiredHits();
     }
 
+    public boolean canChangeTemplate() {
+        return materialId == null && materialItemId == null && materialCount == 0 && hitCount == 0;
+    }
+
     public boolean selectTemplate(ForgeTemplate template) {
+        return setTemplateFromItem(template);
+    }
+
+    public boolean setTemplateFromItem(ForgeTemplate template) {
         if (this.template == template) {
             return true;
         }
-        if (!isEmpty()) {
+        if (!canChangeTemplate()) {
             return false;
         }
         this.template = template;
@@ -86,6 +94,16 @@ public class ToolForgeBlockEntity extends BlockEntity {
         materialItemId = null;
         materialCount = 0;
         hitCount = 0;
+        displayRotationDegrees = 0.0F;
+        sync();
+        return true;
+    }
+
+    public boolean clearTemplate() {
+        if (template == null || !canChangeTemplate()) {
+            return false;
+        }
+        template = null;
         displayRotationDegrees = 0.0F;
         sync();
         return true;

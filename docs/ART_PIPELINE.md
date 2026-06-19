@@ -12,6 +12,15 @@ Current hand-authored source sprites live under:
 src/main/resources/assets/mobstoolforging/textures/source/tool_parts/<material>/<sprite>.png
 ```
 
+Handle sprites may provide a generic base and optional tool-specific bases:
+
+```text
+src/main/resources/assets/mobstoolforging/textures/source/tool_parts/<handle_material>/handle.png
+src/main/resources/assets/mobstoolforging/textures/source/tool_parts/<handle_material>/<tool>_handle.png
+```
+
+Datagen checks the tool-specific handle sprite first, then falls back to `handle.png`, then falls back to procedural drawing. The handle mask is still applied after the base sprite is selected.
+
 Handle visibility masks live under:
 
 ```text

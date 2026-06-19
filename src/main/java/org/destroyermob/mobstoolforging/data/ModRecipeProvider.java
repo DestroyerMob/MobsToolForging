@@ -9,6 +9,7 @@ import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.SpecialRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.recipe.ModularToolRecipe;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
@@ -42,6 +43,13 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
                 .save(output);
 
+        patternRecipe(output, ModItems.PICKAXE_HEAD_PATTERN.get(), "PPP", " S ", " S ");
+        patternRecipe(output, ModItems.AXE_HEAD_PATTERN.get(), "PP ", "PS ", " S ");
+        patternRecipe(output, ModItems.SHOVEL_HEAD_PATTERN.get(), " P ", " P ", " S ");
+        patternRecipe(output, ModItems.HOE_HEAD_PATTERN.get(), "PP ", " S ", " S ");
+        patternRecipe(output, ModItems.SWORD_BLADE_PATTERN.get(), " P ", " P ", " P ");
+        patternRecipe(output, ModItems.SWORD_GUARD_PATTERN.get(), "P P", " S ");
+
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.LAPIDARY_TABLE)
                 .define('D', Items.DIAMOND)
                 .define('C', Items.CRAFTING_TABLE)
@@ -56,5 +64,27 @@ public class ModRecipeProvider extends RecipeProvider {
             SpecialRecipeBuilder.special(category -> new ModularToolRecipe(category, toolKind))
                     .save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "modular_" + toolKind.id()));
         }
+    }
+
+    private void patternRecipe(RecipeOutput output, ItemLike pattern, String... rows) {
+        ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(RecipeCategory.MISC, pattern)
+                .define('P', Items.PAPER)
+                .unlockedBy("has_paper", has(Items.PAPER));
+        if (usesSymbol(rows, 'S')) {
+            builder.define('S', Items.STICK);
+        }
+        for (String row : rows) {
+            builder.pattern(row);
+        }
+        builder.save(output);
+    }
+
+    private static boolean usesSymbol(String[] rows, char symbol) {
+        for (String row : rows) {
+            if (row.indexOf(symbol) >= 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

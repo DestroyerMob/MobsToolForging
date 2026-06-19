@@ -219,9 +219,16 @@ public class ModVisualDefinitionProvider implements DataProvider {
     }
 
     private BufferedImage spriteFor(ToolKind toolKind, String slot, MaterialVisualSpec material) {
-        BufferedImage source = loadSourceSprite(material.id(), sourceTextureName(toolKind, slot));
+        BufferedImage source = slot.equals("handle")
+                ? loadHandleSourceSprite(material.id(), toolKind)
+                : loadSourceSprite(material.id(), sourceTextureName(toolKind, slot));
         BufferedImage sprite = source == null ? drawSprite(toolKind, slot, material) : source;
         return slot.equals("handle") ? applyHandleMask(toolKind, sprite) : sprite;
+    }
+
+    private BufferedImage loadHandleSourceSprite(ResourceLocation material, ToolKind toolKind) {
+        BufferedImage toolSpecific = loadSourceSprite(material, toolKind.id() + "_handle");
+        return toolSpecific == null ? loadSourceSprite(material, "handle") : toolSpecific;
     }
 
     private BufferedImage applyHandleMask(ToolKind toolKind, BufferedImage source) {
@@ -462,9 +469,6 @@ public class ModVisualDefinitionProvider implements DataProvider {
     }
 
     private static String sourceTextureName(ToolKind toolKind, String slot) {
-        if (slot.equals("handle")) {
-            return "handle";
-        }
         if (toolKind == ToolKind.SWORD && slot.equals("guard")) {
             return "sword_guard";
         }

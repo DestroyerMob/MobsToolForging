@@ -12,6 +12,8 @@ import org.destroyermob.mobstoolforging.item.ModularPickaxeItem;
 import org.destroyermob.mobstoolforging.item.ModularShovelItem;
 import org.destroyermob.mobstoolforging.item.ModularSwordItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
+import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
+import org.destroyermob.mobstoolforging.world.ForgeTemplate;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
 
@@ -29,6 +31,30 @@ public final class ModItems {
     public static final DeferredItem<Item> SMITHING_HAMMER = ITEMS.register(
             "smithing_hammer",
             () -> new Item(new Item.Properties().durability(128))
+    );
+    public static final DeferredItem<ToolTemplateItem> PICKAXE_HEAD_PATTERN = ITEMS.register(
+            "pickaxe_head_pattern",
+            () -> new ToolTemplateItem(ForgeTemplate.PICKAXE_HEAD, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> AXE_HEAD_PATTERN = ITEMS.register(
+            "axe_head_pattern",
+            () -> new ToolTemplateItem(ForgeTemplate.AXE_HEAD, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> SHOVEL_HEAD_PATTERN = ITEMS.register(
+            "shovel_head_pattern",
+            () -> new ToolTemplateItem(ForgeTemplate.SHOVEL_HEAD, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> HOE_HEAD_PATTERN = ITEMS.register(
+            "hoe_head_pattern",
+            () -> new ToolTemplateItem(ForgeTemplate.HOE_HEAD, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> SWORD_BLADE_PATTERN = ITEMS.register(
+            "sword_blade_pattern",
+            () -> new ToolTemplateItem(ForgeTemplate.SWORD_BLADE, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> SWORD_GUARD_PATTERN = ITEMS.register(
+            "sword_guard_pattern",
+            () -> new ToolTemplateItem(ForgeTemplate.SWORD_GUARD, new Item.Properties())
     );
     public static final DeferredItem<ModularToolPartItem> SWORD_BLADE = ITEMS.register(
             "sword_blade",

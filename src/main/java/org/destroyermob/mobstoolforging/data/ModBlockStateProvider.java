@@ -12,6 +12,7 @@ import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolPartSpriteKey;
 import org.destroyermob.mobstoolforging.world.ToolKind;
@@ -45,11 +46,21 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockItem(lapidaryTable, lapidaryModel);
 
         itemModels().withExistingParent("smithing_hammer", mcLoc("item/handheld")).texture("layer0", mcLoc("item/iron_axe"));
+        patternModel(ModItems.PICKAXE_HEAD_PATTERN.getId().getPath());
+        patternModel(ModItems.AXE_HEAD_PATTERN.getId().getPath());
+        patternModel(ModItems.SHOVEL_HEAD_PATTERN.getId().getPath());
+        patternModel(ModItems.HOE_HEAD_PATTERN.getId().getPath());
+        patternModel(ModItems.SWORD_BLADE_PATTERN.getId().getPath());
+        patternModel(ModItems.SWORD_GUARD_PATTERN.getId().getPath());
         for (ToolKind toolKind : ToolKind.values()) {
             partModel(toolKind);
             toolModel(toolKind);
         }
         swordGuardPartModel();
+    }
+
+    private void patternModel(String name) {
+        itemModels().withExistingParent(name, mcLoc("item/generated")).texture("layer0", mcLoc("item/paper"));
     }
 
     private void partModel(ToolKind toolKind) {

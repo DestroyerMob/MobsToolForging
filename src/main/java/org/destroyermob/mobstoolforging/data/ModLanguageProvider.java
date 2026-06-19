@@ -16,6 +16,12 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.TOOL_FORGE, "Tool Forge");
         addBlock(ModBlocks.LAPIDARY_TABLE, "Lapidary Table");
         addItem(ModItems.SMITHING_HAMMER, "Smithing Hammer");
+        addItem(ModItems.PICKAXE_HEAD_PATTERN, "Pickaxe Head Pattern");
+        addItem(ModItems.AXE_HEAD_PATTERN, "Axe Head Pattern");
+        addItem(ModItems.SHOVEL_HEAD_PATTERN, "Shovel Head Pattern");
+        addItem(ModItems.HOE_HEAD_PATTERN, "Hoe Head Pattern");
+        addItem(ModItems.SWORD_BLADE_PATTERN, "Sword Blade Pattern");
+        addItem(ModItems.SWORD_GUARD_PATTERN, "Sword Guard Pattern");
         addItem(ModItems.SWORD_BLADE, "Sword Blade");
         addItem(ModItems.SWORD_GUARD, "Sword Guard");
         addItem(ModItems.SHOVEL_HEAD, "Shovel Head");
@@ -59,8 +65,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("forge_template.mobstoolforging.pickaxe_head", "Pickaxe Head");
         add("forge_template.mobstoolforging.axe_head", "Axe Head");
         add("forge_template.mobstoolforging.hoe_head", "Hoe Head");
-        add("message.mobstoolforging.select_template", "Shift right-click to choose a template.");
+        add("message.mobstoolforging.select_template", "Use a pattern item on this station.");
         add("message.mobstoolforging.template_selected", "Selected %s.");
+        add("message.mobstoolforging.template_cleared", "Template cleared.");
         add("message.mobstoolforging.forge_busy", "Finish or clear the current work first.");
         add("message.mobstoolforging.materials_full", "The station already has enough material.");
         add("message.mobstoolforging.need_materials", "Place the required matching materials before working.");

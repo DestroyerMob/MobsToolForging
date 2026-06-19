@@ -1,0 +1,376 @@
+package org.destroyermob.mobstoolforging.world;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Unit;
+import net.minecraft.world.item.DiggerItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.Tool;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.neoforged.neoforge.common.SimpleTier;
+import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.registry.ModDataComponents;
+
+public final class ToolStatBuilder {
+    public static final ResourceLocation AFFINITY_FIRE = affinity("fire");
+    public static final ResourceLocation AFFINITY_NETHER = affinity("nether");
+    public static final ResourceLocation AFFINITY_RESONANCE = affinity("resonance");
+    public static final ResourceLocation AFFINITY_ENCHANTING = affinity("enchanting");
+    public static final ResourceLocation AFFINITY_LUCK = affinity("luck");
+    public static final ResourceLocation AFFINITY_TRADE = affinity("trade");
+    public static final ResourceLocation AFFINITY_FORTUNE = affinity("fortune");
+    public static final ResourceLocation AFFINITY_ENCHANT_CONTROL = affinity("enchant_control");
+    public static final ResourceLocation AFFINITY_SCULK = affinity("sculk");
+    public static final ResourceLocation AFFINITY_SILENCE = affinity("silence");
+    public static final ResourceLocation AFFINITY_ECHO = affinity("echo");
+
+    private ToolStatBuilder() {
+    }
+
+    public static ToolStatProfile build(ToolKind toolKind, ToolConstructionData construction) {
+        Tier headTier = MaterialCatalog.definition(construction.headMaterial()).orElseThrow().tier();
+        WorkingStats stats = new WorkingStats(
+                headTier.getUses(),
+                baseAttackDamageBonus(toolKind, construction.headMaterial()),
+                baseAttackSpeedBonus(toolKind, construction.headMaterial())
+        );
+
+        stats.addDebug(line("Head", construction.headMaterial(), ""));
+        if (MaterialCatalog.NETHERITE.equals(construction.headMaterial())) {
+            stats.fireResistant = true;
+            stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
+            stats.addEffect(effect("Fireproof", "survives fire and lava"));
+        }
+        applyHandle(stats, construction.handleMaterial());
+        applyBindingOrGuard(stats, toolKind, construction.bindingMaterial());
+        applyWrap(stats, construction.wrapMaterial());
+        applyFocus(stats, construction.focusMaterial());
+        applyTreatment(stats, construction);
+        applyQuality(stats, construction.quality());
+
+        int maxDamage = Math.max(1, Math.round(stats.baseMaxDamage * stats.durabilityMultiplier));
+        return new ToolStatProfile(
+                maxDamage,
+                stats.attackDamageBonus,
+                stats.attackSpeedBonus,
+                stats.miningSpeedMultiplier,
+                stats.durabilityMultiplier,
+                List.copyOf(stats.affinities),
+                stats.fireResistant,
+                List.copyOf(stats.effectLines),
+                List.copyOf(stats.debugLines)
+        );
+    }
+
+    public static void apply(ItemStack stack, ToolKind toolKind, ToolConstructionData construction) {
+        ToolStatProfile profile = build(toolKind, construction);
+        Tier headTier = MaterialCatalog.definition(construction.headMaterial()).orElseThrow().tier();
+        Tier adjustedTier = adjustedTier(headTier, profile);
+
+        stack.set(DataComponents.MAX_DAMAGE, profile.maxDamage());
+        stack.set(DataComponents.DAMAGE, 0);
+        stack.set(DataComponents.TOOL, toolComponent(toolKind, adjustedTier));
+        stack.set(DataComponents.ATTRIBUTE_MODIFIERS, toolAttributes(toolKind, adjustedTier, profile));
+        stack.set(ModDataComponents.TOOL_STAT_PROFILE.get(), profile);
+        if (profile.fireResistant()) {
+            stack.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
+        }
+    }
+
+    public static Optional<ToolStatProfile> profile(ItemStack stack) {
+        return Optional.ofNullable(stack.get(ModDataComponents.TOOL_STAT_PROFILE.get()));
+    }
+
+    public static List<ResourceLocation> enchantAffinities(ItemStack stack) {
+        return profile(stack).map(ToolStatProfile::enchantAffinity).orElseGet(List::of);
+    }
+
+    public static boolean hasEnchantAffinity(ItemStack stack, ResourceLocation affinity) {
+        return profile(stack).map(profile -> profile.hasAffinity(affinity)).orElse(false);
+    }
+
+    public static List<Component> tooltip(ItemStack stack, ToolKind toolKind, boolean advanced) {
+        ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
+        if (construction == null) {
+            return List.of();
+        }
+        ToolStatProfile profile = profile(stack)
+                .filter(value -> !value.effectLines().isEmpty() || !value.debugLines().isEmpty())
+                .orElseGet(() -> build(toolKind, construction));
+        List<Component> lines = new ArrayList<>();
+        for (String line : profile.effectLines()) {
+            lines.add(Component.literal(line).withStyle(ChatFormatting.GRAY));
+        }
+        if (advanced && !profile.debugLines().isEmpty()) {
+            if (!lines.isEmpty()) {
+                lines.add(Component.empty());
+            }
+            lines.add(Component.literal("Construction").withStyle(ChatFormatting.DARK_GRAY));
+            for (String line : profile.debugLines()) {
+                lines.add(Component.literal(line).withStyle(ChatFormatting.DARK_GRAY));
+            }
+        }
+        return lines;
+    }
+
+    private static void applyHandle(WorkingStats stats, ResourceLocation handle) {
+        if (MaterialCatalog.DARK_OAK.equals(handle)) {
+            stats.durabilityMultiplier *= 1.08F;
+            stats.attackSpeedBonus -= 0.05F;
+            stats.miningSpeedMultiplier *= 0.98F;
+            stats.addEffect(effect("Sturdy Handling", "more durability, slower swings"));
+            stats.addDebug(line("Handle", handle, "+Durability, -Speed"));
+        } else if (MaterialCatalog.BLAZE.equals(handle)) {
+            stats.durabilityMultiplier *= 0.95F;
+            stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
+            stats.addEffect(effect("Nether Affinity", "fire and nether enchanting, less durability"));
+            stats.addDebug(line("Handle", handle, "+Nether, -Durability"));
+        } else if (MaterialCatalog.BREEZE.equals(handle)) {
+            stats.attackSpeedBonus += 0.15F;
+            stats.durabilityMultiplier *= 0.90F;
+            stats.miningSpeedMultiplier *= 1.03F;
+            stats.addEffect(effect("Swift Handling", "faster swings, lighter durability"));
+            stats.addDebug(line("Handle", handle, "+Speed, -Durability"));
+        } else {
+            stats.addDebug(line("Handle", handle, ""));
+        }
+    }
+
+    private static void applyBindingOrGuard(WorkingStats stats, ToolKind toolKind, Optional<ResourceLocation> material) {
+        if (material.isEmpty()) {
+            return;
+        }
+        ResourceLocation value = material.get();
+        String note = "";
+        if (MaterialCatalog.IRON.equals(value)) {
+            stats.durabilityMultiplier *= 1.10F;
+            note = "+Durability";
+            stats.addEffect(effect("Reinforced", "more durability"));
+        } else if (MaterialCatalog.COPPER.equals(value)) {
+            stats.durabilityMultiplier *= 1.05F;
+            stats.addAffinities(AFFINITY_RESONANCE, AFFINITY_ENCHANTING);
+            note = "+Resonance";
+            stats.addEffect(effect("Resonant", "enchant resonance and more durability"));
+        } else if (MaterialCatalog.GOLD.equals(value)) {
+            stats.durabilityMultiplier *= 0.90F;
+            stats.addAffinities(AFFINITY_ENCHANTING);
+            note = "+Enchanting, -Durability";
+            stats.addEffect(effect("Conductive", "stronger enchanting, less durability"));
+        } else if (MaterialCatalog.DIAMOND.equals(value)) {
+            stats.durabilityMultiplier *= 1.20F;
+            note = "+Stability";
+            stats.addEffect(effect("Stabilized", "much more durability"));
+        } else if (MaterialCatalog.NETHERITE.equals(value)) {
+            stats.durabilityMultiplier *= 1.25F;
+            stats.attackSpeedBonus -= 0.05F;
+            stats.fireResistant = true;
+            stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
+            note = "+Durability, +Fireproof, -Speed";
+            stats.addEffect(effect("Nether-Forged", "fireproof and tougher, slower swings"));
+        } else if (MaterialCatalog.EMERALD.equals(value)) {
+            stats.addAffinities(AFFINITY_LUCK, AFFINITY_TRADE, AFFINITY_FORTUNE);
+            note = "+Fortune";
+            stats.addEffect(effect("Fortunate", "luck, trade, and fortune affinity"));
+        }
+        stats.addDebug(line(toolKind == ToolKind.SWORD ? "Guard" : "Binding", value, note));
+    }
+
+    private static void applyWrap(WorkingStats stats, Optional<ResourceLocation> material) {
+        if (material.isEmpty()) {
+            return;
+        }
+        ResourceLocation value = material.get();
+        String note = "";
+        if (MaterialCatalog.LEATHER.equals(value)) {
+            stats.durabilityMultiplier *= 1.05F;
+            note = "+Grip";
+            stats.addEffect(effect("Sure Grip", "better control and durability"));
+        }
+        stats.addDebug(line("Wrap", value, note));
+    }
+
+    private static void applyFocus(WorkingStats stats, Optional<ResourceLocation> material) {
+        if (material.isEmpty()) {
+            return;
+        }
+        ResourceLocation value = material.get();
+        String note = "";
+        if (MaterialCatalog.AMETHYST.equals(value)) {
+            stats.addAffinities(AFFINITY_RESONANCE, AFFINITY_ENCHANT_CONTROL);
+            note = "+Enchant Control";
+            stats.addEffect(effect("Focused", "enchant control and resonance"));
+        }
+        stats.addDebug(line("Focus", value, note));
+    }
+
+    private static void applyTreatment(WorkingStats stats, ToolConstructionData construction) {
+        if (construction.treatment().isEmpty()) {
+            return;
+        }
+        ResourceLocation treatment = construction.treatment().get();
+        String note = "";
+        if (MaterialCatalog.NETHER.equals(treatment)) {
+            stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
+            if (MaterialCatalog.BLAZE.equals(construction.handleMaterial())
+                    || MaterialCatalog.NETHERITE.equals(construction.headMaterial())
+                    || construction.bindingMaterial().filter(MaterialCatalog.NETHERITE::equals).isPresent()) {
+                stats.fireResistant = true;
+                note = "+Nether, +Fireproof";
+            } else {
+                note = "+Nether";
+            }
+            stats.addEffect(effect("Nether-Treated", stats.fireResistant ? "fireproof nether affinity" : "nether affinity"));
+        } else if (MaterialCatalog.SCULK.equals(treatment)) {
+            stats.addAffinities(AFFINITY_SCULK, AFFINITY_SILENCE, AFFINITY_ECHO);
+            note = "+Echo";
+            stats.addEffect(effect("Echoing", "sculk, silence, and echo affinity"));
+        }
+        stats.addDebug(line("Treatment", treatment, note));
+    }
+
+    private static void applyQuality(WorkingStats stats, int quality) {
+        float qualityMultiplier = Math.max(0.90F, Math.min(1.10F, 1.0F + (quality - ToolConstructionData.DEFAULT_QUALITY) * 0.002F));
+        stats.durabilityMultiplier *= qualityMultiplier;
+        stats.miningSpeedMultiplier *= 1.0F + (qualityMultiplier - 1.0F) * 0.5F;
+        if (quality != ToolConstructionData.DEFAULT_QUALITY) {
+            stats.addEffect(effect("Workmanship", quality > ToolConstructionData.DEFAULT_QUALITY ? "better finish" : "rough finish"));
+            stats.addDebug("Quality: " + quality + "%");
+        }
+    }
+
+    private static Tier adjustedTier(Tier headTier, ToolStatProfile profile) {
+        return new SimpleTier(
+                headTier.getIncorrectBlocksForDrops(),
+                profile.maxDamage(),
+                headTier.getSpeed() * profile.miningSpeedMultiplier(),
+                headTier.getAttackDamageBonus(),
+                headTier.getEnchantmentValue(),
+                () -> {
+                    Ingredient ingredient = headTier.getRepairIngredient();
+                    return ingredient;
+                }
+        );
+    }
+
+    private static Tool toolComponent(ToolKind toolKind, Tier tier) {
+        return switch (toolKind) {
+            case SWORD -> SwordItem.createToolProperties();
+            case SHOVEL -> tier.createToolProperties(BlockTags.MINEABLE_WITH_SHOVEL);
+            case PICKAXE -> tier.createToolProperties(BlockTags.MINEABLE_WITH_PICKAXE);
+            case AXE -> tier.createToolProperties(BlockTags.MINEABLE_WITH_AXE);
+            case HOE -> tier.createToolProperties(BlockTags.MINEABLE_WITH_HOE);
+        };
+    }
+
+    private static ItemAttributeModifiers toolAttributes(ToolKind toolKind, Tier tier, ToolStatProfile profile) {
+        return switch (toolKind) {
+            case SWORD -> SwordItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
+            case SHOVEL, PICKAXE, AXE, HOE -> DiggerItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
+        };
+    }
+
+    private static float baseAttackDamageBonus(ToolKind toolKind, ResourceLocation materialId) {
+        return switch (toolKind) {
+            case SWORD -> 3.0F;
+            case SHOVEL -> 1.5F;
+            case PICKAXE -> 1.0F;
+            case AXE -> (MaterialCatalog.DIAMOND.equals(materialId) || MaterialCatalog.NETHERITE.equals(materialId) || MaterialCatalog.EMERALD.equals(materialId)) ? 5.0F : 6.0F;
+            case HOE -> hoeAttackDamage(materialId);
+        };
+    }
+
+    private static float baseAttackSpeedBonus(ToolKind toolKind, ResourceLocation materialId) {
+        return switch (toolKind) {
+            case SWORD -> -2.4F;
+            case SHOVEL -> -3.0F;
+            case PICKAXE -> -2.8F;
+            case AXE -> (MaterialCatalog.IRON.equals(materialId) || MaterialCatalog.COPPER.equals(materialId)) ? -3.1F : -3.0F;
+            case HOE -> hoeAttackSpeed(materialId);
+        };
+    }
+
+    private static float hoeAttackDamage(ResourceLocation materialId) {
+        if (MaterialCatalog.GOLD.equals(materialId)) {
+            return 0.0F;
+        }
+        if (MaterialCatalog.IRON.equals(materialId)) {
+            return -2.0F;
+        }
+        if (MaterialCatalog.DIAMOND.equals(materialId) || MaterialCatalog.EMERALD.equals(materialId)) {
+            return -3.0F;
+        }
+        if (MaterialCatalog.NETHERITE.equals(materialId)) {
+            return -4.0F;
+        }
+        return -1.0F;
+    }
+
+    private static float hoeAttackSpeed(ResourceLocation materialId) {
+        if (MaterialCatalog.GOLD.equals(materialId)) {
+            return -3.0F;
+        }
+        if (MaterialCatalog.IRON.equals(materialId)) {
+            return -1.0F;
+        }
+        if (MaterialCatalog.DIAMOND.equals(materialId) || MaterialCatalog.EMERALD.equals(materialId) || MaterialCatalog.NETHERITE.equals(materialId)) {
+            return 0.0F;
+        }
+        return -2.0F;
+    }
+
+    private static String line(String label, ResourceLocation material, String note) {
+        String text = label + ": " + MaterialCatalog.displayNameText(material);
+        return note.isBlank() ? text : text + " (" + note + ")";
+    }
+
+    private static String effect(String name, String summary) {
+        return name + ": " + summary;
+    }
+
+    private static ResourceLocation affinity(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, path);
+    }
+
+    private static final class WorkingStats {
+        private final int baseMaxDamage;
+        private float attackDamageBonus;
+        private float attackSpeedBonus;
+        private float miningSpeedMultiplier = 1.0F;
+        private float durabilityMultiplier = 1.0F;
+        private boolean fireResistant;
+        private final Set<ResourceLocation> affinities = new LinkedHashSet<>();
+        private final List<String> effectLines = new ArrayList<>();
+        private final List<String> debugLines = new ArrayList<>();
+
+        private WorkingStats(int baseMaxDamage, float attackDamageBonus, float attackSpeedBonus) {
+            this.baseMaxDamage = baseMaxDamage;
+            this.attackDamageBonus = attackDamageBonus;
+            this.attackSpeedBonus = attackSpeedBonus;
+        }
+
+        private void addAffinities(ResourceLocation... values) {
+            affinities.addAll(List.of(values));
+        }
+
+        private void addEffect(String line) {
+            if (!effectLines.contains(line)) {
+                effectLines.add(line);
+            }
+        }
+
+        private void addDebug(String line) {
+            debugLines.add(line);
+        }
+    }
+}
