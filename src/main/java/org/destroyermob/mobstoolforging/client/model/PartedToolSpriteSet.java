@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.resources.ResourceLocation;
@@ -20,7 +21,7 @@ public final class PartedToolSpriteSet {
         this.particle = particle;
     }
 
-    public static PartedToolSpriteSet from(IGeometryBakingContext context, Function<Material, TextureAtlasSprite> spriteGetter, ToolVisualDefinition visual) {
+    public static PartedToolSpriteSet from(IGeometryBakingContext context, Function<Material, TextureAtlasSprite> spriteGetter, ToolVisualDefinition visual, Map<String, ResourceLocation> textureOverrides) {
         Map<ToolPartSpriteKey, TextureAtlasSprite> sprites = new LinkedHashMap<>();
         for (ToolVisualLayer layer : visual.layers()) {
             Optional<String> materialFrom = layer.materialFrom();
@@ -29,11 +30,11 @@ public final class PartedToolSpriteSet {
             }
             for (ResourceLocation material : MaterialCatalog.visualMaterialIds(materialFrom.get())) {
                 ToolPartSpriteKey key = new ToolPartSpriteKey(visual.id(), layer.slot(), material);
-                readSprite(context, spriteGetter, key.modelTextureKey()).ifPresent(sprite -> sprites.put(key, sprite));
+                readSprite(context, spriteGetter, textureOverrides, key.modelTextureKey()).ifPresent(sprite -> sprites.put(key, sprite));
             }
         }
 
-        TextureAtlasSprite particle = readSprite(context, spriteGetter, "particle")
+        TextureAtlasSprite particle = readSprite(context, spriteGetter, textureOverrides, "particle")
                 .orElseGet(() -> firstOrFallback(sprites));
         return new PartedToolSpriteSet(sprites, particle);
     }
@@ -46,11 +47,15 @@ public final class PartedToolSpriteSet {
         return particle;
     }
 
-    private static java.util.Optional<TextureAtlasSprite> readSprite(IGeometryBakingContext context, Function<Material, TextureAtlasSprite> spriteGetter, String key) {
-        if (!context.hasMaterial(key)) {
-            return java.util.Optional.empty();
+    private static Optional<TextureAtlasSprite> readSprite(IGeometryBakingContext context, Function<Material, TextureAtlasSprite> spriteGetter, Map<String, ResourceLocation> textureOverrides, String key) {
+        ResourceLocation explicitTexture = textureOverrides.get(key);
+        if (explicitTexture != null) {
+            return Optional.of(spriteGetter.apply(new Material(TextureAtlas.LOCATION_BLOCKS, explicitTexture)));
         }
-        return java.util.Optional.of(spriteGetter.apply(context.getMaterial(key)));
+        if (!context.hasMaterial(key)) {
+            return Optional.empty();
+        }
+        return Optional.of(spriteGetter.apply(context.getMaterial(key)));
     }
 
     private static TextureAtlasSprite firstOrFallback(Map<ToolPartSpriteKey, TextureAtlasSprite> sprites) {

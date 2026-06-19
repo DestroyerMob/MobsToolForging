@@ -49,4 +49,11 @@ public record ToolVisualDefinition(
                 .findFirst()
                 .orElseGet(() -> new ToolVisualLayer(toolKind.partType(), java.util.Optional.of("headMaterial"), java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), 0, false, false));
     }
+
+    public ToolVisualLayer layerForSlot(String slot) {
+        return layers.stream()
+                .filter(layer -> layer.slot().equals(slot))
+                .findFirst()
+                .orElseGet(() -> new ToolVisualLayer(slot, java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), 0, false, false));
+    }
 }

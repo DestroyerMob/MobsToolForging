@@ -15,6 +15,7 @@ import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolPartSpriteKey;
 import org.destroyermob.mobstoolforging.world.ToolKind;
+import org.destroyermob.mobstoolforging.world.ToolPartData;
 
 public class ModBlockStateProvider extends BlockStateProvider {
     public ModBlockStateProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
@@ -25,6 +26,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
                     trackGeneratedTexture(existingFileHelper, generatedTexturePath(material, generatedTextureName(toolKind, layer.slot())));
                 }
             }
+        }
+        for (ResourceLocation material : MaterialCatalog.visualMaterialIds("bindingMaterial")) {
+            trackGeneratedTexture(existingFileHelper, generatedTexturePath(material, "sword_guard_part"));
         }
     }
 
@@ -45,26 +49,38 @@ public class ModBlockStateProvider extends BlockStateProvider {
             partModel(toolKind);
             toolModel(toolKind);
         }
+        swordGuardPartModel();
     }
 
     private void partModel(ToolKind toolKind) {
-        ItemModelBuilder builder = itemModels().withExistingParent(toolKind.partType(), mcLoc("item/generated"));
-        addVisualTextures(builder, toolKind, true);
-        builder.customLoader((modelBuilder, helper) -> new PartedItemModelBuilder(modelBuilder, helper, toolKind, true)).end();
+        partModel(toolKind, toolKind.partType(), toolKind.partType(), toolKind.partType(), "headMaterial", generatedTextureName(toolKind, toolKind.partType()));
+    }
+
+    private void swordGuardPartModel() {
+        partModel(ToolKind.SWORD, ToolPartData.SWORD_GUARD, ToolPartData.SWORD_GUARD, "guard", "bindingMaterial", "sword_guard_part");
+    }
+
+    private void partModel(ToolKind toolKind, String itemModelName, String partType, String partSlot, String materialFrom, String textureName) {
+        ItemModelBuilder builder = itemModels().withExistingParent(itemModelName, mcLoc("item/generated"));
+        builder.texture("particle", generatedTexture(MaterialCatalog.IRON, textureName));
+        for (ResourceLocation material : MaterialCatalog.visualMaterialIds(materialFrom)) {
+            builder.texture(
+                    ToolPartSpriteKey.modelTextureKey(partSlot, material),
+                    generatedTexture(material, textureName)
+            );
+        }
+        builder.customLoader((modelBuilder, helper) -> new PartedItemModelBuilder(modelBuilder, helper, toolKind, true, partType, partSlot)).end();
     }
 
     private void toolModel(ToolKind toolKind) {
         ItemModelBuilder builder = itemModels().withExistingParent(toolKind.id(), mcLoc("item/handheld"));
-        addVisualTextures(builder, toolKind, false);
-        builder.customLoader((modelBuilder, helper) -> new PartedItemModelBuilder(modelBuilder, helper, toolKind, false)).end();
+        addVisualTextures(builder, toolKind);
+        builder.customLoader((modelBuilder, helper) -> new PartedItemModelBuilder(modelBuilder, helper, toolKind, false, toolKind.partType(), toolKind.partType())).end();
     }
 
-    private void addVisualTextures(ItemModelBuilder builder, ToolKind toolKind, boolean partOnly) {
+    private void addVisualTextures(ItemModelBuilder builder, ToolKind toolKind) {
         builder.texture("particle", generatedTexture(MaterialCatalog.IRON, toolKind.partType()));
         for (VisualLayerSpec layer : visualLayers(toolKind)) {
-            if (partOnly && !layer.materialFrom().equals("headMaterial")) {
-                continue;
-            }
             for (ResourceLocation material : MaterialCatalog.visualMaterialIds(layer.materialFrom())) {
                 builder.texture(
                         ToolPartSpriteKey.modelTextureKey(layer.slot(), material),
@@ -126,8 +142,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
     private static class PartedItemModelBuilder extends CustomLoaderBuilder<ItemModelBuilder> {
         private final ToolKind toolKind;
         private final boolean partModel;
+        private final String partType;
+        private final String partSlot;
 
-        private PartedItemModelBuilder(ItemModelBuilder parent, ExistingFileHelper existingFileHelper, ToolKind toolKind, boolean partModel) {
+        private PartedItemModelBuilder(ItemModelBuilder parent, ExistingFileHelper existingFileHelper, ToolKind toolKind, boolean partModel, String partType, String partSlot) {
             super(
                     ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, partModel ? "parted_tool_part" : "parted_tool"),
                     parent,
@@ -136,6 +154,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
             );
             this.toolKind = toolKind;
             this.partModel = partModel;
+            this.partType = partType;
+            this.partSlot = partSlot;
         }
 
         @Override
@@ -144,6 +164,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
             json.addProperty("tool", toolKind.id());
             json.addProperty("visual", ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, toolKind.id()).toString());
             json.addProperty("part_model", partModel);
+            if (partModel) {
+                json.addProperty("part_type", partType);
+                json.addProperty("part_slot", partSlot);
+            }
             return json;
         }
     }

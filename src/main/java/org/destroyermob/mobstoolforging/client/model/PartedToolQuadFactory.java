@@ -14,7 +14,7 @@ public final class PartedToolQuadFactory {
     }
 
     public List<BakedQuad> bakeLayer(int layerIndex, TextureAtlasSprite sprite) {
-        var elements = UnbakedGeometryHelper.createUnbakedItemMaskElements(layerIndex, sprite);
+        var elements = UnbakedGeometryHelper.createUnbakedItemElements(layerIndex, sprite);
         return List.copyOf(UnbakedGeometryHelper.bakeElements(elements, ignored -> sprite, modelState));
     }
 }

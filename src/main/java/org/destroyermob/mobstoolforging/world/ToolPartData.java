@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public record ToolPartData(String partType, ResourceLocation materialId) {
     public static final String SWORD_BLADE = "sword_blade";
+    public static final String SWORD_GUARD = "sword_guard";
     public static final String SHOVEL_HEAD = "shovel_head";
     public static final String PICKAXE_HEAD = "pickaxe_head";
     public static final String AXE_HEAD = "axe_head";

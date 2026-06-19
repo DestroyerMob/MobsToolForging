@@ -39,7 +39,7 @@
       "generated": "mobstoolforging:generated/tool_parts/{material}/sword_guard",
       "large_template": "mobstoolforging:tool_templates/sword/large_guard",
       "material_from": "bindingMaterial",
-      "optional": true,
+      "optional": false,
       "slot": "guard",
       "template": "mobstoolforging:tool_templates/sword/guard",
       "z": 4

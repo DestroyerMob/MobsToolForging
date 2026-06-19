@@ -8,22 +8,27 @@ import net.minecraft.resources.ResourceLocation;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 
 public enum ForgeTemplate {
-    SWORD_BLADE(ToolKind.SWORD, 5),
-    SHOVEL_HEAD(ToolKind.SHOVEL, 5),
-    PICKAXE_HEAD(ToolKind.PICKAXE, 5),
-    AXE_HEAD(ToolKind.AXE, 5),
-    HOE_HEAD(ToolKind.HOE, 5);
+    SWORD_BLADE(ToolKind.SWORD, ToolPartData.SWORD_BLADE, ToolKind.SWORD.requiredMaterials(), 5),
+    SWORD_GUARD(ToolKind.SWORD, ToolPartData.SWORD_GUARD, 1, 5),
+    SHOVEL_HEAD(ToolKind.SHOVEL, ToolPartData.SHOVEL_HEAD, ToolKind.SHOVEL.requiredMaterials(), 5),
+    PICKAXE_HEAD(ToolKind.PICKAXE, ToolPartData.PICKAXE_HEAD, ToolKind.PICKAXE.requiredMaterials(), 5),
+    AXE_HEAD(ToolKind.AXE, ToolPartData.AXE_HEAD, ToolKind.AXE.requiredMaterials(), 5),
+    HOE_HEAD(ToolKind.HOE, ToolPartData.HOE_HEAD, ToolKind.HOE.requiredMaterials(), 5);
 
     private final ToolKind toolKind;
+    private final String partType;
+    private final int requiredMaterials;
     private final int requiredHits;
 
-    ForgeTemplate(ToolKind toolKind, int requiredHits) {
+    ForgeTemplate(ToolKind toolKind, String partType, int requiredMaterials, int requiredHits) {
         this.toolKind = toolKind;
+        this.partType = partType;
+        this.requiredMaterials = requiredMaterials;
         this.requiredHits = requiredHits;
     }
 
     public String id() {
-        return toolKind.partType();
+        return partType;
     }
 
     public ToolKind toolKind() {
@@ -31,11 +36,11 @@ public enum ForgeTemplate {
     }
 
     public Component displayName() {
-        return toolKind.templateName();
+        return Component.translatable("forge_template.mobstoolforging." + partType);
     }
 
     public int requiredMaterials() {
-        return toolKind.requiredMaterials();
+        return requiredMaterials;
     }
 
     public int requiredHits() {
@@ -43,6 +48,9 @@ public enum ForgeTemplate {
     }
 
     public ItemStack outputStack(ResourceLocation materialId) {
+        if (ToolPartData.SWORD_GUARD.equals(partType)) {
+            return ModItems.SWORD_GUARD.get().createPart(materialId);
+        }
         return toolKind.createPart(materialId);
     }
 

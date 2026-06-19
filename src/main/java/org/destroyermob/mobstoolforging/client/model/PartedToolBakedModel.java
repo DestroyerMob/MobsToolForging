@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -18,12 +19,16 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.ToolPartSpriteKey;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolVisualKey;
 
 public final class PartedToolBakedModel implements BakedModel {
+    private static final Set<String> REPORTED_MISSING_LAYERS = ConcurrentHashMap.newKeySet();
+
     private final ToolKind toolKind;
     private final ToolVisualDefinition visual;
     private final PartedToolSpriteSet sprites;
@@ -43,7 +48,7 @@ public final class PartedToolBakedModel implements BakedModel {
                 ToolConstructionData.toolType(toolKind),
                 MaterialCatalog.IRON,
                 MaterialCatalog.OAK,
-                Optional.empty(),
+                toolKind == ToolKind.SWORD ? Optional.of(MaterialCatalog.IRON) : Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
@@ -114,10 +119,12 @@ public final class PartedToolBakedModel implements BakedModel {
                 if (layer.optional()) {
                     continue;
                 }
+                warnMissingLayer("required layer has no material", layer, Optional.empty());
                 return Optional.empty();
             }
             Optional<TextureAtlasSprite> sprite = sprites.resolve(visual.id(), layer.slot(), material.get());
             if (sprite.isEmpty()) {
+                warnMissingLayer(layer.optional() ? "optional layer has material data but no sprite" : "required layer has no sprite", layer, material);
                 if (layer.optional()) {
                     continue;
                 }
@@ -148,6 +155,24 @@ public final class PartedToolBakedModel implements BakedModel {
             case "treatment" -> key.treatment();
             default -> Optional.empty();
         });
+    }
+
+    private void warnMissingLayer(String reason, ToolVisualLayer layer, Optional<ResourceLocation> material) {
+        String materialText = material.map(ResourceLocation::toString).orElse("<none>");
+        String textureKey = material
+                .map(value -> ToolPartSpriteKey.modelTextureKey(layer.slot(), value))
+                .orElse("<none>");
+        String reportKey = reason + "|" + visual.id() + "|" + layer.slot() + "|" + materialText + "|" + textureKey;
+        if (REPORTED_MISSING_LAYERS.add(reportKey)) {
+            MobsToolForging.LOGGER.warn(
+                    "Missing tool visual layer: reason={}, visual={}, slot={}, material={}, textureKey={}",
+                    reason,
+                    visual.id(),
+                    layer.slot(),
+                    materialText,
+                    textureKey
+            );
+        }
     }
 
     private ResolvedPartedItemModel particleFallback() {

@@ -1,8 +1,11 @@
 package org.destroyermob.mobstoolforging.client.model;
 
 import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
@@ -32,6 +35,25 @@ public final class PartedToolModelLoader implements IGeometryLoader<PartedToolGe
         String resolvedToolId = toolId;
         ToolKind toolKind = ToolKind.byId(resolvedToolId)
                 .orElseThrow(() -> new JsonParseException("Unknown tool type for parted tool model: " + resolvedToolId));
-        return new PartedToolGeometry(toolKind, visualId, partModel);
+        String partType = GsonHelper.getAsString(jsonObject, "part_type", toolKind.partType());
+        String partSlot = GsonHelper.getAsString(jsonObject, "part_slot", partType);
+        return new PartedToolGeometry(toolKind, visualId, partModel, partType, partSlot, readTextures(jsonObject));
+    }
+
+    private static Map<String, ResourceLocation> readTextures(JsonObject jsonObject) {
+        if (!jsonObject.has("textures") || !jsonObject.get("textures").isJsonObject()) {
+            return Map.of();
+        }
+
+        Map<String, ResourceLocation> textures = new LinkedHashMap<>();
+        JsonObject textureObject = GsonHelper.getAsJsonObject(jsonObject, "textures");
+        for (Map.Entry<String, JsonElement> entry : textureObject.entrySet()) {
+            JsonElement value = entry.getValue();
+            if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isString()) {
+                throw new JsonParseException("Texture entry '" + entry.getKey() + "' must be a resource location string");
+            }
+            textures.put(entry.getKey(), ResourceLocation.parse(value.getAsString()));
+        }
+        return Map.copyOf(textures);
     }
 }

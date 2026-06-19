@@ -24,6 +24,7 @@ import org.destroyermob.mobstoolforging.world.ToolPartData;
 public final class PartedToolPartBakedModel implements BakedModel {
     private final ToolKind toolKind;
     private final ToolVisualDefinition visual;
+    private final String partType;
     private final ToolVisualLayer partLayer;
     private final PartedToolSpriteSet sprites;
     private final PartedToolQuadFactory quadFactory;
@@ -32,10 +33,11 @@ public final class PartedToolPartBakedModel implements BakedModel {
     private final ItemOverrides overrides;
     private final Map<ResourceLocation, ResolvedPartedItemModel> cache = new ConcurrentHashMap<>();
 
-    public PartedToolPartBakedModel(ToolKind toolKind, ToolVisualDefinition visual, PartedToolSpriteSet sprites, PartedToolQuadFactory quadFactory, ItemTransforms transforms) {
+    public PartedToolPartBakedModel(ToolKind toolKind, ToolVisualDefinition visual, String partType, String partSlot, PartedToolSpriteSet sprites, PartedToolQuadFactory quadFactory, ItemTransforms transforms) {
         this.toolKind = toolKind;
         this.visual = visual;
-        this.partLayer = visual.partLayer(toolKind);
+        this.partType = partType;
+        this.partLayer = visual.layerForSlot(partSlot);
         this.sprites = sprites;
         this.quadFactory = quadFactory;
         this.transforms = transforms;
@@ -44,7 +46,7 @@ public final class PartedToolPartBakedModel implements BakedModel {
             @Override
             public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
                 ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
-                if (data == null || !PartedToolPartBakedModel.this.toolKind.partType().equals(data.partType())) {
+                if (data == null || !PartedToolPartBakedModel.this.partType.equals(data.partType())) {
                     return fallback;
                 }
                 return cache.computeIfAbsent(data.materialId(), PartedToolPartBakedModel.this::compose);

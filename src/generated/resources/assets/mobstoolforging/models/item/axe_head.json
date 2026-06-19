@@ -2,6 +2,8 @@
   "parent": "minecraft:item/generated",
   "loader": "mobstoolforging:parted_tool_part",
   "part_model": true,
+  "part_slot": "axe_head",
+  "part_type": "axe_head",
   "textures": {
     "layer_axe_head_copper": "mobstoolforging:generated/tool_parts/copper/axe_head",
     "layer_axe_head_diamond": "mobstoolforging:generated/tool_parts/diamond/axe_head",

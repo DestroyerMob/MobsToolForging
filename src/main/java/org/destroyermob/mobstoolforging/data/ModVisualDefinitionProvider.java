@@ -27,6 +27,7 @@ import org.destroyermob.mobstoolforging.world.ToolKind;
 public class ModVisualDefinitionProvider implements DataProvider {
     private static final int[] GREY_KEYS = {63, 102, 140, 178, 216, 255};
     private static final String SOURCE_TOOL_PART_TEXTURES = "/assets/" + MobsToolForging.MOD_ID + "/textures/source/tool_parts/";
+    private static final String HANDLE_MASK_TEXTURES = SOURCE_TOOL_PART_TEXTURES + "handle_masks/";
 
     private final PackOutput.PathProvider materialVisuals;
     private final PackOutput.PathProvider toolVisuals;
@@ -120,6 +121,9 @@ public class ModVisualDefinitionProvider implements DataProvider {
             }
             for (ResourceLocation binding : MaterialCatalog.visualMaterialIds("bindingMaterial")) {
                 futures.add(savePng(output, generatedTexturePath(binding, toolKind.id() + "_" + jointSlot(toolKind)), spriteFor(toolKind, jointSlot(toolKind), byId.get(binding))));
+                if (toolKind == ToolKind.SWORD) {
+                    futures.add(savePng(output, generatedTexturePath(binding, "sword_guard_part"), spriteFor(toolKind, "guard_part", byId.get(binding))));
+                }
             }
             for (ResourceLocation wrap : MaterialCatalog.visualMaterialIds("wrapMaterial")) {
                 futures.add(savePng(output, generatedTexturePath(wrap, toolKind.id() + "_wrap"), spriteFor(toolKind, "wrap", byId.get(wrap))));
@@ -143,7 +147,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
         layers.add(layer(toolKind, "handle", "handleMaterial", 1, false, false));
         layers.add(layer(toolKind, "wrap", "wrapMaterial", 2, true, false));
         layers.add(layer(toolKind, toolKind.partType(), "headMaterial", 3, false, false));
-        layers.add(layer(toolKind, jointSlot(toolKind), "bindingMaterial", 4, true, false));
+        layers.add(layer(toolKind, jointSlot(toolKind), "bindingMaterial", 4, toolKind != ToolKind.SWORD, false));
         layers.add(layer(toolKind, "focus", "focusMaterial", 5, true, true));
         layers.add(layer(toolKind, "treatment_overlay", "treatment", 6, true, true));
         layers.add(damageLayer(toolKind, 7));
@@ -233,7 +237,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
             drawHandle(image, toolKind, material);
         } else if (slot.equals("wrap")) {
             drawWrap(image, toolKind, material);
-        } else if (slot.equals("binding") || slot.equals("guard")) {
+        } else if (slot.equals("binding") || slot.equals("guard") || slot.equals("guard_part")) {
             drawJoint(image, toolKind, material);
         } else if (slot.equals("focus")) {
             drawFocus(image, toolKind, material);
@@ -247,10 +251,50 @@ public class ModVisualDefinitionProvider implements DataProvider {
 
     private BufferedImage spriteFor(ToolKind toolKind, String slot, MaterialVisualSpec material) {
         BufferedImage source = loadSourceSprite(material.id(), sourceTextureName(toolKind, slot));
-        if (source != null) {
+        BufferedImage sprite = source == null ? drawSprite(toolKind, slot, material) : source;
+        return slot.equals("handle") ? applyHandleMask(toolKind, sprite) : sprite;
+    }
+
+    private BufferedImage applyHandleMask(ToolKind toolKind, BufferedImage source) {
+        BufferedImage mask = loadHandleMask(toolKind);
+        if (mask == null) {
             return source;
         }
-        return drawSprite(toolKind, slot, material);
+        BufferedImage masked = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < 16; y++) {
+            for (int x = 0; x < 16; x++) {
+                if (isMaskPixel(mask.getRGB(x, y))) {
+                    masked.setRGB(x, y, source.getRGB(x, y));
+                }
+            }
+        }
+        return masked;
+    }
+
+    private BufferedImage loadHandleMask(ToolKind toolKind) {
+        String path = HANDLE_MASK_TEXTURES + toolKind.id() + ".png";
+        try (InputStream stream = ModVisualDefinitionProvider.class.getResourceAsStream(path)) {
+            if (stream == null) {
+                return null;
+            }
+            BufferedImage image = ImageIO.read(stream);
+            if (image == null) {
+                throw new IllegalStateException("Handle mask is not a readable PNG: " + path);
+            }
+            if (image.getWidth() != 16 || image.getHeight() != 16) {
+                throw new IllegalStateException("Handle mask must be 16x16: " + path);
+            }
+            BufferedImage normalized = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+            var graphics = normalized.createGraphics();
+            try {
+                graphics.drawImage(image, 0, 0, null);
+            } finally {
+                graphics.dispose();
+            }
+            return normalized;
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Failed to read handle mask " + path, exception);
+        }
     }
 
     private BufferedImage loadSourceSprite(ResourceLocation material, String spriteName) {
@@ -452,6 +496,12 @@ public class ModVisualDefinitionProvider implements DataProvider {
         if (slot.equals("handle")) {
             return "handle";
         }
+        if (toolKind == ToolKind.SWORD && slot.equals("guard")) {
+            return "sword_guard";
+        }
+        if (toolKind == ToolKind.SWORD && slot.equals("guard_part")) {
+            return "sword_guard_part";
+        }
         if (slot.equals(toolKind.partType())) {
             return toolKind.partType();
         }
@@ -517,6 +567,14 @@ public class ModVisualDefinitionProvider implements DataProvider {
         if (x >= 0 && x < 16 && y >= 0 && y < 16) {
             image.setRGB(x, y, color);
         }
+    }
+
+    private static boolean isMaskPixel(int argb) {
+        int alpha = argb >>> 24;
+        int red = (argb >> 16) & 0xFF;
+        int green = (argb >> 8) & 0xFF;
+        int blue = argb & 0xFF;
+        return alpha > 0 && red > 160 && green < 96 && blue < 96;
     }
 
     private static int withAlpha(int argb, int alpha) {

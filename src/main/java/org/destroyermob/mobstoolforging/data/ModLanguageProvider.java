@@ -17,6 +17,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.LAPIDARY_TABLE, "Lapidary Table");
         addItem(ModItems.SMITHING_HAMMER, "Smithing Hammer");
         addItem(ModItems.SWORD_BLADE, "Sword Blade");
+        addItem(ModItems.SWORD_GUARD, "Sword Guard");
         addItem(ModItems.SHOVEL_HEAD, "Shovel Head");
         addItem(ModItems.PICKAXE_HEAD, "Pickaxe Head");
         addItem(ModItems.AXE_HEAD, "Axe Head");
@@ -27,6 +28,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.AXE, "Axe");
         addItem(ModItems.HOE, "Hoe");
         add("item.mobstoolforging.material_sword_blade", "%s Sword Blade");
+        add("item.mobstoolforging.material_sword_guard", "%s Sword Guard");
         add("item.mobstoolforging.material_shovel_head", "%s Shovel Head");
         add("item.mobstoolforging.material_pickaxe_head", "%s Pickaxe Head");
         add("item.mobstoolforging.material_axe_head", "%s Axe Head");
@@ -52,6 +54,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("material.mobstoolforging.sculk", "Sculk");
         add("screen.mobstoolforging.tool_forge_templates", "Tool Templates");
         add("forge_template.mobstoolforging.sword_blade", "Sword Blade");
+        add("forge_template.mobstoolforging.sword_guard", "Sword Guard");
         add("forge_template.mobstoolforging.shovel_head", "Shovel Head");
         add("forge_template.mobstoolforging.pickaxe_head", "Pickaxe Head");
         add("forge_template.mobstoolforging.axe_head", "Axe Head");

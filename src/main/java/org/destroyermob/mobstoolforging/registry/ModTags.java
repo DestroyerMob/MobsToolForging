@@ -15,6 +15,10 @@ public final class ModTags {
         public static final TagKey<Item> MATERIALS_METALS = itemTag("materials/metals");
         public static final TagKey<Item> MATERIALS_GEMS = itemTag("materials/gems");
         public static final TagKey<Item> TOOL_HANDLES = itemTag("tool_handles");
+        public static final TagKey<Item> TOOL_BINDINGS = itemTag("tool_bindings");
+        public static final TagKey<Item> TOOL_WRAPS = itemTag("tool_wraps");
+        public static final TagKey<Item> TOOL_FOCI = itemTag("tool_foci");
+        public static final TagKey<Item> TREATMENT_CATALYSTS = itemTag("treatment_catalysts");
 
         private Items() {
         }

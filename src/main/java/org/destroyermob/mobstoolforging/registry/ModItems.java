@@ -13,6 +13,7 @@ import org.destroyermob.mobstoolforging.item.ModularShovelItem;
 import org.destroyermob.mobstoolforging.item.ModularSwordItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.world.ToolKind;
+import org.destroyermob.mobstoolforging.world.ToolPartData;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MobsToolForging.MOD_ID);
@@ -32,6 +33,10 @@ public final class ModItems {
     public static final DeferredItem<ModularToolPartItem> SWORD_BLADE = ITEMS.register(
             "sword_blade",
             () -> new ModularToolPartItem(ToolKind.SWORD, new Item.Properties())
+    );
+    public static final DeferredItem<ModularToolPartItem> SWORD_GUARD = ITEMS.register(
+            "sword_guard",
+            () -> new ModularToolPartItem(ToolKind.SWORD, ToolPartData.SWORD_GUARD, new Item.Properties())
     );
     public static final DeferredItem<ModularToolPartItem> SHOVEL_HEAD = ITEMS.register(
             "shovel_head",

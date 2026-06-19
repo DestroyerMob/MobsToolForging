@@ -2,6 +2,8 @@
   "parent": "minecraft:item/generated",
   "loader": "mobstoolforging:parted_tool_part",
   "part_model": true,
+  "part_slot": "shovel_head",
+  "part_type": "shovel_head",
   "textures": {
     "layer_shovel_head_copper": "mobstoolforging:generated/tool_parts/copper/shovel_head",
     "layer_shovel_head_diamond": "mobstoolforging:generated/tool_parts/diamond/shovel_head",

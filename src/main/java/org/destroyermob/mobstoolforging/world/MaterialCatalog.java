@@ -27,6 +27,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.SimpleTier;
 import net.neoforged.neoforge.common.Tags;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModTags;
 
 public final class MaterialCatalog {
@@ -183,6 +184,40 @@ public final class MaterialCatalog {
             return BREEZE;
         }
         return BuiltInRegistries.ITEM.getKey(handle.getItem());
+    }
+
+    public static ResourceLocation bindingMaterial(ItemStack stack) {
+        ToolPartData partData = stack.get(ModDataComponents.TOOL_PART.get());
+        if (partData != null) {
+            return partData.materialId();
+        }
+        return resolve(stack)
+                .map(ToolMaterialDefinition::id)
+                .orElseGet(() -> BuiltInRegistries.ITEM.getKey(stack.getItem()));
+    }
+
+    public static ResourceLocation wrapMaterial(ItemStack stack) {
+        if (stack.is(Items.LEATHER)) {
+            return LEATHER;
+        }
+        return BuiltInRegistries.ITEM.getKey(stack.getItem());
+    }
+
+    public static ResourceLocation focusMaterial(ItemStack stack) {
+        if (stack.is(Items.AMETHYST_SHARD)) {
+            return AMETHYST;
+        }
+        return BuiltInRegistries.ITEM.getKey(stack.getItem());
+    }
+
+    public static ResourceLocation treatmentMaterial(ItemStack stack) {
+        if (stack.is(Items.BLAZE_POWDER) || stack.is(Items.MAGMA_CREAM) || stack.is(Items.NETHERITE_SCRAP)) {
+            return NETHER;
+        }
+        if (stack.is(Items.ECHO_SHARD) || stack.is(Items.SCULK_CATALYST)) {
+            return SCULK;
+        }
+        return BuiltInRegistries.ITEM.getKey(stack.getItem());
     }
 
     public static void applyToolComponents(ItemStack stack, ResourceLocation materialId, ToolKind toolKind) {

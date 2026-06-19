@@ -40,5 +40,13 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .addTag(Tags.Items.RODS_WOODEN)
                 .addTag(Tags.Items.RODS_BLAZE)
                 .addTag(Tags.Items.RODS_BREEZE);
+        tag(ModTags.Items.TOOL_BINDINGS)
+                .addTag(ModTags.Items.MATERIALS);
+        tag(ModTags.Items.TOOL_WRAPS)
+                .add(Items.LEATHER);
+        tag(ModTags.Items.TOOL_FOCI)
+                .add(Items.AMETHYST_SHARD);
+        tag(ModTags.Items.TREATMENT_CATALYSTS)
+                .add(Items.BLAZE_POWDER, Items.MAGMA_CREAM, Items.NETHERITE_SCRAP, Items.ECHO_SHARD, Items.SCULK_CATALYST);
     }
 }

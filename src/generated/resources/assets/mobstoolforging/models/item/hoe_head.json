@@ -2,6 +2,8 @@
   "parent": "minecraft:item/generated",
   "loader": "mobstoolforging:parted_tool_part",
   "part_model": true,
+  "part_slot": "hoe_head",
+  "part_type": "hoe_head",
   "textures": {
     "layer_hoe_head_copper": "mobstoolforging:generated/tool_parts/copper/hoe_head",
     "layer_hoe_head_diamond": "mobstoolforging:generated/tool_parts/diamond/hoe_head",
