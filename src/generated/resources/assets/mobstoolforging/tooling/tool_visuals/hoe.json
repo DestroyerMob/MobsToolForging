@@ -16,13 +16,61 @@
     },
     {
       "emissive_allowed": false,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/hoe_wrap",
+      "large_template": "mobstoolforging:tool_templates/hoe/large_wrap",
+      "material_from": "wrapMaterial",
+      "optional": true,
+      "slot": "wrap",
+      "template": "mobstoolforging:tool_templates/hoe/wrap",
+      "z": 2
+    },
+    {
+      "emissive_allowed": false,
       "generated": "mobstoolforging:generated/tool_parts/{material}/hoe_head",
       "large_template": "mobstoolforging:tool_templates/hoe/large_hoe_head",
       "material_from": "headMaterial",
       "optional": false,
       "slot": "hoe_head",
       "template": "mobstoolforging:tool_templates/hoe/hoe_head",
-      "z": 2
+      "z": 3
+    },
+    {
+      "emissive_allowed": false,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/hoe_binding",
+      "large_template": "mobstoolforging:tool_templates/hoe/large_binding",
+      "material_from": "bindingMaterial",
+      "optional": true,
+      "slot": "binding",
+      "template": "mobstoolforging:tool_templates/hoe/binding",
+      "z": 4
+    },
+    {
+      "emissive_allowed": true,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/hoe_focus",
+      "large_template": "mobstoolforging:tool_templates/hoe/large_focus",
+      "material_from": "focusMaterial",
+      "optional": true,
+      "slot": "focus",
+      "template": "mobstoolforging:tool_templates/hoe/focus",
+      "z": 5
+    },
+    {
+      "emissive_allowed": true,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/hoe_treatment_overlay",
+      "large_template": "mobstoolforging:tool_templates/hoe/large_treatment_overlay",
+      "material_from": "treatment",
+      "optional": true,
+      "slot": "treatment_overlay",
+      "template": "mobstoolforging:tool_templates/hoe/treatment_overlay",
+      "z": 6
+    },
+    {
+      "emissive_allowed": false,
+      "large_template": "mobstoolforging:tool_templates/hoe/large_damage_overlay",
+      "optional": true,
+      "slot": "damage_overlay",
+      "template": "mobstoolforging:tool_templates/hoe/damage_overlay",
+      "z": 7
     }
   ]
 }

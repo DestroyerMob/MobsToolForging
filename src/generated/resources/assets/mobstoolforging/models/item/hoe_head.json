@@ -3,9 +3,12 @@
   "loader": "mobstoolforging:parted_tool_part",
   "part_model": true,
   "textures": {
+    "head_copper": "mobstoolforging:generated/tool_parts/copper/hoe_head",
     "head_diamond": "mobstoolforging:generated/tool_parts/diamond/hoe_head",
+    "head_emerald": "mobstoolforging:generated/tool_parts/emerald/hoe_head",
     "head_gold": "mobstoolforging:generated/tool_parts/gold/hoe_head",
     "head_iron": "mobstoolforging:generated/tool_parts/iron/hoe_head",
+    "head_netherite": "mobstoolforging:generated/tool_parts/netherite/hoe_head",
     "particle": "mobstoolforging:generated/tool_parts/iron/hoe_head"
   },
   "tool": "hoe"

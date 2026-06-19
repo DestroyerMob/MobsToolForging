@@ -6,8 +6,6 @@ import com.google.gson.JsonObject;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,7 +24,11 @@ import org.destroyermob.mobstoolforging.world.ToolKind;
 
 public class ModVisualDefinitionProvider implements DataProvider {
     private static final int[] GREY_KEYS = {63, 102, 140, 178, 216, 255};
-    private static final String SOURCE_TOOL_PART_TEXTURES = "/assets/" + MobsToolForging.MOD_ID + "/textures/source/tool_parts/";
+    private static final ResourceLocation DARK_OAK = modLoc("dark_oak");
+    private static final ResourceLocation LEATHER = modLoc("leather");
+    private static final ResourceLocation AMETHYST = modLoc("amethyst");
+    private static final ResourceLocation NETHER = modLoc("nether");
+    private static final ResourceLocation SCULK = modLoc("sculk");
 
     private final PackOutput.PathProvider materialVisuals;
     private final PackOutput.PathProvider toolVisuals;
@@ -67,30 +69,39 @@ public class ModVisualDefinitionProvider implements DataProvider {
         futures.add(DataProvider.saveStable(output, example(
                 ToolKind.PICKAXE,
                 MaterialCatalog.IRON,
-                MaterialCatalog.STICK,
+                MaterialCatalog.OAK,
                 null,
-                null,
+                LEATHER,
                 null,
                 null
         ), examples.json(modLoc("iron_pickaxe"))));
         futures.add(DataProvider.saveStable(output, example(
-                ToolKind.AXE,
-                MaterialCatalog.GOLD,
-                MaterialCatalog.BLAZE_ROD,
-                null,
+                ToolKind.PICKAXE,
+                MaterialCatalog.DIAMOND,
+                DARK_OAK,
+                MaterialCatalog.COPPER,
                 null,
                 null,
                 null
-        ), examples.json(modLoc("gold_axe"))));
+        ), examples.json(modLoc("diamond_pickaxe"))));
         futures.add(DataProvider.saveStable(output, example(
                 ToolKind.SWORD,
+                MaterialCatalog.IRON,
+                MaterialCatalog.BLAZE,
+                null,
+                null,
+                null,
+                NETHER
+        ), examples.json(modLoc("nether_treated_iron_sword"))));
+        futures.add(DataProvider.saveStable(output, example(
+                ToolKind.PICKAXE,
                 MaterialCatalog.DIAMOND,
-                MaterialCatalog.BREEZE_ROD,
+                MaterialCatalog.OAK,
+                MaterialCatalog.COPPER,
                 null,
-                null,
-                null,
+                AMETHYST,
                 null
-        ), examples.json(modLoc("diamond_sword"))));
+        ), examples.json(modLoc("amethyst_focused_diamond_pickaxe"))));
     }
 
     private void writeGeneratedSprites(CachedOutput output, List<CompletableFuture<?>> futures, List<MaterialVisualSpec> materials) {
@@ -103,15 +114,17 @@ public class ModVisualDefinitionProvider implements DataProvider {
             for (ResourceLocation materialId : MaterialCatalog.starterMaterialIds()) {
                 MaterialVisualSpec material = byId.get(materialId);
                 if (material != null) {
-                    futures.add(savePng(output, generatedTexturePath(materialId, toolKind.partType()), spriteFor(toolKind, toolKind.partType(), material)));
+                    futures.add(savePng(output, generatedTexturePath(materialId, toolKind.partType()), drawSprite(toolKind, toolKind.partType(), material)));
                 }
             }
-            for (ResourceLocation handle : MaterialCatalog.handleMaterialIds()) {
-                MaterialVisualSpec material = byId.get(handle);
-                if (material != null) {
-                    futures.add(savePng(output, generatedTexturePath(handle, toolKind.id() + "_handle"), spriteFor(toolKind, "handle", material)));
-                }
+            for (ResourceLocation handle : List.of(MaterialCatalog.OAK, DARK_OAK, MaterialCatalog.BLAZE, MaterialCatalog.BREEZE)) {
+                futures.add(savePng(output, generatedTexturePath(handle, toolKind.id() + "_handle"), drawSprite(toolKind, "handle", byId.get(handle))));
             }
+            futures.add(savePng(output, generatedTexturePath(MaterialCatalog.COPPER, toolKind.id() + "_" + jointSlot(toolKind)), drawSprite(toolKind, jointSlot(toolKind), byId.get(MaterialCatalog.COPPER))));
+            futures.add(savePng(output, generatedTexturePath(LEATHER, toolKind.id() + "_wrap"), drawSprite(toolKind, "wrap", byId.get(LEATHER))));
+            futures.add(savePng(output, generatedTexturePath(AMETHYST, toolKind.id() + "_focus"), drawSprite(toolKind, "focus", byId.get(AMETHYST))));
+            futures.add(savePng(output, generatedTexturePath(NETHER, toolKind.id() + "_treatment_overlay"), drawSprite(toolKind, "treatment_overlay", byId.get(NETHER))));
+            futures.add(savePng(output, generatedTexturePath(SCULK, toolKind.id() + "_treatment_overlay"), drawSprite(toolKind, "treatment_overlay", byId.get(SCULK))));
         }
     }
 
@@ -123,7 +136,12 @@ public class ModVisualDefinitionProvider implements DataProvider {
         json.addProperty("large_in_hand", true);
         JsonArray layers = new JsonArray();
         layers.add(layer(toolKind, "handle", "handleMaterial", 1, false, false));
-        layers.add(layer(toolKind, toolKind.partType(), "headMaterial", 2, false, false));
+        layers.add(layer(toolKind, "wrap", "wrapMaterial", 2, true, false));
+        layers.add(layer(toolKind, toolKind.partType(), "headMaterial", 3, false, false));
+        layers.add(layer(toolKind, jointSlot(toolKind), "bindingMaterial", 4, true, false));
+        layers.add(layer(toolKind, "focus", "focusMaterial", 5, true, true));
+        layers.add(layer(toolKind, "treatment_overlay", "treatment", 6, true, true));
+        layers.add(damageLayer(toolKind, 7));
         json.add("layers", layers);
         return json;
     }
@@ -220,40 +238,6 @@ public class ModVisualDefinitionProvider implements DataProvider {
             drawHead(image, toolKind, material);
         }
         return image;
-    }
-
-    private BufferedImage spriteFor(ToolKind toolKind, String slot, MaterialVisualSpec material) {
-        BufferedImage source = loadSourceSprite(material.id(), sourceTextureName(toolKind, slot));
-        if (source != null) {
-            return source;
-        }
-        return drawSprite(toolKind, slot, material);
-    }
-
-    private BufferedImage loadSourceSprite(ResourceLocation material, String spriteName) {
-        String path = SOURCE_TOOL_PART_TEXTURES + materialPath(material) + "/" + spriteName + ".png";
-        try (InputStream stream = ModVisualDefinitionProvider.class.getResourceAsStream(path)) {
-            if (stream == null) {
-                return null;
-            }
-            BufferedImage image = ImageIO.read(stream);
-            if (image == null) {
-                throw new IllegalStateException("Source tool part sprite is not a readable PNG: " + path);
-            }
-            if (image.getWidth() != 16 || image.getHeight() != 16) {
-                throw new IllegalStateException("Source tool part sprite must be 16x16: " + path);
-            }
-            BufferedImage normalized = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-            var graphics = normalized.createGraphics();
-            try {
-                graphics.drawImage(image, 0, 0, null);
-            } finally {
-                graphics.dispose();
-            }
-            return normalized;
-        } catch (IOException exception) {
-            throw new UncheckedIOException("Failed to read source tool part sprite " + path, exception);
-        }
     }
 
     private void drawHead(BufferedImage image, ToolKind toolKind, MaterialVisualSpec material) {
@@ -398,10 +382,6 @@ public class ModVisualDefinitionProvider implements DataProvider {
         return toolKind.id() + "_" + slot;
     }
 
-    private static String sourceTextureName(ToolKind toolKind, String slot) {
-        return slot.equals("handle") ? "handle" : generatedTextureName(toolKind, slot);
-    }
-
     private static String jointSlot(ToolKind toolKind) {
         return toolKind == ToolKind.SWORD ? "guard" : "binding";
     }
@@ -485,10 +465,18 @@ public class ModVisualDefinitionProvider implements DataProvider {
         return List.of(
                 new MaterialVisualSpec(MaterialCatalog.IRON, "metal", "fine_scratches", false, 0, palette(0xFF3E4650, 0xFF59636F, 0xFF77828E, 0xFF9CA6B1, 0xFFC7D0D8, 0xFFF2F6F8)),
                 new MaterialVisualSpec(MaterialCatalog.GOLD, "metal", "fine_scratches", false, 0, palette(0xFF6D4A06, 0xFF9A6B0D, 0xFFD59A1B, 0xFFFFC943, 0xFFFFE37D, 0xFFFFF2B2)),
+                new MaterialVisualSpec(MaterialCatalog.COPPER, "metal", "fine_scratches", false, 0, palette(0xFF4A2A12, 0xFF7A431D, 0xFFB46A2E, 0xFFD58A43, 0xFFFFB16A, 0xFFFFD8A0)),
+                new MaterialVisualSpec(MaterialCatalog.NETHERITE, "metal", "fine_scratches", false, 0, palette(0xFF1E1B20, 0xFF312B33, 0xFF4A414B, 0xFF675E68, 0xFF8C818D, 0xFFB0A6B2)),
                 new MaterialVisualSpec(MaterialCatalog.DIAMOND, "gem", "facets", false, 0, palette(0xFF0F5563, 0xFF178397, 0xFF24B9C8, 0xFF65E7EE, 0xFFB7FFFF, 0xFFFFFFFF)),
-                new MaterialVisualSpec(MaterialCatalog.STICK, "handle", "wood_grain", false, 0, palette(0xFF3B2613, 0xFF5A371A, 0xFF7D5126, 0xFFA5733A, 0xFFC99758, 0xFFE2BE80)),
-                new MaterialVisualSpec(MaterialCatalog.BLAZE_ROD, "handle", "heat_cracks", true, 7, palette(0xFF4A1604, 0xFF7C2705, 0xFFB84307, 0xFFF07412, 0xFFFFB12E, 0xFFFFF0A4)),
-                new MaterialVisualSpec(MaterialCatalog.BREEZE_ROD, "handle", "facets", false, 0, palette(0xFF5B6170, 0xFF7D879A, 0xFFA3B2C7, 0xFFC3D7E8, 0xFFE4F5FF, 0xFFFFFFFF))
+                new MaterialVisualSpec(MaterialCatalog.EMERALD, "gem", "facets", false, 0, palette(0xFF06451F, 0xFF0C6C32, 0xFF159949, 0xFF33C967, 0xFF89F2A8, 0xFFE3FFE9)),
+                new MaterialVisualSpec(MaterialCatalog.OAK, "wood", "wood_grain", false, 0, palette(0xFF3B2613, 0xFF5A371A, 0xFF7D5126, 0xFFA5733A, 0xFFC99758, 0xFFE2BE80)),
+                new MaterialVisualSpec(DARK_OAK, "wood", "wood_grain", false, 0, palette(0xFF17100B, 0xFF24180F, 0xFF3A2818, 0xFF5A3D22, 0xFF7D5732, 0xFFA77A4A)),
+                new MaterialVisualSpec(MaterialCatalog.BLAZE, "nether", "heat_cracks", true, 7, palette(0xFF4A1604, 0xFF7C2705, 0xFFB84307, 0xFFF07412, 0xFFFFB12E, 0xFFFFF0A4)),
+                new MaterialVisualSpec(MaterialCatalog.BREEZE, "crystal", "facets", false, 0, palette(0xFF5B6170, 0xFF7D879A, 0xFFA3B2C7, 0xFFC3D7E8, 0xFFE4F5FF, 0xFFFFFFFF)),
+                new MaterialVisualSpec(LEATHER, "leather", "rough_wrap", false, 0, palette(0xFF2A170E, 0xFF4A2817, 0xFF704024, 0xFF9C6139, 0xFFC68555, 0xFFE4AF7C)),
+                new MaterialVisualSpec(AMETHYST, "crystal", "facets", false, 0, palette(0xFF28164A, 0xFF422478, 0xFF6636A8, 0xFF905CE0, 0xFFC8A4FF, 0xFFF5E9FF)),
+                new MaterialVisualSpec(NETHER, "nether", "heat_cracks", true, 8, palette(0xFF160503, 0xFF2A0904, 0xFF4D1309, 0xFF8A260D, 0xFFFF6A1A, 0xFFFFD06A)),
+                new MaterialVisualSpec(SCULK, "sculk", "veins", true, 8, palette(0xFF05090A, 0xFF071417, 0xFF0A2428, 0xFF0E3D45, 0xFF0C8395, 0xFF4AF5FF))
         );
     }
 

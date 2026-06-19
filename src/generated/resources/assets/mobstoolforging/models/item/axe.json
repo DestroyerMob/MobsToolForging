@@ -3,12 +3,15 @@
   "loader": "mobstoolforging:parted_tool",
   "part_model": false,
   "textures": {
-    "handle_blaze_rod": "mobstoolforging:generated/tool_parts/blaze_rod/axe_handle",
-    "handle_breeze_rod": "mobstoolforging:generated/tool_parts/breeze_rod/axe_handle",
-    "handle_stick": "mobstoolforging:generated/tool_parts/stick/axe_handle",
+    "handle_blaze": "mobstoolforging:generated/tool_parts/blaze/axe_handle",
+    "handle_breeze": "mobstoolforging:generated/tool_parts/breeze/axe_handle",
+    "handle_oak": "mobstoolforging:generated/tool_parts/oak/axe_handle",
+    "head_copper": "mobstoolforging:generated/tool_parts/copper/axe_head",
     "head_diamond": "mobstoolforging:generated/tool_parts/diamond/axe_head",
+    "head_emerald": "mobstoolforging:generated/tool_parts/emerald/axe_head",
     "head_gold": "mobstoolforging:generated/tool_parts/gold/axe_head",
     "head_iron": "mobstoolforging:generated/tool_parts/iron/axe_head",
+    "head_netherite": "mobstoolforging:generated/tool_parts/netherite/axe_head",
     "particle": "mobstoolforging:generated/tool_parts/iron/axe_head"
   },
   "tool": "axe"

@@ -1,7 +1,8 @@
 {
   "type": "mobstoolforging:tool_visual_example",
-  "handle_material": "mobstoolforging:stick",
+  "handle_material": "mobstoolforging:oak",
   "head_material": "mobstoolforging:iron",
   "quality": 100,
-  "tool_type": "mobstoolforging:pickaxe"
+  "tool_type": "mobstoolforging:pickaxe",
+  "wrap_material": "mobstoolforging:leather"
 }

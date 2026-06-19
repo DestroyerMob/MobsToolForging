@@ -52,7 +52,7 @@ public final class PartedToolSpriteSet {
         if (sprite != null) {
             return sprite;
         }
-        sprite = handles.get(MaterialCatalog.STICK);
+        sprite = handles.get(MaterialCatalog.OAK);
         return sprite != null ? sprite : particle;
     }
 

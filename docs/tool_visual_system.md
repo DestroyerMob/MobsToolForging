@@ -12,7 +12,8 @@ Finished tools store `mobstoolforging:tool_construction`:
 {
   "tool_type": "mobstoolforging:pickaxe",
   "head_material": "mobstoolforging:diamond",
-  "handle_material": "mobstoolforging:stick",
+  "handle_material": "mobstoolforging:oak",
+  "binding_material": "mobstoolforging:copper",
   "quality": 100
 }
 ```
@@ -55,7 +56,7 @@ These are part sprites, not full completed-tool permutations. The intended rende
 
 1. Tag the source item as `mobstoolforging:materials/metals` or `mobstoolforging:materials/gems` if it can become a tool head.
 2. Add or override `tooling/material_visuals/<material>.json`.
-3. Provide explicit 16x16 part sprites under `assets/mobstoolforging/textures/source/tool_parts/<material>/`.
+3. Provide explicit textures for iconic materials where generated sprites are not good enough.
 
 ## Adding A Tool Visual
 

@@ -1,7 +1,0 @@
-{
-  "type": "mobstoolforging:tool_visual_example",
-  "handle_material": "mobstoolforging:breeze_rod",
-  "head_material": "mobstoolforging:diamond",
-  "quality": 100,
-  "tool_type": "mobstoolforging:sword"
-}

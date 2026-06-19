@@ -16,13 +16,61 @@
     },
     {
       "emissive_allowed": false,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/pickaxe_wrap",
+      "large_template": "mobstoolforging:tool_templates/pickaxe/large_wrap",
+      "material_from": "wrapMaterial",
+      "optional": true,
+      "slot": "wrap",
+      "template": "mobstoolforging:tool_templates/pickaxe/wrap",
+      "z": 2
+    },
+    {
+      "emissive_allowed": false,
       "generated": "mobstoolforging:generated/tool_parts/{material}/pickaxe_head",
       "large_template": "mobstoolforging:tool_templates/pickaxe/large_pickaxe_head",
       "material_from": "headMaterial",
       "optional": false,
       "slot": "pickaxe_head",
       "template": "mobstoolforging:tool_templates/pickaxe/pickaxe_head",
-      "z": 2
+      "z": 3
+    },
+    {
+      "emissive_allowed": false,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/pickaxe_binding",
+      "large_template": "mobstoolforging:tool_templates/pickaxe/large_binding",
+      "material_from": "bindingMaterial",
+      "optional": true,
+      "slot": "binding",
+      "template": "mobstoolforging:tool_templates/pickaxe/binding",
+      "z": 4
+    },
+    {
+      "emissive_allowed": true,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/pickaxe_focus",
+      "large_template": "mobstoolforging:tool_templates/pickaxe/large_focus",
+      "material_from": "focusMaterial",
+      "optional": true,
+      "slot": "focus",
+      "template": "mobstoolforging:tool_templates/pickaxe/focus",
+      "z": 5
+    },
+    {
+      "emissive_allowed": true,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/pickaxe_treatment_overlay",
+      "large_template": "mobstoolforging:tool_templates/pickaxe/large_treatment_overlay",
+      "material_from": "treatment",
+      "optional": true,
+      "slot": "treatment_overlay",
+      "template": "mobstoolforging:tool_templates/pickaxe/treatment_overlay",
+      "z": 6
+    },
+    {
+      "emissive_allowed": false,
+      "large_template": "mobstoolforging:tool_templates/pickaxe/large_damage_overlay",
+      "optional": true,
+      "slot": "damage_overlay",
+      "template": "mobstoolforging:tool_templates/pickaxe/damage_overlay",
+      "z": 7
     }
   ]
 }

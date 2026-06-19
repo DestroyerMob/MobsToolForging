@@ -36,7 +36,7 @@ public final class PartedToolBakedModel implements BakedModel {
         this.sprites = sprites;
         this.quadFactory = quadFactory;
         this.transforms = transforms;
-        this.fallback = compose(MaterialCatalog.IRON, MaterialCatalog.STICK);
+        this.fallback = compose(MaterialCatalog.IRON, MaterialCatalog.OAK);
         this.overrides = new ItemOverrides() {
             @Override
             public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {

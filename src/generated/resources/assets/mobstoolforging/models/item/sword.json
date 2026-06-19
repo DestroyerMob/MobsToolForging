@@ -3,12 +3,15 @@
   "loader": "mobstoolforging:parted_tool",
   "part_model": false,
   "textures": {
-    "handle_blaze_rod": "mobstoolforging:generated/tool_parts/blaze_rod/sword_handle",
-    "handle_breeze_rod": "mobstoolforging:generated/tool_parts/breeze_rod/sword_handle",
-    "handle_stick": "mobstoolforging:generated/tool_parts/stick/sword_handle",
+    "handle_blaze": "mobstoolforging:generated/tool_parts/blaze/sword_handle",
+    "handle_breeze": "mobstoolforging:generated/tool_parts/breeze/sword_handle",
+    "handle_oak": "mobstoolforging:generated/tool_parts/oak/sword_handle",
+    "head_copper": "mobstoolforging:generated/tool_parts/copper/sword_blade",
     "head_diamond": "mobstoolforging:generated/tool_parts/diamond/sword_blade",
+    "head_emerald": "mobstoolforging:generated/tool_parts/emerald/sword_blade",
     "head_gold": "mobstoolforging:generated/tool_parts/gold/sword_blade",
     "head_iron": "mobstoolforging:generated/tool_parts/iron/sword_blade",
+    "head_netherite": "mobstoolforging:generated/tool_parts/netherite/sword_blade",
     "particle": "mobstoolforging:generated/tool_parts/iron/sword_blade"
   },
   "tool": "sword"

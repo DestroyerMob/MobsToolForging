@@ -3,12 +3,15 @@
   "loader": "mobstoolforging:parted_tool",
   "part_model": false,
   "textures": {
-    "handle_blaze_rod": "mobstoolforging:generated/tool_parts/blaze_rod/hoe_handle",
-    "handle_breeze_rod": "mobstoolforging:generated/tool_parts/breeze_rod/hoe_handle",
-    "handle_stick": "mobstoolforging:generated/tool_parts/stick/hoe_handle",
+    "handle_blaze": "mobstoolforging:generated/tool_parts/blaze/hoe_handle",
+    "handle_breeze": "mobstoolforging:generated/tool_parts/breeze/hoe_handle",
+    "handle_oak": "mobstoolforging:generated/tool_parts/oak/hoe_handle",
+    "head_copper": "mobstoolforging:generated/tool_parts/copper/hoe_head",
     "head_diamond": "mobstoolforging:generated/tool_parts/diamond/hoe_head",
+    "head_emerald": "mobstoolforging:generated/tool_parts/emerald/hoe_head",
     "head_gold": "mobstoolforging:generated/tool_parts/gold/hoe_head",
     "head_iron": "mobstoolforging:generated/tool_parts/iron/hoe_head",
+    "head_netherite": "mobstoolforging:generated/tool_parts/netherite/hoe_head",
     "particle": "mobstoolforging:generated/tool_parts/iron/hoe_head"
   },
   "tool": "hoe"

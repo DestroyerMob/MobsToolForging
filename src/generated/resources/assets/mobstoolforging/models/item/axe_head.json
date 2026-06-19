@@ -3,9 +3,12 @@
   "loader": "mobstoolforging:parted_tool_part",
   "part_model": true,
   "textures": {
+    "head_copper": "mobstoolforging:generated/tool_parts/copper/axe_head",
     "head_diamond": "mobstoolforging:generated/tool_parts/diamond/axe_head",
+    "head_emerald": "mobstoolforging:generated/tool_parts/emerald/axe_head",
     "head_gold": "mobstoolforging:generated/tool_parts/gold/axe_head",
     "head_iron": "mobstoolforging:generated/tool_parts/iron/axe_head",
+    "head_netherite": "mobstoolforging:generated/tool_parts/netherite/axe_head",
     "particle": "mobstoolforging:generated/tool_parts/iron/axe_head"
   },
   "tool": "axe"

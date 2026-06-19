@@ -1,7 +1,0 @@
-{
-  "type": "mobstoolforging:tool_visual_example",
-  "handle_material": "mobstoolforging:blaze_rod",
-  "head_material": "mobstoolforging:gold",
-  "quality": 100,
-  "tool_type": "mobstoolforging:axe"
-}
