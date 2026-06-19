@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -24,11 +26,7 @@ import org.destroyermob.mobstoolforging.world.ToolKind;
 
 public class ModVisualDefinitionProvider implements DataProvider {
     private static final int[] GREY_KEYS = {63, 102, 140, 178, 216, 255};
-    private static final ResourceLocation DARK_OAK = modLoc("dark_oak");
-    private static final ResourceLocation LEATHER = modLoc("leather");
-    private static final ResourceLocation AMETHYST = modLoc("amethyst");
-    private static final ResourceLocation NETHER = modLoc("nether");
-    private static final ResourceLocation SCULK = modLoc("sculk");
+    private static final String SOURCE_TOOL_PART_TEXTURES = "/assets/" + MobsToolForging.MOD_ID + "/textures/source/tool_parts/";
 
     private final PackOutput.PathProvider materialVisuals;
     private final PackOutput.PathProvider toolVisuals;
@@ -71,14 +69,14 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 MaterialCatalog.IRON,
                 MaterialCatalog.OAK,
                 null,
-                LEATHER,
+                MaterialCatalog.LEATHER,
                 null,
                 null
         ), examples.json(modLoc("iron_pickaxe"))));
         futures.add(DataProvider.saveStable(output, example(
                 ToolKind.PICKAXE,
                 MaterialCatalog.DIAMOND,
-                DARK_OAK,
+                MaterialCatalog.DARK_OAK,
                 MaterialCatalog.COPPER,
                 null,
                 null,
@@ -91,7 +89,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 null,
                 null,
                 null,
-                NETHER
+                MaterialCatalog.NETHER
         ), examples.json(modLoc("nether_treated_iron_sword"))));
         futures.add(DataProvider.saveStable(output, example(
                 ToolKind.PICKAXE,
@@ -99,7 +97,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 MaterialCatalog.OAK,
                 MaterialCatalog.COPPER,
                 null,
-                AMETHYST,
+                MaterialCatalog.AMETHYST,
                 null
         ), examples.json(modLoc("amethyst_focused_diamond_pickaxe"))));
     }
@@ -114,17 +112,24 @@ public class ModVisualDefinitionProvider implements DataProvider {
             for (ResourceLocation materialId : MaterialCatalog.starterMaterialIds()) {
                 MaterialVisualSpec material = byId.get(materialId);
                 if (material != null) {
-                    futures.add(savePng(output, generatedTexturePath(materialId, toolKind.partType()), drawSprite(toolKind, toolKind.partType(), material)));
+                    futures.add(savePng(output, generatedTexturePath(materialId, toolKind.partType()), spriteFor(toolKind, toolKind.partType(), material)));
                 }
             }
-            for (ResourceLocation handle : List.of(MaterialCatalog.OAK, DARK_OAK, MaterialCatalog.BLAZE, MaterialCatalog.BREEZE)) {
-                futures.add(savePng(output, generatedTexturePath(handle, toolKind.id() + "_handle"), drawSprite(toolKind, "handle", byId.get(handle))));
+            for (ResourceLocation handle : MaterialCatalog.handleMaterialIds()) {
+                futures.add(savePng(output, generatedTexturePath(handle, toolKind.id() + "_handle"), spriteFor(toolKind, "handle", byId.get(handle))));
             }
-            futures.add(savePng(output, generatedTexturePath(MaterialCatalog.COPPER, toolKind.id() + "_" + jointSlot(toolKind)), drawSprite(toolKind, jointSlot(toolKind), byId.get(MaterialCatalog.COPPER))));
-            futures.add(savePng(output, generatedTexturePath(LEATHER, toolKind.id() + "_wrap"), drawSprite(toolKind, "wrap", byId.get(LEATHER))));
-            futures.add(savePng(output, generatedTexturePath(AMETHYST, toolKind.id() + "_focus"), drawSprite(toolKind, "focus", byId.get(AMETHYST))));
-            futures.add(savePng(output, generatedTexturePath(NETHER, toolKind.id() + "_treatment_overlay"), drawSprite(toolKind, "treatment_overlay", byId.get(NETHER))));
-            futures.add(savePng(output, generatedTexturePath(SCULK, toolKind.id() + "_treatment_overlay"), drawSprite(toolKind, "treatment_overlay", byId.get(SCULK))));
+            for (ResourceLocation binding : MaterialCatalog.visualMaterialIds("bindingMaterial")) {
+                futures.add(savePng(output, generatedTexturePath(binding, toolKind.id() + "_" + jointSlot(toolKind)), spriteFor(toolKind, jointSlot(toolKind), byId.get(binding))));
+            }
+            for (ResourceLocation wrap : MaterialCatalog.visualMaterialIds("wrapMaterial")) {
+                futures.add(savePng(output, generatedTexturePath(wrap, toolKind.id() + "_wrap"), spriteFor(toolKind, "wrap", byId.get(wrap))));
+            }
+            for (ResourceLocation focus : MaterialCatalog.visualMaterialIds("focusMaterial")) {
+                futures.add(savePng(output, generatedTexturePath(focus, toolKind.id() + "_focus"), spriteFor(toolKind, "focus", byId.get(focus))));
+            }
+            for (ResourceLocation treatment : MaterialCatalog.visualMaterialIds("treatment")) {
+                futures.add(savePng(output, generatedTexturePath(treatment, toolKind.id() + "_treatment_overlay"), spriteFor(toolKind, "treatment_overlay", byId.get(treatment))));
+            }
         }
     }
 
@@ -238,6 +243,40 @@ public class ModVisualDefinitionProvider implements DataProvider {
             drawHead(image, toolKind, material);
         }
         return image;
+    }
+
+    private BufferedImage spriteFor(ToolKind toolKind, String slot, MaterialVisualSpec material) {
+        BufferedImage source = loadSourceSprite(material.id(), sourceTextureName(toolKind, slot));
+        if (source != null) {
+            return source;
+        }
+        return drawSprite(toolKind, slot, material);
+    }
+
+    private BufferedImage loadSourceSprite(ResourceLocation material, String spriteName) {
+        String path = SOURCE_TOOL_PART_TEXTURES + sourceMaterialPath(material) + "/" + spriteName + ".png";
+        try (InputStream stream = ModVisualDefinitionProvider.class.getResourceAsStream(path)) {
+            if (stream == null) {
+                return null;
+            }
+            BufferedImage image = ImageIO.read(stream);
+            if (image == null) {
+                throw new IllegalStateException("Source tool part sprite is not a readable PNG: " + path);
+            }
+            if (image.getWidth() != 16 || image.getHeight() != 16) {
+                throw new IllegalStateException("Source tool part sprite must be 16x16: " + path);
+            }
+            BufferedImage normalized = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+            var graphics = normalized.createGraphics();
+            try {
+                graphics.drawImage(image, 0, 0, null);
+            } finally {
+                graphics.dispose();
+            }
+            return normalized;
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Failed to read source tool part sprite " + path, exception);
+        }
     }
 
     private void drawHead(BufferedImage image, ToolKind toolKind, MaterialVisualSpec material) {
@@ -409,6 +448,29 @@ public class ModVisualDefinitionProvider implements DataProvider {
         return material.getNamespace() + "/" + material.getPath();
     }
 
+    private static String sourceTextureName(ToolKind toolKind, String slot) {
+        if (slot.equals("handle")) {
+            return "handle";
+        }
+        if (slot.equals(toolKind.partType())) {
+            return toolKind.partType();
+        }
+        return slot;
+    }
+
+    private static String sourceMaterialPath(ResourceLocation material) {
+        if (MaterialCatalog.OAK.equals(material)) {
+            return "stick";
+        }
+        if (MaterialCatalog.BLAZE.equals(material)) {
+            return "blaze_rod";
+        }
+        if (MaterialCatalog.BREEZE.equals(material)) {
+            return "breeze_rod";
+        }
+        return materialPath(material);
+    }
+
     private static void line(BufferedImage image, int x0, int y0, int x1, int y1, int color) {
         int dx = Integer.compare(x1, x0);
         int dy = Integer.compare(y1, y0);
@@ -470,13 +532,13 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 new MaterialVisualSpec(MaterialCatalog.DIAMOND, "gem", "facets", false, 0, palette(0xFF0F5563, 0xFF178397, 0xFF24B9C8, 0xFF65E7EE, 0xFFB7FFFF, 0xFFFFFFFF)),
                 new MaterialVisualSpec(MaterialCatalog.EMERALD, "gem", "facets", false, 0, palette(0xFF06451F, 0xFF0C6C32, 0xFF159949, 0xFF33C967, 0xFF89F2A8, 0xFFE3FFE9)),
                 new MaterialVisualSpec(MaterialCatalog.OAK, "wood", "wood_grain", false, 0, palette(0xFF3B2613, 0xFF5A371A, 0xFF7D5126, 0xFFA5733A, 0xFFC99758, 0xFFE2BE80)),
-                new MaterialVisualSpec(DARK_OAK, "wood", "wood_grain", false, 0, palette(0xFF17100B, 0xFF24180F, 0xFF3A2818, 0xFF5A3D22, 0xFF7D5732, 0xFFA77A4A)),
+                new MaterialVisualSpec(MaterialCatalog.DARK_OAK, "wood", "wood_grain", false, 0, palette(0xFF17100B, 0xFF24180F, 0xFF3A2818, 0xFF5A3D22, 0xFF7D5732, 0xFFA77A4A)),
                 new MaterialVisualSpec(MaterialCatalog.BLAZE, "nether", "heat_cracks", true, 7, palette(0xFF4A1604, 0xFF7C2705, 0xFFB84307, 0xFFF07412, 0xFFFFB12E, 0xFFFFF0A4)),
                 new MaterialVisualSpec(MaterialCatalog.BREEZE, "crystal", "facets", false, 0, palette(0xFF5B6170, 0xFF7D879A, 0xFFA3B2C7, 0xFFC3D7E8, 0xFFE4F5FF, 0xFFFFFFFF)),
-                new MaterialVisualSpec(LEATHER, "leather", "rough_wrap", false, 0, palette(0xFF2A170E, 0xFF4A2817, 0xFF704024, 0xFF9C6139, 0xFFC68555, 0xFFE4AF7C)),
-                new MaterialVisualSpec(AMETHYST, "crystal", "facets", false, 0, palette(0xFF28164A, 0xFF422478, 0xFF6636A8, 0xFF905CE0, 0xFFC8A4FF, 0xFFF5E9FF)),
-                new MaterialVisualSpec(NETHER, "nether", "heat_cracks", true, 8, palette(0xFF160503, 0xFF2A0904, 0xFF4D1309, 0xFF8A260D, 0xFFFF6A1A, 0xFFFFD06A)),
-                new MaterialVisualSpec(SCULK, "sculk", "veins", true, 8, palette(0xFF05090A, 0xFF071417, 0xFF0A2428, 0xFF0E3D45, 0xFF0C8395, 0xFF4AF5FF))
+                new MaterialVisualSpec(MaterialCatalog.LEATHER, "leather", "rough_wrap", false, 0, palette(0xFF2A170E, 0xFF4A2817, 0xFF704024, 0xFF9C6139, 0xFFC68555, 0xFFE4AF7C)),
+                new MaterialVisualSpec(MaterialCatalog.AMETHYST, "crystal", "facets", false, 0, palette(0xFF28164A, 0xFF422478, 0xFF6636A8, 0xFF905CE0, 0xFFC8A4FF, 0xFFF5E9FF)),
+                new MaterialVisualSpec(MaterialCatalog.NETHER, "nether", "heat_cracks", true, 8, palette(0xFF160503, 0xFF2A0904, 0xFF4D1309, 0xFF8A260D, 0xFFFF6A1A, 0xFFFFD06A)),
+                new MaterialVisualSpec(MaterialCatalog.SCULK, "sculk", "veins", true, 8, palette(0xFF05090A, 0xFF071417, 0xFF0A2428, 0xFF0E3D45, 0xFF0C8395, 0xFF4AF5FF))
         );
     }
 

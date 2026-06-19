@@ -3,13 +3,14 @@
   "loader": "mobstoolforging:parted_tool_part",
   "part_model": true,
   "textures": {
-    "head_copper": "mobstoolforging:generated/tool_parts/copper/pickaxe_head",
-    "head_diamond": "mobstoolforging:generated/tool_parts/diamond/pickaxe_head",
-    "head_emerald": "mobstoolforging:generated/tool_parts/emerald/pickaxe_head",
-    "head_gold": "mobstoolforging:generated/tool_parts/gold/pickaxe_head",
-    "head_iron": "mobstoolforging:generated/tool_parts/iron/pickaxe_head",
-    "head_netherite": "mobstoolforging:generated/tool_parts/netherite/pickaxe_head",
+    "layer_pickaxe_head_copper": "mobstoolforging:generated/tool_parts/copper/pickaxe_head",
+    "layer_pickaxe_head_diamond": "mobstoolforging:generated/tool_parts/diamond/pickaxe_head",
+    "layer_pickaxe_head_emerald": "mobstoolforging:generated/tool_parts/emerald/pickaxe_head",
+    "layer_pickaxe_head_gold": "mobstoolforging:generated/tool_parts/gold/pickaxe_head",
+    "layer_pickaxe_head_iron": "mobstoolforging:generated/tool_parts/iron/pickaxe_head",
+    "layer_pickaxe_head_netherite": "mobstoolforging:generated/tool_parts/netherite/pickaxe_head",
     "particle": "mobstoolforging:generated/tool_parts/iron/pickaxe_head"
   },
-  "tool": "pickaxe"
+  "tool": "pickaxe",
+  "visual": "mobstoolforging:pickaxe"
 }

@@ -23,6 +23,8 @@ import org.destroyermob.mobstoolforging.world.ToolPartData;
 
 public final class PartedToolPartBakedModel implements BakedModel {
     private final ToolKind toolKind;
+    private final ToolVisualDefinition visual;
+    private final ToolVisualLayer partLayer;
     private final PartedToolSpriteSet sprites;
     private final PartedToolQuadFactory quadFactory;
     private final ItemTransforms transforms;
@@ -30,8 +32,10 @@ public final class PartedToolPartBakedModel implements BakedModel {
     private final ItemOverrides overrides;
     private final Map<ResourceLocation, ResolvedPartedItemModel> cache = new ConcurrentHashMap<>();
 
-    public PartedToolPartBakedModel(ToolKind toolKind, PartedToolSpriteSet sprites, PartedToolQuadFactory quadFactory, ItemTransforms transforms) {
+    public PartedToolPartBakedModel(ToolKind toolKind, ToolVisualDefinition visual, PartedToolSpriteSet sprites, PartedToolQuadFactory quadFactory, ItemTransforms transforms) {
         this.toolKind = toolKind;
+        this.visual = visual;
+        this.partLayer = visual.partLayer(toolKind);
         this.sprites = sprites;
         this.quadFactory = quadFactory;
         this.transforms = transforms;
@@ -89,7 +93,8 @@ public final class PartedToolPartBakedModel implements BakedModel {
     }
 
     private ResolvedPartedItemModel compose(ResourceLocation material) {
-        List<BakedQuad> quads = quadFactory.bakeLayer(0, sprites.head(material));
-        return new ResolvedPartedItemModel(quads, sprites.head(material), transforms);
+        TextureAtlasSprite sprite = sprites.resolve(visual.id(), partLayer.slot(), material).orElse(sprites.particle());
+        List<BakedQuad> quads = quadFactory.bakeLayer(0, sprite);
+        return new ResolvedPartedItemModel(quads, sprite, transforms);
     }
 }

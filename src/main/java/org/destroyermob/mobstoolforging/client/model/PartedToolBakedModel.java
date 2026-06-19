@@ -3,6 +3,7 @@ package org.destroyermob.mobstoolforging.client.model;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -24,6 +25,7 @@ import org.destroyermob.mobstoolforging.world.ToolVisualKey;
 
 public final class PartedToolBakedModel implements BakedModel {
     private final ToolKind toolKind;
+    private final ToolVisualDefinition visual;
     private final PartedToolSpriteSet sprites;
     private final PartedToolQuadFactory quadFactory;
     private final ItemTransforms transforms;
@@ -31,12 +33,23 @@ public final class PartedToolBakedModel implements BakedModel {
     private final ItemOverrides overrides;
     private final Map<ToolVisualKey, ResolvedPartedItemModel> cache = new ConcurrentHashMap<>();
 
-    public PartedToolBakedModel(ToolKind toolKind, PartedToolSpriteSet sprites, PartedToolQuadFactory quadFactory, ItemTransforms transforms) {
+    public PartedToolBakedModel(ToolKind toolKind, ToolVisualDefinition visual, PartedToolSpriteSet sprites, PartedToolQuadFactory quadFactory, ItemTransforms transforms) {
         this.toolKind = toolKind;
+        this.visual = visual;
         this.sprites = sprites;
         this.quadFactory = quadFactory;
         this.transforms = transforms;
-        this.fallback = compose(MaterialCatalog.IRON, MaterialCatalog.OAK);
+        this.fallback = composeLayers(new ToolVisualKey(
+                ToolConstructionData.toolType(toolKind),
+                MaterialCatalog.IRON,
+                MaterialCatalog.OAK,
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                ToolConstructionData.DEFAULT_QUALITY,
+                0
+        )).orElseGet(this::particleFallback);
         this.overrides = new ItemOverrides() {
             @Override
             public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
@@ -89,13 +102,59 @@ public final class PartedToolBakedModel implements BakedModel {
     }
 
     private ResolvedPartedItemModel compose(ToolVisualKey key) {
-        return compose(key.headMaterial(), key.handleMaterial());
+        return composeLayers(key).orElse(fallback);
     }
 
-    private ResolvedPartedItemModel compose(ResourceLocation headMaterial, ResourceLocation handleMaterial) {
+    private Optional<ResolvedPartedItemModel> composeLayers(ToolVisualKey key) {
         Map<Integer, List<BakedQuad>> layers = new LinkedHashMap<>();
-        layers.put(0, quadFactory.bakeLayer(0, sprites.handle(handleMaterial)));
-        layers.put(1, quadFactory.bakeLayer(1, sprites.head(headMaterial)));
-        return ResolvedPartedItemModel.compose(layers, sprites.head(headMaterial), transforms);
+        TextureAtlasSprite particle = null;
+        for (ToolVisualLayer layer : visual.layers()) {
+            Optional<ResourceLocation> material = materialFor(key, layer);
+            if (material.isEmpty()) {
+                if (layer.optional()) {
+                    continue;
+                }
+                return Optional.empty();
+            }
+            Optional<TextureAtlasSprite> sprite = sprites.resolve(visual.id(), layer.slot(), material.get());
+            if (sprite.isEmpty()) {
+                if (layer.optional()) {
+                    continue;
+                }
+                return Optional.empty();
+            }
+            if (particle == null && layer.materialFrom().filter("headMaterial"::equals).isPresent()) {
+                particle = sprite.get();
+            }
+            layers.put(layer.z(), quadFactory.bakeLayer(layer.z(), sprite.get()));
+        }
+        if (layers.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(ResolvedPartedItemModel.compose(
+                layers,
+                particle == null ? sprites.particle() : particle,
+                transforms
+        ));
+    }
+
+    private Optional<ResourceLocation> materialFor(ToolVisualKey key, ToolVisualLayer layer) {
+        return layer.materialFrom().flatMap(materialFrom -> switch (materialFrom) {
+            case "headMaterial" -> Optional.of(key.headMaterial());
+            case "handleMaterial" -> Optional.of(key.handleMaterial());
+            case "bindingMaterial" -> key.bindingMaterial();
+            case "wrapMaterial" -> key.wrapMaterial();
+            case "focusMaterial" -> key.focusMaterial();
+            case "treatment" -> key.treatment();
+            default -> Optional.empty();
+        });
+    }
+
+    private ResolvedPartedItemModel particleFallback() {
+        return new ResolvedPartedItemModel(
+                quadFactory.bakeLayer(0, sprites.particle()),
+                sprites.particle(),
+                transforms
+        );
     }
 }

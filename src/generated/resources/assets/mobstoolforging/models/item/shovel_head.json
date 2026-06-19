@@ -3,13 +3,14 @@
   "loader": "mobstoolforging:parted_tool_part",
   "part_model": true,
   "textures": {
-    "head_copper": "mobstoolforging:generated/tool_parts/copper/shovel_head",
-    "head_diamond": "mobstoolforging:generated/tool_parts/diamond/shovel_head",
-    "head_emerald": "mobstoolforging:generated/tool_parts/emerald/shovel_head",
-    "head_gold": "mobstoolforging:generated/tool_parts/gold/shovel_head",
-    "head_iron": "mobstoolforging:generated/tool_parts/iron/shovel_head",
-    "head_netherite": "mobstoolforging:generated/tool_parts/netherite/shovel_head",
+    "layer_shovel_head_copper": "mobstoolforging:generated/tool_parts/copper/shovel_head",
+    "layer_shovel_head_diamond": "mobstoolforging:generated/tool_parts/diamond/shovel_head",
+    "layer_shovel_head_emerald": "mobstoolforging:generated/tool_parts/emerald/shovel_head",
+    "layer_shovel_head_gold": "mobstoolforging:generated/tool_parts/gold/shovel_head",
+    "layer_shovel_head_iron": "mobstoolforging:generated/tool_parts/iron/shovel_head",
+    "layer_shovel_head_netherite": "mobstoolforging:generated/tool_parts/netherite/shovel_head",
     "particle": "mobstoolforging:generated/tool_parts/iron/shovel_head"
   },
-  "tool": "shovel"
+  "tool": "shovel",
+  "visual": "mobstoolforging:shovel"
 }

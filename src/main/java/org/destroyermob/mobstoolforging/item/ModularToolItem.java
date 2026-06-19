@@ -14,9 +14,13 @@ public interface ModularToolItem {
 
     default ItemStack create(ResourceLocation headMaterialId, ItemStack handle) {
         ResourceLocation handleMaterial = MaterialCatalog.handleMaterial(handle);
+        return create(ToolConstructionData.basic(toolKind(), headMaterialId, handleMaterial));
+    }
+
+    default ItemStack create(ToolConstructionData construction) {
         ItemStack stack = new ItemStack((Item) this);
-        stack.set(ModDataComponents.TOOL_CONSTRUCTION.get(), ToolConstructionData.basic(toolKind(), headMaterialId, handleMaterial));
-        MaterialCatalog.applyToolComponents(stack, headMaterialId, toolKind());
+        stack.set(ModDataComponents.TOOL_CONSTRUCTION.get(), construction);
+        MaterialCatalog.applyToolComponents(stack, construction.headMaterial(), toolKind());
         return stack;
     }
 

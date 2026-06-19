@@ -37,8 +37,13 @@ public final class MaterialCatalog {
     public static final ResourceLocation DIAMOND = materialId("diamond");
     public static final ResourceLocation EMERALD = materialId("emerald");
     public static final ResourceLocation OAK = materialId("oak");
+    public static final ResourceLocation DARK_OAK = materialId("dark_oak");
     public static final ResourceLocation BLAZE = materialId("blaze");
     public static final ResourceLocation BREEZE = materialId("breeze");
+    public static final ResourceLocation LEATHER = materialId("leather");
+    public static final ResourceLocation AMETHYST = materialId("amethyst");
+    public static final ResourceLocation NETHER = materialId("nether");
+    public static final ResourceLocation SCULK = materialId("sculk");
 
     private static final Tier COPPER_TIER = new SimpleTier(
             BlockTags.INCORRECT_FOR_IRON_TOOL,
@@ -59,7 +64,11 @@ public final class MaterialCatalog {
 
     private static final Map<ResourceLocation, ToolMaterialDefinition> DEFINITIONS = new LinkedHashMap<>();
     private static final List<ResourceLocation> STARTER_MATERIALS = List.of(IRON, GOLD, COPPER, NETHERITE, DIAMOND, EMERALD);
-    private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(OAK, BLAZE, BREEZE);
+    private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(OAK, DARK_OAK, BLAZE, BREEZE);
+    private static final List<ResourceLocation> BINDING_MATERIALS = STARTER_MATERIALS;
+    private static final List<ResourceLocation> WRAP_MATERIALS = List.of(LEATHER);
+    private static final List<ResourceLocation> FOCUS_MATERIALS = List.of(AMETHYST);
+    private static final List<ResourceLocation> TREATMENT_MATERIALS = List.of(NETHER, SCULK);
 
     static {
         register(IRON, MaterialCategory.METAL, Items.IRON_INGOT, Tiers.IRON);
@@ -119,6 +128,18 @@ public final class MaterialCatalog {
 
     public static List<ResourceLocation> handleMaterialIds() {
         return HANDLE_MATERIALS;
+    }
+
+    public static List<ResourceLocation> visualMaterialIds(String materialFrom) {
+        return switch (materialFrom) {
+            case "headMaterial" -> STARTER_MATERIALS;
+            case "handleMaterial" -> HANDLE_MATERIALS;
+            case "bindingMaterial" -> BINDING_MATERIALS;
+            case "wrapMaterial" -> WRAP_MATERIALS;
+            case "focusMaterial" -> FOCUS_MATERIALS;
+            case "treatment" -> TREATMENT_MATERIALS;
+            default -> List.of();
+        };
     }
 
     public static Tool toolComponent(ResourceLocation materialId, ToolKind toolKind) {
