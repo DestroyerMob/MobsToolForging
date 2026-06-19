@@ -2,9 +2,6 @@
   "values": [
     "minecraft:stick",
     "minecraft:blaze_rod",
-    "minecraft:breeze_rod",
-    "#c:rods/wooden",
-    "#c:rods/blaze",
-    "#c:rods/breeze"
+    "minecraft:breeze_rod"
   ]
 }

@@ -1,8 +1,6 @@
 {
   "values": [
     "#c:ingots/iron",
-    "#c:ingots/gold",
-    "#c:ingots/copper",
-    "#c:ingots/netherite"
+    "#c:ingots/gold"
   ]
 }

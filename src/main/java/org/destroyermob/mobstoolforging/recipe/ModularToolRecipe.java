@@ -10,6 +10,7 @@ import net.minecraft.world.level.Level;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.registry.ModTags;
+import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
 
@@ -56,6 +57,9 @@ public class ModularToolRecipe extends CustomRecipe {
             }
             ToolPartData partData = stack.get(ModDataComponents.TOOL_PART.get());
             if (stack.is(toolKind.partItem().get()) && partData != null && toolKind.partType().equals(partData.partType())) {
+                if (MaterialCatalog.definition(partData.materialId()).isEmpty()) {
+                    return Parts.invalid();
+                }
                 if (!part.isEmpty()) {
                     return Parts.invalid();
                 }

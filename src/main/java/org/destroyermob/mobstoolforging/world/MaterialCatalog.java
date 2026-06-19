@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.util.Unit;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -23,8 +22,6 @@ import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.SimpleTier;
 import net.neoforged.neoforge.common.Tags;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.registry.ModTags;
@@ -32,41 +29,19 @@ import org.destroyermob.mobstoolforging.registry.ModTags;
 public final class MaterialCatalog {
     public static final ResourceLocation IRON = materialId("iron");
     public static final ResourceLocation GOLD = materialId("gold");
-    public static final ResourceLocation COPPER = materialId("copper");
-    public static final ResourceLocation NETHERITE = materialId("netherite");
     public static final ResourceLocation DIAMOND = materialId("diamond");
-    public static final ResourceLocation EMERALD = materialId("emerald");
-    public static final ResourceLocation OAK = materialId("oak");
-    public static final ResourceLocation BLAZE = materialId("blaze");
-    public static final ResourceLocation BREEZE = materialId("breeze");
-
-    private static final Tier COPPER_TIER = new SimpleTier(
-            BlockTags.INCORRECT_FOR_IRON_TOOL,
-            190,
-            5.5F,
-            1.5F,
-            16,
-            () -> Ingredient.of(Items.COPPER_INGOT)
-    );
-    private static final Tier EMERALD_TIER = new SimpleTier(
-            BlockTags.INCORRECT_FOR_DIAMOND_TOOL,
-            1250,
-            7.5F,
-            2.5F,
-            18,
-            () -> Ingredient.of(Items.EMERALD)
-    );
+    public static final ResourceLocation STICK = materialId("stick");
+    public static final ResourceLocation BLAZE_ROD = materialId("blaze_rod");
+    public static final ResourceLocation BREEZE_ROD = materialId("breeze_rod");
 
     private static final Map<ResourceLocation, ToolMaterialDefinition> DEFINITIONS = new LinkedHashMap<>();
-    private static final List<ResourceLocation> STARTER_MATERIALS = List.of(IRON, GOLD, COPPER, NETHERITE, DIAMOND, EMERALD);
+    private static final List<ResourceLocation> STARTER_MATERIALS = List.of(IRON, GOLD, DIAMOND);
+    private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(STICK, BLAZE_ROD, BREEZE_ROD);
 
     static {
         register(IRON, MaterialCategory.METAL, Items.IRON_INGOT, Tiers.IRON);
         register(GOLD, MaterialCategory.METAL, Items.GOLD_INGOT, Tiers.GOLD);
-        register(COPPER, MaterialCategory.METAL, Items.COPPER_INGOT, COPPER_TIER);
-        register(NETHERITE, MaterialCategory.METAL, Items.NETHERITE_INGOT, Tiers.NETHERITE);
         register(DIAMOND, MaterialCategory.GEM, Items.DIAMOND, Tiers.DIAMOND);
-        register(EMERALD, MaterialCategory.GEM, Items.EMERALD, EMERALD_TIER);
     }
 
     private MaterialCatalog() {
@@ -82,9 +57,7 @@ public final class MaterialCatalog {
         if (known != null) {
             return Optional.of(known);
         }
-        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        Tier fallbackTier = category.get() == MaterialCategory.GEM ? Tiers.DIAMOND : Tiers.IRON;
-        return Optional.of(new ToolMaterialDefinition(itemId, category.get(), stack.getItem(), fallbackTier));
+        return Optional.empty();
     }
 
     public static boolean isMaterial(ItemStack stack) {
@@ -96,10 +69,7 @@ public final class MaterialCatalog {
         if (definition != null) {
             return Optional.of(definition);
         }
-        Item item = BuiltInRegistries.ITEM.get(materialId);
-        MaterialCategory category = materialId.getPath().contains("gem") ? MaterialCategory.GEM : MaterialCategory.METAL;
-        Tier fallbackTier = category == MaterialCategory.GEM ? Tiers.DIAMOND : Tiers.IRON;
-        return Optional.of(new ToolMaterialDefinition(materialId, category, item, fallbackTier));
+        return Optional.empty();
     }
 
     public static Component displayName(ResourceLocation materialId) {
@@ -114,6 +84,10 @@ public final class MaterialCatalog {
 
     public static List<ResourceLocation> starterMaterialIds() {
         return STARTER_MATERIALS;
+    }
+
+    public static List<ResourceLocation> handleMaterialIds() {
+        return HANDLE_MATERIALS;
     }
 
     public static Tool toolComponent(ResourceLocation materialId, ToolKind toolKind) {
@@ -148,13 +122,13 @@ public final class MaterialCatalog {
 
     public static ResourceLocation handleMaterial(ItemStack handle) {
         if (handle.is(Items.STICK)) {
-            return OAK;
+            return STICK;
         }
         if (handle.is(Items.BLAZE_ROD)) {
-            return BLAZE;
+            return BLAZE_ROD;
         }
         if (handle.is(Items.BREEZE_ROD)) {
-            return BREEZE;
+            return BREEZE_ROD;
         }
         return BuiltInRegistries.ITEM.getKey(handle.getItem());
     }
@@ -164,9 +138,6 @@ public final class MaterialCatalog {
         stack.set(DataComponents.DAMAGE, 0);
         stack.set(DataComponents.TOOL, toolComponent(materialId, toolKind));
         stack.set(DataComponents.ATTRIBUTE_MODIFIERS, toolAttributes(materialId, toolKind));
-        if (NETHERITE.equals(materialId)) {
-            stack.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
-        }
     }
 
     private static Optional<MaterialCategory> categoryFor(ItemStack stack) {
@@ -187,18 +158,9 @@ public final class MaterialCatalog {
             if (stack.is(Tags.Items.INGOTS_GOLD)) {
                 return GOLD;
             }
-            if (stack.is(Tags.Items.INGOTS_COPPER)) {
-                return COPPER;
-            }
-            if (stack.is(Tags.Items.INGOTS_NETHERITE)) {
-                return NETHERITE;
-            }
         } else {
             if (stack.is(Tags.Items.GEMS_DIAMOND)) {
                 return DIAMOND;
-            }
-            if (stack.is(Tags.Items.GEMS_EMERALD)) {
-                return EMERALD;
             }
         }
         return BuiltInRegistries.ITEM.getKey(stack.getItem());
@@ -209,14 +171,14 @@ public final class MaterialCatalog {
     }
 
     private static float axeAttackDamage(ResourceLocation materialId) {
-        if (DIAMOND.equals(materialId) || NETHERITE.equals(materialId) || EMERALD.equals(materialId)) {
+        if (DIAMOND.equals(materialId)) {
             return 5.0F;
         }
         return 6.0F;
     }
 
     private static float axeAttackSpeed(ResourceLocation materialId) {
-        if (IRON.equals(materialId) || COPPER.equals(materialId)) {
+        if (IRON.equals(materialId)) {
             return -3.1F;
         }
         return -3.0F;
@@ -229,11 +191,8 @@ public final class MaterialCatalog {
         if (IRON.equals(materialId)) {
             return -2.0F;
         }
-        if (DIAMOND.equals(materialId) || EMERALD.equals(materialId)) {
+        if (DIAMOND.equals(materialId)) {
             return -3.0F;
-        }
-        if (NETHERITE.equals(materialId)) {
-            return -4.0F;
         }
         return -1.0F;
     }
@@ -245,7 +204,7 @@ public final class MaterialCatalog {
         if (IRON.equals(materialId)) {
             return -1.0F;
         }
-        if (DIAMOND.equals(materialId) || EMERALD.equals(materialId) || NETHERITE.equals(materialId)) {
+        if (DIAMOND.equals(materialId)) {
             return 0.0F;
         }
         return -2.0F;

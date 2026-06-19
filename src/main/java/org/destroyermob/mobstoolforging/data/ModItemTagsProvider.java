@@ -29,16 +29,10 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.MATERIALS).addTag(ModTags.Items.MATERIALS_METALS).addTag(ModTags.Items.MATERIALS_GEMS);
         tag(ModTags.Items.MATERIALS_METALS)
                 .addTag(Tags.Items.INGOTS_IRON)
-                .addTag(Tags.Items.INGOTS_GOLD)
-                .addTag(Tags.Items.INGOTS_COPPER)
-                .addTag(Tags.Items.INGOTS_NETHERITE);
+                .addTag(Tags.Items.INGOTS_GOLD);
         tag(ModTags.Items.MATERIALS_GEMS)
-                .addTag(Tags.Items.GEMS_DIAMOND)
-                .addTag(Tags.Items.GEMS_EMERALD);
+                .addTag(Tags.Items.GEMS_DIAMOND);
         tag(ModTags.Items.TOOL_HANDLES)
-                .add(Items.STICK, Items.BLAZE_ROD, Items.BREEZE_ROD)
-                .addTag(Tags.Items.RODS_WOODEN)
-                .addTag(Tags.Items.RODS_BLAZE)
-                .addTag(Tags.Items.RODS_BREEZE);
+                .add(Items.STICK, Items.BLAZE_ROD, Items.BREEZE_ROD);
     }
 }
