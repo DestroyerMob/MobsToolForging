@@ -16,6 +16,10 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.TOOL_FORGE, "Tool Forge");
         addBlock(ModBlocks.LAPIDARY_TABLE, "Lapidary Table");
         addItem(ModItems.SMITHING_HAMMER, "Smithing Hammer");
+        addItem(ModItems.FLINT_SHARD, "Flint Shard");
+        addItem(ModItems.FLINT_KNIFE, "Flint Knife");
+        addItem(ModItems.FLINT_HATCHET, "Flint Hatchet");
+        addItem(ModItems.FLINT_PICK, "Flint Pick");
         addItem(ModItems.PICKAXE_HEAD_PATTERN, "Pickaxe Head Pattern");
         addItem(ModItems.AXE_HEAD_PATTERN, "Axe Head Pattern");
         addItem(ModItems.SHOVEL_HEAD_PATTERN, "Shovel Head Pattern");

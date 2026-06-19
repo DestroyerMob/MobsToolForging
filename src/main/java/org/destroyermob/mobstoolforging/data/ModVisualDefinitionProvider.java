@@ -223,7 +223,11 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 ? loadHandleSourceSprite(material.id(), toolKind)
                 : loadSourceSprite(material.id(), sourceTextureName(toolKind, slot));
         BufferedImage sprite = source == null ? drawSprite(toolKind, slot, material) : source;
-        return slot.equals("handle") ? applyHandleMask(toolKind, sprite) : sprite;
+        if (!slot.equals("handle")) {
+            return sprite;
+        }
+        BufferedImage handleSource = toolKind == ToolKind.SWORD ? shiftLeft(sprite) : sprite;
+        return applyHandleMask(toolKind, handleSource);
     }
 
     private BufferedImage loadHandleSourceSprite(ResourceLocation material, ToolKind toolKind) {
@@ -245,6 +249,16 @@ public class ModVisualDefinitionProvider implements DataProvider {
             }
         }
         return masked;
+    }
+
+    private static BufferedImage shiftLeft(BufferedImage source) {
+        BufferedImage shifted = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < 16; y++) {
+            for (int x = 0; x < 15; x++) {
+                shifted.setRGB(x, y, source.getRGB(x + 1, y));
+            }
+        }
+        return shifted;
     }
 
     private BufferedImage loadHandleMask(ToolKind toolKind) {

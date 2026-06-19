@@ -71,7 +71,34 @@ configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
 
+repositories {
+    maven {
+        name = 'BlameJared'
+        url = 'https://maven.blamejared.com'
+        content {
+            includeGroup 'mezz.jei'
+        }
+    }
+    maven {
+        name = 'CurseMaven'
+        url = 'https://cursemaven.com'
+        content {
+            includeGroup 'curse.maven'
+        }
+    }
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content {
+            includeGroup 'maven.modrinth'
+        }
+    }
+}
+
 dependencies {
+    localRuntime 'mezz.jei:jei-1.21.1-neoforge:19.27.0.340'
+    localRuntime 'curse.maven:durability-tooltip-511040:6833316'
+    localRuntime 'maven.modrinth:supermartijn642s-config-lib:1.1.8-neoforge-mc1.21'
 }
 
 var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {

@@ -1,9 +1,11 @@
 package org.destroyermob.mobstoolforging.data;
 
 import java.util.List;
+import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.CustomLoaderBuilder;
@@ -45,7 +47,11 @@ public class ModBlockStateProvider extends BlockStateProvider {
         horizontalBlock(lapidaryTable, lapidaryModel);
         simpleBlockItem(lapidaryTable, lapidaryModel);
 
-        itemModels().withExistingParent("smithing_hammer", mcLoc("item/handheld")).texture("layer0", mcLoc("item/iron_axe"));
+        smithingHammerModel();
+        itemModels().withExistingParent("flint_shard", mcLoc("item/generated")).texture("layer0", modLoc("item/flint_shard"));
+        itemModels().withExistingParent("flint_knife", mcLoc("item/handheld")).texture("layer0", modLoc("item/flint_knife"));
+        itemModels().withExistingParent("flint_hatchet", mcLoc("item/handheld")).texture("layer0", modLoc("item/flint_hatchet"));
+        itemModels().withExistingParent("flint_pick", mcLoc("item/handheld")).texture("layer0", modLoc("item/flint_pick"));
         patternModel(ModItems.PICKAXE_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.AXE_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.SHOVEL_HEAD_PATTERN.getId().getPath());
@@ -57,6 +63,40 @@ public class ModBlockStateProvider extends BlockStateProvider {
             toolModel(toolKind);
         }
         swordGuardPartModel();
+    }
+
+    private void smithingHammerModel() {
+        ItemModelBuilder builder = itemModels().getBuilder("smithing_hammer")
+                .texture("0", mcLoc("block/oak_log"))
+                .texture("1", mcLoc("block/stone"))
+                .texture("particle", mcLoc("block/oak_log"));
+
+        builder.transforms()
+                .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND).rotation(0, 90, 0).translation(0, 0, 2.5F).end()
+                .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND).rotation(0, 90, 0).translation(0, 0, 2.5F).end()
+                .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND).rotation(0, 90, 0).end()
+                .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND).rotation(0, 90, 0).end()
+                .transform(ItemDisplayContext.GROUND).translation(0, 2, 0).scale(0.5F).end()
+                .transform(ItemDisplayContext.GUI).rotation(45, 45, -45).translation(0, -0.75F, 0).scale(0.5F).end()
+                .end();
+
+        var handle = builder.element().from(7, 0, 7).to(9, 20, 9);
+        handle.face(Direction.NORTH).uvs(0, 0, 2, 16).texture("#0");
+        handle.face(Direction.EAST).uvs(0, 0, 2, 16).texture("#0");
+        handle.face(Direction.SOUTH).uvs(0, 0, 2, 16).texture("#0");
+        handle.face(Direction.WEST).uvs(0, 0, 2, 16).texture("#0");
+        handle.face(Direction.UP).uvs(0, 0, 2, 2).texture("#0");
+        handle.face(Direction.DOWN).uvs(0, 0, 2, 2).texture("#0");
+        handle.end();
+
+        var head = builder.element().from(4, 18, 6).to(12, 21, 10);
+        head.face(Direction.NORTH).uvs(0, 0, 8, 3).texture("#1");
+        head.face(Direction.EAST).uvs(0, 0, 4, 3).texture("#1");
+        head.face(Direction.SOUTH).uvs(1, 0, 9, 3).texture("#1");
+        head.face(Direction.WEST).uvs(0, 0, 4, 3).texture("#1");
+        head.face(Direction.UP).uvs(1, 0, 9, 4).texture("#1");
+        head.face(Direction.DOWN).uvs(1, 0, 9, 4).texture("#1");
+        head.end();
     }
 
     private void patternModel(String name) {

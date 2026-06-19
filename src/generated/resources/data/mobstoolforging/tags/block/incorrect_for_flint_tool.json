@@ -1,0 +1,11 @@
+{
+  "values": [
+    "#minecraft:needs_iron_tool",
+    "#minecraft:needs_diamond_tool",
+    "#minecraft:iron_ores",
+    "#minecraft:lapis_ores",
+    "minecraft:iron_block",
+    "minecraft:raw_iron_block",
+    "minecraft:lapis_block"
+  ]
+}

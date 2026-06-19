@@ -47,3 +47,4 @@ Procedural sprites are placeholder defaults. Final-quality art should come from 
 - The old template selector screen is a debug fallback only and is disabled during normal play unless the debug config is enabled.
 - Bridge support for non-vanilla tool families, such as Mobs More Weapons greatswords, is planned but not implemented. See `docs/API_PLAN.md`.
 - Generated part sprites are useful for wiring tests, but they are not final art.
+- Early progression uses crude flint tools into copper, then copper into iron. See `docs/PROGRESSION.md`.

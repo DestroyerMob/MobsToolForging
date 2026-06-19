@@ -4,6 +4,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 
 public final class ModTags {
@@ -25,6 +26,17 @@ public final class ModTags {
 
         private static TagKey<Item> itemTag(String path) {
             return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, path));
+        }
+    }
+
+    public static final class Blocks {
+        public static final TagKey<Block> INCORRECT_FOR_FLINT_TOOL = blockTag("incorrect_for_flint_tool");
+
+        private Blocks() {
+        }
+
+        private static TagKey<Block> blockTag(String path) {
+            return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, path));
         }
     }
 }

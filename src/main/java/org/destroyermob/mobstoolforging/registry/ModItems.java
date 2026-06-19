@@ -1,11 +1,15 @@
 package org.destroyermob.mobstoolforging.registry;
 
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.item.SwordItem;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.item.CrudeFlintPickItem;
 import org.destroyermob.mobstoolforging.item.ModularAxeItem;
 import org.destroyermob.mobstoolforging.item.ModularHoeItem;
 import org.destroyermob.mobstoolforging.item.ModularPickaxeItem;
@@ -13,6 +17,7 @@ import org.destroyermob.mobstoolforging.item.ModularShovelItem;
 import org.destroyermob.mobstoolforging.item.ModularSwordItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
+import org.destroyermob.mobstoolforging.world.CrudeFlintTiers;
 import org.destroyermob.mobstoolforging.world.ForgeTemplate;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
@@ -31,6 +36,22 @@ public final class ModItems {
     public static final DeferredItem<Item> SMITHING_HAMMER = ITEMS.register(
             "smithing_hammer",
             () -> new Item(new Item.Properties().durability(128))
+    );
+    public static final DeferredItem<Item> FLINT_SHARD = ITEMS.register(
+            "flint_shard",
+            () -> new Item(new Item.Properties())
+    );
+    public static final DeferredItem<SwordItem> FLINT_KNIFE = ITEMS.register(
+            "flint_knife",
+            () -> new SwordItem(CrudeFlintTiers.FLINT, new Item.Properties().attributes(SwordItem.createAttributes(CrudeFlintTiers.FLINT, 1.5F, -1.9F)))
+    );
+    public static final DeferredItem<AxeItem> FLINT_HATCHET = ITEMS.register(
+            "flint_hatchet",
+            () -> new AxeItem(CrudeFlintTiers.FLINT, new Item.Properties().attributes(AxeItem.createAttributes(CrudeFlintTiers.FLINT, 4.5F, -3.2F)))
+    );
+    public static final DeferredItem<PickaxeItem> FLINT_PICK = ITEMS.register(
+            "flint_pick",
+            () -> new CrudeFlintPickItem(CrudeFlintTiers.FLINT, new Item.Properties().attributes(PickaxeItem.createAttributes(CrudeFlintTiers.FLINT, 0.5F, -2.9F)))
     );
     public static final DeferredItem<ToolTemplateItem> PICKAXE_HEAD_PATTERN = ITEMS.register(
             "pickaxe_head_pattern",

@@ -26,22 +26,26 @@ public class ModRecipeProvider extends RecipeProvider {
     @Override
     protected void buildRecipes(RecipeOutput output) {
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.TOOL_FORGE)
-                .define('B', Items.IRON_BLOCK)
-                .define('I', Items.IRON_INGOT)
+                .define('B', Items.COPPER_BLOCK)
+                .define('I', Items.COPPER_INGOT)
                 .pattern("BBB")
                 .pattern(" I ")
                 .pattern("III")
-                .unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
+                .unlockedBy("has_copper_ingot", has(Items.COPPER_INGOT))
                 .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.SMITHING_HAMMER)
-                .define('I', Items.IRON_INGOT)
                 .define('S', Items.STICK)
-                .pattern("II")
-                .pattern(" S")
-                .pattern(" S")
-                .unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
+                .define('X', Items.STONE)
+                .pattern(" XS")
+                .pattern(" SX")
+                .pattern("S  ")
+                .unlockedBy("has_stone", has(Items.STONE))
                 .save(output);
+
+        flintToolRecipe(output, ModItems.FLINT_KNIFE.get(), "F", "S");
+        flintToolRecipe(output, ModItems.FLINT_HATCHET.get(), "FF", "FS", " S");
+        flintToolRecipe(output, ModItems.FLINT_PICK.get(), "FFF", " S ", " S ");
 
         patternRecipe(output, ModItems.PICKAXE_HEAD_PATTERN.get(), "PPP", " S ", " S ");
         patternRecipe(output, ModItems.AXE_HEAD_PATTERN.get(), "PP ", "PS ", " S ");
@@ -73,6 +77,17 @@ public class ModRecipeProvider extends RecipeProvider {
         if (usesSymbol(rows, 'S')) {
             builder.define('S', Items.STICK);
         }
+        for (String row : rows) {
+            builder.pattern(row);
+        }
+        builder.save(output);
+    }
+
+    private void flintToolRecipe(RecipeOutput output, ItemLike tool, String... rows) {
+        ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, tool)
+                .define('F', ModItems.FLINT_SHARD.get())
+                .define('S', Items.STICK)
+                .unlockedBy("has_flint_shard", has(ModItems.FLINT_SHARD.get()));
         for (String row : rows) {
             builder.pattern(row);
         }

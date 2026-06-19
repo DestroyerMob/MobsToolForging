@@ -2,20 +2,20 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
+    "F": {
+      "item": "mobstoolforging:flint_shard"
+    },
     "S": {
       "item": "minecraft:stick"
-    },
-    "X": {
-      "item": "minecraft:stone"
     }
   },
   "pattern": [
-    " XS",
-    " SX",
-    "S  "
+    "FF",
+    "FS",
+    " S"
   ],
   "result": {
     "count": 1,
-    "id": "mobstoolforging:smithing_hammer"
+    "id": "mobstoolforging:flint_hatchet"
   }
 }
