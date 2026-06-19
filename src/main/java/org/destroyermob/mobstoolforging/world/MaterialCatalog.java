@@ -174,16 +174,17 @@ public final class MaterialCatalog {
     }
 
     public static ResourceLocation handleMaterial(ItemStack handle) {
-        if (handle.is(Items.STICK)) {
+        if (handle.is(Items.STICK) || handle.is(Tags.Items.RODS_WOODEN)) {
             return OAK;
         }
-        if (handle.is(Items.BLAZE_ROD)) {
+        if (handle.is(Items.BLAZE_ROD) || handle.is(Tags.Items.RODS_BLAZE)) {
             return BLAZE;
         }
-        if (handle.is(Items.BREEZE_ROD)) {
+        if (handle.is(Items.BREEZE_ROD) || handle.is(Tags.Items.RODS_BREEZE)) {
             return BREEZE;
         }
-        return BuiltInRegistries.ITEM.getKey(handle.getItem());
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(handle.getItem());
+        return HANDLE_MATERIALS.contains(itemId) ? itemId : OAK;
     }
 
     public static ResourceLocation bindingMaterial(ItemStack stack) {

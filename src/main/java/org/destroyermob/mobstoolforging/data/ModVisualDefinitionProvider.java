@@ -52,7 +52,6 @@ public class ModVisualDefinitionProvider implements DataProvider {
         for (ToolKind toolKind : ToolKind.values()) {
             futures.add(DataProvider.saveStable(output, toolVisual(toolKind), toolVisuals.json(toolType(toolKind))));
         }
-        futures.add(DataProvider.saveStable(output, greatswordToolVisual(), toolVisuals.json(ResourceLocation.fromNamespaceAndPath("mobs_more_weapons", "greatsword"))));
         writeExamples(output, futures);
         writeGeneratedSprites(output, futures, materials);
 
@@ -150,25 +149,6 @@ public class ModVisualDefinitionProvider implements DataProvider {
         layers.add(layer(toolKind, jointSlot(toolKind), "bindingMaterial", 4, toolKind != ToolKind.SWORD, false));
         layers.add(layer(toolKind, "focus", "focusMaterial", 5, true, true));
         layers.add(layer(toolKind, "treatment_overlay", "treatment", 6, true, true));
-        layers.add(damageLayer(toolKind, 7));
-        json.add("layers", layers);
-        return json;
-    }
-
-    private JsonObject greatswordToolVisual() {
-        JsonObject json = new JsonObject();
-        json.addProperty("type", modLoc("tool_visual").toString());
-        json.addProperty("canvas", 16);
-        json.addProperty("large_canvas", 32);
-        json.addProperty("large_in_hand", true);
-        json.addProperty("bridge_stub", true);
-        JsonArray layers = new JsonArray();
-        layers.add(layer("handle", "handleMaterial", "mobs_more_weapons:tool_templates/greatsword/handle", "mobs_more_weapons:generated/tool_parts/{material}/greatsword_handle", 1, false, false));
-        layers.add(layer("wrap", "wrapMaterial", "mobs_more_weapons:tool_templates/greatsword/wrap", "mobs_more_weapons:generated/tool_parts/{material}/greatsword_wrap", 2, true, false));
-        layers.add(layer("blade", "headMaterial", "mobs_more_weapons:tool_templates/greatsword/blade", "mobs_more_weapons:generated/tool_parts/{material}/greatsword_blade", 3, false, false));
-        layers.add(layer("guard", "bindingMaterial", "mobs_more_weapons:tool_templates/greatsword/guard", "mobs_more_weapons:generated/tool_parts/{material}/greatsword_guard", 4, true, false));
-        layers.add(layer("focus", "focusMaterial", "mobs_more_weapons:tool_templates/greatsword/focus", "mobs_more_weapons:generated/tool_parts/{material}/greatsword_focus", 5, true, true));
-        layers.add(layer("treatment_overlay", "treatment", "mobs_more_weapons:tool_templates/greatsword/treatment_overlay", "mobs_more_weapons:generated/tool_parts/{material}/greatsword_treatment_overlay", 6, true, true));
         json.add("layers", layers);
         return json;
     }
@@ -195,17 +175,6 @@ public class ModVisualDefinitionProvider implements DataProvider {
         json.addProperty("z", z);
         json.addProperty("optional", optional);
         json.addProperty("emissive_allowed", emissiveAllowed);
-        return json;
-    }
-
-    private JsonObject damageLayer(ToolKind toolKind, int z) {
-        JsonObject json = new JsonObject();
-        json.addProperty("slot", "damage_overlay");
-        json.addProperty("template", modLoc("tool_templates/" + toolKind.id() + "/damage_overlay").toString());
-        json.addProperty("large_template", modLoc("tool_templates/" + toolKind.id() + "/large_damage_overlay").toString());
-        json.addProperty("z", z);
-        json.addProperty("optional", true);
-        json.addProperty("emissive_allowed", false);
         return json;
     }
 

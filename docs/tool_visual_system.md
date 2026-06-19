@@ -62,10 +62,4 @@ These are part sprites, not full completed-tool permutations. The intended rende
 
 Add a `tooling/tool_visuals/<tool_type>.json` file in your mod namespace. Define the ordered layers and point them at your templates and generated output paths.
 
-Bridge mods can add visuals without changing Mobs Tool Forging code. For example, a Mobs More Weapons bridge can define:
-
-```text
-assets/mobs_more_weapons/tooling/tool_visuals/greatsword.json
-```
-
-The generated data includes a greatsword bridge stub showing the expected blade, handle, guard, wrap, focus, and treatment layers.
+The current tool pipeline is still keyed to the hard-coded `ToolKind` enum. Bridge visuals for new weapon shapes, such as Mobs More Weapons greatswords, need the future tool type definition work described in `docs/API_PLAN.md`; they are not supported by the current generated data.

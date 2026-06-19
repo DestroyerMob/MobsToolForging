@@ -63,14 +63,6 @@
       "slot": "treatment_overlay",
       "template": "mobstoolforging:tool_templates/pickaxe/treatment_overlay",
       "z": 6
-    },
-    {
-      "emissive_allowed": false,
-      "large_template": "mobstoolforging:tool_templates/pickaxe/large_damage_overlay",
-      "optional": true,
-      "slot": "damage_overlay",
-      "template": "mobstoolforging:tool_templates/pickaxe/damage_overlay",
-      "z": 7
     }
   ]
 }

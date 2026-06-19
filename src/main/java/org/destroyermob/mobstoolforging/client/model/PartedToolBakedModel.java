@@ -119,12 +119,12 @@ public final class PartedToolBakedModel implements BakedModel {
                 if (layer.optional()) {
                     continue;
                 }
-                warnMissingLayer("required layer has no material", layer, Optional.empty());
+                warnMissingLayer("required layer missing material", layer, Optional.empty());
                 return Optional.empty();
             }
             Optional<TextureAtlasSprite> sprite = sprites.resolve(visual.id(), layer.slot(), material.get());
             if (sprite.isEmpty()) {
-                warnMissingLayer(layer.optional() ? "optional layer has material data but no sprite" : "required layer has no sprite", layer, material);
+                warnMissingLayer(layer.optional() ? "optional layer has material but missing sprite" : "required layer missing sprite", layer, material);
                 if (layer.optional()) {
                     continue;
                 }
