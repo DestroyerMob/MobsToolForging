@@ -1,0 +1,76 @@
+{
+  "type": "mobstoolforging:tool_visual",
+  "canvas": 16,
+  "large_canvas": 32,
+  "large_in_hand": true,
+  "layers": [
+    {
+      "emissive_allowed": false,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/axe_handle",
+      "large_template": "mobstoolforging:tool_templates/axe/large_handle",
+      "material_from": "handleMaterial",
+      "optional": false,
+      "slot": "handle",
+      "template": "mobstoolforging:tool_templates/axe/handle",
+      "z": 1
+    },
+    {
+      "emissive_allowed": false,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/axe_wrap",
+      "large_template": "mobstoolforging:tool_templates/axe/large_wrap",
+      "material_from": "wrapMaterial",
+      "optional": true,
+      "slot": "wrap",
+      "template": "mobstoolforging:tool_templates/axe/wrap",
+      "z": 2
+    },
+    {
+      "emissive_allowed": false,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/axe_head",
+      "large_template": "mobstoolforging:tool_templates/axe/large_axe_head",
+      "material_from": "headMaterial",
+      "optional": false,
+      "slot": "axe_head",
+      "template": "mobstoolforging:tool_templates/axe/axe_head",
+      "z": 3
+    },
+    {
+      "emissive_allowed": false,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/axe_binding",
+      "large_template": "mobstoolforging:tool_templates/axe/large_binding",
+      "material_from": "bindingMaterial",
+      "optional": true,
+      "slot": "binding",
+      "template": "mobstoolforging:tool_templates/axe/binding",
+      "z": 4
+    },
+    {
+      "emissive_allowed": true,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/axe_focus",
+      "large_template": "mobstoolforging:tool_templates/axe/large_focus",
+      "material_from": "focusMaterial",
+      "optional": true,
+      "slot": "focus",
+      "template": "mobstoolforging:tool_templates/axe/focus",
+      "z": 5
+    },
+    {
+      "emissive_allowed": true,
+      "generated": "mobstoolforging:generated/tool_parts/{material}/axe_treatment_overlay",
+      "large_template": "mobstoolforging:tool_templates/axe/large_treatment_overlay",
+      "material_from": "treatment",
+      "optional": true,
+      "slot": "treatment_overlay",
+      "template": "mobstoolforging:tool_templates/axe/treatment_overlay",
+      "z": 6
+    },
+    {
+      "emissive_allowed": false,
+      "large_template": "mobstoolforging:tool_templates/axe/large_damage_overlay",
+      "optional": true,
+      "slot": "damage_overlay",
+      "template": "mobstoolforging:tool_templates/axe/damage_overlay",
+      "z": 7
+    }
+  ]
+}

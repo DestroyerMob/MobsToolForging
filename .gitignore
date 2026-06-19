@@ -1,0 +1,14 @@
+.gradle/
+.idea/
+build/
+run/
+run-data/
+logs/
+crash-reports/
+src/generated/resources/.cache/
+repo/
+
+*.log
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar

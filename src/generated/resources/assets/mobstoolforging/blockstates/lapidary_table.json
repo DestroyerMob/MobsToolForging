@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "mobstoolforging:block/lapidary_table",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "mobstoolforging:block/lapidary_table"
+    },
+    "facing=south": {
+      "model": "mobstoolforging:block/lapidary_table",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mobstoolforging:block/lapidary_table",
+      "y": 270
+    }
+  }
+}

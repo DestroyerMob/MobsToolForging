@@ -1,0 +1,9 @@
+{
+  "type": "mobstoolforging:tool_visual_example",
+  "binding_material": "mobstoolforging:copper",
+  "focus_material": "mobstoolforging:amethyst",
+  "handle_material": "mobstoolforging:oak",
+  "head_material": "mobstoolforging:diamond",
+  "quality": 100,
+  "tool_type": "mobstoolforging:pickaxe"
+}

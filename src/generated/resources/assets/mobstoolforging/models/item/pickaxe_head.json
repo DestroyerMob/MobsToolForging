@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "mobstoolforging:generated/tool_parts/diamond/pickaxe_head"
+  }
+}

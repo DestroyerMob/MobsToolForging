@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "mobstoolforging:block/tool_forge",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "mobstoolforging:block/tool_forge"
+    },
+    "facing=south": {
+      "model": "mobstoolforging:block/tool_forge",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mobstoolforging:block/tool_forge",
+      "y": 270
+    }
+  }
+}

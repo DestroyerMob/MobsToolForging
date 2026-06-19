@@ -1,0 +1,18 @@
+{
+  "type": "mobstoolforging:material_visual",
+  "emissive": true,
+  "fallbacks": [
+    "nether"
+  ],
+  "family": "nether",
+  "luminosity": 8,
+  "palette": {
+    "102": "0xFF2A0904",
+    "140": "0xFF4D1309",
+    "178": "0xFF8A260D",
+    "216": "0xFFFF6A1A",
+    "255": "0xFFFFD06A",
+    "63": "0xFF160503"
+  },
+  "texture_noise": "heat_cracks"
+}
