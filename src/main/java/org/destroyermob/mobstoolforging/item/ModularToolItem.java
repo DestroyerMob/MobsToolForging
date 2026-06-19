@@ -11,6 +11,7 @@ import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
+import org.destroyermob.mobstoolforging.world.ToolTooltipBuilder;
 
 public interface ModularToolItem {
     ToolKind toolKind();
@@ -37,6 +38,6 @@ public interface ModularToolItem {
         if (data == null) {
             return;
         }
-        tooltip.addAll(ToolStatBuilder.tooltip(stack, toolKind(), flag.isAdvanced()));
+        tooltip.addAll(ToolTooltipBuilder.tooltip(stack, toolKind(), flag));
     }
 }

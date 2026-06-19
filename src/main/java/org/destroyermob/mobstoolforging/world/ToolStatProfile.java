@@ -16,7 +16,7 @@ public record ToolStatProfile(
         float durabilityMultiplier,
         List<ResourceLocation> enchantAffinity,
         boolean fireResistant,
-        List<String> effectLines,
+        List<ResourceLocation> traits,
         List<String> debugLines
 ) {
     public static final Codec<ToolStatProfile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -27,7 +27,7 @@ public record ToolStatProfile(
             Codec.FLOAT.fieldOf("durability_multiplier").forGetter(ToolStatProfile::durabilityMultiplier),
             ResourceLocation.CODEC.listOf().fieldOf("enchant_affinity").forGetter(ToolStatProfile::enchantAffinity),
             Codec.BOOL.fieldOf("fire_resistant").forGetter(ToolStatProfile::fireResistant),
-            Codec.STRING.listOf().optionalFieldOf("effect_lines", List.of()).forGetter(ToolStatProfile::effectLines),
+            ResourceLocation.CODEC.listOf().optionalFieldOf("traits", List.of()).forGetter(ToolStatProfile::traits),
             Codec.STRING.listOf().optionalFieldOf("debug_lines", List.of()).forGetter(ToolStatProfile::debugLines)
     ).apply(instance, ToolStatProfile::new));
 
