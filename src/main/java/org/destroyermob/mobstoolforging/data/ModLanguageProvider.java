@@ -66,6 +66,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("forge_template.mobstoolforging.axe_head", "Axe Head");
         add("forge_template.mobstoolforging.hoe_head", "Hoe Head");
         add("message.mobstoolforging.select_template", "Use a pattern item on this station.");
+        add("message.mobstoolforging.sneak_hint", "Use a pattern item, or an empty hand to check the station.");
         add("message.mobstoolforging.template_selected", "Selected %s.");
         add("message.mobstoolforging.template_cleared", "Template cleared.");
         add("message.mobstoolforging.forge_busy", "Finish or clear the current work first.");

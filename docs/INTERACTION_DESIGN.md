@@ -13,6 +13,13 @@ The normal selection flow is:
 
 The old stonecutter-style template screen still exists, but it is a debug fallback only. It should be opened only when the debug template selector config is enabled.
 
+Pattern items define the physical shape to make. They are intentionally not station-specific right now. The station defines the material process:
+
+- Tool Forge: metal materials.
+- Lapidary Table: gem materials.
+
+That means a Sword Blade Pattern can be used on either station, but the material placed afterward determines whether the work is forged metal or lapidary-cut gem.
+
 ## Forming A Part
 
 After a pattern is placed:
@@ -23,3 +30,5 @@ After a pattern is placed:
 4. The completed output becomes the selected shape.
 
 If the station has a selected template but no materials or progress, sneak-right-clicking it with an empty hand clears that template.
+
+Sneak-right-clicking with a held item should not open the debug selector during normal play. It should give a small status hint instead of feeling like the action disappeared.

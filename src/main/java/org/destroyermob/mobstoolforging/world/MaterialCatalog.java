@@ -5,24 +5,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.util.Unit;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.PickaxeItem;
-import net.minecraft.world.item.ShovelItem;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.Tiers;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
-import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.SimpleTier;
 import net.neoforged.neoforge.common.Tags;
@@ -150,32 +141,6 @@ public final class MaterialCatalog {
         };
     }
 
-    public static Tool toolComponent(ResourceLocation materialId, ToolKind toolKind) {
-        Tier tier = definition(materialId).orElseThrow().tier();
-        return switch (toolKind) {
-            case SWORD -> SwordItem.createToolProperties();
-            case SHOVEL -> tier.createToolProperties(BlockTags.MINEABLE_WITH_SHOVEL);
-            case PICKAXE -> tier.createToolProperties(BlockTags.MINEABLE_WITH_PICKAXE);
-            case AXE -> tier.createToolProperties(BlockTags.MINEABLE_WITH_AXE);
-            case HOE -> tier.createToolProperties(BlockTags.MINEABLE_WITH_HOE);
-        };
-    }
-
-    public static ItemAttributeModifiers toolAttributes(ResourceLocation materialId, ToolKind toolKind) {
-        Tier tier = definition(materialId).orElseThrow().tier();
-        return switch (toolKind) {
-            case SWORD -> SwordItem.createAttributes(tier, 3, -2.4F);
-            case SHOVEL -> ShovelItem.createAttributes(tier, 1.5F, -3.0F);
-            case PICKAXE -> PickaxeItem.createAttributes(tier, 1.0F, -2.8F);
-            case AXE -> AxeItem.createAttributes(tier, axeAttackDamage(materialId), axeAttackSpeed(materialId));
-            case HOE -> HoeItem.createAttributes(tier, hoeAttackDamage(materialId), hoeAttackSpeed(materialId));
-        };
-    }
-
-    public static int durability(ResourceLocation materialId) {
-        return definition(materialId).orElseThrow().tier().getUses();
-    }
-
     public static ItemStack displayStack(ResourceLocation materialId) {
         return new ItemStack(definition(materialId).orElseThrow().displayItem());
     }
@@ -228,16 +193,6 @@ public final class MaterialCatalog {
         return BuiltInRegistries.ITEM.getKey(stack.getItem());
     }
 
-    public static void applyToolComponents(ItemStack stack, ResourceLocation materialId, ToolKind toolKind) {
-        stack.set(DataComponents.MAX_DAMAGE, durability(materialId));
-        stack.set(DataComponents.DAMAGE, 0);
-        stack.set(DataComponents.TOOL, toolComponent(materialId, toolKind));
-        stack.set(DataComponents.ATTRIBUTE_MODIFIERS, toolAttributes(materialId, toolKind));
-        if (NETHERITE.equals(materialId)) {
-            stack.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
-        }
-    }
-
     private static Optional<MaterialCategory> categoryFor(ItemStack stack) {
         if (stack.is(ModTags.Items.MATERIALS_METALS)) {
             return Optional.of(MaterialCategory.METAL);
@@ -275,49 +230,6 @@ public final class MaterialCatalog {
 
     private static void register(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier) {
         DEFINITIONS.put(id, new ToolMaterialDefinition(id, category, displayItem, tier));
-    }
-
-    private static float axeAttackDamage(ResourceLocation materialId) {
-        if (DIAMOND.equals(materialId) || NETHERITE.equals(materialId) || EMERALD.equals(materialId)) {
-            return 5.0F;
-        }
-        return 6.0F;
-    }
-
-    private static float axeAttackSpeed(ResourceLocation materialId) {
-        if (IRON.equals(materialId) || COPPER.equals(materialId)) {
-            return -3.1F;
-        }
-        return -3.0F;
-    }
-
-    private static float hoeAttackDamage(ResourceLocation materialId) {
-        if (GOLD.equals(materialId)) {
-            return 0.0F;
-        }
-        if (IRON.equals(materialId)) {
-            return -2.0F;
-        }
-        if (DIAMOND.equals(materialId) || EMERALD.equals(materialId)) {
-            return -3.0F;
-        }
-        if (NETHERITE.equals(materialId)) {
-            return -4.0F;
-        }
-        return -1.0F;
-    }
-
-    private static float hoeAttackSpeed(ResourceLocation materialId) {
-        if (GOLD.equals(materialId)) {
-            return -3.0F;
-        }
-        if (IRON.equals(materialId)) {
-            return -1.0F;
-        }
-        if (DIAMOND.equals(materialId) || EMERALD.equals(materialId) || NETHERITE.equals(materialId)) {
-            return 0.0F;
-        }
-        return -2.0F;
     }
 
     private static ResourceLocation materialId(String path) {

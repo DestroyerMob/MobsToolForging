@@ -86,6 +86,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                 openTemplateSelector(level, pos, player);
                 return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }
+            if (!level.isClientSide) {
+                player.displayClientMessage(Component.translatable("message.mobstoolforging.sneak_hint"), true);
+            }
             return ItemInteractionResult.CONSUME;
         }
         if (tryCollectOutput(forge, player)) {
