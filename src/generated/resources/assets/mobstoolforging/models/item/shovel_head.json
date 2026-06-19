@@ -1,6 +1,12 @@
 {
   "parent": "minecraft:item/generated",
+  "loader": "mobstoolforging:parted_tool_part",
+  "part_model": true,
   "textures": {
-    "layer0": "mobstoolforging:generated/tool_parts/diamond/shovel_head"
-  }
+    "head_diamond": "mobstoolforging:generated/tool_parts/diamond/shovel_head",
+    "head_gold": "mobstoolforging:generated/tool_parts/gold/shovel_head",
+    "head_iron": "mobstoolforging:generated/tool_parts/iron/shovel_head",
+    "particle": "mobstoolforging:generated/tool_parts/iron/shovel_head"
+  },
+  "tool": "shovel"
 }

@@ -16,61 +16,13 @@
     },
     {
       "emissive_allowed": false,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/shovel_wrap",
-      "large_template": "mobstoolforging:tool_templates/shovel/large_wrap",
-      "material_from": "wrapMaterial",
-      "optional": true,
-      "slot": "wrap",
-      "template": "mobstoolforging:tool_templates/shovel/wrap",
-      "z": 2
-    },
-    {
-      "emissive_allowed": false,
       "generated": "mobstoolforging:generated/tool_parts/{material}/shovel_head",
       "large_template": "mobstoolforging:tool_templates/shovel/large_shovel_head",
       "material_from": "headMaterial",
       "optional": false,
       "slot": "shovel_head",
       "template": "mobstoolforging:tool_templates/shovel/shovel_head",
-      "z": 3
-    },
-    {
-      "emissive_allowed": false,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/shovel_binding",
-      "large_template": "mobstoolforging:tool_templates/shovel/large_binding",
-      "material_from": "bindingMaterial",
-      "optional": true,
-      "slot": "binding",
-      "template": "mobstoolforging:tool_templates/shovel/binding",
-      "z": 4
-    },
-    {
-      "emissive_allowed": true,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/shovel_focus",
-      "large_template": "mobstoolforging:tool_templates/shovel/large_focus",
-      "material_from": "focusMaterial",
-      "optional": true,
-      "slot": "focus",
-      "template": "mobstoolforging:tool_templates/shovel/focus",
-      "z": 5
-    },
-    {
-      "emissive_allowed": true,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/shovel_treatment_overlay",
-      "large_template": "mobstoolforging:tool_templates/shovel/large_treatment_overlay",
-      "material_from": "treatment",
-      "optional": true,
-      "slot": "treatment_overlay",
-      "template": "mobstoolforging:tool_templates/shovel/treatment_overlay",
-      "z": 6
-    },
-    {
-      "emissive_allowed": false,
-      "large_template": "mobstoolforging:tool_templates/shovel/large_damage_overlay",
-      "optional": true,
-      "slot": "damage_overlay",
-      "template": "mobstoolforging:tool_templates/shovel/damage_overlay",
-      "z": 7
+      "z": 2
     }
   ]
 }

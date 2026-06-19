@@ -123,12 +123,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
         json.addProperty("large_in_hand", true);
         JsonArray layers = new JsonArray();
         layers.add(layer(toolKind, "handle", "handleMaterial", 1, false, false));
-        layers.add(layer(toolKind, "wrap", "wrapMaterial", 2, true, false));
-        layers.add(layer(toolKind, toolKind.partType(), "headMaterial", 3, false, false));
-        layers.add(layer(toolKind, jointSlot(toolKind), "bindingMaterial", 4, true, false));
-        layers.add(layer(toolKind, "focus", "focusMaterial", 5, true, true));
-        layers.add(layer(toolKind, "treatment_overlay", "treatment", 6, true, true));
-        layers.add(damageLayer(toolKind, 7));
+        layers.add(layer(toolKind, toolKind.partType(), "headMaterial", 2, false, false));
         json.add("layers", layers);
         return json;
     }

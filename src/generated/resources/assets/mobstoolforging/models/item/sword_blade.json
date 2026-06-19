@@ -1,6 +1,12 @@
 {
   "parent": "minecraft:item/generated",
+  "loader": "mobstoolforging:parted_tool_part",
+  "part_model": true,
   "textures": {
-    "layer0": "mobstoolforging:generated/tool_parts/diamond/sword_blade"
-  }
+    "head_diamond": "mobstoolforging:generated/tool_parts/diamond/sword_blade",
+    "head_gold": "mobstoolforging:generated/tool_parts/gold/sword_blade",
+    "head_iron": "mobstoolforging:generated/tool_parts/iron/sword_blade",
+    "particle": "mobstoolforging:generated/tool_parts/iron/sword_blade"
+  },
+  "tool": "sword"
 }

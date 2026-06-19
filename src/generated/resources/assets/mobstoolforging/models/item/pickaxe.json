@@ -1,6 +1,15 @@
 {
   "parent": "minecraft:item/handheld",
+  "loader": "mobstoolforging:parted_tool",
+  "part_model": false,
   "textures": {
-    "layer0": "minecraft:item/diamond_pickaxe"
-  }
+    "handle_blaze_rod": "mobstoolforging:generated/tool_parts/blaze_rod/pickaxe_handle",
+    "handle_breeze_rod": "mobstoolforging:generated/tool_parts/breeze_rod/pickaxe_handle",
+    "handle_stick": "mobstoolforging:generated/tool_parts/stick/pickaxe_handle",
+    "head_diamond": "mobstoolforging:generated/tool_parts/diamond/pickaxe_head",
+    "head_gold": "mobstoolforging:generated/tool_parts/gold/pickaxe_head",
+    "head_iron": "mobstoolforging:generated/tool_parts/iron/pickaxe_head",
+    "particle": "mobstoolforging:generated/tool_parts/iron/pickaxe_head"
+  },
+  "tool": "pickaxe"
 }

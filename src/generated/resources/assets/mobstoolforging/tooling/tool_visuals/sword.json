@@ -16,61 +16,13 @@
     },
     {
       "emissive_allowed": false,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/sword_wrap",
-      "large_template": "mobstoolforging:tool_templates/sword/large_wrap",
-      "material_from": "wrapMaterial",
-      "optional": true,
-      "slot": "wrap",
-      "template": "mobstoolforging:tool_templates/sword/wrap",
-      "z": 2
-    },
-    {
-      "emissive_allowed": false,
       "generated": "mobstoolforging:generated/tool_parts/{material}/sword_blade",
       "large_template": "mobstoolforging:tool_templates/sword/large_sword_blade",
       "material_from": "headMaterial",
       "optional": false,
       "slot": "sword_blade",
       "template": "mobstoolforging:tool_templates/sword/sword_blade",
-      "z": 3
-    },
-    {
-      "emissive_allowed": false,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/sword_guard",
-      "large_template": "mobstoolforging:tool_templates/sword/large_guard",
-      "material_from": "bindingMaterial",
-      "optional": true,
-      "slot": "guard",
-      "template": "mobstoolforging:tool_templates/sword/guard",
-      "z": 4
-    },
-    {
-      "emissive_allowed": true,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/sword_focus",
-      "large_template": "mobstoolforging:tool_templates/sword/large_focus",
-      "material_from": "focusMaterial",
-      "optional": true,
-      "slot": "focus",
-      "template": "mobstoolforging:tool_templates/sword/focus",
-      "z": 5
-    },
-    {
-      "emissive_allowed": true,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/sword_treatment_overlay",
-      "large_template": "mobstoolforging:tool_templates/sword/large_treatment_overlay",
-      "material_from": "treatment",
-      "optional": true,
-      "slot": "treatment_overlay",
-      "template": "mobstoolforging:tool_templates/sword/treatment_overlay",
-      "z": 6
-    },
-    {
-      "emissive_allowed": false,
-      "large_template": "mobstoolforging:tool_templates/sword/large_damage_overlay",
-      "optional": true,
-      "slot": "damage_overlay",
-      "template": "mobstoolforging:tool_templates/sword/damage_overlay",
-      "z": 7
+      "z": 2
     }
   ]
 }

@@ -5,6 +5,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.registries.DeferredItem;
+import java.util.Arrays;
+import java.util.Optional;
 import org.destroyermob.mobstoolforging.item.ModularToolItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.registry.ModItems;
@@ -28,6 +30,10 @@ public enum ToolKind {
 
     public String id() {
         return id;
+    }
+
+    public static Optional<ToolKind> byId(String id) {
+        return Arrays.stream(values()).filter(toolKind -> toolKind.id.equals(id)).findFirst();
     }
 
     public String partType() {

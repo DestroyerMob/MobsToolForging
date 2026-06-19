@@ -1,6 +1,12 @@
 {
   "parent": "minecraft:item/generated",
+  "loader": "mobstoolforging:parted_tool_part",
+  "part_model": true,
   "textures": {
-    "layer0": "mobstoolforging:generated/tool_parts/diamond/pickaxe_head"
-  }
+    "head_diamond": "mobstoolforging:generated/tool_parts/diamond/pickaxe_head",
+    "head_gold": "mobstoolforging:generated/tool_parts/gold/pickaxe_head",
+    "head_iron": "mobstoolforging:generated/tool_parts/iron/pickaxe_head",
+    "particle": "mobstoolforging:generated/tool_parts/iron/pickaxe_head"
+  },
+  "tool": "pickaxe"
 }

@@ -1,6 +1,15 @@
 {
   "parent": "minecraft:item/handheld",
+  "loader": "mobstoolforging:parted_tool",
+  "part_model": false,
   "textures": {
-    "layer0": "minecraft:item/diamond_hoe"
-  }
+    "handle_blaze_rod": "mobstoolforging:generated/tool_parts/blaze_rod/hoe_handle",
+    "handle_breeze_rod": "mobstoolforging:generated/tool_parts/breeze_rod/hoe_handle",
+    "handle_stick": "mobstoolforging:generated/tool_parts/stick/hoe_handle",
+    "head_diamond": "mobstoolforging:generated/tool_parts/diamond/hoe_head",
+    "head_gold": "mobstoolforging:generated/tool_parts/gold/hoe_head",
+    "head_iron": "mobstoolforging:generated/tool_parts/iron/hoe_head",
+    "particle": "mobstoolforging:generated/tool_parts/iron/hoe_head"
+  },
+  "tool": "hoe"
 }
