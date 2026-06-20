@@ -1,5 +1,7 @@
 package org.destroyermob.mobstoolforging.world;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -16,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
+import org.destroyermob.mobstoolforging.registry.ModTags;
 
 public class ToolForgeBlockEntity extends BlockEntity {
     private static final String TEMPLATE_TAG = "Template";
@@ -28,6 +31,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private static final String MATERIAL_HEAT_TEMPERATURE_TAG = "MaterialHeatTemperature";
     private static final String MATERIAL_HEAT_LAST_UPDATE_TAG = "MaterialHeatLastUpdate";
     private static final String MATERIAL_HEAT_WORKABLE_TAG = "MaterialHeatWorkable";
+    private static final String DIRECT_OUTPUT_TAG = "DirectOutput";
+    private static final String LOOSE_WORK_RECIPE_TAG = "LooseWorkRecipe";
+    private static final String ABRASIVE_STACK_TAG = "AbrasiveStack";
 
     @Nullable
     private ResourceLocation templateId;
@@ -37,6 +43,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private ResourceLocation materialItemId;
     @Nullable
     private HeatedWorkpieceData materialHeatData;
+    @Nullable
+    private ResourceLocation looseWorkRecipeId;
+    private ItemStack directOutputStack = ItemStack.EMPTY;
+    private ItemStack abrasiveStack = ItemStack.EMPTY;
     private int materialCount;
     private int hitCount;
     private float displayRotationDegrees;
@@ -48,6 +58,16 @@ public class ToolForgeBlockEntity extends BlockEntity {
     @Nullable
     public ForgeTemplateDefinition template() {
         return templateId == null ? null : ToolTypeRegistry.template(templateId).orElse(null);
+    }
+
+    @Nullable
+    public ResourceLocation templateId() {
+        return templateId;
+    }
+
+    @Nullable
+    public StationWorkRecipe looseWorkRecipe() {
+        return looseWorkRecipeId == null ? null : StationWorkRecipeRegistry.recipe(looseWorkRecipeId).orElse(null);
     }
 
     public int materialCount() {
@@ -62,6 +82,14 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return displayRotationDegrees;
     }
 
+    public boolean hasAbrasive() {
+        return !abrasiveStack.isEmpty();
+    }
+
+    public ItemStack abrasiveStack() {
+        return abrasiveStack.copy();
+    }
+
     @Nullable
     public ResourceLocation materialId() {
         return materialId;
@@ -69,6 +97,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     public float progress() {
         ForgeTemplateDefinition template = template();
+        StationWorkRecipe looseRecipe = looseWorkRecipe();
+        if (looseRecipe != null && materialItemId != null) {
+            return Math.min(1.0F, hitCount / (float) looseRecipe.requiredHits());
+        }
         if (template == null) {
             return 0.0F;
         }
@@ -76,20 +108,23 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean isEmpty() {
-        return templateId == null && materialId == null && materialItemId == null && materialHeatData == null && materialCount == 0 && hitCount == 0;
+        return directOutputStack.isEmpty() && abrasiveStack.isEmpty() && templateId == null && materialId == null && materialItemId == null && materialHeatData == null && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
     }
 
     public boolean isComplete() {
+        if (!directOutputStack.isEmpty()) {
+            return true;
+        }
         ForgeTemplateDefinition template = template();
         return template != null && materialCount >= template.requiredMaterials() && hitCount >= template.requiredHits();
     }
 
     public boolean canChangeTemplate() {
-        return materialId == null && materialItemId == null && materialHeatData == null && materialCount == 0 && hitCount == 0;
+        return directOutputStack.isEmpty() && materialId == null && materialItemId == null && materialHeatData == null && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
     }
 
     public boolean hasPlacedWork() {
-        return materialId != null || materialItemId != null || materialHeatData != null || materialCount > 0 || hitCount > 0;
+        return !abrasiveStack.isEmpty() || materialId != null || materialItemId != null || materialHeatData != null || looseWorkRecipeId != null || materialCount > 0 || hitCount > 0;
     }
 
     public boolean selectTemplate(ForgeTemplateDefinition template) {
@@ -107,6 +142,8 @@ public class ToolForgeBlockEntity extends BlockEntity {
         materialId = null;
         materialItemId = null;
         materialHeatData = null;
+        looseWorkRecipeId = null;
+        directOutputStack = ItemStack.EMPTY;
         materialCount = 0;
         hitCount = 0;
         displayRotationDegrees = 0.0F;
@@ -166,11 +203,17 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public ItemStack outputStack() {
+        if (!directOutputStack.isEmpty()) {
+            return directOutputStack.copy();
+        }
         ForgeTemplateDefinition template = template();
-        return isComplete() && template != null && materialId != null ? applyMaterialHeat(template.outputStack(materialId)) : ItemStack.EMPTY;
+        return isComplete() && template != null && materialId != null ? applyMaterialHeat(template.outputStack(materialId, workQuality(template))) : ItemStack.EMPTY;
     }
 
     public ItemStack displayMaterialStack() {
+        if (!directOutputStack.isEmpty()) {
+            return directOutputStack.copy();
+        }
         if (isComplete()) {
             return outputStack();
         }
@@ -190,35 +233,119 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public ItemStack removeOutput() {
         ItemStack output = outputStack();
         if (!output.isEmpty()) {
-            reset();
+            resetWork();
         }
         return output;
     }
 
-    public ItemStack removePlacedWork() {
+    public List<ItemStack> removePlacedWorkStacks() {
         if (!hasPlacedWork()) {
-            return ItemStack.EMPTY;
+            return List.of();
         }
-        ItemStack removed = materialDropStack();
-        materialId = null;
-        materialItemId = null;
-        materialHeatData = null;
-        materialCount = 0;
-        hitCount = 0;
-        displayRotationDegrees = 0.0F;
+
+        List<ItemStack> removed = new ArrayList<>();
+        ItemStack materialDrop = materialDropStack();
+        if (!materialDrop.isEmpty()) {
+            removed.add(materialDrop);
+        }
+        if (!abrasiveStack.isEmpty()) {
+            removed.add(abrasiveStack.copy());
+        }
+
+        clearWorkState();
+        abrasiveStack = ItemStack.EMPTY;
         sync();
         return removed;
     }
 
+    public boolean canPlaceAbrasive(ItemStack stack) {
+        return workstationKind() == WorkstationKind.LAPIDARY_TABLE
+                && stack.is(ModTags.Items.LAPIDARY_ABRASIVES)
+                && abrasiveStack.isEmpty()
+                && directOutputStack.isEmpty()
+                && looseWorkRecipeId == null;
+    }
+
+    public boolean placeAbrasive(ItemStack stack) {
+        if (!canPlaceAbrasive(stack)) {
+            return false;
+        }
+        abrasiveStack = stack.copyWithCount(1);
+        stack.shrink(1);
+        sync();
+        return true;
+    }
+
     public void reset() {
+        clearWorkState();
+        abrasiveStack = ItemStack.EMPTY;
+        sync();
+    }
+
+    private void resetWork() {
+        clearWorkState();
+        sync();
+    }
+
+    private void clearWorkState() {
         templateId = null;
         materialId = null;
         materialItemId = null;
         materialHeatData = null;
+        looseWorkRecipeId = null;
+        directOutputStack = ItemStack.EMPTY;
         materialCount = 0;
         hitCount = 0;
         displayRotationDegrees = 0.0F;
+    }
+
+    public boolean canPlaceLooseWork(StationWorkRecipe recipe, ItemStack stack) {
+        return recipe.canStart(workstationKind(), templateId, stack)
+                && directOutputStack.isEmpty()
+                && materialId == null
+                && materialItemId == null
+                && materialHeatData == null
+                && looseWorkRecipeId == null
+                && materialCount == 0
+                && hitCount == 0;
+    }
+
+    public boolean placeLooseWork(StationWorkRecipe recipe, ItemStack stack) {
+        if (stack.isEmpty() || !canPlaceLooseWork(recipe, stack)) {
+            return false;
+        }
+        looseWorkRecipeId = recipe.id();
+        materialItemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        materialCount = 1;
+        stack.shrink(1);
         sync();
+        return true;
+    }
+
+    public boolean hasLooseWork() {
+        return looseWorkRecipeId != null && directOutputStack.isEmpty() && materialId == null && materialCount == 1 && materialItemId != null;
+    }
+
+    public boolean hammerLooseWork(StationWorkRecipe recipe) {
+        if (!hasLooseWork() || !recipe.id().equals(looseWorkRecipeId)) {
+            return false;
+        }
+        hitCount++;
+        randomizeDisplayRotation();
+        if (hitCount < recipe.requiredHits()) {
+            sync();
+            return true;
+        }
+        materialId = null;
+        materialItemId = null;
+        materialHeatData = null;
+        looseWorkRecipeId = null;
+        materialCount = 0;
+        hitCount = 0;
+        displayRotationDegrees = 0.0F;
+        directOutputStack = recipe.outputCopy();
+        sync();
+        return true;
     }
 
     public boolean materialIsForgeReady() {
@@ -272,6 +399,25 @@ public class ToolForgeBlockEntity extends BlockEntity {
         );
     }
 
+    private int workQuality(ForgeTemplateDefinition template) {
+        int quality = ToolPartData.DEFAULT_QUALITY;
+        WorkstationKind kind = workstationKind();
+        if (kind == WorkstationKind.LAPIDARY_TABLE && hasAbrasive()) {
+            quality += 3;
+        }
+        if (kind == WorkstationKind.TOOL_FORGE && materialHeatData != null && level != null) {
+            float temperature = materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
+            float minimum = template.minimumTemperature();
+            if (temperature >= minimum) {
+                float headroom = Math.max(0.01F, 1.0F - minimum);
+                quality += Math.round(Math.min(1.0F, (temperature - minimum) / headroom) * 10.0F);
+            } else {
+                quality -= Math.round((minimum - temperature) * 20.0F);
+            }
+        }
+        return Math.max(90, Math.min(110, quality));
+    }
+
     private void randomizeDisplayRotation() {
         if (level == null) {
             return;
@@ -290,6 +436,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
             wrapped += 360.0F;
         }
         return wrapped;
+    }
+
+    private WorkstationKind workstationKind() {
+        return getBlockState().getBlock() instanceof ToolWorkstationBlock workstation ? workstation.kind() : WorkstationKind.TOOL_FORGE;
     }
 
     public void sync() {
@@ -318,6 +468,15 @@ public class ToolForgeBlockEntity extends BlockEntity {
             tag.putLong(MATERIAL_HEAT_LAST_UPDATE_TAG, materialHeatData.lastUpdateGameTime());
             tag.putBoolean(MATERIAL_HEAT_WORKABLE_TAG, materialHeatData.workable());
         }
+        if (!directOutputStack.isEmpty()) {
+            tag.put(DIRECT_OUTPUT_TAG, directOutputStack.saveOptional(registries));
+        }
+        if (looseWorkRecipeId != null) {
+            tag.putString(LOOSE_WORK_RECIPE_TAG, looseWorkRecipeId.toString());
+        }
+        if (!abrasiveStack.isEmpty()) {
+            tag.put(ABRASIVE_STACK_TAG, abrasiveStack.saveOptional(registries));
+        }
         tag.putInt(MATERIAL_COUNT_TAG, materialCount);
         tag.putInt(HIT_COUNT_TAG, hitCount);
         tag.putFloat(DISPLAY_ROTATION_TAG, displayRotationDegrees);
@@ -337,6 +496,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 tag.getBoolean(MATERIAL_HEAT_WORKABLE_TAG)
         )
                 : null;
+        directOutputStack = tag.contains(DIRECT_OUTPUT_TAG) ? ItemStack.parseOptional(registries, tag.getCompound(DIRECT_OUTPUT_TAG)) : ItemStack.EMPTY;
+        looseWorkRecipeId = tag.contains(LOOSE_WORK_RECIPE_TAG) ? ResourceLocation.parse(tag.getString(LOOSE_WORK_RECIPE_TAG)) : null;
+        abrasiveStack = tag.contains(ABRASIVE_STACK_TAG) ? ItemStack.parseOptional(registries, tag.getCompound(ABRASIVE_STACK_TAG)) : ItemStack.EMPTY;
         materialCount = tag.getInt(MATERIAL_COUNT_TAG);
         hitCount = tag.getInt(HIT_COUNT_TAG);
         displayRotationDegrees = tag.getFloat(DISPLAY_ROTATION_TAG);

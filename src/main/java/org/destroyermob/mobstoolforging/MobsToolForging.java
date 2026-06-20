@@ -51,6 +51,7 @@ import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
+import org.destroyermob.mobstoolforging.world.StationWorkRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
 import org.destroyermob.mobstoolforging.world.ToolTrait;
@@ -101,6 +102,7 @@ public class MobsToolForging {
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.SMITHING_HAMMER);
+            event.accept(ModItems.IRON_SMITHING_HAMMER);
             if (MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
                 event.accept(ModItems.FLINT_KNIFE);
                 event.accept(ModItems.FLINT_HATCHET);
@@ -112,9 +114,12 @@ public class MobsToolForging {
             event.accept(ModItems.HOE_HEAD_PATTERN);
             event.accept(ModItems.SWORD_BLADE_PATTERN);
             event.accept(ModItems.SWORD_GUARD_PATTERN);
+            event.accept(ModItems.SMITHING_HAMMER_HEAD_PATTERN);
         }
         if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(ModItems.FLINT_SHARD);
+            event.accept(ModItems.SMITHING_HAMMER_HEAD);
+            event.accept(ModItems.DIAMOND_POWDER);
         }
     }
 
@@ -226,6 +231,7 @@ public class MobsToolForging {
 
     private void addReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new ForgeTemplateReloadListener());
+        event.addListener(new StationWorkRecipeReloadListener());
     }
 
     private void coolPlayerWorkpieces(PlayerTickEvent.Post event) {

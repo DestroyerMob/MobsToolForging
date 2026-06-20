@@ -18,8 +18,10 @@ import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.world.CrudeFlintTiers;
 import org.destroyermob.mobstoolforging.world.ForgeTemplate;
+import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
+import org.destroyermob.mobstoolforging.world.WorkstationKind;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MobsToolForging.MOD_ID);
@@ -39,6 +41,18 @@ public final class ModItems {
     public static final DeferredItem<Item> SMITHING_HAMMER = ITEMS.register(
             "smithing_hammer",
             () -> new Item(new Item.Properties().durability(128))
+    );
+    public static final DeferredItem<Item> IRON_SMITHING_HAMMER = ITEMS.register(
+            "iron_smithing_hammer",
+            () -> new Item(new Item.Properties().durability(384))
+    );
+    public static final DeferredItem<Item> SMITHING_HAMMER_HEAD = ITEMS.register(
+            "smithing_hammer_head",
+            () -> new Item(new Item.Properties())
+    );
+    public static final DeferredItem<Item> DIAMOND_POWDER = ITEMS.register(
+            "diamond_powder",
+            () -> new Item(new Item.Properties())
     );
     public static final DeferredItem<Item> FLINT_SHARD = ITEMS.register(
             "flint_shard",
@@ -79,6 +93,10 @@ public final class ModItems {
     public static final DeferredItem<ToolTemplateItem> SWORD_GUARD_PATTERN = ITEMS.register(
             "sword_guard_pattern",
             () -> new ToolTemplateItem(ForgeTemplate.SWORD_GUARD, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> SMITHING_HAMMER_HEAD_PATTERN = ITEMS.register(
+            "smithing_hammer_head_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.SMITHING_HAMMER_HEAD_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
     );
     public static final DeferredItem<ModularToolPartItem> SWORD_BLADE = ITEMS.register(
             "sword_blade",

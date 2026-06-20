@@ -96,6 +96,8 @@ repositories {
 }
 
 dependencies {
+    compileOnly 'mezz.jei:jei-1.21.1-neoforge:19.27.0.340'
+    compileOnly 'maven.modrinth:jade:15.10.5+neoforge'
     localRuntime 'mezz.jei:jei-1.21.1-neoforge:19.27.0.340'
     localRuntime 'maven.modrinth:jade:15.10.5+neoforge'
     localRuntime 'curse.maven:durability-tooltip-511040:6833316'

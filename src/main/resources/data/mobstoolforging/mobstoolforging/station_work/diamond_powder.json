@@ -1,0 +1,13 @@
+{
+  "workstation": "smithing_anvil",
+  "input": {
+    "item": "minecraft:diamond"
+  },
+  "output": {
+    "id": "mobstoolforging:diamond_powder",
+    "count": 4
+  },
+  "pattern": "none",
+  "required_hits": 4,
+  "minimum_hammer_level": "iron"
+}

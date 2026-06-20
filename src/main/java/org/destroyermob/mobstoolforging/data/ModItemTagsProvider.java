@@ -51,5 +51,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .add(Items.AMETHYST_SHARD);
         tag(ModTags.Items.TREATMENT_CATALYSTS)
                 .add(Items.BLAZE_POWDER, Items.MAGMA_CREAM, Items.NETHERITE_SCRAP, Items.ECHO_SHARD, Items.SCULK_CATALYST);
+        tag(ModTags.Items.LAPIDARY_ABRASIVES)
+                .add(ModItems.DIAMOND_POWDER.get());
     }
 }

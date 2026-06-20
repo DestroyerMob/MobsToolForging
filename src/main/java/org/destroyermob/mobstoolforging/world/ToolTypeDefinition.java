@@ -97,7 +97,11 @@ public final class ToolTypeDefinition {
     }
 
     public ItemStack createPart(String partType, ResourceLocation materialId) {
-        return partFactory.create(this, partType, materialId);
+        return createPart(partType, materialId, ToolPartData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack createPart(String partType, ResourceLocation materialId, int quality) {
+        return partFactory.create(this, partType, materialId, quality);
     }
 
     public boolean requiresAssemblyPart(String partType) {
@@ -124,14 +128,14 @@ public final class ToolTypeDefinition {
         return stack;
     }
 
-    private static ItemStack defaultPartStack(ToolTypeDefinition definition, String partType, ResourceLocation materialId) {
+    private static ItemStack defaultPartStack(ToolTypeDefinition definition, String partType, ResourceLocation materialId, int quality) {
         return definition.partItem(partType)
                 .map(item -> {
                     if (item instanceof ModularToolPartItem partItem) {
-                        return partItem.createPart(materialId);
+                        return partItem.createPart(materialId, quality);
                     }
                     ItemStack stack = new ItemStack(item);
-                    stack.set(ModDataComponents.TOOL_PART.get(), new ToolPartData(partType, materialId));
+                    stack.set(ModDataComponents.TOOL_PART.get(), new ToolPartData(partType, materialId, quality));
                     return stack;
                 })
                 .orElse(ItemStack.EMPTY);
@@ -139,7 +143,7 @@ public final class ToolTypeDefinition {
 
     @FunctionalInterface
     public interface PartFactory {
-        ItemStack create(ToolTypeDefinition definition, String partType, ResourceLocation materialId);
+        ItemStack create(ToolTypeDefinition definition, String partType, ResourceLocation materialId, int quality);
     }
 
     public static final class Builder {

@@ -53,6 +53,15 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_stone", has(Items.STONE))
                 .save(output);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.IRON_SMITHING_HAMMER)
+                .define('H', ModItems.SMITHING_HAMMER_HEAD.get())
+                .define('S', Items.STICK)
+                .pattern("H")
+                .pattern("S")
+                .pattern("S")
+                .unlockedBy("has_smithing_hammer_head", has(ModItems.SMITHING_HAMMER_HEAD.get()))
+                .save(output);
+
         flintToolRecipe(output, ModItems.FLINT_KNIFE.get(), "F", "S");
         flintToolRecipe(output, ModItems.FLINT_HATCHET.get(), "FF", "FS", " S");
         flintToolRecipe(output, ModItems.FLINT_PICK.get(), "FFF", " S ", " S ");
@@ -63,6 +72,7 @@ public class ModRecipeProvider extends RecipeProvider {
         patternRecipe(output, ModItems.HOE_HEAD_PATTERN.get(), "PP ", " S ", " S ");
         patternRecipe(output, ModItems.SWORD_BLADE_PATTERN.get(), " P ", " P ", " P ");
         patternRecipe(output, ModItems.SWORD_GUARD_PATTERN.get(), "P P", " S ");
+        patternRecipe(output, ModItems.SMITHING_HAMMER_HEAD_PATTERN.get(), "PPP", " S ", " S ");
 
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.LAPIDARY_TABLE)
                 .define('D', Items.DIAMOND)

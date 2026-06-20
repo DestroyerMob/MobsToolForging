@@ -32,6 +32,7 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         if (forge.template() != null && !forge.isComplete()) {
             renderTemplatePreview(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
         }
+        renderAbrasive(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
 
         ItemStack display = forge.displayMaterialStack();
         if (display.isEmpty()) {
@@ -54,6 +55,14 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             renderItem(forge, display, poseStack, bufferSource, packedLight, packedOverlay, layout, 0.0F, layout.centerMaterialScale());
             renderItem(forge, display, poseStack, bufferSource, packedLight, packedOverlay, layout, spread, layout.materialScale());
         }
+    }
+
+    private void renderAbrasive(ToolForgeBlockEntity forge, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
+        ItemStack abrasive = forge.abrasiveStack();
+        if (abrasive.isEmpty() || layout.abrasiveScale() <= 0.0F) {
+            return;
+        }
+        renderFlatItem(forge, abrasive, poseStack, bufferSource, packedLight, packedOverlay, layout.abrasiveX(), layout.abrasiveZ(), layout.abrasiveScale(), layout.abrasiveSurfaceY(), 0.0F);
     }
 
     private void renderTemplatePreview(ToolForgeBlockEntity forge, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
@@ -123,7 +132,11 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             float outputScale,
             float previewScale,
             float spread,
-            SpreadAxis spreadAxis
+            SpreadAxis spreadAxis,
+            float abrasiveSurfaceY,
+            float abrasiveScale,
+            float abrasiveX,
+            float abrasiveZ
     ) {
         private static final DisplayLayout TOOL_FORGE = new DisplayLayout(
                 0.707F,
@@ -133,7 +146,11 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
                 0.58F,
                 0.32F,
                 0.24F,
-                SpreadAxis.X
+                SpreadAxis.X,
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F
         );
         private static final DisplayLayout LAPIDARY = new DisplayLayout(
                 0.770F,
@@ -143,7 +160,11 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
                 0.52F,
                 0.30F,
                 0.20F,
-                SpreadAxis.X
+                SpreadAxis.X,
+                0.775F,
+                0.24F,
+                0.0F,
+                -0.28F
         );
     }
 }

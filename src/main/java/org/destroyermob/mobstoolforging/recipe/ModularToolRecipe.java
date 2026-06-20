@@ -62,7 +62,7 @@ public class ModularToolRecipe extends CustomRecipe {
                 material(parts.wrap(), MaterialCatalog::wrapMaterial),
                 material(parts.focus(), MaterialCatalog::focusMaterial),
                 material(parts.treatment(), MaterialCatalog::treatmentMaterial),
-                ToolConstructionData.DEFAULT_QUALITY
+                parts.quality()
         ));
     }
 
@@ -203,6 +203,21 @@ public class ModularToolRecipe extends CustomRecipe {
                 return requiredParts.values().stream().findFirst().map(MaterialCatalog::bindingMaterial);
             }
             return binding.isEmpty() ? Optional.empty() : Optional.of(MaterialCatalog.bindingMaterial(binding));
+        }
+
+        private int quality() {
+            int total = partQuality(part);
+            int count = 1;
+            for (ItemStack requiredPart : requiredParts.values()) {
+                total += partQuality(requiredPart);
+                count++;
+            }
+            return Math.round(total / (float) count);
+        }
+
+        private static int partQuality(ItemStack stack) {
+            ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
+            return data == null ? ToolPartData.DEFAULT_QUALITY : data.quality();
         }
     }
 
