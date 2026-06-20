@@ -22,23 +22,22 @@ Flint shards come from right-clicking a hard surface with vanilla flint. Any blo
 
 The Flint Pick is deliberately narrow:
 
-- mines stone and cobblestone
-- mines coal ore
-- mines copper ore when `flintCanMineCopper` is enabled
+- uses vanilla wooden-tier mining rules
+- mines basic stone progression blocks that wooden pickaxes can mine
+- mines copper ore when `copperRequiresWoodenTool` is enabled
 - does not mine iron ore by default
-- does not mine iron-tier or diamond-tier ores
+- does not mine stone-tier or diamond-tier ores
 
 ## Copper
 
-Copper is the first real metal tier. It is weaker than iron but can mine iron ore, which gives it a clear bridge role instead of being cosmetic.
+Copper is the first real metal tier. It uses vanilla stone-tier mining rules, so it can mine iron ore but cannot mine diamond ore. Its durability, speed, damage, and enchantability are still copper-specific rather than copied wholesale from stone.
 
 ## Config
 
 - `enableCrudeFlintTools = true`
 - `disableStoneTools = true`
 - `disableWoodenTools = false`
-- `flintCanMineCopper = true`
-- `flintCanMineIron = false`
+- `copperRequiresWoodenTool = true`
 - `flintKnappingSuccessChance = 0.6`
 - `flintKnappingBonusShardChance = 0.4`
 

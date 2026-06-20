@@ -40,7 +40,7 @@ public final class MaterialCatalog {
     public static final ResourceLocation SCULK = materialId("sculk");
 
     private static final Tier COPPER_TIER = new SimpleTier(
-            BlockTags.INCORRECT_FOR_IRON_TOOL,
+            BlockTags.INCORRECT_FOR_STONE_TOOL,
             190,
             5.5F,
             1.5F,

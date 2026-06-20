@@ -78,6 +78,7 @@ public class MobsToolForging {
         ModNetworking.register(modEventBus);
         ModDataGenerators.register(modEventBus);
         ToolTypeRegistry.bootstrap();
+        ToolStatBuilder.validateStarterMaterialAttributes();
         modContainer.registerConfig(ModConfig.Type.COMMON, MobsToolForgingConfig.COMMON_SPEC);
 
         modEventBus.addListener(this::addCreativeTabContents);

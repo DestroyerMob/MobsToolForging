@@ -122,6 +122,15 @@ public final class ToolStatBuilder {
         return profile(stack).map(ToolStatProfile::enchantAffinity).orElseGet(List::of);
     }
 
+    public static void validateStarterMaterialAttributes() {
+        for (ResourceLocation materialId : MaterialCatalog.starterMaterialIds()) {
+            MaterialCatalog.definition(materialId).ifPresentOrElse(
+                    ignored -> validateStarterMaterialAttributes(materialId),
+                    () -> MobsToolForging.LOGGER.warn("Starter material {} has no material definition; modular tools made from it will not build attributes.", materialId)
+            );
+        }
+    }
+
     public static boolean hasEnchantAffinity(ItemStack stack, ResourceLocation affinity) {
         return profile(stack).map(profile -> profile.hasAffinity(affinity)).orElse(false);
     }
@@ -325,6 +334,37 @@ public final class ToolStatBuilder {
             return SwordItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
         }
         return DiggerItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
+    }
+
+    private static void validateStarterMaterialAttributes(ResourceLocation materialId) {
+        for (ToolKind toolKind : ToolKind.values()) {
+            ToolConstructionData construction = ToolConstructionData.basic(toolKind, materialId, MaterialCatalog.OAK);
+            ToolTypeDefinition definition = ToolTypeRegistry.toolType(toolKind).orElse(null);
+            if (definition == null) {
+                MobsToolForging.LOGGER.warn("Tool kind {} has no type definition; cannot validate attributes for {}.", toolKind.id(), materialId);
+                continue;
+            }
+            ToolStatProfile profile = build(definition, construction);
+            Tier headTier = MaterialCatalog.definition(materialId).orElseThrow().tier();
+            Tier adjustedTier = adjustedTier(headTier, profile);
+            ItemAttributeModifiers attributes = toolAttributes(definition, adjustedTier, profile);
+            if (profile.maxDamage() <= 0
+                    || !Float.isFinite(profile.attackDamageBonus())
+                    || !Float.isFinite(profile.attackSpeedBonus())
+                    || attributes.modifiers().isEmpty()
+                    || !attributes.showInTooltip()) {
+                MobsToolForging.LOGGER.warn(
+                        "Starter material {} produced suspicious {} attributes: maxDamage={}, attackDamageBonus={}, attackSpeedBonus={}, modifiers={}, showInTooltip={}",
+                        materialId,
+                        toolKind.id(),
+                        profile.maxDamage(),
+                        profile.attackDamageBonus(),
+                        profile.attackSpeedBonus(),
+                        attributes.modifiers().size(),
+                        attributes.showInTooltip()
+                );
+            }
+        }
     }
 
     public static float builtInBaseAttackDamageBonus(ToolKind toolKind, ResourceLocation materialId) {
