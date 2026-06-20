@@ -19,6 +19,30 @@ import org.joml.Vector3f;
 public final class HeatingForgeVoxelRenderer {
     private static final float HEAT_GLOW_THRESHOLD = 0.05F;
     private static final float WHITE_HOT_THRESHOLD = 0.9F;
+    private static final float WHITE_HOT_TEXTURE_START = 0.82F;
+    private static final int[] HEAT_COLOR_STOPS = {
+            0xFF3A0903,
+            0xFF520D04,
+            0xFF6D1205,
+            0xFF861806,
+            0xFFA11F07,
+            0xFFB92908,
+            0xFFD2350A,
+            0xFFE4430E,
+            0xFFF15316,
+            0xFFFF6420,
+            0xFFFF762B,
+            0xFFFF8836,
+            0xFFFF9A42,
+            0xFFFFAD50,
+            0xFFFFBE61,
+            0xFFFFCE73,
+            0xFFFFDC8A,
+            0xFFFFE8A3,
+            0xFFFFF1C0,
+            0xFFFFF8DF,
+            0xFFFFFFFF
+    };
     private static final Set<ResourceLocation> MISSING_TEXTURE_WARNINGS = new HashSet<>();
 
     private HeatingForgeVoxelRenderer() {
@@ -44,23 +68,23 @@ public final class HeatingForgeVoxelRenderer {
         ResourceLocation hotTexture = visual.hotTexture();
         int baseLight = whiteHot ? LightTexture.FULL_BRIGHT : packedLight;
         renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), baseLight, packedOverlay, baseColor(clampedHeat));
-        if (hotTexture != null && clampedHeat > 0.0F) {
+        if (clampedHeat >= HEAT_GLOW_THRESHOLD) {
+            poseStack.pushPose();
+            float heatScale = 1.012F + clampedHeat * 0.024F;
+            poseStack.scale(heatScale, heatScale, heatScale);
+            renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, heatGlowColor(clampedHeat));
+            poseStack.popPose();
+        }
+        if (hotTexture != null && clampedHeat >= WHITE_HOT_TEXTURE_START) {
             TextureAtlasSprite hotSprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(hotTexture);
             warnIfMissing(hotTexture, hotSprite);
             poseStack.pushPose();
             float hotScale = 1.002F + clampedHeat * 0.004F;
             poseStack.scale(hotScale, hotScale, hotScale);
-            renderModel(model, hotSprite, centerSample(hotTexture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, withAlpha(0xFFFFFFFF, clampedHeat));
+            renderModel(model, hotSprite, centerSample(hotTexture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, withAlpha(0xFFFFFFFF, smoothstep(WHITE_HOT_TEXTURE_START, 1.0F, clampedHeat)));
             poseStack.popPose();
         }
         if (clampedHeat >= HEAT_GLOW_THRESHOLD) {
-            poseStack.pushPose();
-            float heatScale = 1.015F + clampedHeat * 0.02F;
-            poseStack.scale(heatScale, heatScale, heatScale);
-            renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, edgeColor(clampedHeat));
-            poseStack.popPose();
-        }
-        if (whiteHot) {
             ResourceLocation glowTexture = visual.glowTexture();
             ResourceLocation overlayTexture = glowTexture == null ? texture : glowTexture;
             TextureAtlasSprite overlaySprite = glowTexture == null ? sprite : Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(glowTexture);
@@ -70,7 +94,7 @@ public final class HeatingForgeVoxelRenderer {
             poseStack.pushPose();
             float edgeScale = 1.035F + clampedHeat * 0.04F;
             poseStack.scale(edgeScale, edgeScale, edgeScale);
-            int overlayColor = glowTexture == null ? edgeColor(clampedHeat) : 0xFFFFFFFF;
+            int overlayColor = glowTexture == null ? heatGlowColor(clampedHeat) : whiteHotGlowColor(clampedHeat);
             renderModel(model, overlaySprite, centerSample(overlayTexture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, overlayColor);
             poseStack.popPose();
         }
@@ -192,21 +216,52 @@ public final class HeatingForgeVoxelRenderer {
         if (heat <= 0.02F) {
             return 0xFFFFFFFF;
         }
-        int red = 255;
-        int green = Math.round(255.0F - (1.0F - heat) * 92.0F);
-        int blue = Math.round(255.0F - (1.0F - heat * heat) * 204.0F);
-        return 0xFF << 24 | red << 16 | green << 8 | blue;
+        float amount = smoothstep(0.02F, 1.0F, heat);
+        return lerpColor(0xFFFFFFFF, heatColor(heat), 0.30F + amount * 0.70F);
     }
 
-    private static int edgeColor(float heat) {
-        int alpha = Math.round(72.0F + heat * 112.0F);
-        int green = Math.round(70.0F + heat * 88.0F);
-        int blue = Math.round(8.0F + heat * 12.0F);
-        return alpha << 24 | 0xFF << 16 | green << 8 | blue;
+    private static int heatGlowColor(float heat) {
+        float amount = smoothstep(HEAT_GLOW_THRESHOLD, 1.0F, heat);
+        int alpha = Math.round(28.0F + amount * 164.0F);
+        return withAlpha(heatColor(heat), alpha / 255.0F);
+    }
+
+    private static int whiteHotGlowColor(float heat) {
+        float amount = smoothstep(HEAT_GLOW_THRESHOLD, 1.0F, heat);
+        int alpha = Math.round(amount * 210.0F);
+        return withAlpha(heatColor(heat), alpha / 255.0F);
+    }
+
+    private static int heatColor(float heat) {
+        float scaled = clamp(heat) * (HEAT_COLOR_STOPS.length - 1);
+        int index = Math.min(HEAT_COLOR_STOPS.length - 2, (int) Math.floor(scaled));
+        float amount = smoothstep(0.0F, 1.0F, scaled - index);
+        return lerpColor(HEAT_COLOR_STOPS[index], HEAT_COLOR_STOPS[index + 1], amount);
     }
 
     private static int withAlpha(int color, float alpha) {
         return Math.round(clamp(alpha) * 255.0F) << 24 | color & 0x00FFFFFF;
+    }
+
+    private static float smoothstep(float from, float to, float value) {
+        if (from >= to) {
+            return clamp(value);
+        }
+        float t = clamp((value - from) / (to - from));
+        return t * t * (3.0F - 2.0F * t);
+    }
+
+    private static float lerp(float from, float to, float amount) {
+        return from + (to - from) * clamp(amount);
+    }
+
+    private static int lerpColor(int from, int to, float amount) {
+        float clamped = clamp(amount);
+        int alpha = Math.round(lerp(from >>> 24 & 0xFF, to >>> 24 & 0xFF, clamped));
+        int red = Math.round(lerp(from >>> 16 & 0xFF, to >>> 16 & 0xFF, clamped));
+        int green = Math.round(lerp(from >>> 8 & 0xFF, to >>> 8 & 0xFF, clamped));
+        int blue = Math.round(lerp(from & 0xFF, to & 0xFF, clamped));
+        return alpha << 24 | red << 16 | green << 8 | blue;
     }
 
     private static float clamp(float value) {

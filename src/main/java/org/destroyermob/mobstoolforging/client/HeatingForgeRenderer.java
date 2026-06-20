@@ -14,6 +14,7 @@ import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlockEntity> {
+    private static final float WORKPIECE_PAIR_SIDE_OFFSET = 0.18F;
     private static final float[][] FUEL_OFFSETS = {
             {-0.12F, -0.18F, -12.0F},
             {0.12F, -0.18F, 18.0F},
@@ -26,15 +27,23 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
 
     @Override
     public void render(HeatingForgeBlockEntity forge, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        renderFuel(forge, poseStack, bufferSource, packedLight, packedOverlay);
-        ItemStack workpiece = forge.workpieceStack();
-        if (!workpiece.isEmpty()) {
-            float heat = heatAmount(forge, workpiece);
-            renderInsert(forge, HeatingForgeInsertVisualManager.workpiece(workpiece), poseStack, bufferSource, packedLight, packedOverlay, 0.0F, 0.0F, 1.15F, 0.60F, 0.0F, heat);
+        renderFuel(forge, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
+        int workpieceCount = forge.workpieceCount();
+        int renderedWorkpiece = 0;
+        for (int slot = 0; slot < forge.workpieceSlots(); slot++) {
+            ItemStack workpiece = forge.workpieceStack(slot);
+            if (workpiece.isEmpty()) {
+                continue;
+            }
+            float localZ = workpieceCount == 1 ? 0.0F : (renderedWorkpiece == 0 ? -WORKPIECE_PAIR_SIDE_OFFSET : WORKPIECE_PAIR_SIDE_OFFSET);
+            float localRotation = workpieceCount == 1 ? 0.0F : (renderedWorkpiece == 0 ? -4.0F : 4.0F);
+            float heat = heatAmount(forge, slot, workpiece);
+            renderInsert(forge, HeatingForgeInsertVisualManager.workpiece(workpiece), poseStack, bufferSource, packedLight, packedOverlay, 0.0F, localZ, 1.15F, 0.60F, localRotation, heat);
+            renderedWorkpiece++;
         }
     }
 
-    private void renderFuel(HeatingForgeBlockEntity forge, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+    private void renderFuel(HeatingForgeBlockEntity forge, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         ItemStack fuel = forge.fuelStack();
         int visibleFuel = Math.min(FUEL_OFFSETS.length, fuel.getCount() + (forge.isLit() ? 1 : 0));
         if (visibleFuel <= 0) {
@@ -44,7 +53,7 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
         HeatingForgeInsertVisualManager.ResolvedInsert visual = HeatingForgeInsertVisualManager.fuel(visualFuel);
         for (int index = 0; index < visibleFuel; index++) {
             float[] offset = FUEL_OFFSETS[index];
-            renderInsert(forge, visual, poseStack, bufferSource, packedLight, packedOverlay, offset[0], offset[1], 1.65F, 0.13F, offset[2], forge.isLit() ? 0.20F : 0.0F);
+            renderInsert(forge, visual, poseStack, bufferSource, packedLight, packedOverlay, offset[0], offset[1], 1.65F, 0.13F, offset[2], fuelHeat(forge, partialTick, index));
         }
     }
 
@@ -69,9 +78,24 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
         };
     }
 
-    private static float heatAmount(HeatingForgeBlockEntity forge, ItemStack stack) {
+    private static float heatAmount(HeatingForgeBlockEntity forge, int slot, ItemStack stack) {
         Level level = forge.getLevel();
         float stackTemperature = level == null ? WorkpieceHeat.storedTemperature(stack) : WorkpieceHeat.temperature(stack, level);
-        return Math.max(forge.heatProgressFraction(), stackTemperature);
+        return Math.max(forge.heatProgressFraction(slot), stackTemperature);
+    }
+
+    private static float fuelHeat(HeatingForgeBlockEntity forge, float partialTick, int index) {
+        if (!forge.isLit()) {
+            return 0.0F;
+        }
+        Level level = forge.getLevel();
+        float time = level == null ? 0.0F : level.getGameTime() + partialTick;
+        float pulse = ((float) Math.sin(time * 0.18F + index * 1.7F) + 1.0F) * 0.5F;
+        float workpieceBonus = forge.hasWorkpiece() ? forge.heatProgressFraction() * 0.08F : 0.0F;
+        return clamp(0.38F + pulse * 0.18F + workpieceBonus, 0.0F, 0.68F);
+    }
+
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
     }
 }

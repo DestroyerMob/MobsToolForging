@@ -185,8 +185,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof HeatingForgeBlockEntity forge) {
-            ItemStack workpiece = forge.workpieceDropStack();
-            if (!workpiece.isEmpty()) {
+            for (ItemStack workpiece : forge.workpieceDropStacks()) {
                 Block.popResource(level, pos, workpiece);
             }
             ItemStack fuel = forge.fuelDropStack();

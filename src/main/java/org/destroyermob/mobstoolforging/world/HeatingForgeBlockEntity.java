@@ -1,5 +1,7 @@
 package org.destroyermob.mobstoolforging.world;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -18,6 +20,7 @@ import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 
 public class HeatingForgeBlockEntity extends BlockEntity {
+    private static final int WORKPIECE_SLOTS = 2;
     private static final String FUEL_TAG = "Fuel";
     private static final String WORKPIECE_TAG = "Workpiece";
     private static final String BURN_TIME_TAG = "BurnTime";
@@ -26,14 +29,17 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     private static final String IGNITED_TAG = "Ignited";
 
     private ItemStack fuelStack = ItemStack.EMPTY;
-    private ItemStack workpieceStack = ItemStack.EMPTY;
+    private final ItemStack[] workpieceStacks = new ItemStack[WORKPIECE_SLOTS];
+    private final int[] heatProgress = new int[WORKPIECE_SLOTS];
     private int burnTime;
     private int burnDuration;
-    private int heatProgress;
     private boolean ignited;
 
     public HeatingForgeBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.HEATING_FORGE.get(), pos, blockState);
+        for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
+            workpieceStacks[slot] = ItemStack.EMPTY;
+        }
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, HeatingForgeBlockEntity forge) {
@@ -53,30 +59,35 @@ public class HeatingForgeBlockEntity extends BlockEntity {
                 changed = true;
             }
         }
-        if (!forge.workpieceStack.isEmpty()) {
-            WorkpieceHeat.clearIfCooled(forge.workpieceStack, level);
-        }
-        if (forge.burnTime > 0 && !forge.workpieceStack.isEmpty()) {
-            if (forge.heatProgress < requiredTicks) {
-                forge.heatProgress++;
-                changed = true;
-                sync = level.getGameTime() % 10L == 0L;
+        boolean canAdvanceHeat = forge.workpieceCount() < WORKPIECE_SLOTS || level.getGameTime() % 3L != 0L;
+        for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
+            ItemStack workpiece = forge.workpieceStacks[slot];
+            if (workpiece.isEmpty()) {
+                continue;
             }
-            if (forge.heatProgress >= requiredTicks) {
-                if (!WorkpieceHeat.isHot(forge.workpieceStack, level) || level.getGameTime() % 20L == 0L) {
-                    WorkpieceHeat.heat(forge.workpieceStack, level);
+            WorkpieceHeat.clearIfCooled(workpiece, level);
+            if (forge.burnTime > 0) {
+                if (canAdvanceHeat && forge.heatProgress[slot] < requiredTicks) {
+                    forge.heatProgress[slot]++;
                     changed = true;
-                    sync = true;
+                    sync = level.getGameTime() % 10L == 0L;
                 }
-            } else if (sync) {
-                WorkpieceHeat.setTemperature(forge.workpieceStack, level, forge.heatProgressFraction(), false);
-            }
-        } else if (!forge.workpieceStack.isEmpty() && forge.heatProgress > 0) {
-            int visualProgress = forge.coolingVisualProgress(level, requiredTicks);
-            if (visualProgress != forge.heatProgress) {
-                forge.heatProgress = visualProgress;
-                changed = true;
-                sync = level.getGameTime() % 10L == 0L || visualProgress == 0;
+                if (forge.heatProgress[slot] >= requiredTicks) {
+                    if (!WorkpieceHeat.isHot(workpiece, level) || level.getGameTime() % 20L == 0L) {
+                        WorkpieceHeat.heat(workpiece, level);
+                        changed = true;
+                        sync = true;
+                    }
+                } else if (sync) {
+                    WorkpieceHeat.setTemperature(workpiece, level, forge.heatProgressFraction(slot), false);
+                }
+            } else if (forge.heatProgress[slot] > 0) {
+                int visualProgress = forge.coolingVisualProgress(level, requiredTicks, slot);
+                if (visualProgress != forge.heatProgress[slot]) {
+                    forge.heatProgress[slot] = visualProgress;
+                    changed = true;
+                    sync = level.getGameTime() % 10L == 0L || visualProgress == 0;
+                }
             }
         }
         if (changed) {
@@ -92,7 +103,26 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     }
 
     public ItemStack workpieceStack() {
-        return workpieceStack;
+        int slot = firstOccupiedSlot();
+        return slot >= 0 ? workpieceStacks[slot] : ItemStack.EMPTY;
+    }
+
+    public ItemStack workpieceStack(int slot) {
+        return validWorkpieceSlot(slot) ? workpieceStacks[slot] : ItemStack.EMPTY;
+    }
+
+    public int workpieceSlots() {
+        return WORKPIECE_SLOTS;
+    }
+
+    public int workpieceCount() {
+        int count = 0;
+        for (ItemStack workpiece : workpieceStacks) {
+            if (!workpiece.isEmpty()) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public boolean isLit() {
@@ -104,15 +134,26 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     }
 
     public boolean hasWorkpiece() {
-        return !workpieceStack.isEmpty();
+        return firstOccupiedSlot() >= 0;
     }
 
     public int heatProgress() {
-        return heatProgress;
+        int progress = 0;
+        for (int slotProgress : heatProgress) {
+            progress = Math.max(progress, slotProgress);
+        }
+        return progress;
     }
 
     public float heatProgressFraction() {
-        return Math.min(1.0F, heatProgress / (float) MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get());
+        return Math.min(1.0F, heatProgress() / (float) MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get());
+    }
+
+    public float heatProgressFraction(int slot) {
+        if (!validWorkpieceSlot(slot)) {
+            return 0.0F;
+        }
+        return Math.min(1.0F, heatProgress[slot] / (float) MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get());
     }
 
     public boolean acceptFuel(ItemStack stack) {
@@ -133,11 +174,12 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     }
 
     public boolean acceptWorkpiece(ItemStack stack) {
-        if (stack.isEmpty() || hasWorkpiece() || !isHeatableWorkpiece(stack)) {
+        int slot = firstEmptySlot();
+        if (stack.isEmpty() || slot < 0 || !isHeatableWorkpiece(stack)) {
             return false;
         }
-        workpieceStack = stack.split(1);
-        heatProgress = Math.round(WorkpieceHeat.temperature(workpieceStack, levelOrThrow()) * MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get());
+        workpieceStacks[slot] = stack.split(1);
+        heatProgress[slot] = Math.round(WorkpieceHeat.temperature(workpieceStacks[slot], levelOrThrow()) * MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get());
         sync();
         return true;
     }
@@ -157,17 +199,15 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     }
 
     public ItemStack removeWorkpiece() {
-        if (level != null && !workpieceStack.isEmpty() && heatProgress > 0) {
-            int requiredTicks = MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get();
-            if (heatProgress >= requiredTicks) {
-                WorkpieceHeat.heat(workpieceStack, level);
-            } else {
-                WorkpieceHeat.setTemperature(workpieceStack, level, heatProgressFraction(), false);
-            }
+        int slot = lastOccupiedSlot();
+        if (slot < 0) {
+            return ItemStack.EMPTY;
         }
-        ItemStack result = workpieceStack;
-        workpieceStack = ItemStack.EMPTY;
-        heatProgress = 0;
+        applyStoredHeat(slot);
+        ItemStack result = workpieceStacks[slot];
+        workpieceStacks[slot] = ItemStack.EMPTY;
+        heatProgress[slot] = 0;
+        compactWorkpieces();
         sync();
         return result;
     }
@@ -180,7 +220,17 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     }
 
     public ItemStack workpieceDropStack() {
-        return workpieceStack.copy();
+        return workpieceStack().copy();
+    }
+
+    public List<ItemStack> workpieceDropStacks() {
+        List<ItemStack> drops = new ArrayList<>();
+        for (ItemStack workpiece : workpieceStacks) {
+            if (!workpiece.isEmpty()) {
+                drops.add(workpiece.copy());
+            }
+        }
+        return drops;
     }
 
     public ItemStack fuelDropStack() {
@@ -227,8 +277,60 @@ public class HeatingForgeBlockEntity extends BlockEntity {
         return level;
     }
 
-    private int coolingVisualProgress(Level level, int requiredTicks) {
-        return Math.round(WorkpieceHeat.temperature(workpieceStack, level) * requiredTicks);
+    private int coolingVisualProgress(Level level, int requiredTicks, int slot) {
+        return Math.round(WorkpieceHeat.temperature(workpieceStacks[slot], level) * requiredTicks);
+    }
+
+    private void applyStoredHeat(int slot) {
+        if (level == null || workpieceStacks[slot].isEmpty() || heatProgress[slot] <= 0) {
+            return;
+        }
+        int requiredTicks = MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get();
+        if (heatProgress[slot] >= requiredTicks) {
+            WorkpieceHeat.heat(workpieceStacks[slot], level);
+        } else {
+            WorkpieceHeat.setTemperature(workpieceStacks[slot], level, heatProgressFraction(slot), false);
+        }
+    }
+
+    private int firstOccupiedSlot() {
+        for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
+            if (!workpieceStacks[slot].isEmpty()) {
+                return slot;
+            }
+        }
+        return -1;
+    }
+
+    private int lastOccupiedSlot() {
+        for (int slot = WORKPIECE_SLOTS - 1; slot >= 0; slot--) {
+            if (!workpieceStacks[slot].isEmpty()) {
+                return slot;
+            }
+        }
+        return -1;
+    }
+
+    private int firstEmptySlot() {
+        for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
+            if (workpieceStacks[slot].isEmpty()) {
+                return slot;
+            }
+        }
+        return -1;
+    }
+
+    private void compactWorkpieces() {
+        if (workpieceStacks[0].isEmpty() && !workpieceStacks[1].isEmpty()) {
+            workpieceStacks[0] = workpieceStacks[1];
+            heatProgress[0] = heatProgress[1];
+            workpieceStacks[1] = ItemStack.EMPTY;
+            heatProgress[1] = 0;
+        }
+    }
+
+    private static boolean validWorkpieceSlot(int slot) {
+        return slot >= 0 && slot < WORKPIECE_SLOTS;
     }
 
     public void sync() {
@@ -245,12 +347,14 @@ public class HeatingForgeBlockEntity extends BlockEntity {
         if (!fuelStack.isEmpty()) {
             tag.put(FUEL_TAG, fuelStack.saveOptional(registries));
         }
-        if (!workpieceStack.isEmpty()) {
-            tag.put(WORKPIECE_TAG, workpieceStack.saveOptional(registries));
+        for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
+            if (!workpieceStacks[slot].isEmpty()) {
+                tag.put(WORKPIECE_TAG + slot, workpieceStacks[slot].saveOptional(registries));
+                tag.putInt(HEAT_PROGRESS_TAG + slot, heatProgress[slot]);
+            }
         }
         tag.putInt(BURN_TIME_TAG, burnTime);
         tag.putInt(BURN_DURATION_TAG, burnDuration);
-        tag.putInt(HEAT_PROGRESS_TAG, heatProgress);
         tag.putBoolean(IGNITED_TAG, ignited);
     }
 
@@ -258,11 +362,18 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         fuelStack = tag.contains(FUEL_TAG) ? ItemStack.parseOptional(registries, tag.getCompound(FUEL_TAG)) : ItemStack.EMPTY;
-        workpieceStack = tag.contains(WORKPIECE_TAG) ? ItemStack.parseOptional(registries, tag.getCompound(WORKPIECE_TAG)) : ItemStack.EMPTY;
+        for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
+            workpieceStacks[slot] = tag.contains(WORKPIECE_TAG + slot) ? ItemStack.parseOptional(registries, tag.getCompound(WORKPIECE_TAG + slot)) : ItemStack.EMPTY;
+            heatProgress[slot] = tag.getInt(HEAT_PROGRESS_TAG + slot);
+        }
+        if (tag.contains(WORKPIECE_TAG) && workpieceStacks[0].isEmpty()) {
+            workpieceStacks[0] = ItemStack.parseOptional(registries, tag.getCompound(WORKPIECE_TAG));
+            heatProgress[0] = tag.getInt(HEAT_PROGRESS_TAG);
+        }
         burnTime = tag.getInt(BURN_TIME_TAG);
         burnDuration = tag.getInt(BURN_DURATION_TAG);
-        heatProgress = tag.getInt(HEAT_PROGRESS_TAG);
         ignited = tag.getBoolean(IGNITED_TAG);
+        compactWorkpieces();
     }
 
     @Nullable
