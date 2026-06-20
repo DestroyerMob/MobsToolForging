@@ -70,7 +70,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getClockWise());
+        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
@@ -145,15 +145,19 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (!templateItem.canUseOn(kind)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
+        ForgeTemplateDefinition template = templateItem.template().orElse(null);
+        if (template == null) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
         if (level.isClientSide) {
             return ItemInteractionResult.SUCCESS;
         }
-        if (!forge.setTemplateFromItem(templateItem.template())) {
+        if (!forge.setTemplateFromItem(template)) {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.forge_busy"), true);
             return ItemInteractionResult.CONSUME;
         }
         level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75F, 1.1F + level.random.nextFloat() * 0.1F);
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.template_selected", templateItem.template().displayName()), true);
+        player.displayClientMessage(Component.translatable("message.mobstoolforging.template_selected", template.displayName()), true);
         return ItemInteractionResult.CONSUME;
     }
 
@@ -171,6 +175,13 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         if (material.category() != kind.materialCategory()) {
             player.displayClientMessage(Component.translatable(kind.wrongStationMessage()), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        if (kind == WorkstationKind.TOOL_FORGE
+                && material.category() == MaterialCategory.METAL
+                && MobsToolForgingConfig.REQUIRE_HEATED_METAL.get()
+                && !WorkpieceHeat.isHot(stack, level)) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.metal_needs_heat"), true);
             return ItemInteractionResult.CONSUME;
         }
         if (forge.materialId() != null && !forge.materialId().equals(material.id())) {

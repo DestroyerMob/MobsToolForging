@@ -33,6 +33,10 @@ public final class ModItems {
             "lapidary_table",
             () -> new BlockItem(ModBlocks.LAPIDARY_TABLE.get(), new Item.Properties())
     );
+    public static final DeferredItem<BlockItem> HEATING_FORGE = ITEMS.register(
+            "heating_forge",
+            () -> new BlockItem(ModBlocks.HEATING_FORGE.get(), new Item.Properties())
+    );
     public static final DeferredItem<Item> SMITHING_HAMMER = ITEMS.register(
             "smithing_hammer",
             () -> new Item(new Item.Properties().durability(128))

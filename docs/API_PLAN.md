@@ -1,10 +1,10 @@
 # API Plan
 
-This is a TODO for the public tool API, not a supported bridge contract yet.
+This document describes the current compatibility bridge and the parts that are still planned work.
 
-## Current Scope
+## Current Built-In Scope
 
-The current `ToolKind` enum supports only the built-in Mobs Tool Forging tool shapes:
+The `ToolKind` enum still represents only the built-in Mobs Tool Forging shapes:
 
 - `sword`
 - `shovel`
@@ -12,26 +12,37 @@ The current `ToolKind` enum supports only the built-in Mobs Tool Forging tool sh
 - `axe`
 - `hoe`
 
-Those values drive current recipes, part items, template selection, tool construction data, tool stats, and generated visuals. Anything outside that enum is not wired into the gameplay loop yet.
+Those enum values are now treated as built-in convenience definitions, not the public ceiling of the system. New tool families should use `ToolTypeDefinition` through `ToolTypeRegistry`.
+
+## Current Bridge API
+
+Bridge mods can now register:
+
+- Tool families with `ToolTypeRegistry.registerToolType`.
+- Forge or lapidary templates with `ToolTypeRegistry.registerTemplate`.
+- Extra stat behavior with `ToolTypeRegistry.registerStatModifier`.
+- Custom visible traits with `ToolTraitRegistry.registerTrait`.
+- Custom material tiers with `MaterialCatalog.registerMaterial`.
+- Extra visual material ids with `MaterialCatalog.registerVisualMaterial`.
+- Custom handle item to visual-material mappings with `MaterialCatalog.registerHandleMaterial`.
+
+The generic recipe serializer `mobstoolforging:crafting_special_modular_tool` can craft registered tool types by `tool_type` id.
 
 ## Mobs More Weapons Status
 
-Mobs More Weapons greatswords are not supported yet. The mod should not ship generated greatsword bridge stubs or documentation that implies greatsword construction already works.
+Mobs More Weapons greatswords are not built in yet. They are now feasible through a small bridge mod, but the base mod still does not ship Mobs More Weapons items, generated greatsword parts, or greatsword recipes.
 
-Future Mobs More Weapons support needs a real `ToolTypeDefinition` registry/data system instead of one-off enum additions. That system should let Mobs Tool Forging and bridge mods define new tool or weapon families through data.
+A Mobs More Weapons bridge should register a `ToolTypeDefinition` such as `mobs_more_weapons:greatsword`, register blade and guard templates, provide physical pattern items, and provide visual JSON/sprites for the greatsword layers.
 
-## Future ToolTypeDefinition Shape
+## Remaining Planned Work
 
-A future tool type definition should cover at least:
+The current bridge is Java-first. Fully data-driven tool type registration is still planned.
 
-- Tool type id and display name.
-- Required forged part types.
-- Optional part slots such as guard, binding, wrap, focus, and treatment.
-- Valid workstations and templates.
-- Material costs per part.
-- Crafting or assembly rules.
-- Visual layer slots and texture/template paths.
-- Attribute, durability, mining, and combat behavior.
-- Compatibility hooks for bridge mods.
+Future work should cover:
 
-Until that exists, bridge mods should treat non-vanilla tool shapes as planned work only.
+- Datapack-defined `ToolTypeDefinition` records.
+- Datapack-defined template definitions.
+- Datapack-defined material stat profiles.
+- More explicit workstation compatibility per template.
+- A cleaner public event timing story for bridge registration.
+- Optional API helpers for external item classes that want MTF fire resistance and tooltip behavior.

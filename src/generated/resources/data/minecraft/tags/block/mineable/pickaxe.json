@@ -1,6 +1,7 @@
 {
   "values": [
     "mobstoolforging:tool_forge",
-    "mobstoolforging:lapidary_table"
+    "mobstoolforging:lapidary_table",
+    "mobstoolforging:heating_forge"
   ]
 }

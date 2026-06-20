@@ -23,13 +23,13 @@ import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolPartSpriteKey;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
-import org.destroyermob.mobstoolforging.world.ToolKind;
+import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
 import org.destroyermob.mobstoolforging.world.ToolVisualKey;
 
 public final class PartedToolBakedModel implements BakedModel {
     private static final Set<String> REPORTED_MISSING_LAYERS = ConcurrentHashMap.newKeySet();
 
-    private final ToolKind toolKind;
+    private final ToolTypeDefinition definition;
     private final ToolVisualDefinition visual;
     private final PartedToolSpriteSet sprites;
     private final PartedToolQuadFactory quadFactory;
@@ -38,17 +38,17 @@ public final class PartedToolBakedModel implements BakedModel {
     private final ItemOverrides overrides;
     private final Map<ToolVisualKey, ResolvedPartedItemModel> cache = new ConcurrentHashMap<>();
 
-    public PartedToolBakedModel(ToolKind toolKind, ToolVisualDefinition visual, PartedToolSpriteSet sprites, PartedToolQuadFactory quadFactory, ItemTransforms transforms) {
-        this.toolKind = toolKind;
+    public PartedToolBakedModel(ToolTypeDefinition definition, ToolVisualDefinition visual, PartedToolSpriteSet sprites, PartedToolQuadFactory quadFactory, ItemTransforms transforms) {
+        this.definition = definition;
         this.visual = visual;
         this.sprites = sprites;
         this.quadFactory = quadFactory;
         this.transforms = transforms;
         this.fallback = composeLayers(new ToolVisualKey(
-                ToolConstructionData.toolType(toolKind),
+                definition.id(),
                 MaterialCatalog.IRON,
                 MaterialCatalog.OAK,
-                toolKind == ToolKind.SWORD ? Optional.of(MaterialCatalog.IRON) : Optional.empty(),
+                definition.requiredAssemblyParts().isEmpty() ? Optional.empty() : Optional.of(MaterialCatalog.IRON),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
@@ -59,7 +59,7 @@ public final class PartedToolBakedModel implements BakedModel {
             @Override
             public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
                 return ToolVisualKey.from(stack)
-                        .filter(key -> key.toolType().equals(ToolConstructionData.toolType(PartedToolBakedModel.this.toolKind)))
+                        .filter(key -> key.toolType().equals(PartedToolBakedModel.this.definition.id()))
                         .map(key -> cache.computeIfAbsent(key, PartedToolBakedModel.this::compose))
                         .orElse(fallback);
             }

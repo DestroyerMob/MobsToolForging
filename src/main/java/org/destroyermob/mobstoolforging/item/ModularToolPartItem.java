@@ -10,7 +10,6 @@ import org.destroyermob.mobstoolforging.world.ToolPartData;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 
 public class ModularToolPartItem extends Item {
-    private final ToolKind toolKind;
     private final String partType;
 
     public ModularToolPartItem(ToolKind toolKind, Properties properties) {
@@ -18,8 +17,11 @@ public class ModularToolPartItem extends Item {
     }
 
     public ModularToolPartItem(ToolKind toolKind, String partType, Properties properties) {
+        this(partType, properties);
+    }
+
+    public ModularToolPartItem(String partType, Properties properties) {
         super(properties);
-        this.toolKind = toolKind;
         this.partType = partType;
     }
 

@@ -6,6 +6,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.LapidaryTableBlock;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlock;
 
@@ -19,6 +20,10 @@ public final class ModBlocks {
     public static final DeferredBlock<LapidaryTableBlock> LAPIDARY_TABLE = BLOCKS.register(
             "lapidary_table",
             () -> new LapidaryTableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONECUTTER).noOcclusion())
+    );
+    public static final DeferredBlock<HeatingForgeBlock> HEATING_FORGE = BLOCKS.register(
+            "heating_forge",
+            () -> new HeatingForgeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).noOcclusion())
     );
 
     private ModBlocks() {

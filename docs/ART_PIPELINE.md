@@ -61,3 +61,27 @@ assets/<namespace>/tooling/tool_visuals/<tool_type>.json
 ```
 
 If a material or tool shape needs to look polished, add explicit source sprites or resource-pack overrides instead of adding more procedural drawing code.
+
+## Bridge Mod Visuals
+
+Bridge mods can use the same override paths in their own namespace. For non-MTF material ids, make the material visible to the model loader in one of two ways:
+
+- Register it from Java with `MaterialCatalog.registerVisualMaterial`.
+- Add the material id to a visual layer's `materials` array.
+
+Example layer:
+
+```json
+{
+  "slot": "greatsword_blade",
+  "material_from": "headMaterial",
+  "materials": ["mobs_more_weapons:steel"],
+  "z": 3
+}
+```
+
+The texture key for that layer would be:
+
+```text
+layer_greatsword_blade_mobs_more_weapons_steel
+```

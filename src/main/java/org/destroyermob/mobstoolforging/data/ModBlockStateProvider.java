@@ -38,14 +38,19 @@ public class ModBlockStateProvider extends BlockStateProvider {
     @Override
     protected void registerStatesAndModels() {
         Block forge = ModBlocks.TOOL_FORGE.get();
-        ModelFile forgeModel = models().withExistingParent("tool_forge", mcLoc("block/anvil"));
+        ModelFile forgeModel = new ModelFile.UncheckedModelFile(modLoc("block/tool_forge"));
         horizontalBlock(forge, forgeModel);
         simpleBlockItem(forge, forgeModel);
 
         Block lapidaryTable = ModBlocks.LAPIDARY_TABLE.get();
-        ModelFile lapidaryModel = models().cubeBottomTop("lapidary_table", mcLoc("block/smooth_stone"), mcLoc("block/smooth_stone"), mcLoc("block/amethyst_block"));
+        ModelFile lapidaryModel = new ModelFile.UncheckedModelFile(modLoc("block/lapidary_table"));
         horizontalBlock(lapidaryTable, lapidaryModel);
         simpleBlockItem(lapidaryTable, lapidaryModel);
+
+        Block heatingForge = ModBlocks.HEATING_FORGE.get();
+        ModelFile heatingForgeModel = models().cubeBottomTop("heating_forge", mcLoc("block/deepslate_bricks"), mcLoc("block/deepslate_bricks"), mcLoc("block/blast_furnace_top"));
+        horizontalBlock(heatingForge, heatingForgeModel);
+        simpleBlockItem(heatingForge, heatingForgeModel);
 
         smithingHammerModel();
         itemModels().withExistingParent("flint_shard", mcLoc("item/generated")).texture("layer0", modLoc("item/flint_shard"));

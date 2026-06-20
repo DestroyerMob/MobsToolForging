@@ -22,8 +22,8 @@ public final class ToolTraitDisplay {
     }
 
     private static int priority(ResourceLocation traitId) {
-        return ToolTrait.byId(traitId)
-                .flatMap(ToolTrait::category)
+        return ToolTraitRegistry.definition(traitId)
+                .flatMap(ToolTraitDefinition::categoryName)
                 .map(ToolTraitDisplay::categoryPriority)
                 .orElse(50);
     }

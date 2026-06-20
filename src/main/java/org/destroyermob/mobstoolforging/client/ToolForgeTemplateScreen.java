@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.client;
 
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -11,8 +12,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.destroyermob.mobstoolforging.network.SetForgeTemplatePayload;
-import org.destroyermob.mobstoolforging.world.ForgeTemplate;
+import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
 
 public class ToolForgeTemplateScreen extends Screen {
@@ -35,12 +37,14 @@ public class ToolForgeTemplateScreen extends Screen {
 
     private final BlockPos forgePos;
     private final WorkstationKind workstationKind;
+    private final List<ForgeTemplateDefinition> templates;
     private int previewIndex;
 
     public ToolForgeTemplateScreen(BlockPos forgePos, WorkstationKind workstationKind) {
         super(Component.translatable("screen.mobstoolforging.tool_forge_templates"));
         this.forgePos = forgePos;
         this.workstationKind = workstationKind;
+        this.templates = ToolTypeRegistry.templates();
     }
 
     @Override
@@ -53,8 +57,11 @@ public class ToolForgeTemplateScreen extends Screen {
         int hovered = hoveredIndex(layout, mouseX, mouseY);
         int shownIndex = hovered >= 0 ? hovered : previewIndex;
         ItemStack hoveredStack = ItemStack.EMPTY;
-        for (int i = 0; i < ForgeTemplate.values().length; i++) {
-            ForgeTemplate template = ForgeTemplate.values()[i];
+        if (templates.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < templates.size(); i++) {
+            ForgeTemplateDefinition template = templates.get(i);
             int left = recipeLeft(layout, i);
             int top = recipeTop(layout, i);
             ItemStack previewStack = previewStack(template);
@@ -64,7 +71,7 @@ public class ToolForgeTemplateScreen extends Screen {
             }
         }
 
-        ItemStack shownStack = previewStack(ForgeTemplate.values()[shownIndex]);
+        ItemStack shownStack = previewStack(templates.get(Math.min(shownIndex, templates.size() - 1)));
         graphics.renderItem(shownStack, layout.left() + OUTPUT_LEFT, layout.top() + OUTPUT_TOP);
 
         if (!hoveredStack.isEmpty()) {
@@ -80,11 +87,11 @@ public class ToolForgeTemplateScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) {
             Layout layout = layout();
-            for (int i = 0; i < ForgeTemplate.values().length; i++) {
+            for (int i = 0; i < templates.size(); i++) {
                 if (contains(mouseX, mouseY, recipeLeft(layout, i), recipeTop(layout, i), RECIPE_WIDTH, RECIPE_HEIGHT)) {
                     previewIndex = i;
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
-                    PacketDistributor.sendToServer(new SetForgeTemplatePayload(forgePos, ForgeTemplate.values()[i]));
+                    PacketDistributor.sendToServer(new SetForgeTemplatePayload(forgePos, templates.get(i).id()));
                     onClose();
                     return true;
                 }
@@ -112,8 +119,8 @@ public class ToolForgeTemplateScreen extends Screen {
         return layout.top() + RECIPE_AREA_TOP + (index / COLUMNS) * RECIPE_HEIGHT + 1;
     }
 
-    private static int hoveredIndex(Layout layout, int mouseX, int mouseY) {
-        for (int i = 0; i < ForgeTemplate.values().length; i++) {
+    private int hoveredIndex(Layout layout, int mouseX, int mouseY) {
+        for (int i = 0; i < templates.size(); i++) {
             if (contains(mouseX, mouseY, recipeLeft(layout, i), recipeTop(layout, i), RECIPE_WIDTH, RECIPE_HEIGHT)) {
                 return i;
             }
@@ -121,7 +128,7 @@ public class ToolForgeTemplateScreen extends Screen {
         return -1;
     }
 
-    private ItemStack previewStack(ForgeTemplate template) {
+    private ItemStack previewStack(ForgeTemplateDefinition template) {
         return template.outputStack(previewMaterial());
     }
 

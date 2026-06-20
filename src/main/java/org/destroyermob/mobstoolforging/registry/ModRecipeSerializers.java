@@ -41,6 +41,11 @@ public final class ModRecipeSerializers {
                     "crafting_special_modular_hoe",
                     () -> new SimpleCraftingRecipeSerializer<>(category -> new ModularToolRecipe(category, ToolKind.HOE))
             );
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ModularToolRecipe>> MODULAR_TOOL =
+            RECIPE_SERIALIZERS.register(
+                    "crafting_special_modular_tool",
+                    ModularToolRecipe.Serializer::new
+            );
 
     private ModRecipeSerializers() {
     }

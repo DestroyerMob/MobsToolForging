@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import org.destroyermob.mobstoolforging.world.ToolKind;
 
 public record ToolVisualDefinition(
         ResourceLocation id,
@@ -30,30 +29,30 @@ public record ToolVisualDefinition(
         );
     }
 
-    public static ToolVisualDefinition fallback(ResourceLocation id, ToolKind toolKind) {
+    public static ToolVisualDefinition fallback(ResourceLocation id, String primaryPartType) {
         return new ToolVisualDefinition(
                 id,
                 16,
                 32,
                 true,
                 List.of(
-                        new ToolVisualLayer("handle", java.util.Optional.of("handleMaterial"), java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), 1, false, false),
-                        new ToolVisualLayer(toolKind.partType(), java.util.Optional.of("headMaterial"), java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), 2, false, false)
+                        new ToolVisualLayer("handle", java.util.Optional.of("handleMaterial"), java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), List.of(), 1, false, false),
+                        new ToolVisualLayer(primaryPartType, java.util.Optional.of("headMaterial"), java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), List.of(), 2, false, false)
                 )
         );
     }
 
-    public ToolVisualLayer partLayer(ToolKind toolKind) {
+    public ToolVisualLayer partLayer(String primaryPartType) {
         return layers.stream()
                 .filter(layer -> layer.materialFrom().filter("headMaterial"::equals).isPresent())
                 .findFirst()
-                .orElseGet(() -> new ToolVisualLayer(toolKind.partType(), java.util.Optional.of("headMaterial"), java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), 0, false, false));
+                .orElseGet(() -> new ToolVisualLayer(primaryPartType, java.util.Optional.of("headMaterial"), java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), List.of(), 0, false, false));
     }
 
     public ToolVisualLayer layerForSlot(String slot) {
         return layers.stream()
                 .filter(layer -> layer.slot().equals(slot))
                 .findFirst()
-                .orElseGet(() -> new ToolVisualLayer(slot, java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), 0, false, false));
+                .orElseGet(() -> new ToolVisualLayer(slot, java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), java.util.Optional.empty(), List.of(), 0, false, false));
     }
 }

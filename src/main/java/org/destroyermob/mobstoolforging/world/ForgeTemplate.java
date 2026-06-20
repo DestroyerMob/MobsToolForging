@@ -5,7 +5,7 @@ import java.util.Optional;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
-import org.destroyermob.mobstoolforging.registry.ModItems;
+import org.destroyermob.mobstoolforging.MobsToolForging;
 
 public enum ForgeTemplate {
     SWORD_BLADE(ToolKind.SWORD, ToolPartData.SWORD_BLADE, ToolKind.SWORD.requiredMaterials(), 5),
@@ -31,12 +31,16 @@ public enum ForgeTemplate {
         return partType;
     }
 
+    public ResourceLocation registryId() {
+        return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, partType);
+    }
+
     public ToolKind toolKind() {
         return toolKind;
     }
 
     public Component displayName() {
-        return Component.translatable("forge_template.mobstoolforging." + partType);
+        return definition().displayName();
     }
 
     public int requiredMaterials() {
@@ -48,13 +52,26 @@ public enum ForgeTemplate {
     }
 
     public ItemStack outputStack(ResourceLocation materialId) {
-        if (ToolPartData.SWORD_GUARD.equals(partType)) {
-            return ModItems.SWORD_GUARD.get().createPart(materialId);
-        }
-        return toolKind.createPart(materialId);
+        return definition().outputStack(materialId);
+    }
+
+    public ForgeTemplateDefinition definition() {
+        return new ForgeTemplateDefinition(
+                registryId(),
+                ToolConstructionData.toolType(toolKind),
+                partType,
+                requiredMaterials,
+                requiredHits,
+                "forge_template.mobstoolforging." + partType
+        );
     }
 
     public static Optional<ForgeTemplate> byId(String id) {
         return Arrays.stream(values()).filter(template -> template.id().equals(id)).findFirst();
+    }
+
+    public static Optional<ForgeTemplateDefinition> definitionById(String id) {
+        return ToolTypeRegistry.template(id)
+                .or(() -> byId(id).map(ForgeTemplate::definition));
     }
 }

@@ -18,11 +18,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
-import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
 
 public final class PartedToolPartBakedModel implements BakedModel {
-    private final ToolKind toolKind;
     private final ToolVisualDefinition visual;
     private final String partType;
     private final ToolVisualLayer partLayer;
@@ -33,8 +31,7 @@ public final class PartedToolPartBakedModel implements BakedModel {
     private final ItemOverrides overrides;
     private final Map<ResourceLocation, ResolvedPartedItemModel> cache = new ConcurrentHashMap<>();
 
-    public PartedToolPartBakedModel(ToolKind toolKind, ToolVisualDefinition visual, String partType, String partSlot, PartedToolSpriteSet sprites, PartedToolQuadFactory quadFactory, ItemTransforms transforms) {
-        this.toolKind = toolKind;
+    public PartedToolPartBakedModel(ToolVisualDefinition visual, String partType, String partSlot, PartedToolSpriteSet sprites, PartedToolQuadFactory quadFactory, ItemTransforms transforms) {
         this.visual = visual;
         this.partType = partType;
         this.partLayer = visual.layerForSlot(partSlot);

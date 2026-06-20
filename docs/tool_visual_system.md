@@ -2,7 +2,7 @@
 
 Mobs Tool Forging tools are meant to look assembled from physical parts, not like one item recolored by tint indexes.
 
-The current implementation stores finished tool construction data on the item stack and generates resource-pack-friendly visual inputs. A later client model pass should consume these JSON files and sprites through a custom `mobstoolforging:parted_tool` model loader and cached baked models.
+The implementation stores finished tool construction data on the item stack and composes resource-pack-friendly part sprites through the custom `mobstoolforging:parted_tool` and `mobstoolforging:parted_tool_part` model loaders.
 
 ## Stack Data
 
@@ -55,11 +55,35 @@ These are part sprites, not full completed-tool permutations. The intended rende
 ## Adding A Material
 
 1. Tag the source item as `mobstoolforging:materials/metals` or `mobstoolforging:materials/gems` if it can become a tool head.
-2. Add or override `tooling/material_visuals/<material>.json`.
-3. Provide explicit textures for iconic materials where generated sprites are not good enough.
+2. For a bridge mod, call `MaterialCatalog.registerMaterial` if the material needs custom stats instead of fallback iron/diamond-like behavior.
+3. Add or override `tooling/material_visuals/<material>.json`.
+4. Provide explicit textures for iconic materials where generated sprites are not good enough.
+5. If the material id is not one of MTF's built-ins, either call `MaterialCatalog.registerVisualMaterial` or list it in the layer's `materials` array inside the relevant tool visual JSON.
 
 ## Adding A Tool Visual
 
 Add a `tooling/tool_visuals/<tool_type>.json` file in your mod namespace. Define the ordered layers and point them at your templates and generated output paths.
 
-The current tool pipeline is still keyed to the hard-coded `ToolKind` enum. Bridge visuals for new weapon shapes, such as Mobs More Weapons greatswords, need the future tool type definition work described in `docs/API_PLAN.md`; they are not supported by the current generated data.
+Registered external tool types can use the same model loader by setting `tool` to their registered `ToolTypeDefinition` id and `visual` to the visual JSON id:
+
+```json
+{
+  "parent": "minecraft:item/handheld",
+  "loader": "mobstoolforging:parted_tool",
+  "tool": "mobs_more_weapons:greatsword",
+  "visual": "mobs_more_weapons:greatsword"
+}
+```
+
+Tool visual layers can include extra material ids:
+
+```json
+{
+  "slot": "greatsword_blade",
+  "material_from": "headMaterial",
+  "materials": ["mobs_more_weapons:steel"],
+  "z": 3
+}
+```
+
+This is how bridge mods make non-MTF materials load textures instead of falling back to the model's particle sprite.

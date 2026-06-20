@@ -11,6 +11,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.destroyermob.mobstoolforging.client.MobsToolForgingClient;
+import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
 
 public final class ModNetworking {
@@ -47,9 +48,13 @@ public final class ModNetworking {
         if (player.distanceToSqr(Vec3.atCenterOf(payload.pos())) > MAX_TEMPLATE_DISTANCE_SQUARED) {
             return;
         }
+        ForgeTemplateDefinition template = payload.template();
+        if (template == null) {
+            return;
+        }
         if (player.level().getBlockEntity(payload.pos()) instanceof ToolForgeBlockEntity forge) {
-            if (forge.selectTemplate(payload.template())) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.template_selected", payload.template().displayName()), true);
+            if (forge.selectTemplate(template)) {
+                player.displayClientMessage(Component.translatable("message.mobstoolforging.template_selected", template.displayName()), true);
             } else {
                 player.displayClientMessage(Component.translatable("message.mobstoolforging.forge_busy"), true);
             }

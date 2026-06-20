@@ -19,15 +19,21 @@ public final class ToolTooltipBuilder {
     }
 
     public static List<Component> tooltip(ItemStack stack, ToolKind toolKind, TooltipFlag flag) {
+        return ToolTypeRegistry.toolType(toolKind)
+                .map(definition -> tooltip(stack, definition, flag))
+                .orElseGet(List::of);
+    }
+
+    public static List<Component> tooltip(ItemStack stack, ToolTypeDefinition definition, TooltipFlag flag) {
         ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
         if (construction == null) {
             return List.of();
         }
-        ToolStatProfile profile = ToolStatBuilder.profileForTooltip(stack, toolKind, construction);
+        ToolStatProfile profile = ToolStatBuilder.profileForTooltip(stack, definition, construction);
         List<Component> lines = new ArrayList<>();
 
         if (flag.hasShiftDown()) {
-            addShiftTooltip(lines, toolKind, construction, profile);
+            addShiftTooltip(lines, definition, construction, profile);
         } else {
             addNormalTooltip(lines, profile);
         }
@@ -63,11 +69,11 @@ public final class ToolTooltipBuilder {
         lines.add(Component.translatable("tooltip.mobstoolforging.hold_shift").withStyle(ChatFormatting.DARK_GRAY));
     }
 
-    private static void addShiftTooltip(List<Component> lines, ToolKind toolKind, ToolConstructionData construction, ToolStatProfile profile) {
+    private static void addShiftTooltip(List<Component> lines, ToolTypeDefinition definition, ToolConstructionData construction, ToolStatProfile profile) {
         lines.add(Component.translatable("tooltip.mobstoolforging.construction").withStyle(ChatFormatting.GRAY));
         lines.add(partLine("tooltip.mobstoolforging.part.head", Optional.of(construction.headMaterial())));
         lines.add(partLine("tooltip.mobstoolforging.part.handle", Optional.of(construction.handleMaterial())));
-        lines.add(partLine(toolKind == ToolKind.SWORD ? "tooltip.mobstoolforging.part.guard" : "tooltip.mobstoolforging.part.binding", construction.bindingMaterial()));
+        lines.add(partLine(definition.swordLike() || !definition.requiredAssemblyParts().isEmpty() ? "tooltip.mobstoolforging.part.guard" : "tooltip.mobstoolforging.part.binding", construction.bindingMaterial()));
         lines.add(partLine("tooltip.mobstoolforging.part.wrap", construction.wrapMaterial()));
         lines.add(partLine("tooltip.mobstoolforging.part.focus", construction.focusMaterial()));
         lines.add(partLine("tooltip.mobstoolforging.part.treatment", construction.treatment()));
@@ -115,15 +121,15 @@ public final class ToolTooltipBuilder {
         MutableComponent line = Component.empty()
                 .append(traitName(traitId))
                 .append(Component.literal(" \u2014 ").withStyle(ChatFormatting.DARK_GRAY));
-        ToolTrait.byId(traitId)
-                .map(ToolTrait::description)
+        ToolTraitRegistry.definition(traitId)
+                .map(ToolTraitDefinition::description)
                 .ifPresentOrElse(line::append, () -> line.append(Component.literal(traitId.toString()).withStyle(ChatFormatting.GRAY)));
         return line;
     }
 
     private static Component traitName(ResourceLocation traitId) {
-        return ToolTrait.byId(traitId)
-                .map(ToolTrait::displayName)
+        return ToolTraitRegistry.definition(traitId)
+                .map(ToolTraitDefinition::displayName)
                 .orElseGet(() -> Component.literal(ToolTrait.fallbackName(traitId)).withStyle(ChatFormatting.GRAY));
     }
 

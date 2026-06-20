@@ -15,6 +15,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
@@ -25,7 +26,10 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.destroyermob.mobstoolforging.client.MobsToolForgingClient;
 import org.destroyermob.mobstoolforging.data.ModDataGenerators;
 import org.destroyermob.mobstoolforging.network.ModNetworking;
@@ -34,6 +38,8 @@ import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
+import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
+import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 import org.slf4j.Logger;
 
 @Mod(MobsToolForging.MOD_ID)
@@ -49,11 +55,15 @@ public class MobsToolForging {
         ModRecipeSerializers.register(modEventBus);
         ModNetworking.register(modEventBus);
         ModDataGenerators.register(modEventBus);
+        ToolTypeRegistry.bootstrap();
         modContainer.registerConfig(ModConfig.Type.COMMON, MobsToolForgingConfig.COMMON_SPEC);
 
         modEventBus.addListener(this::addCreativeTabContents);
         NeoForge.EVENT_BUS.addListener(this::knapFlintShard);
         NeoForge.EVENT_BUS.addListener(this::removeDisabledEarlyToolRecipes);
+        NeoForge.EVENT_BUS.addListener(this::coolPlayerWorkpieces);
+        NeoForge.EVENT_BUS.addListener(this::coolDroppedWorkpieces);
+        NeoForge.EVENT_BUS.addListener(this::addHeatTooltip);
 
         if (FMLEnvironment.dist.isClient()) {
             MobsToolForgingClient.register(modEventBus);
@@ -64,6 +74,7 @@ public class MobsToolForging {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
             event.accept(ModBlocks.TOOL_FORGE);
             event.accept(ModBlocks.LAPIDARY_TABLE);
+            event.accept(ModBlocks.HEATING_FORGE);
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.SMITHING_HAMMER);
@@ -157,6 +168,34 @@ public class MobsToolForging {
         if (removed > 0) {
             event.getServer().getRecipeManager().replaceRecipes(keptRecipes);
             LOGGER.info("Removed {} early-game tool recipe(s) from config.", removed);
+        }
+    }
+
+    private void coolPlayerWorkpieces(PlayerTickEvent.Post event) {
+        if (event.getEntity().level().isClientSide) {
+            return;
+        }
+        for (int slot = 0; slot < event.getEntity().getInventory().getContainerSize(); slot++) {
+            WorkpieceHeat.clearIfCooled(event.getEntity().getInventory().getItem(slot), event.getEntity().level());
+        }
+    }
+
+    private void coolDroppedWorkpieces(EntityTickEvent.Post event) {
+        if (event.getEntity().level().isClientSide || !(event.getEntity() instanceof ItemEntity itemEntity)) {
+            return;
+        }
+        ItemStack stack = itemEntity.getItem();
+        WorkpieceHeat.clearIfCooled(stack, itemEntity.level());
+        itemEntity.setItem(stack);
+    }
+
+    private void addHeatTooltip(ItemTooltipEvent event) {
+        if (event.getEntity() == null) {
+            return;
+        }
+        long remainingTicks = WorkpieceHeat.remainingTicks(event.getItemStack(), event.getEntity().level());
+        if (remainingTicks > 0) {
+            event.getToolTip().add(net.minecraft.network.chat.Component.translatable("tooltip.mobstoolforging.heated_workpiece", Math.max(1L, remainingTicks / 20L)));
         }
     }
 

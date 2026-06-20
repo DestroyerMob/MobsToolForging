@@ -1,6 +1,7 @@
 package org.destroyermob.mobstoolforging.world;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -55,6 +56,8 @@ public final class MaterialCatalog {
     );
 
     private static final Map<ResourceLocation, ToolMaterialDefinition> DEFINITIONS = new LinkedHashMap<>();
+    private static final Map<String, LinkedHashSet<ResourceLocation>> EXTRA_VISUAL_MATERIALS = new LinkedHashMap<>();
+    private static final Map<Item, ResourceLocation> CUSTOM_HANDLE_MATERIALS = new LinkedHashMap<>();
     private static final List<ResourceLocation> STARTER_MATERIALS = List.of(IRON, GOLD, COPPER, NETHERITE, DIAMOND, EMERALD);
     private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(OAK, DARK_OAK, BLAZE, BREEZE);
     private static final List<ResourceLocation> BINDING_MATERIALS = STARTER_MATERIALS;
@@ -130,7 +133,7 @@ public final class MaterialCatalog {
     }
 
     public static List<ResourceLocation> visualMaterialIds(String materialFrom) {
-        return switch (materialFrom) {
+        List<ResourceLocation> base = switch (materialFrom) {
             case "headMaterial" -> STARTER_MATERIALS;
             case "handleMaterial" -> HANDLE_MATERIALS;
             case "bindingMaterial" -> BINDING_MATERIALS;
@@ -139,6 +142,28 @@ public final class MaterialCatalog {
             case "treatment" -> TREATMENT_MATERIALS;
             default -> List.of();
         };
+        LinkedHashSet<ResourceLocation> values = new LinkedHashSet<>(base);
+        values.addAll(EXTRA_VISUAL_MATERIALS.getOrDefault(materialFrom, new LinkedHashSet<>()));
+        return List.copyOf(values);
+    }
+
+    public static synchronized void registerMaterial(ToolMaterialDefinition definition) {
+        DEFINITIONS.put(definition.id(), definition);
+        registerVisualMaterial("headMaterial", definition.id());
+        registerVisualMaterial("bindingMaterial", definition.id());
+    }
+
+    public static synchronized void registerMaterial(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier) {
+        registerMaterial(new ToolMaterialDefinition(id, category, displayItem, tier));
+    }
+
+    public static synchronized void registerVisualMaterial(String materialFrom, ResourceLocation materialId) {
+        EXTRA_VISUAL_MATERIALS.computeIfAbsent(materialFrom, ignored -> new LinkedHashSet<>()).add(materialId);
+    }
+
+    public static synchronized void registerHandleMaterial(Item item, ResourceLocation materialId) {
+        CUSTOM_HANDLE_MATERIALS.put(item, materialId);
+        registerVisualMaterial("handleMaterial", materialId);
     }
 
     public static ItemStack displayStack(ResourceLocation materialId) {
@@ -155,8 +180,12 @@ public final class MaterialCatalog {
         if (handle.is(Items.BREEZE_ROD) || handle.is(Tags.Items.RODS_BREEZE)) {
             return BREEZE;
         }
+        ResourceLocation customHandle = CUSTOM_HANDLE_MATERIALS.get(handle.getItem());
+        if (customHandle != null) {
+            return customHandle;
+        }
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(handle.getItem());
-        return HANDLE_MATERIALS.contains(itemId) ? itemId : OAK;
+        return visualMaterialIds("handleMaterial").contains(itemId) ? itemId : OAK;
     }
 
     public static ResourceLocation bindingMaterial(ItemStack stack) {

@@ -18,8 +18,8 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModBlocks.TOOL_FORGE.get(), ModBlocks.LAPIDARY_TABLE.get());
-        tag(BlockTags.NEEDS_STONE_TOOL).add(ModBlocks.TOOL_FORGE.get());
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModBlocks.TOOL_FORGE.get(), ModBlocks.LAPIDARY_TABLE.get(), ModBlocks.HEATING_FORGE.get());
+        tag(BlockTags.NEEDS_STONE_TOOL).add(ModBlocks.TOOL_FORGE.get(), ModBlocks.HEATING_FORGE.get());
         tag(ModTags.Blocks.INCORRECT_FOR_FLINT_TOOL)
                 .addTag(BlockTags.NEEDS_IRON_TOOL)
                 .addTag(BlockTags.NEEDS_DIAMOND_TOOL)

@@ -36,6 +36,7 @@ public final class MobsToolForgingClient {
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntities.TOOL_WORKSTATION.get(), ToolForgeRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.HEATING_FORGE.get(), HeatingForgeRenderer::new);
     }
 
     private static void registerGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {

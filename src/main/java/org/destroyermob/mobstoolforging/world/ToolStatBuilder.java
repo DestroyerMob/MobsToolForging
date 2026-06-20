@@ -38,11 +38,15 @@ public final class ToolStatBuilder {
     }
 
     public static ToolStatProfile build(ToolKind toolKind, ToolConstructionData construction) {
+        return build(ToolTypeRegistry.toolType(toolKind).orElseThrow(), construction);
+    }
+
+    public static ToolStatProfile build(ToolTypeDefinition definition, ToolConstructionData construction) {
         Tier headTier = MaterialCatalog.definition(construction.headMaterial()).orElseThrow().tier();
-        WorkingStats stats = new WorkingStats(
+        MutableStats stats = new MutableStats(
                 headTier.getUses(),
-                baseAttackDamageBonus(toolKind, construction.headMaterial()),
-                baseAttackSpeedBonus(toolKind, construction.headMaterial())
+                definition.baseAttackDamageBonus(construction.headMaterial()),
+                definition.baseAttackSpeedBonus(construction.headMaterial())
         );
 
         stats.addDebug(line("Head", construction.headMaterial(), ""));
@@ -51,11 +55,12 @@ public final class ToolStatBuilder {
             stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
         }
         applyHandle(stats, construction.handleMaterial());
-        applyBindingOrGuard(stats, toolKind, construction.bindingMaterial());
+        applyBindingOrGuard(stats, definition.swordLike(), construction.bindingMaterial());
         applyWrap(stats, construction.wrapMaterial());
         applyFocus(stats, construction.focusMaterial());
         applyTreatment(stats, construction);
         applyQuality(stats, construction.quality());
+        ToolTypeRegistry.applyStatModifiers(definition, construction, stats);
 
         int maxDamage = Math.max(1, Math.round(stats.baseMaxDamage * stats.durabilityMultiplier));
         return new ToolStatProfile(
@@ -72,14 +77,21 @@ public final class ToolStatBuilder {
     }
 
     public static void apply(ItemStack stack, ToolKind toolKind, ToolConstructionData construction) {
-        ToolStatProfile profile = build(toolKind, construction);
+        apply(stack, ToolTypeRegistry.toolType(toolKind).orElseThrow(), construction);
+    }
+
+    public static void apply(ItemStack stack, ToolTypeDefinition definition, ToolConstructionData construction) {
+        ToolStatProfile profile = build(definition, construction);
         Tier headTier = MaterialCatalog.definition(construction.headMaterial()).orElseThrow().tier();
         Tier adjustedTier = adjustedTier(headTier, profile);
 
         stack.set(DataComponents.MAX_DAMAGE, profile.maxDamage());
         stack.set(DataComponents.DAMAGE, 0);
-        stack.set(DataComponents.TOOL, toolComponent(toolKind, adjustedTier));
-        stack.set(DataComponents.ATTRIBUTE_MODIFIERS, toolAttributes(toolKind, adjustedTier, profile));
+        Tool tool = toolComponent(definition, adjustedTier);
+        if (tool != null) {
+            stack.set(DataComponents.TOOL, tool);
+        }
+        stack.set(DataComponents.ATTRIBUTE_MODIFIERS, toolAttributes(definition, adjustedTier, profile));
         stack.set(ModDataComponents.TOOL_STAT_PROFILE.get(), profile);
         if (profile.fireResistant()) {
             stack.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
@@ -91,9 +103,13 @@ public final class ToolStatBuilder {
     }
 
     public static ToolStatProfile profileForTooltip(ItemStack stack, ToolKind toolKind, ToolConstructionData construction) {
+        return profileForTooltip(stack, ToolTypeRegistry.toolType(toolKind).orElseThrow(), construction);
+    }
+
+    public static ToolStatProfile profileForTooltip(ItemStack stack, ToolTypeDefinition definition, ToolConstructionData construction) {
         return profile(stack)
                 .filter(profile -> !profile.traits().isEmpty() && !profile.traits().contains(LEGACY_NETHER_TOUCHED_TRAIT))
-                .orElseGet(() -> build(toolKind, construction));
+                .orElseGet(() -> build(definition, construction));
     }
 
     public static List<ResourceLocation> enchantAffinities(ItemStack stack) {
@@ -105,20 +121,28 @@ public final class ToolStatBuilder {
     }
 
     public static boolean shouldBeFireResistant(ItemStack stack, ToolKind toolKind) {
+        return shouldBeFireResistant(stack, ToolTypeRegistry.toolType(toolKind).orElseThrow());
+    }
+
+    public static boolean shouldBeFireResistant(ItemStack stack, ToolTypeDefinition definition) {
         ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
         if (construction != null) {
-            return build(toolKind, construction).fireResistant();
+            return build(definition, construction).fireResistant();
         }
         return profile(stack).map(ToolStatProfile::fireResistant).orElseGet(() -> stack.has(DataComponents.FIRE_RESISTANT));
     }
 
     public static void ensureFireResistanceComponent(ItemStack stack, ToolKind toolKind) {
-        if (shouldBeFireResistant(stack, toolKind) && !stack.has(DataComponents.FIRE_RESISTANT)) {
+        ensureFireResistanceComponent(stack, ToolTypeRegistry.toolType(toolKind).orElseThrow());
+    }
+
+    public static void ensureFireResistanceComponent(ItemStack stack, ToolTypeDefinition definition) {
+        if (shouldBeFireResistant(stack, definition) && !stack.has(DataComponents.FIRE_RESISTANT)) {
             stack.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
         }
     }
 
-    private static void applyHandle(WorkingStats stats, ResourceLocation handle) {
+    private static void applyHandle(MutableStats stats, ResourceLocation handle) {
         if (MaterialCatalog.DARK_OAK.equals(handle)) {
             stats.durabilityMultiplier *= 1.08F;
             stats.attackSpeedBonus -= 0.05F;
@@ -142,7 +166,7 @@ public final class ToolStatBuilder {
         }
     }
 
-    private static void applyBindingOrGuard(WorkingStats stats, ToolKind toolKind, Optional<ResourceLocation> material) {
+    private static void applyBindingOrGuard(MutableStats stats, boolean guardLike, Optional<ResourceLocation> material) {
         if (material.isEmpty()) {
             return;
         }
@@ -178,10 +202,10 @@ public final class ToolStatBuilder {
             note = "+Fortune";
             stats.addTrait(ToolTrait.FORTUNATE);
         }
-        stats.addDebug(line(toolKind == ToolKind.SWORD ? "Guard" : "Binding", value, note));
+        stats.addDebug(line(guardLike ? "Guard" : "Binding", value, note));
     }
 
-    private static void applyWrap(WorkingStats stats, Optional<ResourceLocation> material) {
+    private static void applyWrap(MutableStats stats, Optional<ResourceLocation> material) {
         if (material.isEmpty()) {
             return;
         }
@@ -195,7 +219,7 @@ public final class ToolStatBuilder {
         stats.addDebug(line("Wrap", value, note));
     }
 
-    private static void applyFocus(WorkingStats stats, Optional<ResourceLocation> material) {
+    private static void applyFocus(MutableStats stats, Optional<ResourceLocation> material) {
         if (material.isEmpty()) {
             return;
         }
@@ -209,7 +233,7 @@ public final class ToolStatBuilder {
         stats.addDebug(line("Focus", value, note));
     }
 
-    private static void applyTreatment(WorkingStats stats, ToolConstructionData construction) {
+    private static void applyTreatment(MutableStats stats, ToolConstructionData construction) {
         if (construction.treatment().isEmpty()) {
             return;
         }
@@ -234,7 +258,7 @@ public final class ToolStatBuilder {
         stats.addDebug(line("Treatment", treatment, note));
     }
 
-    private static void applyQuality(WorkingStats stats, int quality) {
+    private static void applyQuality(MutableStats stats, int quality) {
         float qualityMultiplier = Math.max(0.90F, Math.min(1.10F, 1.0F + (quality - ToolConstructionData.DEFAULT_QUALITY) * 0.002F));
         stats.durabilityMultiplier *= qualityMultiplier;
         stats.miningSpeedMultiplier *= 1.0F + (qualityMultiplier - 1.0F) * 0.5F;
@@ -268,6 +292,18 @@ public final class ToolStatBuilder {
         };
     }
 
+    private static Tool toolComponent(ToolTypeDefinition definition, Tier tier) {
+        if (definition.builtInKind().isPresent()) {
+            return toolComponent(definition.builtInKind().get(), tier);
+        }
+        if (definition.swordLike()) {
+            return SwordItem.createToolProperties();
+        }
+        return definition.miningTag()
+                .map(tier::createToolProperties)
+                .orElse(null);
+    }
+
     private static ItemAttributeModifiers toolAttributes(ToolKind toolKind, Tier tier, ToolStatProfile profile) {
         return switch (toolKind) {
             case SWORD -> SwordItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
@@ -275,7 +311,17 @@ public final class ToolStatBuilder {
         };
     }
 
-    private static float baseAttackDamageBonus(ToolKind toolKind, ResourceLocation materialId) {
+    private static ItemAttributeModifiers toolAttributes(ToolTypeDefinition definition, Tier tier, ToolStatProfile profile) {
+        if (definition.builtInKind().isPresent()) {
+            return toolAttributes(definition.builtInKind().get(), tier, profile);
+        }
+        if (definition.swordLike()) {
+            return SwordItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
+        }
+        return DiggerItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
+    }
+
+    public static float builtInBaseAttackDamageBonus(ToolKind toolKind, ResourceLocation materialId) {
         return switch (toolKind) {
             case SWORD -> 3.0F;
             case SHOVEL -> 1.5F;
@@ -285,7 +331,7 @@ public final class ToolStatBuilder {
         };
     }
 
-    private static float baseAttackSpeedBonus(ToolKind toolKind, ResourceLocation materialId) {
+    public static float builtInBaseAttackSpeedBonus(ToolKind toolKind, ResourceLocation materialId) {
         return switch (toolKind) {
             case SWORD -> -2.4F;
             case SHOVEL -> -3.0F;
@@ -333,7 +379,7 @@ public final class ToolStatBuilder {
         return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, path);
     }
 
-    private static final class WorkingStats {
+    public static final class MutableStats {
         private final int baseMaxDamage;
         private float attackDamageBonus;
         private float attackSpeedBonus;
@@ -344,22 +390,46 @@ public final class ToolStatBuilder {
         private final Set<ResourceLocation> traits = new LinkedHashSet<>();
         private final List<String> debugLines = new ArrayList<>();
 
-        private WorkingStats(int baseMaxDamage, float attackDamageBonus, float attackSpeedBonus) {
+        private MutableStats(int baseMaxDamage, float attackDamageBonus, float attackSpeedBonus) {
             this.baseMaxDamage = baseMaxDamage;
             this.attackDamageBonus = attackDamageBonus;
             this.attackSpeedBonus = attackSpeedBonus;
         }
 
-        private void addAffinities(ResourceLocation... values) {
+        public void addAffinities(ResourceLocation... values) {
             affinities.addAll(List.of(values));
         }
 
-        private void addTrait(ToolTrait trait) {
+        public void addTrait(ToolTrait trait) {
             traits.add(trait.id());
         }
 
-        private void addDebug(String line) {
+        public void addTrait(ResourceLocation trait) {
+            traits.add(trait);
+        }
+
+        public void addDebug(String line) {
             debugLines.add(line);
+        }
+
+        public void multiplyDurability(float multiplier) {
+            durabilityMultiplier *= multiplier;
+        }
+
+        public void multiplyMiningSpeed(float multiplier) {
+            miningSpeedMultiplier *= multiplier;
+        }
+
+        public void addAttackDamage(float value) {
+            attackDamageBonus += value;
+        }
+
+        public void addAttackSpeed(float value) {
+            attackSpeedBonus += value;
+        }
+
+        public void setFireResistant() {
+            fireResistant = true;
         }
     }
 }

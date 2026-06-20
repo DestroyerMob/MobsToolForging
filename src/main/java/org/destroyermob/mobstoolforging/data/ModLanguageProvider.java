@@ -15,6 +15,7 @@ public class ModLanguageProvider extends LanguageProvider {
     protected void addTranslations() {
         addBlock(ModBlocks.TOOL_FORGE, "Tool Forge");
         addBlock(ModBlocks.LAPIDARY_TABLE, "Lapidary Table");
+        addBlock(ModBlocks.HEATING_FORGE, "Heating Forge");
         addItem(ModItems.SMITHING_HAMMER, "Smithing Hammer");
         addItem(ModItems.FLINT_SHARD, "Flint Shard");
         addItem(ModItems.FLINT_KNIFE, "Flint Knife");
@@ -82,6 +83,17 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.complete", "The tool part is ready.");
         add("message.mobstoolforging.inventory_full", "Make room before taking the finished part.");
         add("message.mobstoolforging.station_status", "Materials: %s/%s, Progress: %s/%s");
+        add("message.mobstoolforging.metal_needs_heat", "Heat this metal in a Heating Forge first.");
+        add("message.mobstoolforging.heating_disabled", "Forge heating is disabled.");
+        add("message.mobstoolforging.heating_fuel_added", "Fuel added.");
+        add("message.mobstoolforging.heating_workpiece_added", "Workpiece placed.");
+        add("message.mobstoolforging.heating_workpiece_busy", "Remove the current workpiece first.");
+        add("message.mobstoolforging.heating_gems_rejected", "Gems are cut on a Lapidary Table.");
+        add("message.mobstoolforging.heating_needs_fuel", "Add fuel before lighting the forge.");
+        add("message.mobstoolforging.heating_ignited", "Heating forge lit.");
+        add("message.mobstoolforging.heating_lit", "The forge is burning.");
+        add("message.mobstoolforging.heating_status", "Add fuel, place metal, then light the forge.");
+        add("tooltip.mobstoolforging.heated_workpiece", "Heated: %ss remaining");
         add("tooltip.mobstoolforging.traits", "Traits");
         add("tooltip.mobstoolforging.hold_shift", "Hold Shift for construction");
         add("tooltip.mobstoolforging.construction", "Construction");

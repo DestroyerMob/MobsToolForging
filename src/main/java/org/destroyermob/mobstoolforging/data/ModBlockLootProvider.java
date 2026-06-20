@@ -17,10 +17,11 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
     protected void generate() {
         dropSelf(ModBlocks.TOOL_FORGE.get());
         dropSelf(ModBlocks.LAPIDARY_TABLE.get());
+        dropSelf(ModBlocks.HEATING_FORGE.get());
     }
 
     @Override
     protected Iterable<Block> getKnownBlocks() {
-        return Set.of(ModBlocks.TOOL_FORGE.get(), ModBlocks.LAPIDARY_TABLE.get());
+        return Set.of(ModBlocks.TOOL_FORGE.get(), ModBlocks.LAPIDARY_TABLE.get(), ModBlocks.HEATING_FORGE.get());
     }
 }

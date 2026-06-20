@@ -10,7 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import org.destroyermob.mobstoolforging.MobsToolForging;
-import org.destroyermob.mobstoolforging.world.ToolKind;
+import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
+import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 
 public final class PartedToolModelLoader implements IGeometryLoader<PartedToolGeometry> {
     private final boolean partModel;
@@ -29,15 +30,16 @@ public final class PartedToolModelLoader implements IGeometryLoader<PartedToolGe
         ResourceLocation visualId = visual == null
                 ? ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, toolId)
                 : ResourceLocation.parse(visual);
-        if (toolId == null) {
-            toolId = visualId.getPath();
-        }
-        String resolvedToolId = toolId;
-        ToolKind toolKind = ToolKind.byId(resolvedToolId)
-                .orElseThrow(() -> new JsonParseException("Unknown tool type for parted tool model: " + resolvedToolId));
-        String partType = GsonHelper.getAsString(jsonObject, "part_type", toolKind.partType());
+        ResourceLocation toolTypeId = toolId == null
+                ? visualId
+                : toolId.contains(":")
+                ? ResourceLocation.parse(toolId)
+                : ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, toolId);
+        ToolTypeDefinition definition = ToolTypeRegistry.toolType(toolTypeId)
+                .orElseThrow(() -> new JsonParseException("Unknown tool type for parted tool model: " + toolTypeId));
+        String partType = GsonHelper.getAsString(jsonObject, "part_type", definition.primaryPartType());
         String partSlot = GsonHelper.getAsString(jsonObject, "part_slot", partType);
-        return new PartedToolGeometry(toolKind, visualId, partModel, partType, partSlot, readTextures(jsonObject));
+        return new PartedToolGeometry(definition, visualId, partModel, partType, partSlot, readTextures(jsonObject));
     }
 
     private static Map<String, ResourceLocation> readTextures(JsonObject jsonObject) {

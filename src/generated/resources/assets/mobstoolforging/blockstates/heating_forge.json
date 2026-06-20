@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "mobstoolforging:block/heating_forge",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "mobstoolforging:block/heating_forge"
+    },
+    "facing=south": {
+      "model": "mobstoolforging:block/heating_forge",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mobstoolforging:block/heating_forge",
+      "y": 270
+    }
+  }
+}

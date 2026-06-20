@@ -1,8 +1,10 @@
 package org.destroyermob.mobstoolforging.client.model;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -28,7 +30,9 @@ public final class PartedToolSpriteSet {
             if (materialFrom.isEmpty()) {
                 continue;
             }
-            for (ResourceLocation material : MaterialCatalog.visualMaterialIds(materialFrom.get())) {
+            Set<ResourceLocation> materialIds = new LinkedHashSet<>(MaterialCatalog.visualMaterialIds(materialFrom.get()));
+            materialIds.addAll(layer.materials());
+            for (ResourceLocation material : materialIds) {
                 ToolPartSpriteKey key = new ToolPartSpriteKey(visual.id(), layer.slot(), material);
                 readSprite(context, spriteGetter, textureOverrides, key.modelTextureKey()).ifPresent(sprite -> sprites.put(key, sprite));
             }

@@ -1,54 +1,63 @@
 package org.destroyermob.mobstoolforging.recipe;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
-import org.destroyermob.mobstoolforging.item.ModularToolItem;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
-import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.registry.ModTags;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
+import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
+import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 
 public class ModularToolRecipe extends CustomRecipe {
-    private final ToolKind toolKind;
+    private final ResourceLocation toolTypeId;
 
     public ModularToolRecipe(CraftingBookCategory category, ToolKind toolKind) {
+        this(category, ToolConstructionData.toolType(toolKind));
+    }
+
+    public ModularToolRecipe(CraftingBookCategory category, ResourceLocation toolTypeId) {
         super(category);
-        this.toolKind = toolKind;
+        this.toolTypeId = toolTypeId;
     }
 
     @Override
     public boolean matches(CraftingInput input, Level level) {
-        return findParts(input).isValid(toolKind);
+        return definition().map(definition -> findParts(input, definition).isValid(definition)).orElse(false);
     }
 
     @Override
     public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
-        Parts parts = findParts(input);
-        if (!parts.isValid(toolKind)) {
+        ToolTypeDefinition definition = definition().orElse(null);
+        if (definition == null) {
+            return ItemStack.EMPTY;
+        }
+        Parts parts = findParts(input, definition);
+        if (!parts.isValid(definition)) {
             return ItemStack.EMPTY;
         }
         ToolPartData partData = parts.part().get(ModDataComponents.TOOL_PART.get());
-        Item item = toolKind.toolItem().get();
-        if (!(item instanceof ModularToolItem modularTool)) {
-            return ItemStack.EMPTY;
-        }
-        return modularTool.create(new ToolConstructionData(
-                ToolConstructionData.toolType(toolKind),
+        return definition.createTool(new ToolConstructionData(
+                definition.id(),
                 partData.materialId(),
                 MaterialCatalog.handleMaterial(parts.handle()),
-                material(parts.binding(), MaterialCatalog::bindingMaterial),
+                parts.bindingMaterial(),
                 material(parts.wrap(), MaterialCatalog::wrapMaterial),
                 material(parts.focus(), MaterialCatalog::focusMaterial),
                 material(parts.treatment(), MaterialCatalog::treatmentMaterial),
@@ -58,28 +67,37 @@ public class ModularToolRecipe extends CustomRecipe {
 
     @Override
     public boolean canCraftInDimensions(int width, int height) {
-        return width * height >= (toolKind == ToolKind.SWORD ? 3 : 2);
+        return width * height >= 2;
     }
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return ModRecipeSerializers.serializerFor(toolKind).get();
+        Optional<ToolKind> builtInKind = ToolKind.byId(toolTypeId.getPath())
+                .filter(kind -> ToolConstructionData.toolType(kind).equals(toolTypeId));
+        return builtInKind
+                .<RecipeSerializer<?>>map(kind -> ModRecipeSerializers.serializerFor(kind).get())
+                .orElseGet(() -> ModRecipeSerializers.MODULAR_TOOL.get());
     }
 
-    private Parts findParts(CraftingInput input) {
+    private Optional<ToolTypeDefinition> definition() {
+        return ToolTypeRegistry.toolType(toolTypeId);
+    }
+
+    private Parts findParts(CraftingInput input, ToolTypeDefinition definition) {
         ItemStack part = ItemStack.EMPTY;
         ItemStack handle = ItemStack.EMPTY;
         ItemStack binding = ItemStack.EMPTY;
         ItemStack wrap = ItemStack.EMPTY;
         ItemStack focus = ItemStack.EMPTY;
         ItemStack treatment = ItemStack.EMPTY;
+        Map<String, ItemStack> requiredParts = new LinkedHashMap<>();
         for (int i = 0; i < input.size(); i++) {
             ItemStack stack = input.getItem(i);
             if (stack.isEmpty()) {
                 continue;
             }
             ToolPartData partData = stack.get(ModDataComponents.TOOL_PART.get());
-            if (stack.is(toolKind.partItem().get()) && partData != null && toolKind.partType().equals(partData.partType())) {
+            if (matchesPart(definition, stack, partData, definition.primaryPartType())) {
                 if (MaterialCatalog.definition(partData.materialId()).isEmpty()) {
                     return Parts.invalid();
                 }
@@ -89,14 +107,15 @@ public class ModularToolRecipe extends CustomRecipe {
                 part = stack;
                 continue;
             }
-            if (toolKind == ToolKind.SWORD && stack.is(ModItems.SWORD_GUARD.get()) && partData != null && ToolPartData.SWORD_GUARD.equals(partData.partType())) {
+            String requiredPart = matchingRequiredPart(definition, stack, partData).orElse(null);
+            if (requiredPart != null) {
                 if (MaterialCatalog.definition(partData.materialId()).isEmpty()) {
                     return Parts.invalid();
                 }
-                if (!binding.isEmpty()) {
+                if (requiredParts.containsKey(requiredPart)) {
                     return Parts.invalid();
                 }
-                binding = stack;
+                requiredParts.put(requiredPart, stack);
                 continue;
             }
             if (stack.is(ModTags.Items.TOOL_HANDLES)) {
@@ -107,7 +126,7 @@ public class ModularToolRecipe extends CustomRecipe {
                 continue;
             }
             if (stack.is(ModTags.Items.TOOL_BINDINGS)) {
-                if (toolKind == ToolKind.SWORD) {
+                if (!definition.requiredAssemblyParts().isEmpty()) {
                     return Parts.invalid();
                 }
                 if (!binding.isEmpty()) {
@@ -139,11 +158,24 @@ public class ModularToolRecipe extends CustomRecipe {
             }
             return Parts.invalid();
         }
-        return new Parts(part, handle, binding, wrap, focus, treatment);
+        return new Parts(part, handle, binding, requiredParts, wrap, focus, treatment);
     }
 
     private Optional<ResourceLocation> material(ItemStack stack, MaterialResolver resolver) {
         return stack.isEmpty() ? Optional.empty() : Optional.of(resolver.resolve(stack));
+    }
+
+    private static boolean matchesPart(ToolTypeDefinition definition, ItemStack stack, ToolPartData partData, String partType) {
+        if (partData == null || !partType.equals(partData.partType())) {
+            return false;
+        }
+        return definition.partItem(partType).map(stack::is).orElse(true);
+    }
+
+    private static Optional<String> matchingRequiredPart(ToolTypeDefinition definition, ItemStack stack, ToolPartData partData) {
+        return definition.requiredAssemblyParts().stream()
+                .filter(partType -> matchesPart(definition, stack, partData, partType))
+                .findFirst();
     }
 
     @FunctionalInterface
@@ -151,13 +183,52 @@ public class ModularToolRecipe extends CustomRecipe {
         ResourceLocation resolve(ItemStack stack);
     }
 
-    private record Parts(ItemStack part, ItemStack handle, ItemStack binding, ItemStack wrap, ItemStack focus, ItemStack treatment) {
+    private record Parts(ItemStack part, ItemStack handle, ItemStack binding, Map<String, ItemStack> requiredParts, ItemStack wrap, ItemStack focus, ItemStack treatment) {
         private static Parts invalid() {
-            return new Parts(ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY);
+            return new Parts(ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, Map.of(), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY);
         }
 
-        private boolean isValid(ToolKind toolKind) {
-            return !part.isEmpty() && !handle.isEmpty() && (toolKind != ToolKind.SWORD || !binding.isEmpty());
+        private boolean isValid(ToolTypeDefinition definition) {
+            return !part.isEmpty()
+                    && !handle.isEmpty()
+                    && requiredParts.keySet().containsAll(definition.requiredAssemblyParts());
+        }
+
+        private Optional<ResourceLocation> bindingMaterial() {
+            if (!requiredParts.isEmpty()) {
+                return requiredParts.values().stream().findFirst().map(MaterialCatalog::bindingMaterial);
+            }
+            return binding.isEmpty() ? Optional.empty() : Optional.of(MaterialCatalog.bindingMaterial(binding));
+        }
+    }
+
+    public static final class Serializer implements RecipeSerializer<ModularToolRecipe> {
+        private static final MapCodec<ModularToolRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                CraftingBookCategory.CODEC.optionalFieldOf("category", CraftingBookCategory.EQUIPMENT).forGetter(ModularToolRecipe::category),
+                ResourceLocation.CODEC.fieldOf("tool_type").forGetter(recipe -> recipe.toolTypeId)
+        ).apply(instance, ModularToolRecipe::new));
+        private static final StreamCodec<RegistryFriendlyByteBuf, ModularToolRecipe> STREAM_CODEC = StreamCodec.of(
+                Serializer::write,
+                Serializer::read
+        );
+
+        @Override
+        public MapCodec<ModularToolRecipe> codec() {
+            return CODEC;
+        }
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, ModularToolRecipe> streamCodec() {
+            return STREAM_CODEC;
+        }
+
+        private static ModularToolRecipe read(RegistryFriendlyByteBuf buffer) {
+            return new ModularToolRecipe(CraftingBookCategory.STREAM_CODEC.decode(buffer), buffer.readResourceLocation());
+        }
+
+        private static void write(RegistryFriendlyByteBuf buffer, ModularToolRecipe recipe) {
+            CraftingBookCategory.STREAM_CODEC.encode(buffer, recipe.category());
+            buffer.writeResourceLocation(recipe.toolTypeId);
         }
     }
 }

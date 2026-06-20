@@ -1,5 +1,6 @@
 {
   "values": [
-    "mobstoolforging:tool_forge"
+    "mobstoolforging:tool_forge",
+    "mobstoolforging:heating_forge"
   ]
 }

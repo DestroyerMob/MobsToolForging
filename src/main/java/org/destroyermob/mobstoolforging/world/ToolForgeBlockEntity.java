@@ -24,7 +24,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private static final String DISPLAY_ROTATION_TAG = "DisplayRotation";
 
     @Nullable
-    private ForgeTemplate template;
+    private ResourceLocation templateId;
     @Nullable
     private ResourceLocation materialId;
     @Nullable
@@ -38,8 +38,8 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     @Nullable
-    public ForgeTemplate template() {
-        return template;
+    public ForgeTemplateDefinition template() {
+        return templateId == null ? null : ToolTypeRegistry.template(templateId).orElse(null);
     }
 
     public int materialCount() {
@@ -60,6 +60,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public float progress() {
+        ForgeTemplateDefinition template = template();
         if (template == null) {
             return 0.0F;
         }
@@ -67,10 +68,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean isEmpty() {
-        return template == null && materialId == null && materialItemId == null && materialCount == 0 && hitCount == 0;
+        return templateId == null && materialId == null && materialItemId == null && materialCount == 0 && hitCount == 0;
     }
 
     public boolean isComplete() {
+        ForgeTemplateDefinition template = template();
         return template != null && materialCount >= template.requiredMaterials() && hitCount >= template.requiredHits();
     }
 
@@ -78,18 +80,18 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return materialId == null && materialItemId == null && materialCount == 0 && hitCount == 0;
     }
 
-    public boolean selectTemplate(ForgeTemplate template) {
+    public boolean selectTemplate(ForgeTemplateDefinition template) {
         return setTemplateFromItem(template);
     }
 
-    public boolean setTemplateFromItem(ForgeTemplate template) {
-        if (this.template == template) {
+    public boolean setTemplateFromItem(ForgeTemplateDefinition template) {
+        if (this.templateId != null && this.templateId.equals(template.id())) {
             return true;
         }
         if (!canChangeTemplate()) {
             return false;
         }
-        this.template = template;
+        this.templateId = template.id();
         materialId = null;
         materialItemId = null;
         materialCount = 0;
@@ -100,21 +102,22 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean clearTemplate() {
-        if (template == null || !canChangeTemplate()) {
+        if (templateId == null || !canChangeTemplate()) {
             return false;
         }
-        template = null;
+        templateId = null;
         displayRotationDegrees = 0.0F;
         sync();
         return true;
     }
 
     public int remainingMaterials() {
+        ForgeTemplateDefinition template = template();
         return template == null ? 0 : Math.max(0, template.requiredMaterials() - materialCount);
     }
 
     public int acceptMaterials(ItemStack stack, ToolMaterialDefinition material) {
-        if (template == null || isComplete()) {
+        if (template() == null || isComplete()) {
             return 0;
         }
         if (materialId != null && !materialId.equals(material.id())) {
@@ -134,6 +137,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean canHammer() {
+        ForgeTemplateDefinition template = template();
         return template != null && materialCount >= template.requiredMaterials() && !isComplete();
     }
 
@@ -148,6 +152,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public ItemStack outputStack() {
+        ForgeTemplateDefinition template = template();
         return isComplete() && template != null && materialId != null ? template.outputStack(materialId) : ItemStack.EMPTY;
     }
 
@@ -177,7 +182,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public void reset() {
-        template = null;
+        templateId = null;
         materialId = null;
         materialItemId = null;
         materialCount = 0;
@@ -217,8 +222,8 @@ public class ToolForgeBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        if (template != null) {
-            tag.putString(TEMPLATE_TAG, template.id());
+        if (templateId != null) {
+            tag.putString(TEMPLATE_TAG, templateId.toString());
         }
         if (materialId != null) {
             tag.putString(MATERIAL_ID_TAG, materialId.toString());
@@ -234,7 +239,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        template = ForgeTemplate.byId(tag.getString(TEMPLATE_TAG)).orElse(null);
+        templateId = tag.contains(TEMPLATE_TAG) ? ResourceLocation.parse(tag.getString(TEMPLATE_TAG)) : null;
         materialId = tag.contains(MATERIAL_ID_TAG) ? ResourceLocation.parse(tag.getString(MATERIAL_ID_TAG)) : null;
         materialItemId = tag.contains(MATERIAL_ITEM_ID_TAG) ? ResourceLocation.parse(tag.getString(MATERIAL_ITEM_ID_TAG)) : null;
         materialCount = tag.getInt(MATERIAL_COUNT_TAG);
