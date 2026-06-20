@@ -66,13 +66,19 @@ public final class HeatingForgeVoxelRenderer {
         float clampedHeat = clamp(heat);
         boolean whiteHot = clampedHeat >= WHITE_HOT_THRESHOLD;
         ResourceLocation hotTexture = visual.hotTexture();
+        float hotBlend = hotTexture == null ? 0.0F : smoothstep(WHITE_HOT_TEXTURE_START, 1.0F, clampedHeat);
+        float baseAlpha = 1.0F - hotBlend;
         int baseLight = whiteHot ? LightTexture.FULL_BRIGHT : packedLight;
-        renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), baseLight, packedOverlay, baseColor(clampedHeat));
-        if (clampedHeat >= HEAT_GLOW_THRESHOLD) {
+        if (baseAlpha > 0.01F) {
+            RenderType baseRenderType = baseAlpha >= 0.999F ? RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS) : RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
+            int visibleBaseColor = baseAlpha >= 0.999F ? baseColor(clampedHeat) : withAlpha(baseColor(clampedHeat), baseAlpha);
+            renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(baseRenderType), baseLight, packedOverlay, visibleBaseColor);
+        }
+        if (clampedHeat >= HEAT_GLOW_THRESHOLD && baseAlpha > 0.01F) {
             poseStack.pushPose();
             float heatScale = 1.012F + clampedHeat * 0.024F;
             poseStack.scale(heatScale, heatScale, heatScale);
-            renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, heatGlowColor(clampedHeat));
+            renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, multiplyAlpha(heatGlowColor(clampedHeat), baseAlpha));
             poseStack.popPose();
         }
         if (hotTexture != null && clampedHeat >= WHITE_HOT_TEXTURE_START) {
@@ -81,7 +87,7 @@ public final class HeatingForgeVoxelRenderer {
             poseStack.pushPose();
             float hotScale = 1.002F + clampedHeat * 0.004F;
             poseStack.scale(hotScale, hotScale, hotScale);
-            renderModel(model, hotSprite, centerSample(hotTexture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, withAlpha(0xFFFFFFFF, smoothstep(WHITE_HOT_TEXTURE_START, 1.0F, clampedHeat)));
+            renderModel(model, hotSprite, centerSample(hotTexture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, withAlpha(0xFFFFFFFF, hotBlend));
             poseStack.popPose();
         }
         if (clampedHeat >= HEAT_GLOW_THRESHOLD) {
@@ -241,6 +247,11 @@ public final class HeatingForgeVoxelRenderer {
 
     private static int withAlpha(int color, float alpha) {
         return Math.round(clamp(alpha) * 255.0F) << 24 | color & 0x00FFFFFF;
+    }
+
+    private static int multiplyAlpha(int color, float multiplier) {
+        float alpha = (color >>> 24 & 0xFF) / 255.0F;
+        return withAlpha(color, alpha * multiplier);
     }
 
     private static float smoothstep(float from, float to, float value) {
