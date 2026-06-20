@@ -55,7 +55,7 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
         poseStack.translate(localX, 0.0F, localZ);
         poseStack.mulPose(Axis.YP.rotationDegrees(localRotation));
         poseStack.scale(scale, scale, scale);
-        HeatingForgeVoxelRenderer.render(visual.model(), visual.visual().texture(), poseStack, bufferSource, packedLight, packedOverlay, heat);
+        HeatingForgeVoxelRenderer.render(visual.model(), visual.visual(), poseStack, bufferSource, packedLight, packedOverlay, heat);
         poseStack.popPose();
     }
 

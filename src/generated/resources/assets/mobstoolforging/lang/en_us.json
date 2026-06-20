@@ -75,6 +75,7 @@
   "message.mobstoolforging.need_materials": "Place the required matching materials before working.",
   "message.mobstoolforging.select_template": "Use a pattern item on this station.",
   "message.mobstoolforging.sneak_hint": "Use a pattern item, or an empty hand to check the station.",
+  "message.mobstoolforging.station_cleared": "Work cleared.",
   "message.mobstoolforging.station_status": "Materials: %s/%s, Progress: %s/%s",
   "message.mobstoolforging.template_cleared": "Template cleared.",
   "message.mobstoolforging.template_selected": "Selected %s.",

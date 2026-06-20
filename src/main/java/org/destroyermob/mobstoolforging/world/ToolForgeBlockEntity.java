@@ -88,6 +88,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return materialId == null && materialItemId == null && materialHeatData == null && materialCount == 0 && hitCount == 0;
     }
 
+    public boolean hasPlacedWork() {
+        return materialId != null || materialItemId != null || materialHeatData != null || materialCount > 0 || hitCount > 0;
+    }
+
     public boolean selectTemplate(ForgeTemplateDefinition template) {
         return setTemplateFromItem(template);
     }
@@ -189,6 +193,21 @@ public class ToolForgeBlockEntity extends BlockEntity {
             reset();
         }
         return output;
+    }
+
+    public ItemStack removePlacedWork() {
+        if (!hasPlacedWork()) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack removed = materialDropStack();
+        materialId = null;
+        materialItemId = null;
+        materialHeatData = null;
+        materialCount = 0;
+        hitCount = 0;
+        displayRotationDegrees = 0.0F;
+        sync();
+        return removed;
     }
 
     public void reset() {

@@ -1,17 +1,19 @@
 {
   "fallback_fuel": {
     "model": "mobstoolforging:block/heating_forge/fuel_chunk",
-    "fuel_texture": "minecraft:item/coal"
+    "fuel_texture": "minecraft:block/coal_block"
   },
   "fallback_workpiece": {
     "model": "mobstoolforging:block/heating_forge/billet",
-    "billet_texture": "minecraft:block/iron_block"
+    "billet_texture": "minecraft:block/iron_block",
+    "hot_texture": "mobstoolforging:block/heating_forge/white_hot_billet",
+    "glow_texture": "mobstoolforging:block/heating_forge/billet_glow"
   },
   "entries": [
     {
       "fuel": "minecraft:coal",
       "model": "mobstoolforging:block/heating_forge/fuel_chunk",
-      "fuel_texture": "minecraft:item/coal"
+      "fuel_texture": "minecraft:block/coal_block"
     },
     {
       "fuel": "minecraft:charcoal",
@@ -33,7 +35,7 @@
       "workpiece": "minecraft:gold_ingot",
       "material": "mobstoolforging:gold",
       "model": "mobstoolforging:block/heating_forge/billet",
-      "billet_texture": "minecraft:item/gold_ingot"
+      "billet_texture": "minecraft:block/gold_block"
     },
     {
       "workpiece": "minecraft:copper_ingot",

@@ -6,6 +6,11 @@
       "prefix": "generated/tool_parts/"
     },
     {
+      "type": "minecraft:directory",
+      "source": "block/heating_forge",
+      "prefix": "block/heating_forge/"
+    },
+    {
       "type": "minecraft:single",
       "resource": "minecraft:item/coal"
     },

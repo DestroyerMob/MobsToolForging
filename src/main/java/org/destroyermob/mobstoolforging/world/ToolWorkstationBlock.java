@@ -78,18 +78,11 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof ToolForgeBlockEntity forge)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
+        if (player.isShiftKeyDown()) {
+            return itemResult(handleSneakUse(forge, level, pos, player), level);
+        }
         if (stack.getItem() instanceof ToolTemplateItem templateItem) {
             return applyTemplateItem(templateItem, forge, level, pos, player);
-        }
-        if (player.isShiftKeyDown()) {
-            if (debugTemplateSelectorEnabled()) {
-                openTemplateSelector(level, pos, player);
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
-            }
-            if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.sneak_hint"), true);
-            }
-            return ItemInteractionResult.CONSUME;
         }
         if (tryCollectOutput(forge, player)) {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
@@ -105,27 +98,10 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (player.isShiftKeyDown()) {
-            if (level.getBlockEntity(pos) instanceof ToolForgeBlockEntity forge && forge.template() != null) {
-                if (forge.canChangeTemplate()) {
-                    if (!level.isClientSide && forge.clearTemplate()) {
-                        level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.6F, 1.15F);
-                        player.displayClientMessage(Component.translatable("message.mobstoolforging.template_cleared"), true);
-                    }
-                    return InteractionResult.sidedSuccess(level.isClientSide);
-                }
-                if (!level.isClientSide) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.forge_busy"), true);
-                }
-                return InteractionResult.CONSUME;
-            }
-            if (debugTemplateSelectorEnabled()) {
-                openTemplateSelector(level, pos, player);
-                return InteractionResult.sidedSuccess(level.isClientSide);
-            }
-            return InteractionResult.CONSUME;
-        }
         if (level.getBlockEntity(pos) instanceof ToolForgeBlockEntity forge) {
+            if (player.isShiftKeyDown()) {
+                return handleSneakUse(forge, level, pos, player);
+            }
             if (tryCollectOutput(forge, player)) {
                 return InteractionResult.sidedSuccess(level.isClientSide);
             }
@@ -199,6 +175,40 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         return ItemInteractionResult.CONSUME;
     }
 
+    private static InteractionResult handleSneakUse(ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (tryCollectOutput(forge, player)) {
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+        if (tryClearPlacedWork(forge, player, level, pos)) {
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+        if (forge.template() != null) {
+            if (forge.canChangeTemplate()) {
+                if (!level.isClientSide && forge.clearTemplate()) {
+                    level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.6F, 1.15F);
+                    player.displayClientMessage(Component.translatable("message.mobstoolforging.template_cleared"), true);
+                }
+                return InteractionResult.sidedSuccess(level.isClientSide);
+            }
+            if (!level.isClientSide) {
+                player.displayClientMessage(Component.translatable("message.mobstoolforging.forge_busy"), true);
+            }
+            return InteractionResult.CONSUME;
+        }
+        if (debugTemplateSelectorEnabled()) {
+            openTemplateSelector(level, pos, player);
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+        if (!level.isClientSide) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.sneak_hint"), true);
+        }
+        return InteractionResult.CONSUME;
+    }
+
+    private static ItemInteractionResult itemResult(InteractionResult result, Level level) {
+        return result.consumesAction() ? ItemInteractionResult.sidedSuccess(level.isClientSide) : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
     private ItemInteractionResult work(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
         if (level.isClientSide) {
             return ItemInteractionResult.SUCCESS;
@@ -225,6 +235,22 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
         }
         return ItemInteractionResult.CONSUME;
+    }
+
+    private static boolean tryClearPlacedWork(ToolForgeBlockEntity forge, Player player, Level level, BlockPos pos) {
+        if (!forge.hasPlacedWork()) {
+            return false;
+        }
+        if (level.isClientSide) {
+            return true;
+        }
+        ItemStack removed = forge.removePlacedWork();
+        if (!removed.isEmpty() && !player.getInventory().add(removed)) {
+            player.drop(removed, false);
+        }
+        level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.55F, 1.05F);
+        player.displayClientMessage(Component.translatable("message.mobstoolforging.station_cleared"), true);
+        return true;
     }
 
     private static boolean tryCollectOutput(ToolForgeBlockEntity forge, Player player) {
