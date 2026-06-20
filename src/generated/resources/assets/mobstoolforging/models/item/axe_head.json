@@ -5,6 +5,7 @@
   "part_slot": "axe_head",
   "part_type": "axe_head",
   "textures": {
+    "layer_axe_head_copper": "mobstoolforging:source/tool_parts/copper/copper_axe_head_part",
     "layer_axe_head_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_axe_head_part",
     "layer_axe_head_gold": "mobstoolforging:source/tool_parts/gold/gold_axe_head_part",
     "layer_axe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_axe_head_part",

@@ -5,6 +5,7 @@
   "part_slot": "guard",
   "part_type": "sword_guard",
   "textures": {
+    "layer_guard_copper": "mobstoolforging:source/tool_parts/copper/copper_sword_guard_part",
     "layer_guard_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_sword_guard_part",
     "layer_guard_gold": "mobstoolforging:source/tool_parts/gold/gold_sword_guard_part",
     "layer_guard_iron": "mobstoolforging:source/tool_parts/iron/iron_sword_guard_part",

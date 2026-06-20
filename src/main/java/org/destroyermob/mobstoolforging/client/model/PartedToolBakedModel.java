@@ -128,7 +128,7 @@ public final class PartedToolBakedModel implements BakedModel {
                 if (layer.optional()) {
                     continue;
                 }
-                return Optional.empty();
+                sprite = Optional.of(sprites.missing());
             }
             if (particle == null && layer.materialFrom().filter("headMaterial"::equals).isPresent()) {
                 particle = sprite.get();

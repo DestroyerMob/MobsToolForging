@@ -100,7 +100,7 @@ public final class PartedToolPartBakedModel implements BakedModel {
         TextureAtlasSprite sprite = sprites.resolve(visual.id(), partLayer.slot(), material)
                 .orElseGet(() -> {
                     warnMissingPartSprite(material);
-                    return sprites.particle();
+                    return sprites.missing();
                 });
         List<BakedQuad> quads = quadFactory.bakeLayer(0, sprite);
         return new ResolvedPartedItemModel(quads, sprite, transforms);

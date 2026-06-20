@@ -5,6 +5,7 @@
   "part_slot": "pickaxe_head",
   "part_type": "pickaxe_head",
   "textures": {
+    "layer_pickaxe_head_copper": "mobstoolforging:source/tool_parts/copper/copper_pickaxe_head_part",
     "layer_pickaxe_head_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_pickaxe_head_part",
     "layer_pickaxe_head_gold": "mobstoolforging:source/tool_parts/gold/gold_pickaxe_head_part",
     "layer_pickaxe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_pickaxe_head_part",

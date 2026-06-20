@@ -5,6 +5,7 @@
   "part_slot": "hoe_head",
   "part_type": "hoe_head",
   "textures": {
+    "layer_hoe_head_copper": "mobstoolforging:source/tool_parts/copper/copper_hoe_head_part",
     "layer_hoe_head_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_hoe_head_part",
     "layer_hoe_head_gold": "mobstoolforging:source/tool_parts/gold/gold_hoe_head_part",
     "layer_hoe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_hoe_head_part",

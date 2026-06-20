@@ -5,6 +5,7 @@
   "part_slot": "shovel_head",
   "part_type": "shovel_head",
   "textures": {
+    "layer_shovel_head_copper": "mobstoolforging:source/tool_parts/copper/copper_shovel_head_part",
     "layer_shovel_head_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_shovel_head_part",
     "layer_shovel_head_gold": "mobstoolforging:source/tool_parts/gold/gold_shovel_head_part",
     "layer_shovel_head_iron": "mobstoolforging:source/tool_parts/iron/iron_shovel_head_part",

@@ -68,6 +68,12 @@ assets/<namespace>/tooling/tool_visuals/<tool_type>.json
 
 If a material or tool shape needs to render, add explicit source sprites or resource-pack overrides.
 
+## Diagnostics And Fallbacks
+
+The layered tool model logs missing sprites once per unique layer/material/key. Required missing layers render with Minecraft's missing-texture sprite so the broken layer is visible in-game instead of silently disappearing or replacing the whole tool with an unrelated fallback. Optional missing layers are skipped and logged once when that optional material is actually present on the stack.
+
+If an explicit model texture override resolves to the missing texture, the client log includes the model texture key and requested sprite path. Treat that as a bad path, missing atlas source, or missing resource-pack override.
+
 ## Bridge Mod Visuals
 
 Bridge mods can use the same override paths in their own namespace. For non-MTF material ids, make the material visible to the model loader in one of two ways:
