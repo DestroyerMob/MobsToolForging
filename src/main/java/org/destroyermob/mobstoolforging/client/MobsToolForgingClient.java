@@ -3,13 +3,16 @@ package org.destroyermob.mobstoolforging.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
 
@@ -20,6 +23,7 @@ public final class MobsToolForgingClient {
     public static void register(IEventBus eventBus) {
         eventBus.addListener(MobsToolForgingClient::registerRenderers);
         eventBus.addListener(MobsToolForgingClient::registerGeometryLoaders);
+        eventBus.addListener(MobsToolForgingClient::registerItemDecorations);
     }
 
     public static void openTemplateScreen(BlockPos pos) {
@@ -42,5 +46,18 @@ public final class MobsToolForgingClient {
     private static void registerGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
         event.register(ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "parted_tool"), new PartedToolModelLoader(false));
         event.register(ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "parted_tool_part"), new PartedToolModelLoader(true));
+    }
+
+    private static void registerItemDecorations(RegisterItemDecorationsEvent event) {
+        event.register(Items.IRON_INGOT, HeatItemDecorator.INSTANCE);
+        event.register(Items.GOLD_INGOT, HeatItemDecorator.INSTANCE);
+        event.register(Items.COPPER_INGOT, HeatItemDecorator.INSTANCE);
+        event.register(Items.NETHERITE_INGOT, HeatItemDecorator.INSTANCE);
+        event.register(ModItems.SWORD_BLADE.get(), HeatItemDecorator.INSTANCE);
+        event.register(ModItems.SWORD_GUARD.get(), HeatItemDecorator.INSTANCE);
+        event.register(ModItems.SHOVEL_HEAD.get(), HeatItemDecorator.INSTANCE);
+        event.register(ModItems.PICKAXE_HEAD.get(), HeatItemDecorator.INSTANCE);
+        event.register(ModItems.AXE_HEAD.get(), HeatItemDecorator.INSTANCE);
+        event.register(ModItems.HOE_HEAD.get(), HeatItemDecorator.INSTANCE);
     }
 }

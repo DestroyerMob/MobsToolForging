@@ -81,7 +81,6 @@
   "screen.mobstoolforging.tool_forge_templates": "Tool Templates",
   "tooltip.mobstoolforging.construction": "Construction",
   "tooltip.mobstoolforging.debug": "Debug",
-  "tooltip.mobstoolforging.heated_workpiece": "Heated: %ss remaining",
   "tooltip.mobstoolforging.hold_shift": "Hold Shift for construction",
   "tooltip.mobstoolforging.none": "None",
   "tooltip.mobstoolforging.part.binding": "Binding",
@@ -131,5 +130,8 @@
   "tooltip.mobstoolforging.trait.workmanship_good.desc": "slightly improves the finish",
   "tooltip.mobstoolforging.trait.workmanship_rough": "Rough Workmanship",
   "tooltip.mobstoolforging.trait.workmanship_rough.desc": "slightly weakens the finish",
-  "tooltip.mobstoolforging.traits": "Traits"
+  "tooltip.mobstoolforging.traits": "Traits",
+  "tooltip.mobstoolforging.workpiece_not_ready": "Not hot enough to forge",
+  "tooltip.mobstoolforging.workpiece_ready": "Ready to forge",
+  "tooltip.mobstoolforging.workpiece_temperature": "Temperature: %s%%"
 }

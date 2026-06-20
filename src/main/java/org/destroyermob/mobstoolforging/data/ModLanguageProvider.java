@@ -93,7 +93,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.heating_ignited", "Heating forge lit.");
         add("message.mobstoolforging.heating_lit", "The forge is burning.");
         add("message.mobstoolforging.heating_status", "Add fuel, place metal, then light the forge.");
-        add("tooltip.mobstoolforging.heated_workpiece", "Heated: %ss remaining");
+        add("tooltip.mobstoolforging.workpiece_temperature", "Temperature: %s%%");
+        add("tooltip.mobstoolforging.workpiece_ready", "Ready to forge");
+        add("tooltip.mobstoolforging.workpiece_not_ready", "Not hot enough to forge");
         add("tooltip.mobstoolforging.traits", "Traits");
         add("tooltip.mobstoolforging.hold_shift", "Hold Shift for construction");
         add("tooltip.mobstoolforging.construction", "Construction");

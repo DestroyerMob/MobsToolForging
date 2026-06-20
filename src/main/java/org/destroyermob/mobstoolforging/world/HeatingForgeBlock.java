@@ -214,7 +214,19 @@ public class HeatingForgeBlock extends BaseEntityBlock {
     }
 
     private static void giveOrDrop(Player player, ItemStack stack) {
-        if (!stack.isEmpty() && !player.getInventory().add(stack)) {
+        if (stack.isEmpty()) {
+            return;
+        }
+        if (WorkpieceHeat.hasHeat(stack)) {
+            int freeSlot = player.getInventory().getFreeSlot();
+            if (freeSlot >= 0) {
+                player.getInventory().setItem(freeSlot, stack);
+                return;
+            }
+            player.drop(stack, false);
+            return;
+        }
+        if (!player.getInventory().add(stack)) {
             player.drop(stack, false);
         }
     }

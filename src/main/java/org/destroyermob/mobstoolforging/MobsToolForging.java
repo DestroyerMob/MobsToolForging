@@ -4,7 +4,9 @@ import com.mojang.logging.LogUtils;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -190,13 +192,16 @@ public class MobsToolForging {
     }
 
     private void addHeatTooltip(ItemTooltipEvent event) {
-        if (event.getEntity() == null) {
+        ItemStack stack = event.getItemStack();
+        float temperature = event.getEntity() == null ? WorkpieceHeat.storedTemperature(stack) : WorkpieceHeat.temperature(stack, event.getEntity().level());
+        if (temperature <= 0.0F) {
             return;
         }
-        long remainingTicks = WorkpieceHeat.remainingTicks(event.getItemStack(), event.getEntity().level());
-        if (remainingTicks > 0) {
-            event.getToolTip().add(net.minecraft.network.chat.Component.translatable("tooltip.mobstoolforging.heated_workpiece", Math.max(1L, remainingTicks / 20L)));
-        }
+        boolean forgeReady = event.getEntity() == null
+                ? WorkpieceHeat.data(stack).map(data -> data.workable() && data.temperature() > 0.0F).orElse(false)
+                : WorkpieceHeat.isHot(stack, event.getEntity().level());
+        event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.workpiece_temperature", Math.round(temperature * 100.0F)).withStyle(forgeReady ? ChatFormatting.GOLD : ChatFormatting.RED));
+        event.getToolTip().add(Component.translatable(forgeReady ? "tooltip.mobstoolforging.workpiece_ready" : "tooltip.mobstoolforging.workpiece_not_ready").withStyle(ChatFormatting.DARK_GRAY));
     }
 
     private static List<ResourceLocation> vanillaToolRecipes(String materialPrefix) {

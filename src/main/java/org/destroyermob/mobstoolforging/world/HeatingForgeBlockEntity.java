@@ -68,6 +68,8 @@ public class HeatingForgeBlockEntity extends BlockEntity {
                     changed = true;
                     sync = true;
                 }
+            } else if (sync) {
+                WorkpieceHeat.setTemperature(forge.workpieceStack, level, forge.heatProgressFraction(), false);
             }
         } else if (!forge.workpieceStack.isEmpty() && forge.heatProgress > 0) {
             int visualProgress = forge.coolingVisualProgress(level, requiredTicks);
@@ -135,7 +137,7 @@ public class HeatingForgeBlockEntity extends BlockEntity {
             return false;
         }
         workpieceStack = stack.split(1);
-        heatProgress = WorkpieceHeat.isHot(workpieceStack, levelOrThrow()) ? MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get() : 0;
+        heatProgress = Math.round(WorkpieceHeat.temperature(workpieceStack, levelOrThrow()) * MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get());
         sync();
         return true;
     }
@@ -155,6 +157,14 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     }
 
     public ItemStack removeWorkpiece() {
+        if (level != null && !workpieceStack.isEmpty() && heatProgress > 0) {
+            int requiredTicks = MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get();
+            if (heatProgress >= requiredTicks) {
+                WorkpieceHeat.heat(workpieceStack, level);
+            } else {
+                WorkpieceHeat.setTemperature(workpieceStack, level, heatProgressFraction(), false);
+            }
+        }
         ItemStack result = workpieceStack;
         workpieceStack = ItemStack.EMPTY;
         heatProgress = 0;
@@ -218,12 +228,7 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     }
 
     private int coolingVisualProgress(Level level, int requiredTicks) {
-        long remainingTicks = WorkpieceHeat.remainingTicks(workpieceStack, level);
-        if (remainingTicks > 0L) {
-            int coolingTicks = MobsToolForgingConfig.COOLING_TICKS.get();
-            return Math.min(requiredTicks, (int) Math.ceil(requiredTicks * (remainingTicks / (double) coolingTicks)));
-        }
-        return Math.max(0, heatProgress - 1);
+        return Math.round(WorkpieceHeat.temperature(workpieceStack, level) * requiredTicks);
     }
 
     public void sync() {
