@@ -102,6 +102,7 @@ dependencies {
     localRuntime 'maven.modrinth:jade:15.10.5+neoforge'
     localRuntime 'curse.maven:durability-tooltip-511040:6833316'
     localRuntime 'maven.modrinth:supermartijn642s-config-lib:1.1.8-neoforge-mc1.21'
+    localRuntime files('/Users/ethanhellyer/Documents/Minecraft Mods/MoreWeapons/build/libs/mobsmoreweapons-0.4-1.21.1-neoforge.jar')
 }
 
 var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {

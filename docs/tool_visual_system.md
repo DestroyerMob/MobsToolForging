@@ -76,6 +76,18 @@ Registered external tool types can use the same model loader by setting `tool` t
 }
 ```
 
+External final-tool and part item models do not have to replace their base
+`layer0` models just to support MTF-crafted stacks. MTF wraps ordinary inventory
+models and switches to component-driven layered rendering when a stack has
+`TOOL_CONSTRUCTION` or `TOOL_PART` data. Stacks without those components still
+render through the original item model.
+
+The automatic path expects part textures next to the external item textures:
+`<part_item>_tool` for final tools and `<part_item>_part` for standalone parts.
+Use `mobstoolforging:parted_tool` or `mobstoolforging:parted_tool_part` item
+models when a compat pack needs explicit texture keys or a custom resource-pack
+override.
+
 Tool visual layers can include extra material ids:
 
 ```json

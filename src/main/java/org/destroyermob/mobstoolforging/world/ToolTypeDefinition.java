@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import net.minecraft.resources.ResourceLocation;
@@ -70,6 +71,10 @@ public final class ToolTypeDefinition {
     public Optional<Item> partItem(String partType) {
         Supplier<? extends Item> supplier = partItems.get(partType);
         return supplier == null ? Optional.empty() : Optional.of(supplier.get());
+    }
+
+    public Set<String> partTypes() {
+        return partItems.keySet();
     }
 
     public List<String> requiredAssemblyParts() {

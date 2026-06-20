@@ -1,6 +1,7 @@
 package org.destroyermob.mobstoolforging.client;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -11,6 +12,7 @@ import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.client.model.ComponentDrivenToolBakedModel;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModItems;
@@ -24,6 +26,7 @@ public final class MobsToolForgingClient {
     public static void register(IEventBus eventBus) {
         eventBus.addListener(MobsToolForgingClient::registerRenderers);
         eventBus.addListener(MobsToolForgingClient::registerGeometryLoaders);
+        eventBus.addListener(MobsToolForgingClient::wrapComponentDrivenItemModels);
         eventBus.addListener(MobsToolForgingClient::registerItemDecorations);
         eventBus.addListener(MobsToolForgingClient::registerReloadListeners);
     }
@@ -48,6 +51,15 @@ public final class MobsToolForgingClient {
     private static void registerGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
         event.register(ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "parted_tool"), new PartedToolModelLoader(false));
         event.register(ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "parted_tool_part"), new PartedToolModelLoader(true));
+    }
+
+    private static void wrapComponentDrivenItemModels(ModelEvent.ModifyBakingResult event) {
+        event.getModels().replaceAll((location, model) -> {
+            if (!ModelResourceLocation.INVENTORY_VARIANT.equals(location.variant()) || !ComponentDrivenToolBakedModel.shouldWrap(model)) {
+                return model;
+            }
+            return new ComponentDrivenToolBakedModel(model);
+        });
     }
 
     private static void registerItemDecorations(RegisterItemDecorationsEvent event) {

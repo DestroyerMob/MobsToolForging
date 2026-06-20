@@ -211,6 +211,24 @@ External finished tools can use the dynamic model loader:
 }
 ```
 
+MTF also wraps ordinary inventory item models at bake time. If an external stack
+has MTF's `TOOL_CONSTRUCTION` or `TOOL_PART` component, MTF will attempt to
+render it from the registered tool type and visual definitions even if the
+external item's own model is still a plain `layer0` model. Plain external stacks
+without MTF components keep their original model.
+
+The component-driven renderer uses these default texture conventions:
+
+- final tool layer for part item `namespace:iron_great_sword_blade`:
+  `namespace:item/iron_great_sword_blade_tool`
+- standalone part layer for part item `namespace:iron_great_sword_blade`:
+  `namespace:item/iron_great_sword_blade_part`
+- handles use MTF's built-in handle sprites.
+
+Use explicit `mobstoolforging:parted_tool` or `parted_tool_part` item models
+only when a compat pack needs to override those conventions or fully control
+model resources.
+
 External visual definitions can list extra material ids per layer so the model loader knows which sprites to collect:
 
 ```json
