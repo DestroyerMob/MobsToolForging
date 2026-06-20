@@ -5,16 +5,21 @@ import java.util.List;
 import java.util.Optional;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
@@ -53,6 +58,23 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     }
 
     @Override
+    public void registerItemSubtypes(ISubtypeRegistration registration) {
+        registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.TEMPLATE_PATTERN.get(), new ISubtypeInterpreter<>() {
+            @Override
+            public Object getSubtypeData(ItemStack stack, UidContext context) {
+                ResourceLocation template = stack.get(ModDataComponents.FORGE_TEMPLATE.get());
+                return template == null ? "" : template;
+            }
+
+            @Override
+            public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
+                ResourceLocation template = stack.get(ModDataComponents.FORGE_TEMPLATE.get());
+                return template == null ? "" : template.toString();
+            }
+        });
+    }
+
+    @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(ModItems.TOOL_FORGE.get(), FORGE_SHAPING, STATION_WORK);
         registration.addRecipeCatalyst(ModItems.LAPIDARY_TABLE.get(), FORGE_SHAPING, STATION_WORK);
@@ -77,7 +99,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 }
                 ItemStack materialStack = new ItemStack(material.get().displayItem(), template.requiredMaterials());
                 recipes.add(new ForgeShapingJeiRecipe(
-                        recipeId("forge_shaping/" + template.id().getPath() + "/" + materialId.getPath()),
+                        recipeId("forge_shaping/" + idPath(template.id()) + "/" + idPath(materialId)),
                         workstation,
                         template,
                         materialId,
@@ -152,20 +174,32 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     private static ItemStack patternFor(ForgeTemplateDefinition template) {
         String partType = template.partType();
-        return switch (partType) {
-            case ToolPartData.PICKAXE_HEAD -> new ItemStack(ModItems.PICKAXE_HEAD_PATTERN.get());
-            case ToolPartData.AXE_HEAD -> new ItemStack(ModItems.AXE_HEAD_PATTERN.get());
-            case ToolPartData.SHOVEL_HEAD -> new ItemStack(ModItems.SHOVEL_HEAD_PATTERN.get());
-            case ToolPartData.HOE_HEAD -> new ItemStack(ModItems.HOE_HEAD_PATTERN.get());
-            case ToolPartData.SWORD_BLADE -> new ItemStack(ModItems.SWORD_BLADE_PATTERN.get());
-            case ToolPartData.SWORD_GUARD -> new ItemStack(ModItems.SWORD_GUARD_PATTERN.get());
-            case ToolPartData.SMITHING_HAMMER_HEAD -> new ItemStack(ModItems.SMITHING_HAMMER_HEAD_PATTERN.get());
-            default -> ItemStack.EMPTY;
-        };
+        if (template.id().getNamespace().equals(MobsToolForging.MOD_ID)) {
+            ItemStack builtInPattern = switch (partType) {
+                case ToolPartData.PICKAXE_HEAD -> new ItemStack(ModItems.PICKAXE_HEAD_PATTERN.get());
+                case ToolPartData.AXE_HEAD -> new ItemStack(ModItems.AXE_HEAD_PATTERN.get());
+                case ToolPartData.SHOVEL_HEAD -> new ItemStack(ModItems.SHOVEL_HEAD_PATTERN.get());
+                case ToolPartData.HOE_HEAD -> new ItemStack(ModItems.HOE_HEAD_PATTERN.get());
+                case ToolPartData.SWORD_BLADE -> new ItemStack(ModItems.SWORD_BLADE_PATTERN.get());
+                case ToolPartData.SWORD_GUARD -> new ItemStack(ModItems.SWORD_GUARD_PATTERN.get());
+                case ToolPartData.SMITHING_HAMMER_HEAD -> new ItemStack(ModItems.SMITHING_HAMMER_HEAD_PATTERN.get());
+                default -> ItemStack.EMPTY;
+            };
+            if (!builtInPattern.isEmpty()) {
+                return builtInPattern;
+            }
+        }
+        ItemStack pattern = new ItemStack(ModItems.TEMPLATE_PATTERN.get());
+        pattern.set(ModDataComponents.FORGE_TEMPLATE.get(), template.id());
+        return pattern;
     }
 
     private static ResourceLocation recipeId(String path) {
         return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, path);
+    }
+
+    private static String idPath(ResourceLocation id) {
+        return id.getNamespace() + "/" + id.getPath();
     }
 
     static ItemStack smithingAnvilIcon() {
