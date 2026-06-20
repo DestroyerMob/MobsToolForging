@@ -12,11 +12,11 @@ import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 
 public enum ToolKind {
-    SWORD("sword", "sword_blade", 2),
+    SWORD("sword", "sword_blade", 1),
     SHOVEL("shovel", "shovel_head", 1),
-    PICKAXE("pickaxe", "pickaxe_head", 3),
-    AXE("axe", "axe_head", 3),
-    HOE("hoe", "hoe_head", 2);
+    PICKAXE("pickaxe", "pickaxe_head", 2),
+    AXE("axe", "axe_head", 2),
+    HOE("hoe", "hoe_head", 1);
 
     private final String id;
     private final String partType;

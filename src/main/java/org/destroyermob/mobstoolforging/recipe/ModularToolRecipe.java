@@ -24,6 +24,7 @@ import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
 import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
+import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 public class ModularToolRecipe extends CustomRecipe {
     private final ResourceLocation toolTypeId;
@@ -95,6 +96,9 @@ public class ModularToolRecipe extends CustomRecipe {
             ItemStack stack = input.getItem(i);
             if (stack.isEmpty()) {
                 continue;
+            }
+            if (WorkpieceHeat.hasHeat(stack)) {
+                return Parts.invalid();
             }
             ToolPartData partData = stack.get(ModDataComponents.TOOL_PART.get());
             if (matchesPart(definition, stack, partData, definition.primaryPartType())) {

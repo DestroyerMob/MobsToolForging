@@ -14,6 +14,7 @@ public final class MobsToolForgingConfig {
     public static final ModConfigSpec.DoubleValue FLINT_KNAPPING_BONUS_SHARD_CHANCE;
     public static final ModConfigSpec.BooleanValue ENABLE_FORGE_HEATING;
     public static final ModConfigSpec.BooleanValue REQUIRE_HEATED_METAL;
+    public static final ModConfigSpec.DoubleValue MINIMUM_FORGE_TEMPERATURE;
     public static final ModConfigSpec.IntValue HEATED_WORKPIECE_TICKS;
     public static final ModConfigSpec.IntValue COOLING_TICKS;
     public static final ModConfigSpec.BooleanValue ENABLE_BLOOMERY;
@@ -57,6 +58,9 @@ public final class MobsToolForgingConfig {
         REQUIRE_HEATED_METAL = builder
                 .comment("When true, metal materials must be heated before they can be placed on the Smithing Anvil.")
                 .define("requireHeatedMetal", true);
+        MINIMUM_FORGE_TEMPERATURE = builder
+                .comment("Default minimum metal temperature required for forging. 0.9 means 90%. Datapack forge templates can override this per template.")
+                .defineInRange("minimumForgeTemperature", 0.9D, 0.0D, 1.0D);
         HEATED_WORKPIECE_TICKS = builder
                 .comment("Ticks required for the Heating Forge to heat a metal workpiece.")
                 .defineInRange("heatedWorkpieceTicks", 1200, 1, 20 * 60 * 60);

@@ -8,6 +8,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
+import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 import net.neoforged.neoforge.client.model.generators.CustomLoaderBuilder;
 import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
@@ -15,6 +16,7 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModItems;
+import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolPartSpriteKey;
 import org.destroyermob.mobstoolforging.world.ToolKind;
@@ -49,7 +51,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         Block heatingForge = ModBlocks.HEATING_FORGE.get();
         ModelFile heatingForgeModel = new ModelFile.UncheckedModelFile(modLoc("block/heating_forge"));
-        horizontalBlock(heatingForge, heatingForgeModel);
+        heatingForgeBlock(heatingForge, heatingForgeModel);
         simpleBlockItem(heatingForge, heatingForgeModel);
 
         smithingHammerModel();
@@ -70,6 +72,23 @@ public class ModBlockStateProvider extends BlockStateProvider {
         swordGuardPartModel();
     }
 
+    private void heatingForgeBlock(Block block, ModelFile model) {
+        getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(model)
+                .rotationY(heatingForgeRotation(state.getValue(HeatingForgeBlock.FACING)))
+                .build()
+        );
+    }
+
+    private static int heatingForgeRotation(Direction facing) {
+        return switch (facing) {
+            case EAST -> 180;
+            case SOUTH -> 270;
+            case WEST -> 0;
+            default -> 90;
+        };
+    }
+
     private void smithingHammerModel() {
         ItemModelBuilder builder = itemModels().getBuilder("smithing_hammer")
                 .texture("0", mcLoc("block/oak_log"))
@@ -82,7 +101,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND).rotation(0, 90, 0).end()
                 .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND).rotation(0, 90, 0).end()
                 .transform(ItemDisplayContext.GROUND).translation(0, 2, 0).scale(0.5F).end()
-                .transform(ItemDisplayContext.GUI).rotation(45, 45, -45).translation(0, -0.75F, 0).scale(0.5F).end()
+                .transform(ItemDisplayContext.GUI).rotation(45, 45, 0).scale(0.5F).end()
                 .end();
 
         var handle = builder.element().from(7, 0, 7).to(9, 20, 9);

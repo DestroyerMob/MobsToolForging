@@ -31,6 +31,16 @@ public final class ToolTypeRegistry {
         registerBuiltIn(ToolKind.PICKAXE);
         registerBuiltIn(ToolKind.AXE);
         registerBuiltIn(ToolKind.HOE);
+        registerBuiltInTemplates();
+    }
+
+    public static synchronized void resetTemplatesToBuiltIns() {
+        bootstrap();
+        TEMPLATES.clear();
+        registerBuiltInTemplates();
+    }
+
+    private static void registerBuiltInTemplates() {
         registerTemplate(ForgeTemplate.SWORD_BLADE.definition());
         registerTemplate(ForgeTemplate.SWORD_GUARD.definition());
         registerTemplate(ForgeTemplate.SHOVEL_HEAD.definition());

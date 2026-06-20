@@ -39,6 +39,12 @@ public final class WorkpieceHeat {
                 .isPresent();
     }
 
+    public static boolean isForgeReady(ItemStack stack, Level level, float minimumTemperature) {
+        return data(stack)
+                .filter(data -> data.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get()) >= clamp(minimumTemperature))
+                .isPresent();
+    }
+
     public static Optional<HeatedWorkpieceData> data(ItemStack stack) {
         return Optional.ofNullable(stack.get(ModDataComponents.HEATED_WORKPIECE.get()));
     }
@@ -63,10 +69,22 @@ public final class WorkpieceHeat {
         return storedTemperature(stack) > 0.0F;
     }
 
+    public static boolean quench(ItemStack stack) {
+        if (!hasHeat(stack)) {
+            return false;
+        }
+        stack.remove(ModDataComponents.HEATED_WORKPIECE.get());
+        return true;
+    }
+
     public static void clearIfCooled(ItemStack stack, Level level) {
         HeatedWorkpieceData data = stack.get(ModDataComponents.HEATED_WORKPIECE.get());
         if (data != null && data.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get()) <= 0.0F) {
             stack.remove(ModDataComponents.HEATED_WORKPIECE.get());
         }
+    }
+
+    private static float clamp(float value) {
+        return Math.max(0.0F, Math.min(1.0F, value));
     }
 }

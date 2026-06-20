@@ -202,9 +202,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
         sync();
     }
 
-    public boolean materialIsHot() {
-        return materialHeatData != null && level != null && materialHeatData.workable()
-                && materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get()) > 0.0F;
+    public boolean materialIsForgeReady() {
+        ForgeTemplateDefinition template = template();
+        return materialHeatData != null && level != null
+                && template != null
+                && materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get()) >= template.minimumTemperature();
     }
 
     private void captureMaterialHeat(ItemStack stack) {

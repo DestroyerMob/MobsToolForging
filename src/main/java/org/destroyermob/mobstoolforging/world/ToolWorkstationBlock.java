@@ -165,7 +165,8 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (level.isClientSide) {
             return ItemInteractionResult.SUCCESS;
         }
-        if (forge.template() == null) {
+        ForgeTemplateDefinition template = forge.template();
+        if (template == null) {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.select_template"), true);
             return ItemInteractionResult.CONSUME;
         }
@@ -180,8 +181,8 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (kind == WorkstationKind.TOOL_FORGE
                 && material.category() == MaterialCategory.METAL
                 && MobsToolForgingConfig.REQUIRE_HEATED_METAL.get()
-                && !WorkpieceHeat.isHot(stack, level)) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.metal_needs_heat"), true);
+                && !WorkpieceHeat.isForgeReady(stack, level, template.minimumTemperature())) {
+            player.displayClientMessage(metalNeedsHeatMessage(template), true);
             return ItemInteractionResult.CONSUME;
         }
         if (forge.materialId() != null && !forge.materialId().equals(material.id())) {
@@ -206,8 +207,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.need_materials"), true);
             return ItemInteractionResult.CONSUME;
         }
-        if (kind == WorkstationKind.TOOL_FORGE && MobsToolForgingConfig.REQUIRE_HEATED_METAL.get() && !forge.materialIsHot()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.metal_needs_heat"), true);
+        if (kind == WorkstationKind.TOOL_FORGE && MobsToolForgingConfig.REQUIRE_HEATED_METAL.get() && !forge.materialIsForgeReady()) {
+            ForgeTemplateDefinition template = forge.template();
+            player.displayClientMessage(template == null ? Component.translatable("message.mobstoolforging.metal_needs_heat") : metalNeedsHeatMessage(template), true);
             return ItemInteractionResult.CONSUME;
         }
         if (forge.hammer()) {
@@ -250,6 +252,10 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
 
     private static boolean debugTemplateSelectorEnabled() {
         return MobsToolForgingConfig.DEBUG_TEMPLATE_SELECTOR.get();
+    }
+
+    private static Component metalNeedsHeatMessage(ForgeTemplateDefinition template) {
+        return Component.translatable("message.mobstoolforging.metal_needs_heat_percent", Math.round(template.minimumTemperature() * 100.0F));
     }
 
     @Override

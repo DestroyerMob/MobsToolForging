@@ -84,6 +84,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.inventory_full", "Make room before taking the finished part.");
         add("message.mobstoolforging.station_status", "Materials: %s/%s, Progress: %s/%s");
         add("message.mobstoolforging.metal_needs_heat", "Heat this metal in a Heating Forge first.");
+        add("message.mobstoolforging.metal_needs_heat_percent", "Heat this metal to at least %s%% first.");
+        add("message.mobstoolforging.heated_parts_cannot_craft", "Quench or cool heated parts before crafting.");
         add("message.mobstoolforging.heating_disabled", "Forge heating is disabled.");
         add("message.mobstoolforging.heating_fuel_added", "Fuel added.");
         add("message.mobstoolforging.heating_workpiece_added", "Workpiece placed.");

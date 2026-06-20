@@ -199,11 +199,12 @@ public class HeatingForgeBlock extends BaseEntityBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        // The authored model's open/work side points west before blockstate rotation.
         return switch (state.getValue(FACING)) {
-            case EAST -> EAST_SHAPE;
-            case SOUTH -> SOUTH_SHAPE;
-            case WEST -> WEST_SHAPE;
-            default -> NORTH_SHAPE;
+            case EAST -> SOUTH_SHAPE;
+            case SOUTH -> WEST_SHAPE;
+            case WEST -> NORTH_SHAPE;
+            default -> EAST_SHAPE;
         };
     }
 

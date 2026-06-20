@@ -21,11 +21,13 @@ public final class HeatRenderUtil {
         }
 
         poseStack.pushPose();
+        poseStack.translate(0.0F, 0.0F, -0.018F);
         poseStack.scale(1.12F, 1.12F, 1.12F);
         itemRenderer.renderStatic(stack, context, LightTexture.FULL_BRIGHT, packedOverlay, poseStack, new HeatTintingBufferSource(bufferSource, clamped, HeatLayer.EDGE), level, 1);
         poseStack.popPose();
 
         poseStack.pushPose();
+        poseStack.translate(0.0F, 0.0F, -0.028F);
         poseStack.scale(0.96F, 0.96F, 0.96F);
         itemRenderer.renderStatic(stack, context, LightTexture.FULL_BRIGHT, packedOverlay, poseStack, new HeatTintingBufferSource(bufferSource, clamped, HeatLayer.CORE), level, 2);
         poseStack.popPose();

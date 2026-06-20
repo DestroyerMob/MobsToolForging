@@ -85,9 +85,12 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         poseStack.mulPose(Axis.YP.rotationDegrees(localRotation));
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.scale(scale, scale, scale);
-        itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
         float heat = level == null ? WorkpieceHeat.storedTemperature(stack) : WorkpieceHeat.temperature(stack, level);
-        HeatRenderUtil.renderHeatedItem(itemRenderer, stack, ItemDisplayContext.GROUND, packedOverlay, poseStack, bufferSource, level, heat);
+        if (heat > 0.02F) {
+            HeatRenderUtil.renderHeatedItem(itemRenderer, stack, ItemDisplayContext.GROUND, packedOverlay, poseStack, bufferSource, level, heat);
+        } else {
+            itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
+        }
         poseStack.popPose();
     }
 

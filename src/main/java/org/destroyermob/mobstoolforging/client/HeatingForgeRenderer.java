@@ -49,17 +49,21 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
         poseStack.mulPose(Axis.YP.rotationDegrees(localRotation));
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.scale(scale, scale, scale);
-        itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
-        HeatRenderUtil.renderHeatedItem(itemRenderer, stack, ItemDisplayContext.GROUND, packedOverlay, poseStack, bufferSource, level, heat);
+        if (heat > 0.02F) {
+            HeatRenderUtil.renderHeatedItem(itemRenderer, stack, ItemDisplayContext.GROUND, packedOverlay, poseStack, bufferSource, level, heat);
+        } else {
+            itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
+        }
         poseStack.popPose();
     }
 
     private static float facingRotation(Direction direction) {
+        // The authored forge model opens west before blockstate rotation.
         return switch (direction) {
-            case EAST -> 90.0F;
-            case SOUTH -> 180.0F;
-            case WEST -> 270.0F;
-            default -> 0.0F;
+            case EAST -> 180.0F;
+            case SOUTH -> 270.0F;
+            case WEST -> 0.0F;
+            default -> 90.0F;
         };
     }
 

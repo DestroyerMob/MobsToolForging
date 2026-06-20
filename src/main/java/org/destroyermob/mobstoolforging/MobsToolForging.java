@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -13,13 +14,16 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
@@ -29,6 +33,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -40,6 +45,7 @@ import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
+import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 import org.slf4j.Logger;
@@ -62,9 +68,12 @@ public class MobsToolForging {
 
         modEventBus.addListener(this::addCreativeTabContents);
         NeoForge.EVENT_BUS.addListener(this::knapFlintShard);
+        NeoForge.EVENT_BUS.addListener(this::quenchInWaterCauldron);
+        NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
         NeoForge.EVENT_BUS.addListener(this::removeDisabledEarlyToolRecipes);
         NeoForge.EVENT_BUS.addListener(this::coolPlayerWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::coolDroppedWorkpieces);
+        NeoForge.EVENT_BUS.addListener(this::blockHeatedCrafting);
         NeoForge.EVENT_BUS.addListener(this::addHeatTooltip);
 
         if (FMLEnvironment.dist.isClient()) {
@@ -173,6 +182,10 @@ public class MobsToolForging {
         }
     }
 
+    private void addReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(new ForgeTemplateReloadListener());
+    }
+
     private void coolPlayerWorkpieces(PlayerTickEvent.Post event) {
         if (event.getEntity().level().isClientSide) {
             return;
@@ -187,8 +200,41 @@ public class MobsToolForging {
             return;
         }
         ItemStack stack = itemEntity.getItem();
+        if (WorkpieceHeat.hasHeat(stack) && isQuenching(itemEntity)) {
+            if (WorkpieceHeat.quench(stack)) {
+                itemEntity.setItem(stack);
+                playQuenchEffects(itemEntity.level(), itemEntity.blockPosition());
+            }
+            return;
+        }
         WorkpieceHeat.clearIfCooled(stack, itemEntity.level());
         itemEntity.setItem(stack);
+    }
+
+    private void quenchInWaterCauldron(PlayerInteractEvent.RightClickBlock event) {
+        ItemStack stack = event.getItemStack();
+        if (!WorkpieceHeat.hasHeat(stack) || !event.getLevel().getBlockState(event.getPos()).is(Blocks.WATER_CAULDRON)) {
+            return;
+        }
+        event.setCanceled(true);
+        event.setCancellationResult(InteractionResult.SUCCESS);
+        if (event.getLevel().isClientSide) {
+            return;
+        }
+        WorkpieceHeat.quench(stack);
+        event.getEntity().setItemInHand(event.getHand(), stack);
+        playQuenchEffects(event.getLevel(), event.getPos());
+    }
+
+    private void blockHeatedCrafting(PlayerEvent.ItemCraftedEvent event) {
+        Container inventory = event.getInventory();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            if (WorkpieceHeat.hasHeat(inventory.getItem(slot))) {
+                event.getCrafting().setCount(0);
+                event.getEntity().displayClientMessage(Component.translatable("message.mobstoolforging.heated_parts_cannot_craft"), true);
+                return;
+            }
+        }
     }
 
     private void addHeatTooltip(ItemTooltipEvent event) {
@@ -198,10 +244,22 @@ public class MobsToolForging {
             return;
         }
         boolean forgeReady = event.getEntity() == null
-                ? WorkpieceHeat.data(stack).map(data -> data.workable() && data.temperature() > 0.0F).orElse(false)
-                : WorkpieceHeat.isHot(stack, event.getEntity().level());
+                ? WorkpieceHeat.data(stack).map(data -> data.temperature() >= MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get()).orElse(false)
+                : WorkpieceHeat.isForgeReady(stack, event.getEntity().level(), MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
         event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.workpiece_temperature", Math.round(temperature * 100.0F)).withStyle(forgeReady ? ChatFormatting.GOLD : ChatFormatting.RED));
         event.getToolTip().add(Component.translatable(forgeReady ? "tooltip.mobstoolforging.workpiece_ready" : "tooltip.mobstoolforging.workpiece_not_ready").withStyle(ChatFormatting.DARK_GRAY));
+    }
+
+    private static boolean isQuenching(ItemEntity itemEntity) {
+        BlockState state = itemEntity.level().getBlockState(itemEntity.blockPosition());
+        return itemEntity.isInWater() || state.is(Blocks.WATER_CAULDRON);
+    }
+
+    private static void playQuenchEffects(Level level, BlockPos pos) {
+        level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.55F, 1.45F);
+        if (level instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5D, pos.getY() + 0.8D, pos.getZ() + 0.5D, 12, 0.18D, 0.12D, 0.18D, 0.02D);
+        }
     }
 
     private static List<ResourceLocation> vanillaToolRecipes(String materialPrefix) {
