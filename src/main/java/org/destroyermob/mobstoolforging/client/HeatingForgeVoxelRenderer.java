@@ -17,6 +17,7 @@ import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.joml.Vector3f;
 
 public final class HeatingForgeVoxelRenderer {
+    private static final float HEAT_GLOW_THRESHOLD = 0.05F;
     private static final float WHITE_HOT_THRESHOLD = 0.9F;
     private static final Set<ResourceLocation> MISSING_TEXTURE_WARNINGS = new HashSet<>();
 
@@ -42,12 +43,22 @@ public final class HeatingForgeVoxelRenderer {
         boolean whiteHot = clampedHeat >= WHITE_HOT_THRESHOLD;
         ResourceLocation hotTexture = visual.hotTexture();
         int baseLight = whiteHot ? LightTexture.FULL_BRIGHT : packedLight;
-        int bodyColor = hotTexture == null ? baseColor(clampedHeat) : 0xFFFFFFFF;
-        renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), baseLight, packedOverlay, bodyColor);
+        renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), baseLight, packedOverlay, baseColor(clampedHeat));
         if (hotTexture != null && clampedHeat > 0.0F) {
             TextureAtlasSprite hotSprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(hotTexture);
             warnIfMissing(hotTexture, hotSprite);
+            poseStack.pushPose();
+            float hotScale = 1.002F + clampedHeat * 0.004F;
+            poseStack.scale(hotScale, hotScale, hotScale);
             renderModel(model, hotSprite, centerSample(hotTexture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, withAlpha(0xFFFFFFFF, clampedHeat));
+            poseStack.popPose();
+        }
+        if (clampedHeat >= HEAT_GLOW_THRESHOLD) {
+            poseStack.pushPose();
+            float heatScale = 1.015F + clampedHeat * 0.02F;
+            poseStack.scale(heatScale, heatScale, heatScale);
+            renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, edgeColor(clampedHeat));
+            poseStack.popPose();
         }
         if (whiteHot) {
             ResourceLocation glowTexture = visual.glowTexture();
@@ -57,7 +68,7 @@ public final class HeatingForgeVoxelRenderer {
                 warnIfMissing(glowTexture, overlaySprite);
             }
             poseStack.pushPose();
-            float edgeScale = 1.03F + clampedHeat * 0.035F;
+            float edgeScale = 1.035F + clampedHeat * 0.04F;
             poseStack.scale(edgeScale, edgeScale, edgeScale);
             int overlayColor = glowTexture == null ? edgeColor(clampedHeat) : 0xFFFFFFFF;
             renderModel(model, overlaySprite, centerSample(overlayTexture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, overlayColor);
@@ -147,8 +158,12 @@ public final class HeatingForgeVoxelRenderer {
     }
 
     private static void vertex(PoseStack poseStack, VertexConsumer consumer, int color, int light, int overlay, Vector3f normal, float x, float y, float z, float u, float v) {
+        int alpha = color >>> 24 & 0xFF;
+        int red = color >>> 16 & 0xFF;
+        int green = color >>> 8 & 0xFF;
+        int blue = color & 0xFF;
         consumer.addVertex(poseStack.last(), x, y, z)
-                .setColor(color)
+                .setColor(red, green, blue, alpha)
                 .setUv(u, v)
                 .setOverlay(overlay)
                 .setLight(light)
