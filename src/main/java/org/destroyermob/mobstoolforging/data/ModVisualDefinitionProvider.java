@@ -106,6 +106,9 @@ public class ModVisualDefinitionProvider implements DataProvider {
         JsonObject json = new JsonObject();
         json.addProperty("slot", slot);
         json.addProperty("material_from", materialFrom);
+        if ("handleMaterial".equals(materialFrom)) {
+            json.addProperty("handle_strategy", "default_handle");
+        }
         json.addProperty("template", modLoc("tool_templates/" + toolKind.id() + "/" + slot).toString());
         json.addProperty("large_template", modLoc("tool_templates/" + toolKind.id() + "/large_" + slot).toString());
         json.addProperty("z", z);

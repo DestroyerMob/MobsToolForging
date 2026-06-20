@@ -97,13 +97,13 @@ public final class PartedToolPartBakedModel implements BakedModel {
     }
 
     private ResolvedPartedItemModel compose(ResourceLocation material) {
-        TextureAtlasSprite sprite = sprites.resolve(visual.id(), partLayer.slot(), material)
+        ResolvedToolLayerSprite resolved = sprites.resolveLayer(visual.id(), partLayer, material)
                 .orElseGet(() -> {
                     warnMissingPartSprite(material);
-                    return sprites.missing();
+                    return ResolvedToolLayerSprite.exact(sprites.missing(), net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());
                 });
-        List<BakedQuad> quads = quadFactory.bakeLayer(0, sprite);
-        return new ResolvedPartedItemModel(quads, sprite, transforms);
+        List<BakedQuad> quads = quadFactory.bakeLayer(0, resolved.sprite(), resolved.color());
+        return new ResolvedPartedItemModel(quads, resolved.sprite(), transforms);
     }
 
     private void warnMissingPartSprite(ResourceLocation material) {

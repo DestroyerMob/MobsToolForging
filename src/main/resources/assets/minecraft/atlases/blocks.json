@@ -16,6 +16,11 @@
       "prefix": "item/"
     },
     {
+      "type": "minecraft:directory",
+      "source": "tool_templates",
+      "prefix": "tool_templates/"
+    },
+    {
       "type": "minecraft:single",
       "resource": "minecraft:item/coal"
     },

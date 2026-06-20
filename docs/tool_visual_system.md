@@ -100,3 +100,19 @@ Tool visual layers can include extra material ids:
 ```
 
 This is how bridge mods make non-MTF materials load textures instead of falling back to the model's particle sprite.
+
+Handle layers can choose how broad their fallback should be:
+
+```json
+{
+  "slot": "handle",
+  "material_from": "handleMaterial",
+  "handle_strategy": "template_handle",
+  "template": "mobs_more_weapons:tool_templates/greatsword/handle",
+  "z": 1
+}
+```
+
+`default_handle` uses exact handle textures first, then falls back to the layer's grayscale template if one exists. `template_handle` is for unusual grips that cannot be made cleanly from a shared handle shape or mask; exact art still wins first. `explicit_handle` uses exact handle art only. If no exact sprite and no usable grayscale template exists, MTF renders Minecraft's missing texture and logs a warning instead of crashing.
+
+Grayscale fallback templates are tinted from `tooling/material_visuals/<material>.json`, so a material add-on can provide a palette once while a tool add-on provides a shape once.

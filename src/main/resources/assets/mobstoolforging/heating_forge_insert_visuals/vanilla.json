@@ -18,7 +18,7 @@
     {
       "fuel": "minecraft:charcoal",
       "model": "mobstoolforging:block/heating_forge/fuel_chunk",
-      "fuel_texture": "minecraft:item/charcoal"
+      "fuel_texture": "minecraft:item/charcoal_block"
     },
     {
       "fuel": "minecraft:coal_block",
@@ -41,13 +41,13 @@
       "workpiece": "minecraft:copper_ingot",
       "material": "mobstoolforging:copper",
       "model": "mobstoolforging:block/heating_forge/billet",
-      "billet_texture": "minecraft:item/copper_ingot"
+      "billet_texture": "minecraft:item/copper_block"
     },
     {
       "workpiece": "minecraft:netherite_ingot",
       "material": "mobstoolforging:netherite",
       "model": "mobstoolforging:block/heating_forge/billet",
-      "billet_texture": "minecraft:item/netherite_ingot"
+      "billet_texture": "minecraft:item/netherite_block"
     }
   ]
 }

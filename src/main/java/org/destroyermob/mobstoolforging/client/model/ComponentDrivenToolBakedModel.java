@@ -138,18 +138,17 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
                 return fallback;
             }
 
-            ResourceLocation texture = textureForToolLayer(definition, layer, material.get());
-            TextureAtlasSprite sprite = sprite(texture);
-            if (isMissing(sprite)) {
-                warnMissingLayer(layer.optional() ? "optional layer has material but missing sprite" : "required layer missing sprite", visual, layer, material, texture);
+            ResolvedToolLayerSprite resolvedLayer = resolveToolLayer(definition, layer, material.get());
+            if (isMissing(resolvedLayer.sprite())) {
+                warnMissingLayer(layer.optional() ? "optional layer has material but missing sprite" : "required layer missing sprite", visual, layer, material, resolvedLayer.texture());
                 if (layer.optional()) {
                     continue;
                 }
             }
             if (particle == null && layer.materialFrom().filter("headMaterial"::equals).isPresent()) {
-                particle = sprite;
+                particle = resolvedLayer.sprite();
             }
-            layers.put(layer.z(), quadFactory.bakeLayer(layer.z(), sprite));
+            layers.put(layer.z(), quadFactory.bakeLayer(layer.z(), resolvedLayer.sprite(), resolvedLayer.color()));
         }
 
         if (layers.isEmpty()) {
@@ -161,12 +160,11 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
     private BakedModel composePart(ToolTypeDefinition definition, ToolPartData partData) {
         ToolVisualDefinition visual = ToolVisualManager.resolve(definition.visualId(), definition);
         ToolVisualLayer layer = visual.layerForSlot(partData.partType());
-        ResourceLocation texture = textureForPart(definition, partData.partType(), partData.materialId());
-        TextureAtlasSprite sprite = sprite(texture);
-        if (isMissing(sprite)) {
-            warnMissingLayer("part layer missing sprite", visual, layer, Optional.of(partData.materialId()), texture);
+        ResolvedToolLayerSprite resolvedLayer = resolvePartLayer(definition, layer, partData.partType(), partData.materialId());
+        if (isMissing(resolvedLayer.sprite())) {
+            warnMissingLayer("part layer missing sprite", visual, layer, Optional.of(partData.materialId()), resolvedLayer.texture());
         }
-        return new ResolvedPartedItemModel(quadFactory.bakeLayer(0, sprite), sprite, fallback.getTransforms());
+        return new ResolvedPartedItemModel(quadFactory.bakeLayer(0, resolvedLayer.sprite(), resolvedLayer.color()), resolvedLayer.sprite(), fallback.getTransforms());
     }
 
     private Optional<ToolTypeDefinition> findPartDefinition(ItemStack stack, ToolPartData partData) {
@@ -185,6 +183,38 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
             case "treatment" -> key.treatment();
             default -> Optional.empty();
         });
+    }
+
+    private ResolvedToolLayerSprite resolveToolLayer(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
+        ResourceLocation exactTexture = textureForToolLayer(definition, layer, material);
+        TextureAtlasSprite exactSprite = sprite(exactTexture);
+        if (!isMissing(exactSprite)) {
+            return ResolvedToolLayerSprite.exact(exactSprite, exactTexture);
+        }
+        return resolveTemplateFallback(layer, material).orElseGet(() -> ResolvedToolLayerSprite.exact(exactSprite, exactTexture));
+    }
+
+    private ResolvedToolLayerSprite resolvePartLayer(ToolTypeDefinition definition, ToolVisualLayer layer, String partType, ResourceLocation material) {
+        ResourceLocation exactTexture = textureForPart(definition, partType, material);
+        TextureAtlasSprite exactSprite = sprite(exactTexture);
+        if (!isMissing(exactSprite)) {
+            return ResolvedToolLayerSprite.exact(exactSprite, exactTexture);
+        }
+        return resolveTemplateFallback(layer, material).orElseGet(() -> ResolvedToolLayerSprite.exact(exactSprite, exactTexture));
+    }
+
+    private Optional<ResolvedToolLayerSprite> resolveTemplateFallback(ToolVisualLayer layer, ResourceLocation material) {
+        if (!layer.canUseTemplateFallback()) {
+            return Optional.empty();
+        }
+        return layer.templateId()
+                .map(template -> {
+                    TextureAtlasSprite templateSprite = sprite(template);
+                    if (isMissing(templateSprite)) {
+                        return null;
+                    }
+                    return ResolvedToolLayerSprite.generated(templateSprite, ToolMaterialVisualManager.INSTANCE.tintColor(material), template);
+                });
     }
 
     private ResourceLocation textureForToolLayer(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {

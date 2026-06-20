@@ -4,6 +4,7 @@ import java.util.List;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelState;
+import net.neoforged.neoforge.client.model.ExtraFaceData;
 import net.neoforged.neoforge.client.model.geometry.UnbakedGeometryHelper;
 
 public final class PartedToolQuadFactory {
@@ -15,6 +16,14 @@ public final class PartedToolQuadFactory {
 
     public List<BakedQuad> bakeLayer(int layerIndex, TextureAtlasSprite sprite) {
         var elements = UnbakedGeometryHelper.createUnbakedItemElements(layerIndex, sprite);
+        return List.copyOf(UnbakedGeometryHelper.bakeElements(elements, ignored -> sprite, modelState));
+    }
+
+    public List<BakedQuad> bakeLayer(int layerIndex, TextureAtlasSprite sprite, int color) {
+        if (color == 0xFFFFFFFF) {
+            return bakeLayer(layerIndex, sprite);
+        }
+        var elements = UnbakedGeometryHelper.createUnbakedItemElements(layerIndex, sprite, new ExtraFaceData(color, 0, 0, true));
         return List.copyOf(UnbakedGeometryHelper.bakeElements(elements, ignored -> sprite, modelState));
     }
 }

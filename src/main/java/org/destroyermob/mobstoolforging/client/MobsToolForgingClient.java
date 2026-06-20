@@ -14,6 +14,7 @@ import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.client.model.ComponentDrivenToolBakedModel;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
+import org.destroyermob.mobstoolforging.client.model.ToolMaterialVisualManager;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
@@ -77,5 +78,6 @@ public final class MobsToolForgingClient {
 
     private static void registerReloadListeners(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener(HeatingForgeInsertVisualManager.INSTANCE);
+        event.registerReloadListener(ToolMaterialVisualManager.INSTANCE);
     }
 }

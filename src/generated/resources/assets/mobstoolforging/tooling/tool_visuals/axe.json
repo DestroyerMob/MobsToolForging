@@ -6,6 +6,7 @@
   "layers": [
     {
       "emissive_allowed": false,
+      "handle_strategy": "default_handle",
       "large_template": "mobstoolforging:tool_templates/axe/large_handle",
       "material_from": "handleMaterial",
       "optional": false,

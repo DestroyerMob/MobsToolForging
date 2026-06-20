@@ -12,6 +12,7 @@ public record ToolVisualLayer(
         Optional<String> generated,
         Optional<String> template,
         Optional<String> largeTemplate,
+        HandleRenderStrategy handleStrategy,
         List<ResourceLocation> materials,
         int z,
         boolean optional,
@@ -24,6 +25,7 @@ public record ToolVisualLayer(
                 optionalString(json, "generated"),
                 optionalString(json, "template"),
                 optionalString(json, "large_template"),
+                handleStrategy(json),
                 materialIds(json),
                 GsonHelper.getAsInt(json, "z", 0),
                 GsonHelper.getAsBoolean(json, "optional", false),
@@ -31,11 +33,26 @@ public record ToolVisualLayer(
         );
     }
 
+    public Optional<ResourceLocation> templateId() {
+        return template.map(ResourceLocation::parse);
+    }
+
+    public boolean canUseTemplateFallback() {
+        return !materialFrom.filter("handleMaterial"::equals).isPresent() || handleStrategy.usesTemplateFallback();
+    }
+
     private static Optional<String> optionalString(JsonObject json, String key) {
         if (!json.has(key) || json.get(key).isJsonNull()) {
             return Optional.empty();
         }
         return Optional.of(GsonHelper.getAsString(json, key));
+    }
+
+    private static HandleRenderStrategy handleStrategy(JsonObject json) {
+        if (!json.has("handle_strategy") || json.get("handle_strategy").isJsonNull()) {
+            return HandleRenderStrategy.DEFAULT_HANDLE;
+        }
+        return HandleRenderStrategy.parse(GsonHelper.getAsString(json, "handle_strategy"));
     }
 
     private static List<ResourceLocation> materialIds(JsonObject json) {

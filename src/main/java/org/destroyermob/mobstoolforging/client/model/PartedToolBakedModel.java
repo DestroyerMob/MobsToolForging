@@ -122,18 +122,18 @@ public final class PartedToolBakedModel implements BakedModel {
                 warnMissingLayer("required layer missing material", layer, Optional.empty());
                 return Optional.empty();
             }
-            Optional<TextureAtlasSprite> sprite = sprites.resolve(visual.id(), layer.slot(), material.get());
-            if (sprite.isEmpty()) {
+            Optional<ResolvedToolLayerSprite> resolvedLayer = sprites.resolveLayer(visual.id(), layer, material.get());
+            if (resolvedLayer.isEmpty()) {
                 warnMissingLayer(layer.optional() ? "optional layer has material but missing sprite" : "required layer missing sprite", layer, material);
                 if (layer.optional()) {
                     continue;
                 }
-                sprite = Optional.of(sprites.missing());
+                resolvedLayer = Optional.of(ResolvedToolLayerSprite.exact(sprites.missing(), net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation()));
             }
             if (particle == null && layer.materialFrom().filter("headMaterial"::equals).isPresent()) {
-                particle = sprite.get();
+                particle = resolvedLayer.get().sprite();
             }
-            layers.put(layer.z(), quadFactory.bakeLayer(layer.z(), sprite.get()));
+            layers.put(layer.z(), quadFactory.bakeLayer(layer.z(), resolvedLayer.get().sprite(), resolvedLayer.get().color()));
         }
         if (layers.isEmpty()) {
             return Optional.empty();
