@@ -30,7 +30,7 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
         ItemStack workpiece = forge.workpieceStack();
         if (!workpiece.isEmpty()) {
             float heat = heatAmount(forge, workpiece);
-            renderInsert(forge, HeatingForgeInsertVisualManager.workpiece(workpiece), poseStack, bufferSource, packedLight, packedOverlay, 0.0F, -0.12F, 1.15F, 0.60F, 0.0F, heat);
+            renderInsert(forge, HeatingForgeInsertVisualManager.workpiece(workpiece), poseStack, bufferSource, packedLight, packedOverlay, 0.0F, 0.0F, 1.15F, 0.60F, 0.0F, heat);
         }
     }
 

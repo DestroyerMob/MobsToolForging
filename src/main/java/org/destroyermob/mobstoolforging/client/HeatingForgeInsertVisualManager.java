@@ -34,7 +34,7 @@ public class HeatingForgeInsertVisualManager extends SimplePreparableReloadListe
     public static ResolvedInsert fuel(ItemStack stack) {
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
         LoadedVisuals visuals = loaded;
-        HeatingForgeInsertVisual visual = visuals.itemVisuals().getOrDefault(itemId, visuals.fallbackFuel());
+        HeatingForgeInsertVisual visual = visuals.fuelItemVisuals().getOrDefault(itemId, visuals.fallbackFuel());
         return new ResolvedInsert(visual, visuals.model(visual.model()));
     }
 
@@ -48,7 +48,7 @@ public class HeatingForgeInsertVisualManager extends SimplePreparableReloadListe
             }
         }
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        HeatingForgeInsertVisual visual = visuals.itemVisuals().getOrDefault(itemId, visuals.fallbackWorkpiece());
+        HeatingForgeInsertVisual visual = visuals.workpieceItemVisuals().getOrDefault(itemId, visuals.fallbackWorkpiece());
         return new ResolvedInsert(visual, visuals.model(visual.model()));
     }
 
@@ -72,7 +72,8 @@ public class HeatingForgeInsertVisualManager extends SimplePreparableReloadListe
         Set<ResourceLocation> modelIds = new LinkedHashSet<>();
         modelIds.add(visuals.fallbackFuel().model());
         modelIds.add(visuals.fallbackWorkpiece().model());
-        visuals.itemVisuals().values().forEach(visual -> modelIds.add(visual.model()));
+        visuals.fuelItemVisuals().values().forEach(visual -> modelIds.add(visual.model()));
+        visuals.workpieceItemVisuals().values().forEach(visual -> modelIds.add(visual.model()));
         visuals.materialVisuals().values().forEach(visual -> modelIds.add(visual.model()));
 
         Map<ResourceLocation, HeatingForgeVoxelModel> models = new LinkedHashMap<>();
@@ -80,7 +81,8 @@ public class HeatingForgeInsertVisualManager extends SimplePreparableReloadListe
             models.put(modelId, HeatingForgeVoxelModel.load(resourceManager, modelId));
         }
         return new LoadedVisuals(
-                Map.copyOf(visuals.itemVisuals()),
+                Map.copyOf(visuals.fuelItemVisuals()),
+                Map.copyOf(visuals.workpieceItemVisuals()),
                 Map.copyOf(visuals.materialVisuals()),
                 visuals.fallbackFuel(),
                 visuals.fallbackWorkpiece(),
@@ -97,20 +99,29 @@ public class HeatingForgeInsertVisualManager extends SimplePreparableReloadListe
         try (BufferedReader reader = resource.openAsReader()) {
             JsonObject json = GsonHelper.parse(reader);
             if (json.has("fallback_fuel")) {
-                visuals.fallbackFuel(HeatingForgeInsertVisual.fromJson(GsonHelper.getAsJsonObject(json, "fallback_fuel")));
+                visuals.fallbackFuel(HeatingForgeInsertVisual.fuelFromJson(GsonHelper.getAsJsonObject(json, "fallback_fuel"), visuals.fallbackFuel()));
             }
             if (json.has("fallback_workpiece")) {
-                visuals.fallbackWorkpiece(HeatingForgeInsertVisual.fromJson(GsonHelper.getAsJsonObject(json, "fallback_workpiece")));
+                visuals.fallbackWorkpiece(HeatingForgeInsertVisual.workpieceFromJson(GsonHelper.getAsJsonObject(json, "fallback_workpiece"), visuals.fallbackWorkpiece()));
             }
             JsonArray entries = GsonHelper.getAsJsonArray(json, "entries", new JsonArray());
             for (JsonElement element : entries) {
                 JsonObject entry = GsonHelper.convertToJsonObject(element, "entry");
-                HeatingForgeInsertVisual visual = HeatingForgeInsertVisual.fromJson(entry);
+                HeatingForgeInsertVisual fuelVisual = HeatingForgeInsertVisual.fuelFromJson(entry, visuals.fallbackFuel());
+                HeatingForgeInsertVisual workpieceVisual = HeatingForgeInsertVisual.workpieceFromJson(entry, visuals.fallbackWorkpiece());
+                if (entry.has("fuel")) {
+                    visuals.fuelItemVisuals().put(ResourceLocation.parse(GsonHelper.getAsString(entry, "fuel")), fuelVisual);
+                }
+                if (entry.has("workpiece")) {
+                    visuals.workpieceItemVisuals().put(ResourceLocation.parse(GsonHelper.getAsString(entry, "workpiece")), workpieceVisual);
+                }
                 if (entry.has("item")) {
-                    visuals.itemVisuals().put(ResourceLocation.parse(GsonHelper.getAsString(entry, "item")), visual);
+                    ResourceLocation itemId = ResourceLocation.parse(GsonHelper.getAsString(entry, "item"));
+                    visuals.fuelItemVisuals().put(itemId, fuelVisual);
+                    visuals.workpieceItemVisuals().put(itemId, workpieceVisual);
                 }
                 if (entry.has("material")) {
-                    visuals.materialVisuals().put(ResourceLocation.parse(GsonHelper.getAsString(entry, "material")), visual);
+                    visuals.materialVisuals().put(ResourceLocation.parse(GsonHelper.getAsString(entry, "material")), workpieceVisual);
                 }
             }
         } catch (IOException | RuntimeException exception) {
@@ -122,7 +133,8 @@ public class HeatingForgeInsertVisualManager extends SimplePreparableReloadListe
     }
 
     public record LoadedVisuals(
-            Map<ResourceLocation, HeatingForgeInsertVisual> itemVisuals,
+            Map<ResourceLocation, HeatingForgeInsertVisual> fuelItemVisuals,
+            Map<ResourceLocation, HeatingForgeInsertVisual> workpieceItemVisuals,
             Map<ResourceLocation, HeatingForgeInsertVisual> materialVisuals,
             HeatingForgeInsertVisual fallbackFuel,
             HeatingForgeInsertVisual fallbackWorkpiece,
@@ -131,7 +143,7 @@ public class HeatingForgeInsertVisualManager extends SimplePreparableReloadListe
         static LoadedVisuals empty() {
             HeatingForgeInsertVisual fuel = HeatingForgeInsertVisual.defaultFuel();
             HeatingForgeInsertVisual workpiece = HeatingForgeInsertVisual.defaultWorkpiece();
-            return new LoadedVisuals(Map.of(), Map.of(), fuel, workpiece, Map.of());
+            return new LoadedVisuals(Map.of(), Map.of(), Map.of(), fuel, workpiece, Map.of());
         }
 
         HeatingForgeVoxelModel model(ResourceLocation modelId) {
@@ -140,13 +152,15 @@ public class HeatingForgeInsertVisualManager extends SimplePreparableReloadListe
     }
 
     private static final class MutableVisuals {
-        private final Map<ResourceLocation, HeatingForgeInsertVisual> itemVisuals;
+        private final Map<ResourceLocation, HeatingForgeInsertVisual> fuelItemVisuals;
+        private final Map<ResourceLocation, HeatingForgeInsertVisual> workpieceItemVisuals;
         private final Map<ResourceLocation, HeatingForgeInsertVisual> materialVisuals;
         private HeatingForgeInsertVisual fallbackFuel;
         private HeatingForgeInsertVisual fallbackWorkpiece;
 
-        private MutableVisuals(Map<ResourceLocation, HeatingForgeInsertVisual> itemVisuals, Map<ResourceLocation, HeatingForgeInsertVisual> materialVisuals, HeatingForgeInsertVisual fallbackFuel, HeatingForgeInsertVisual fallbackWorkpiece) {
-            this.itemVisuals = itemVisuals;
+        private MutableVisuals(Map<ResourceLocation, HeatingForgeInsertVisual> fuelItemVisuals, Map<ResourceLocation, HeatingForgeInsertVisual> workpieceItemVisuals, Map<ResourceLocation, HeatingForgeInsertVisual> materialVisuals, HeatingForgeInsertVisual fallbackFuel, HeatingForgeInsertVisual fallbackWorkpiece) {
+            this.fuelItemVisuals = fuelItemVisuals;
+            this.workpieceItemVisuals = workpieceItemVisuals;
             this.materialVisuals = materialVisuals;
             this.fallbackFuel = fallbackFuel;
             this.fallbackWorkpiece = fallbackWorkpiece;
@@ -156,13 +170,18 @@ public class HeatingForgeInsertVisualManager extends SimplePreparableReloadListe
             return new MutableVisuals(
                     new LinkedHashMap<>(),
                     new LinkedHashMap<>(),
+                    new LinkedHashMap<>(),
                     HeatingForgeInsertVisual.defaultFuel(),
                     HeatingForgeInsertVisual.defaultWorkpiece()
             );
         }
 
-        Map<ResourceLocation, HeatingForgeInsertVisual> itemVisuals() {
-            return itemVisuals;
+        Map<ResourceLocation, HeatingForgeInsertVisual> fuelItemVisuals() {
+            return fuelItemVisuals;
+        }
+
+        Map<ResourceLocation, HeatingForgeInsertVisual> workpieceItemVisuals() {
+            return workpieceItemVisuals;
         }
 
         Map<ResourceLocation, HeatingForgeInsertVisual> materialVisuals() {

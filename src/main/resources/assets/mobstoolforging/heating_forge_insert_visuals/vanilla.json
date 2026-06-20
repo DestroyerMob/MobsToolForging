@@ -1,47 +1,51 @@
 {
   "fallback_fuel": {
     "model": "mobstoolforging:block/heating_forge/fuel_chunk",
-    "texture": "minecraft:block/coal_block"
+    "fuel_texture": "minecraft:item/coal"
   },
   "fallback_workpiece": {
     "model": "mobstoolforging:block/heating_forge/billet",
-    "texture": "minecraft:block/iron_block"
+    "billet_texture": "minecraft:item/iron_ingot"
   },
   "entries": [
     {
-      "item": "minecraft:coal",
+      "fuel": "minecraft:coal",
       "model": "mobstoolforging:block/heating_forge/fuel_chunk",
-      "texture": "minecraft:block/coal_block"
+      "fuel_texture": "minecraft:item/coal"
     },
     {
-      "item": "minecraft:charcoal",
+      "fuel": "minecraft:charcoal",
       "model": "mobstoolforging:block/heating_forge/fuel_chunk",
-      "texture": "minecraft:item/charcoal"
+      "fuel_texture": "minecraft:item/charcoal"
     },
     {
-      "item": "minecraft:coal_block",
+      "fuel": "minecraft:coal_block",
       "model": "mobstoolforging:block/heating_forge/fuel_chunk",
-      "texture": "minecraft:block/coal_block"
+      "fuel_texture": "minecraft:block/coal_block"
     },
     {
+      "workpiece": "minecraft:iron_ingot",
       "material": "mobstoolforging:iron",
       "model": "mobstoolforging:block/heating_forge/billet",
-      "texture": "minecraft:block/iron_block"
+      "billet_texture": "minecraft:item/iron_ingot"
     },
     {
+      "workpiece": "minecraft:gold_ingot",
       "material": "mobstoolforging:gold",
       "model": "mobstoolforging:block/heating_forge/billet",
-      "texture": "minecraft:block/gold_block"
+      "billet_texture": "minecraft:item/gold_ingot"
     },
     {
+      "workpiece": "minecraft:copper_ingot",
       "material": "mobstoolforging:copper",
       "model": "mobstoolforging:block/heating_forge/billet",
-      "texture": "minecraft:block/copper_block"
+      "billet_texture": "minecraft:item/copper_ingot"
     },
     {
+      "workpiece": "minecraft:netherite_ingot",
       "material": "mobstoolforging:netherite",
       "model": "mobstoolforging:block/heating_forge/billet",
-      "texture": "minecraft:block/netherite_block"
+      "billet_texture": "minecraft:item/netherite_ingot"
     }
   ]
 }

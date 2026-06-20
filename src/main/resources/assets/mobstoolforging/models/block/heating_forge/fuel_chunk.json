@@ -1,8 +1,8 @@
 {
   "credit": "Made with Blockbench",
   "textures": {
-    "0": "minecraft:block/coal_block",
-    "particle": "minecraft:block/coal_block"
+    "0": "minecraft:item/coal",
+    "particle": "minecraft:item/coal"
   },
   "elements": [
     {
