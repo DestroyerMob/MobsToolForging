@@ -132,6 +132,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.trait.resonant.desc", "improves enchantment alignment");
         add("tooltip.mobstoolforging.trait.conductive", "Conductive");
         add("tooltip.mobstoolforging.trait.conductive.desc", "draws stronger enchanting but wears faster");
+        add("tooltip.mobstoolforging.trait.gilded", "Gilded");
+        add("tooltip.mobstoolforging.trait.gilded.desc", "draws extra experience from ores and kills");
         add("tooltip.mobstoolforging.trait.stabilized", "Stabilized");
         add("tooltip.mobstoolforging.trait.stabilized.desc", "greatly improves structural stability");
         add("tooltip.mobstoolforging.trait.nether_forged", "Nether-Forged");

@@ -1,0 +1,47 @@
+{
+  "fallback_fuel": {
+    "model": "mobstoolforging:block/heating_forge/fuel_chunk",
+    "texture": "minecraft:block/coal_block"
+  },
+  "fallback_workpiece": {
+    "model": "mobstoolforging:block/heating_forge/billet",
+    "texture": "minecraft:block/iron_block"
+  },
+  "entries": [
+    {
+      "item": "minecraft:coal",
+      "model": "mobstoolforging:block/heating_forge/fuel_chunk",
+      "texture": "minecraft:block/coal_block"
+    },
+    {
+      "item": "minecraft:charcoal",
+      "model": "mobstoolforging:block/heating_forge/fuel_chunk",
+      "texture": "minecraft:item/charcoal"
+    },
+    {
+      "item": "minecraft:coal_block",
+      "model": "mobstoolforging:block/heating_forge/fuel_chunk",
+      "texture": "minecraft:block/coal_block"
+    },
+    {
+      "material": "mobstoolforging:iron",
+      "model": "mobstoolforging:block/heating_forge/billet",
+      "texture": "minecraft:block/iron_block"
+    },
+    {
+      "material": "mobstoolforging:gold",
+      "model": "mobstoolforging:block/heating_forge/billet",
+      "texture": "minecraft:block/gold_block"
+    },
+    {
+      "material": "mobstoolforging:copper",
+      "model": "mobstoolforging:block/heating_forge/billet",
+      "texture": "minecraft:block/copper_block"
+    },
+    {
+      "material": "mobstoolforging:netherite",
+      "model": "mobstoolforging:block/heating_forge/billet",
+      "texture": "minecraft:block/netherite_block"
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
@@ -24,6 +25,7 @@ public final class MobsToolForgingClient {
         eventBus.addListener(MobsToolForgingClient::registerRenderers);
         eventBus.addListener(MobsToolForgingClient::registerGeometryLoaders);
         eventBus.addListener(MobsToolForgingClient::registerItemDecorations);
+        eventBus.addListener(MobsToolForgingClient::registerReloadListeners);
     }
 
     public static void openTemplateScreen(BlockPos pos) {
@@ -59,5 +61,9 @@ public final class MobsToolForgingClient {
         event.register(ModItems.PICKAXE_HEAD.get(), HeatItemDecorator.INSTANCE);
         event.register(ModItems.AXE_HEAD.get(), HeatItemDecorator.INSTANCE);
         event.register(ModItems.HOE_HEAD.get(), HeatItemDecorator.INSTANCE);
+    }
+
+    private static void registerReloadListeners(RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(HeatingForgeInsertVisualManager.INSTANCE);
     }
 }

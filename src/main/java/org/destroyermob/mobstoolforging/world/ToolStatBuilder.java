@@ -54,6 +54,10 @@ public final class ToolStatBuilder {
             stats.fireResistant = true;
             stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
         }
+        if (MaterialCatalog.GOLD.equals(construction.headMaterial())) {
+            stats.addTrait(ToolTrait.GILDED);
+            stats.addDebug("Head: Gilded experience");
+        }
         applyHandle(stats, construction.handleMaterial());
         applyBindingOrGuard(stats, definition.swordLike(), construction.bindingMaterial());
         applyWrap(stats, construction.wrapMaterial());
@@ -108,7 +112,9 @@ public final class ToolStatBuilder {
 
     public static ToolStatProfile profileForTooltip(ItemStack stack, ToolTypeDefinition definition, ToolConstructionData construction) {
         return profile(stack)
-                .filter(profile -> !profile.traits().isEmpty() && !profile.traits().contains(LEGACY_NETHER_TOUCHED_TRAIT))
+                .filter(profile -> !profile.traits().isEmpty()
+                        && !profile.traits().contains(LEGACY_NETHER_TOUCHED_TRAIT)
+                        && (!MaterialCatalog.GOLD.equals(construction.headMaterial()) || profile.traits().contains(ToolTrait.GILDED.id())))
                 .orElseGet(() -> build(definition, construction));
     }
 

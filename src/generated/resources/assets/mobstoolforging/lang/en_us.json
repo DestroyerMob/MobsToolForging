@@ -110,6 +110,8 @@
   "tooltip.mobstoolforging.trait.focused.desc": "steadies controlled enchanting",
   "tooltip.mobstoolforging.trait.fortunate": "Fortunate",
   "tooltip.mobstoolforging.trait.fortunate.desc": "favours luck and fortune",
+  "tooltip.mobstoolforging.trait.gilded": "Gilded",
+  "tooltip.mobstoolforging.trait.gilded.desc": "draws extra experience from ores and kills",
   "tooltip.mobstoolforging.trait.kindled": "Kindled",
   "tooltip.mobstoolforging.trait.kindled.desc": "evades fire's grasp",
   "tooltip.mobstoolforging.trait.nether_forged": "Nether-Forged",

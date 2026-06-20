@@ -20,6 +20,7 @@ public enum ToolTrait {
     REINFORCED("reinforced", ChatFormatting.GRAY, "structure"),
     RESONANT("resonant", ChatFormatting.LIGHT_PURPLE, "affinity"),
     CONDUCTIVE("conductive", ChatFormatting.YELLOW, "affinity"),
+    GILDED("gilded", ChatFormatting.GOLD, "affinity"),
     STABILIZED("stabilized", ChatFormatting.AQUA, "structure"),
     NETHER_FORGED("nether_forged", ChatFormatting.DARK_RED, "structure"),
     FORTUNATE("fortunate", ChatFormatting.GREEN, "affinity"),
