@@ -9,7 +9,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
-import org.destroyermob.mobstoolforging.item.CrudeFlintPickItem;
 import org.destroyermob.mobstoolforging.item.ModularAxeItem;
 import org.destroyermob.mobstoolforging.item.ModularHoeItem;
 import org.destroyermob.mobstoolforging.item.ModularPickaxeItem;
@@ -55,7 +54,7 @@ public final class ModItems {
     );
     public static final DeferredItem<PickaxeItem> FLINT_PICK = ITEMS.register(
             "flint_pick",
-            () -> new CrudeFlintPickItem(CrudeFlintTiers.FLINT, new Item.Properties().attributes(PickaxeItem.createAttributes(CrudeFlintTiers.FLINT, 0.5F, -2.9F)))
+            () -> new PickaxeItem(CrudeFlintTiers.FLINT, new Item.Properties().attributes(PickaxeItem.createAttributes(CrudeFlintTiers.FLINT, 0.5F, -2.9F)))
     );
     public static final DeferredItem<ToolTemplateItem> PICKAXE_HEAD_PATTERN = ITEMS.register(
             "pickaxe_head_pattern",

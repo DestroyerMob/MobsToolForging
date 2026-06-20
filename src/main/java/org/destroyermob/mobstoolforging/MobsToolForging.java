@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -68,6 +69,7 @@ public class MobsToolForging {
 
         modEventBus.addListener(this::addCreativeTabContents);
         NeoForge.EVENT_BUS.addListener(this::knapFlintShard);
+        NeoForge.EVENT_BUS.addListener(this::lowerCopperHarvestTier);
         NeoForge.EVENT_BUS.addListener(this::quenchInWaterCauldron);
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
         NeoForge.EVENT_BUS.addListener(this::removeDisabledEarlyToolRecipes);
@@ -151,6 +153,15 @@ public class MobsToolForging {
                     0.08,
                     0.02
             );
+        }
+    }
+
+    private void lowerCopperHarvestTier(PlayerEvent.HarvestCheck event) {
+        if (!MobsToolForgingConfig.COPPER_REQUIRES_WOODEN_TOOL.get() || event.canHarvest()) {
+            return;
+        }
+        if (isCopperProgressionBlock(event.getTargetBlock()) && event.getEntity().getMainHandItem().is(ItemTags.PICKAXES)) {
+            event.setCanHarvest(true);
         }
     }
 
@@ -253,6 +264,10 @@ public class MobsToolForging {
     private static boolean isQuenching(ItemEntity itemEntity) {
         BlockState state = itemEntity.level().getBlockState(itemEntity.blockPosition());
         return itemEntity.isInWater() || state.is(Blocks.WATER_CAULDRON);
+    }
+
+    private static boolean isCopperProgressionBlock(BlockState state) {
+        return state.is(BlockTags.COPPER_ORES) || state.is(Blocks.COPPER_BLOCK) || state.is(Blocks.RAW_COPPER_BLOCK);
     }
 
     private static void playQuenchEffects(Level level, BlockPos pos) {
