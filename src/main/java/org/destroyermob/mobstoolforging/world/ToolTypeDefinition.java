@@ -176,6 +176,7 @@ public final class ToolTypeDefinition {
             stack = new ItemStack(item.get());
             stack.set(ModDataComponents.TOOL_CONSTRUCTION.get(), construction);
             ToolStatBuilder.apply(stack, definition, construction);
+            ToolStackNames.applyToolName(stack, definition, construction);
         }
         return stack;
     }
@@ -188,6 +189,7 @@ public final class ToolTypeDefinition {
                     }
                     ItemStack stack = new ItemStack(item);
                     stack.set(ModDataComponents.TOOL_PART.get(), new ToolPartData(partType, materialId, quality));
+                    ToolStackNames.applyPartName(stack, partType, materialId);
                     return stack;
                 })
                 .orElse(ItemStack.EMPTY);

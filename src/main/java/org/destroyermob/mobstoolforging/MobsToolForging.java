@@ -50,6 +50,7 @@ import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
+import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
 import org.destroyermob.mobstoolforging.world.MaterialDefinitionReloadListener;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeReloadListener;
@@ -120,6 +121,10 @@ public class MobsToolForging {
             event.accept(ModItems.SWORD_BLADE_PATTERN);
             event.accept(ModItems.SWORD_GUARD_PATTERN);
             event.accept(ModItems.SMITHING_HAMMER_HEAD_PATTERN);
+            ToolTypeRegistry.templates().stream()
+                    .filter(template -> !template.id().getNamespace().equals(MOD_ID))
+                    .map(MobsToolForging::templatePattern)
+                    .forEach(event::accept);
             event.accept(ModItems.TEMPLATE_PATTERN);
         }
         if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
@@ -127,6 +132,12 @@ public class MobsToolForging {
             event.accept(ModItems.SMITHING_HAMMER_HEAD);
             event.accept(ModItems.DIAMOND_POWDER);
         }
+    }
+
+    private static ItemStack templatePattern(ForgeTemplateDefinition template) {
+        ItemStack stack = new ItemStack(ModItems.TEMPLATE_PATTERN.get());
+        stack.set(ModDataComponents.FORGE_TEMPLATE.get(), template.id());
+        return stack;
     }
 
     private void knapFlintShard(PlayerInteractEvent.RightClickBlock event) {

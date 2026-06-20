@@ -9,6 +9,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
+import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
+import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 
 public record ForgeTemplateDefinition(
         ResourceLocation id,
@@ -78,7 +80,12 @@ public record ForgeTemplateDefinition(
             if (item == Items.AIR) {
                 return ItemStack.EMPTY;
             }
-            return new ItemStack(item);
+            ItemStack stack = new ItemStack(item);
+            stack.set(ModDataComponents.TOOL_PART.get(), new ToolPartData(partType, materialId, quality));
+            if (!(item instanceof ModularToolPartItem)) {
+                ToolStackNames.applyPartName(stack, partType, materialId);
+            }
+            return stack;
         }
         return ToolTypeRegistry.createPart(this, materialId, quality);
     }
