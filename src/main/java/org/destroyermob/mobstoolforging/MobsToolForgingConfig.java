@@ -62,7 +62,7 @@ public final class MobsToolForgingConfig {
                 .defineInRange("heatedWorkpieceTicks", 1200, 1, 20 * 60 * 60);
         COOLING_TICKS = builder
                 .comment("Ticks a heated workpiece remains workable after leaving the Heating Forge.")
-                .defineInRange("coolingTicks", 1200, 1, 20 * 60 * 60);
+                .defineInRange("coolingTicks", 2400, 1, 20 * 60 * 60);
         builder.pop();
         builder.push("bloomery");
         ENABLE_BLOOMERY = builder

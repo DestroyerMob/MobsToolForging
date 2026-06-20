@@ -40,17 +40,15 @@ public final class HeatingForgeVoxelRenderer {
         warnIfMissing(texture, sprite);
         float clampedHeat = clamp(heat);
         boolean whiteHot = clampedHeat >= WHITE_HOT_THRESHOLD;
-        ResourceLocation hotTexture = whiteHot ? visual.hotTexture() : null;
-        TextureAtlasSprite bodySprite = sprite;
-        ResourceLocation bodyTexture = texture;
-        if (hotTexture != null) {
-            bodyTexture = hotTexture;
-            bodySprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(hotTexture);
-            warnIfMissing(hotTexture, bodySprite);
-        }
-        int baseLight = clampedHeat >= WHITE_HOT_THRESHOLD ? LightTexture.FULL_BRIGHT : packedLight;
+        ResourceLocation hotTexture = visual.hotTexture();
+        int baseLight = whiteHot ? LightTexture.FULL_BRIGHT : packedLight;
         int bodyColor = hotTexture == null ? baseColor(clampedHeat) : 0xFFFFFFFF;
-        renderModel(model, bodySprite, centerSample(bodyTexture), poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), baseLight, packedOverlay, bodyColor);
+        renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), baseLight, packedOverlay, bodyColor);
+        if (hotTexture != null && clampedHeat > 0.0F) {
+            TextureAtlasSprite hotSprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(hotTexture);
+            warnIfMissing(hotTexture, hotSprite);
+            renderModel(model, hotSprite, centerSample(hotTexture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), LightTexture.FULL_BRIGHT, packedOverlay, withAlpha(0xFFFFFFFF, clampedHeat));
+        }
         if (whiteHot) {
             ResourceLocation glowTexture = visual.glowTexture();
             ResourceLocation overlayTexture = glowTexture == null ? texture : glowTexture;
@@ -190,6 +188,10 @@ public final class HeatingForgeVoxelRenderer {
         int green = Math.round(70.0F + heat * 88.0F);
         int blue = Math.round(8.0F + heat * 12.0F);
         return alpha << 24 | 0xFF << 16 | green << 8 | blue;
+    }
+
+    private static int withAlpha(int color, float alpha) {
+        return Math.round(clamp(alpha) * 255.0F) << 24 | color & 0x00FFFFFF;
     }
 
     private static float clamp(float value) {
