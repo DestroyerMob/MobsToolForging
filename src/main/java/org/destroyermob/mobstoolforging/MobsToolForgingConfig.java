@@ -5,6 +5,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public final class MobsToolForgingConfig {
     public static final ModConfigSpec COMMON_SPEC;
     public static final ModConfigSpec.BooleanValue DEBUG_TEMPLATE_SELECTOR;
+    public static final ModConfigSpec.BooleanValue ENABLE_VANILLA_TOOL_RECIPES;
     public static final ModConfigSpec.BooleanValue ENABLE_CRUDE_FLINT_TOOLS;
     public static final ModConfigSpec.BooleanValue DISABLE_STONE_TOOLS;
     public static final ModConfigSpec.BooleanValue DISABLE_WOODEN_TOOLS;
@@ -29,6 +30,9 @@ public final class MobsToolForgingConfig {
         DEBUG_TEMPLATE_SELECTOR = builder
                 .comment("When true, sneak-right-clicking a workstation can open the old template selector GUI for debugging.")
                 .define("debugTemplateSelector", false);
+        ENABLE_VANILLA_TOOL_RECIPES = builder
+                .comment("When true, vanilla sword, shovel, pickaxe, axe, and hoe recipes remain enabled. When false, vanilla material tool recipes are removed so Mobs Tool Forging owns tool progression.")
+                .define("enableVanillaToolRecipes", false);
         ENABLE_CRUDE_FLINT_TOOLS = builder
                 .comment("When true, crude flint survival tools are craftable.")
                 .define("enableCrudeFlintTools", true);

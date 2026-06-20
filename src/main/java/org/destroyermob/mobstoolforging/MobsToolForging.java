@@ -209,11 +209,15 @@ public class MobsToolForging {
 
     private void removeDisabledEarlyToolRecipes(ServerStartedEvent event) {
         Set<ResourceLocation> disabledRecipes = new HashSet<>();
-        if (MobsToolForgingConfig.DISABLE_STONE_TOOLS.get()) {
-            disabledRecipes.addAll(vanillaToolRecipes("stone"));
-        }
-        if (MobsToolForgingConfig.DISABLE_WOODEN_TOOLS.get()) {
-            disabledRecipes.addAll(vanillaToolRecipes("wooden"));
+        if (!MobsToolForgingConfig.ENABLE_VANILLA_TOOL_RECIPES.get()) {
+            disabledRecipes.addAll(vanillaToolRecipes());
+        } else {
+            if (MobsToolForgingConfig.DISABLE_STONE_TOOLS.get()) {
+                disabledRecipes.addAll(vanillaMaterialToolRecipes("stone"));
+            }
+            if (MobsToolForgingConfig.DISABLE_WOODEN_TOOLS.get()) {
+                disabledRecipes.addAll(vanillaMaterialToolRecipes("wooden"));
+            }
         }
         if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
             disabledRecipes.addAll(List.of(
@@ -231,7 +235,7 @@ public class MobsToolForging {
         int removed = event.getServer().getRecipeManager().getRecipes().size() - keptRecipes.size();
         if (removed > 0) {
             event.getServer().getRecipeManager().replaceRecipes(keptRecipes);
-            LOGGER.info("Removed {} early-game tool recipe(s) from config.", removed);
+            LOGGER.info("Removed {} tool recipe(s) from config.", removed);
         }
     }
 
@@ -354,13 +358,34 @@ public class MobsToolForging {
         }
     }
 
-    private static List<ResourceLocation> vanillaToolRecipes(String materialPrefix) {
+    private static List<ResourceLocation> vanillaToolRecipes() {
+        return List.of(
+                vanillaMaterialToolRecipes("wooden"),
+                vanillaMaterialToolRecipes("stone"),
+                vanillaMaterialToolRecipes("iron"),
+                vanillaMaterialToolRecipes("golden"),
+                vanillaMaterialToolRecipes("diamond"),
+                vanillaNetheriteToolRecipes()
+        ).stream().flatMap(List::stream).toList();
+    }
+
+    private static List<ResourceLocation> vanillaMaterialToolRecipes(String materialPrefix) {
         return List.of(
                 ResourceLocation.withDefaultNamespace(materialPrefix + "_sword"),
                 ResourceLocation.withDefaultNamespace(materialPrefix + "_shovel"),
                 ResourceLocation.withDefaultNamespace(materialPrefix + "_pickaxe"),
                 ResourceLocation.withDefaultNamespace(materialPrefix + "_axe"),
                 ResourceLocation.withDefaultNamespace(materialPrefix + "_hoe")
+        );
+    }
+
+    private static List<ResourceLocation> vanillaNetheriteToolRecipes() {
+        return List.of(
+                ResourceLocation.withDefaultNamespace("netherite_sword_smithing"),
+                ResourceLocation.withDefaultNamespace("netherite_shovel_smithing"),
+                ResourceLocation.withDefaultNamespace("netherite_pickaxe_smithing"),
+                ResourceLocation.withDefaultNamespace("netherite_axe_smithing"),
+                ResourceLocation.withDefaultNamespace("netherite_hoe_smithing")
         );
     }
 
