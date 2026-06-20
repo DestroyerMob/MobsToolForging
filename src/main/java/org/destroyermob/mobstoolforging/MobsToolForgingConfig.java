@@ -55,8 +55,8 @@ public final class MobsToolForgingConfig {
                 .comment("When true, the Heating Forge can heat solid metal workpieces.")
                 .define("enableForgeHeating", true);
         REQUIRE_HEATED_METAL = builder
-                .comment("When true, metal materials must be heated before they can be placed on the Tool Forge.")
-                .define("requireHeatedMetal", false);
+                .comment("When true, metal materials must be heated before they can be placed on the Smithing Anvil.")
+                .define("requireHeatedMetal", true);
         HEATED_WORKPIECE_TICKS = builder
                 .comment("Ticks required for the Heating Forge to heat a metal workpiece.")
                 .defineInRange("heatedWorkpieceTicks", 1200, 1, 20 * 60 * 60);

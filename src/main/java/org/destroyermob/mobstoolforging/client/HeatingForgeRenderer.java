@@ -1,9 +1,11 @@
 package org.destroyermob.mobstoolforging.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -30,11 +32,15 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
         ItemStack workpiece = forge.workpieceStack();
         if (!workpiece.isEmpty()) {
             float heatScale = 0.36F + forge.heatProgressFraction() * 0.04F;
-            renderFlatItem(forge, workpiece, poseStack, bufferSource, packedLight, packedOverlay, 0.0F, -0.12F, heatScale, 0.60F, 0.0F);
+            renderFlatItem(forge, workpiece, poseStack, bufferSource, packedLight, packedOverlay, 0.0F, -0.12F, heatScale, 0.60F, 0.0F, forge.heatProgressFraction());
         }
     }
 
     private void renderFlatItem(HeatingForgeBlockEntity forge, ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float localX, float localZ, float scale, float surfaceY, float localRotation) {
+        renderFlatItem(forge, stack, poseStack, bufferSource, packedLight, packedOverlay, localX, localZ, scale, surfaceY, localRotation, 0.0F);
+    }
+
+    private void renderFlatItem(HeatingForgeBlockEntity forge, ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float localX, float localZ, float scale, float surfaceY, float localRotation, float heat) {
         Level level = forge.getLevel();
         poseStack.pushPose();
         poseStack.translate(0.5F, surfaceY, 0.5F);
@@ -44,7 +50,29 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.scale(scale, scale, scale);
         itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
+        if (heat > 0.02F) {
+            renderHeatGlow(poseStack, bufferSource, heat);
+        }
         poseStack.popPose();
+    }
+
+    private static void renderHeatGlow(PoseStack poseStack, MultiBufferSource bufferSource, float heat) {
+        float clampedHeat = Math.min(1.0F, heat);
+        int alpha = 40 + Math.round(clampedHeat * 135.0F);
+        int green = 58 + Math.round(clampedHeat * 112.0F);
+        VertexConsumer consumer = bufferSource.getBuffer(RenderType.lightning());
+        addGlowVertex(consumer, poseStack, -1.05F, -1.05F, -0.035F, 255, green, 20, alpha);
+        addGlowVertex(consumer, poseStack, 1.05F, -1.05F, -0.035F, 255, green, 20, alpha);
+        addGlowVertex(consumer, poseStack, 1.05F, 1.05F, -0.035F, 255, 210, 70, alpha);
+        addGlowVertex(consumer, poseStack, -1.05F, 1.05F, -0.035F, 255, 210, 70, alpha);
+        addGlowVertex(consumer, poseStack, -1.05F, 1.05F, 0.035F, 255, 210, 70, alpha);
+        addGlowVertex(consumer, poseStack, 1.05F, 1.05F, 0.035F, 255, 210, 70, alpha);
+        addGlowVertex(consumer, poseStack, 1.05F, -1.05F, 0.035F, 255, green, 20, alpha);
+        addGlowVertex(consumer, poseStack, -1.05F, -1.05F, 0.035F, 255, green, 20, alpha);
+    }
+
+    private static void addGlowVertex(VertexConsumer consumer, PoseStack poseStack, float x, float y, float z, int red, int green, int blue, int alpha) {
+        consumer.addVertex(poseStack.last(), x, y, z).setColor(red, green, blue, alpha);
     }
 
     private static float facingRotation(Direction direction) {

@@ -38,6 +38,8 @@ public class HeatingForgeBlockEntity extends BlockEntity {
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, HeatingForgeBlockEntity forge) {
         boolean changed = false;
+        boolean sync = false;
+        int requiredTicks = MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get();
         if (forge.burnTime > 0) {
             forge.burnTime--;
             changed = true;
@@ -55,21 +57,29 @@ public class HeatingForgeBlockEntity extends BlockEntity {
             WorkpieceHeat.clearIfCooled(forge.workpieceStack, level);
         }
         if (forge.burnTime > 0 && !forge.workpieceStack.isEmpty()) {
-            int requiredTicks = MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get();
             if (forge.heatProgress < requiredTicks) {
                 forge.heatProgress++;
                 changed = true;
+                sync = level.getGameTime() % 10L == 0L;
             }
             if (forge.heatProgress >= requiredTicks) {
                 if (!WorkpieceHeat.isHot(forge.workpieceStack, level) || level.getGameTime() % 20L == 0L) {
                     WorkpieceHeat.heat(forge.workpieceStack, level);
                     changed = true;
+                    sync = true;
                 }
+            }
+        } else if (!forge.workpieceStack.isEmpty() && forge.heatProgress > 0) {
+            int visualProgress = forge.coolingVisualProgress(level, requiredTicks);
+            if (visualProgress != forge.heatProgress) {
+                forge.heatProgress = visualProgress;
+                changed = true;
+                sync = level.getGameTime() % 10L == 0L || visualProgress == 0;
             }
         }
         if (changed) {
             forge.setChanged();
-            if (forge.heatProgress == MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get() || forge.burnTime == 0) {
+            if (sync || forge.burnTime == 0) {
                 forge.sync();
             }
         }
@@ -205,6 +215,15 @@ public class HeatingForgeBlockEntity extends BlockEntity {
             throw new IllegalStateException("Heating forge level is not available");
         }
         return level;
+    }
+
+    private int coolingVisualProgress(Level level, int requiredTicks) {
+        long remainingTicks = WorkpieceHeat.remainingTicks(workpieceStack, level);
+        if (remainingTicks > 0L) {
+            int coolingTicks = MobsToolForgingConfig.COOLING_TICKS.get();
+            return Math.min(requiredTicks, (int) Math.ceil(requiredTicks * (remainingTicks / (double) coolingTicks)));
+        }
+        return Math.max(0, heatProgress - 1);
     }
 
     public void sync() {
