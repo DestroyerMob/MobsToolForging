@@ -15,34 +15,51 @@ public final class HeatRenderUtil {
     }
 
     public static void renderHeatedItem(ItemRenderer itemRenderer, ItemStack stack, ItemDisplayContext context, int packedOverlay, PoseStack poseStack, MultiBufferSource bufferSource, Level level, float heat) {
-        if (heat <= 0.02F) {
+        float clamped = clamp(heat);
+        if (clamped <= 0.02F) {
             return;
         }
-        itemRenderer.renderStatic(stack, context, LightTexture.FULL_BRIGHT, packedOverlay, poseStack, new HeatTintingBufferSource(bufferSource, heat), level, 1);
+
+        poseStack.pushPose();
+        poseStack.scale(1.12F, 1.12F, 1.12F);
+        itemRenderer.renderStatic(stack, context, LightTexture.FULL_BRIGHT, packedOverlay, poseStack, new HeatTintingBufferSource(bufferSource, clamped, HeatLayer.EDGE), level, 1);
+        poseStack.popPose();
+
+        poseStack.pushPose();
+        poseStack.scale(0.96F, 0.96F, 0.96F);
+        itemRenderer.renderStatic(stack, context, LightTexture.FULL_BRIGHT, packedOverlay, poseStack, new HeatTintingBufferSource(bufferSource, clamped, HeatLayer.CORE), level, 2);
+        poseStack.popPose();
     }
 
     public static int inventoryTintColor(float heat) {
         float clamped = clamp(heat);
-        int green = Math.round(80.0F + clamped * 175.0F);
-        int blue = Math.round(16.0F + clamped * clamped * 220.0F);
+        int green = Math.round(120.0F + clamped * 132.0F);
+        int blue = Math.round(36.0F + clamped * clamped * 204.0F);
         int alpha = Math.round(80.0F + clamped * 120.0F);
         return alpha << 24 | 0xFF << 16 | green << 8 | blue;
     }
 
-    private record HeatTintingBufferSource(MultiBufferSource delegate, float heat) implements MultiBufferSource {
+    private enum HeatLayer {
+        EDGE,
+        CORE
+    }
+
+    private record HeatTintingBufferSource(MultiBufferSource delegate, float heat, HeatLayer layer) implements MultiBufferSource {
         @Override
         public VertexConsumer getBuffer(RenderType renderType) {
-            return new HeatTintingVertexConsumer(delegate.getBuffer(renderType), heat);
+            return new HeatTintingVertexConsumer(delegate.getBuffer(renderType), heat, layer);
         }
     }
 
     private static class HeatTintingVertexConsumer implements VertexConsumer {
         private final VertexConsumer delegate;
         private final float heat;
+        private final HeatLayer layer;
 
-        private HeatTintingVertexConsumer(VertexConsumer delegate, float heat) {
+        private HeatTintingVertexConsumer(VertexConsumer delegate, float heat, HeatLayer layer) {
             this.delegate = delegate;
             this.heat = clamp(heat);
+            this.layer = layer;
         }
 
         @Override
@@ -53,9 +70,9 @@ public final class HeatRenderUtil {
 
         @Override
         public VertexConsumer setColor(int red, int green, int blue, int alpha) {
-            float strength = 0.22F + heat * 0.62F;
-            int hotGreen = Math.round(80.0F + heat * 175.0F);
-            int hotBlue = Math.round(16.0F + heat * heat * 220.0F);
+            float strength = layer == HeatLayer.CORE ? 0.40F + heat * 0.58F : 0.35F + heat * 0.50F;
+            int hotGreen = layer == HeatLayer.CORE ? Math.round(120.0F + heat * 132.0F) : Math.round(40.0F + heat * 88.0F);
+            int hotBlue = layer == HeatLayer.CORE ? Math.round(36.0F + heat * heat * 204.0F) : Math.round(4.0F + heat * 18.0F);
             delegate.setColor(mix(red, 255, strength), mix(green, hotGreen, strength), mix(blue, hotBlue, strength), alpha);
             return this;
         }

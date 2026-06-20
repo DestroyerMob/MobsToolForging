@@ -44,11 +44,11 @@ public class HeatingForgeBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape NORTH_SHAPE = Shapes.or(
             Block.box(0.0, 0.0, 0.0, 16.0, 1.0, 16.0),
-            Block.box(0.0, 15.0, 0.0, 16.0, 16.0, 16.0),
+            Block.box(0.0, 15.0, 1.0, 15.0, 16.0, 15.0),
             Block.box(1.0, 8.0, 1.0, 15.0, 9.0, 15.0),
-            Block.box(0.0, 1.0, 15.0, 16.0, 15.0, 16.0),
-            Block.box(15.0, 1.0, 0.0, 16.0, 15.0, 15.0),
-            Block.box(0.0, 1.0, 0.0, 1.0, 15.0, 15.0)
+            Block.box(15.0, 1.0, 0.0, 16.0, 16.0, 16.0),
+            Block.box(0.0, 1.0, 0.0, 15.0, 16.0, 1.0),
+            Block.box(0.0, 1.0, 15.0, 15.0, 16.0, 16.0)
     ).optimize();
     private static final VoxelShape EAST_SHAPE = rotateClockwise(NORTH_SHAPE);
     private static final VoxelShape SOUTH_SHAPE = rotateClockwise(EAST_SHAPE);
