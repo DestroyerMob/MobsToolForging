@@ -11,7 +11,12 @@ public record ToolVisualLayer(
         Optional<String> materialFrom,
         Optional<String> generated,
         Optional<String> template,
+        Optional<String> toolTemplate,
+        Optional<String> partTemplate,
+        Optional<String> handleTemplate,
         Optional<String> largeTemplate,
+        Optional<String> textureNamespace,
+        Optional<String> texturePattern,
         HandleRenderStrategy handleStrategy,
         List<ResourceLocation> materials,
         int z,
@@ -24,7 +29,12 @@ public record ToolVisualLayer(
                 optionalString(json, "material_from"),
                 optionalString(json, "generated"),
                 optionalString(json, "template"),
+                optionalString(json, "tool_template"),
+                optionalString(json, "part_template"),
+                optionalString(json, "handle_template"),
                 optionalString(json, "large_template"),
+                optionalString(json, "texture_namespace"),
+                optionalString(json, "texture_pattern"),
                 handleStrategy(json),
                 materialIds(json),
                 GsonHelper.getAsInt(json, "z", 0),
@@ -34,11 +44,56 @@ public record ToolVisualLayer(
     }
 
     public Optional<ResourceLocation> templateId() {
-        return template.map(ResourceLocation::parse);
+        return toolTemplate.or(() -> template).map(ResourceLocation::parse);
+    }
+
+    public Optional<ResourceLocation> partTemplateId() {
+        return partTemplate.or(() -> template).map(ResourceLocation::parse);
+    }
+
+    public Optional<ResourceLocation> handleTemplateId() {
+        return handleTemplate.or(this::templateIdString).map(ResourceLocation::parse);
+    }
+
+    public Optional<ResourceLocation> templateId(boolean partTemplate) {
+        if (partTemplate) {
+            return partTemplateId();
+        }
+        if (materialFrom.filter("handleMaterial"::equals).isPresent()) {
+            return handleTemplateId();
+        }
+        return templateId();
+    }
+
+    public boolean canUseExactTexture() {
+        return !materialFrom.filter("handleMaterial"::equals).isPresent() || handleStrategy.usesExactTextures();
     }
 
     public boolean canUseTemplateFallback() {
         return !materialFrom.filter("handleMaterial"::equals).isPresent() || handleStrategy.usesTemplateFallback();
+    }
+
+    public boolean prefersTemplateFallback() {
+        return materialFrom.filter("handleMaterial"::equals).isPresent() && handleStrategy.prefersTemplate();
+    }
+
+    public Optional<ResourceLocation> textureFromPattern(ResourceLocation material, String usage) {
+        if (texturePattern.isEmpty()) {
+            return Optional.empty();
+        }
+        String namespace = textureNamespace.orElse(material.getNamespace());
+        String path = texturePattern.get()
+                .replace("{namespace}", namespace)
+                .replace("{material_namespace}", material.getNamespace())
+                .replace("{material}", material.getPath())
+                .replace("{material_path}", material.getPath())
+                .replace("{slot}", slot)
+                .replace("{usage}", usage);
+        return Optional.of(ResourceLocation.fromNamespaceAndPath(namespace, path));
+    }
+
+    private Optional<String> templateIdString() {
+        return toolTemplate.or(() -> template);
     }
 
     private static Optional<String> optionalString(JsonObject json, String key) {

@@ -44,12 +44,23 @@ public class ToolTypeReloadListener extends SimpleJsonResourceReloadListener {
     private static ToolTypeDefinition parse(ResourceLocation id, JsonObject json) {
         String primaryPartType = GsonHelper.getAsString(json, "primary_part_type", id.getPath() + "_head");
         ToolTypeDefinition.Builder builder = ToolTypeDefinition.builder(id, primaryPartType)
-                .toolItem(() -> parseItem(GsonHelper.getAsString(json, "tool_item"), "tool_item"))
                 .visual(json.has("visual") ? ResourceLocation.parse(GsonHelper.getAsString(json, "visual")) : id)
                 .baseStats(
                         GsonHelper.getAsFloat(json, "base_attack_damage_bonus", 1.0F),
                         GsonHelper.getAsFloat(json, "base_attack_speed_bonus", -2.8F)
                 );
+        if (json.has("tool_item")) {
+            Item toolItem = parseItem(GsonHelper.getAsString(json, "tool_item"), "tool_item");
+            builder.toolItem(() -> toolItem);
+        }
+        if (json.has("tool_items")) {
+            JsonObject toolItems = GsonHelper.getAsJsonObject(json, "tool_items");
+            toolItems.entrySet().forEach(entry -> {
+                ResourceLocation materialId = ResourceLocation.parse(entry.getKey());
+                Item item = parseItem(entry.getValue().getAsString(), "tool_items." + entry.getKey());
+                builder.toolItem(materialId, () -> item);
+            });
+        }
 
         boolean swordLike = GsonHelper.getAsBoolean(json, "sword_like", false);
         if (swordLike) {
@@ -65,42 +76,59 @@ public class ToolTypeReloadListener extends SimpleJsonResourceReloadListener {
             builder.noMiningTag();
         }
 
-        Map<String, Item> partItems = partItems(json);
+        ParsedPartItems partItems = partItems(json);
         if (json.has("primary_part_item")) {
-            partItems.put(primaryPartType, parseItem(GsonHelper.getAsString(json, "primary_part_item"), "primary_part_item"));
+            partItems.defaults().put(primaryPartType, parseItem(GsonHelper.getAsString(json, "primary_part_item"), "primary_part_item"));
         }
-        Item primaryPartItem = partItems.get(primaryPartType);
-        if (primaryPartItem == null) {
+        if (json.has("primary_part_items")) {
+            JsonObject primaryPartItems = GsonHelper.getAsJsonObject(json, "primary_part_items");
+            primaryPartItems.entrySet().forEach(entry -> {
+                ResourceLocation materialId = ResourceLocation.parse(entry.getKey());
+                Item item = parseItem(entry.getValue().getAsString(), "primary_part_items." + entry.getKey());
+                partItems.materials().computeIfAbsent(primaryPartType, ignored -> new LinkedHashMap<>()).put(materialId, item);
+            });
+        }
+        if (!partItems.hasPart(primaryPartType)) {
             throw new IllegalArgumentException("Tool type " + id + " needs a part item for primary part " + primaryPartType);
         }
-        builder.partItem(primaryPartType, () -> primaryPartItem);
+        partItems.defaults().forEach((partType, item) -> builder.partItem(partType, () -> item));
+        partItems.materials().forEach((partType, materialItems) -> materialItems.forEach((materialId, item) -> builder.partItem(partType, materialId, () -> item)));
 
         if (json.has("required_assembly_parts")) {
             for (JsonElement element : GsonHelper.getAsJsonArray(json, "required_assembly_parts")) {
                 String partType = element.getAsString();
-                Item partItem = partItems.get(partType);
-                if (partItem == null) {
+                if (!partItems.hasPart(partType)) {
                     throw new IllegalArgumentException("Required assembly part " + partType + " has no matching part_items entry");
                 }
-                builder.requiredAssemblyPart(partType, () -> partItem);
+                builder.requiredAssemblyPart(partType);
             }
         }
 
-        partItems.forEach((partType, item) -> {
-            if (!partType.equals(primaryPartType)) {
-                builder.partItem(partType, () -> item);
-            }
-        });
         return builder.build();
     }
 
-    private static Map<String, Item> partItems(JsonObject json) {
-        Map<String, Item> values = new LinkedHashMap<>();
+    private static ParsedPartItems partItems(JsonObject json) {
+        ParsedPartItems values = new ParsedPartItems(new LinkedHashMap<>(), new LinkedHashMap<>());
         if (!json.has("part_items")) {
             return values;
         }
         JsonObject object = GsonHelper.getAsJsonObject(json, "part_items");
-        object.entrySet().forEach(entry -> values.put(entry.getKey(), parseItem(entry.getValue().getAsString(), "part_items." + entry.getKey())));
+        object.entrySet().forEach(entry -> {
+            if (entry.getValue().isJsonPrimitive()) {
+                values.defaults().put(entry.getKey(), parseItem(entry.getValue().getAsString(), "part_items." + entry.getKey()));
+                return;
+            }
+            JsonObject materialItems = GsonHelper.convertToJsonObject(entry.getValue(), "part_items." + entry.getKey());
+            materialItems.entrySet().forEach(materialEntry -> {
+                if (materialEntry.getKey().equals("default")) {
+                    values.defaults().put(entry.getKey(), parseItem(materialEntry.getValue().getAsString(), "part_items." + entry.getKey() + ".default"));
+                    return;
+                }
+                ResourceLocation materialId = ResourceLocation.parse(materialEntry.getKey());
+                Item item = parseItem(materialEntry.getValue().getAsString(), "part_items." + entry.getKey() + "." + materialEntry.getKey());
+                values.materials().computeIfAbsent(entry.getKey(), ignored -> new LinkedHashMap<>()).put(materialId, item);
+            });
+        });
         return values;
     }
 
@@ -110,5 +138,11 @@ public class ToolTypeReloadListener extends SimpleJsonResourceReloadListener {
             throw new IllegalArgumentException("Unknown item in " + field + ": " + value);
         }
         return item;
+    }
+
+    private record ParsedPartItems(Map<String, Item> defaults, Map<String, Map<ResourceLocation, Item>> materials) {
+        private boolean hasPart(String partType) {
+            return defaults.containsKey(partType) || materials.containsKey(partType);
+        }
     }
 }

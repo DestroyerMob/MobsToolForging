@@ -107,12 +107,30 @@ Handle layers can choose how broad their fallback should be:
 {
   "slot": "handle",
   "material_from": "handleMaterial",
-  "handle_strategy": "template_handle",
-  "template": "mobs_more_weapons:tool_templates/greatsword/handle",
+  "handle_strategy": "template_first",
+  "handle_template": "mobs_more_weapons:tool_templates/greatsword/handle",
   "z": 1
 }
 ```
 
-`default_handle` uses exact handle textures first, then falls back to the layer's grayscale template if one exists. `template_handle` is for unusual grips that cannot be made cleanly from a shared handle shape or mask; exact art still wins first. `explicit_handle` uses exact handle art only. If no exact sprite and no usable grayscale template exists, MTF renders Minecraft's missing texture and logs a warning instead of crashing.
+`default_handle` and `exact_first` use exact handle textures first, then fall back to the layer's grayscale template if one exists. `template_first` and the older `template_handle` alias use the grayscale handle template first, then exact art. `template_only` ignores exact art. `explicit_only` and the older `explicit_handle` alias use exact handle art only. If no exact sprite and no usable grayscale template exists, MTF renders Minecraft's missing texture and logs a warning instead of crashing.
+
+Part and tool layers can use separate fallback shapes:
+
+```json
+{
+  "slot": "greatsword_blade",
+  "material_from": "headMaterial",
+  "tool_template": "mobs_more_weapons:tool_templates/greatsword/blade_tool",
+  "part_template": "mobs_more_weapons:tool_templates/greatsword/blade_part",
+  "texture_namespace": "mobs_more_weapons",
+  "texture_pattern": "item/{material}_{slot}_{usage}",
+  "z": 3
+}
+```
+
+`tool_template` is used for finished tool layers. `part_template` is used for standalone part items. `handle_template` is used for handle layers. The older `template` key remains a shared fallback alias.
+
+`texture_pattern` gives compat packs an escape hatch when item ids and texture ids do not follow MTF's defaults. `{usage}` becomes `tool` or `part`.
 
 Grayscale fallback templates are tinted from `tooling/material_visuals/<material>.json`, so a material add-on can provide a palette once while a tool add-on provides a shape once.

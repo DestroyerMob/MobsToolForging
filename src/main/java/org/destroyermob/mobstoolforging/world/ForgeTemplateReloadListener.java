@@ -53,7 +53,9 @@ public class ForgeTemplateReloadListener extends SimpleJsonResourceReloadListene
         ResourceLocation outputItem = json.has("output_item")
                 ? ResourceLocation.parse(GsonHelper.getAsString(json, "output_item"))
                 : base == null ? null : base.outputItem();
-        return new ForgeTemplateDefinition(id, toolType, partType, requiredMaterials, requiredHits, translationKey, minimumTemperature, whitelist, blacklist, minimumHammerLevel, materialHammerLevels, outputItem);
+        Map<ResourceLocation, ResourceLocation> outputItems = outputItems(json, base);
+        Set<ResourceLocation> compatibleToolTypes = compatibleToolTypes(json, base, toolType);
+        return new ForgeTemplateDefinition(id, toolType, partType, requiredMaterials, requiredHits, translationKey, minimumTemperature, whitelist, blacklist, minimumHammerLevel, materialHammerLevels, outputItem, outputItems, compatibleToolTypes);
     }
 
     private static float minimumTemperature(JsonObject json, ForgeTemplateDefinition base) {
@@ -104,6 +106,31 @@ public class ForgeTemplateReloadListener extends SimpleJsonResourceReloadListene
                         : SmithingHammerLevel.parseLevel(entry.getValue().getAsString().toLowerCase(Locale.ROOT), SmithingHammerLevel.STONE.level())
         ));
         return Map.copyOf(result);
+    }
+
+    private static Map<ResourceLocation, ResourceLocation> outputItems(JsonObject json, ForgeTemplateDefinition base) {
+        if (!json.has("output_items")) {
+            return base == null ? Map.of() : Map.copyOf(base.outputItems());
+        }
+        JsonObject object = GsonHelper.getAsJsonObject(json, "output_items");
+        LinkedHashMap<ResourceLocation, ResourceLocation> result = new LinkedHashMap<>();
+        object.entrySet().forEach(entry -> result.put(ResourceLocation.parse(entry.getKey()), ResourceLocation.parse(entry.getValue().getAsString())));
+        return Map.copyOf(result);
+    }
+
+    private static Set<ResourceLocation> compatibleToolTypes(JsonObject json, ForgeTemplateDefinition base, ResourceLocation toolType) {
+        if (!json.has("compatible_tool_types")) {
+            return base == null ? Set.of(toolType) : Set.copyOf(base.compatibleToolTypes());
+        }
+        JsonArray values = GsonHelper.getAsJsonArray(json, "compatible_tool_types");
+        LinkedHashSet<ResourceLocation> result = new LinkedHashSet<>();
+        for (JsonElement element : values) {
+            result.add(ResourceLocation.parse(element.getAsString()));
+        }
+        if (result.isEmpty()) {
+            result.add(toolType);
+        }
+        return Set.copyOf(result);
     }
 
     private static float clamp(float value) {

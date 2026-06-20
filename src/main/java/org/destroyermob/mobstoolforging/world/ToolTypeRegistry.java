@@ -65,7 +65,9 @@ public final class ToolTypeRegistry {
                 Set.of(),
                 SmithingHammerLevel.STONE.level(),
                 Map.of(),
-                ModItems.SMITHING_HAMMER_HEAD.getId()
+                ModItems.SMITHING_HAMMER_HEAD.getId(),
+                Map.of(),
+                Set.of(SMITHING_HAMMER_TOOL_TYPE)
         ));
     }
 

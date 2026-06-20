@@ -22,13 +22,17 @@ public record ForgeTemplateDefinition(
         Set<ResourceLocation> materialBlacklist,
         int minimumHammerLevel,
         Map<ResourceLocation, Integer> materialHammerLevels,
-        ResourceLocation outputItem
+        ResourceLocation outputItem,
+        Map<ResourceLocation, ResourceLocation> outputItems,
+        Set<ResourceLocation> compatibleToolTypes
 ) {
     public ForgeTemplateDefinition {
         materialWhitelist = Set.copyOf(materialWhitelist);
         materialBlacklist = Set.copyOf(materialBlacklist);
         minimumHammerLevel = Math.max(0, minimumHammerLevel);
         materialHammerLevels = Map.copyOf(materialHammerLevels);
+        outputItems = Map.copyOf(outputItems);
+        compatibleToolTypes = compatibleToolTypes.isEmpty() ? Set.of(toolType) : Set.copyOf(compatibleToolTypes);
     }
 
     public ForgeTemplateDefinition(ResourceLocation id, ResourceLocation toolType, String partType, int requiredMaterials, int requiredHits, String translationKey) {
@@ -36,7 +40,7 @@ public record ForgeTemplateDefinition(
     }
 
     public ForgeTemplateDefinition(ResourceLocation id, ResourceLocation toolType, String partType, int requiredMaterials, int requiredHits, String translationKey, float minimumTemperature) {
-        this(id, toolType, partType, requiredMaterials, requiredHits, translationKey, minimumTemperature, Set.of(), Set.of(), SmithingHammerLevel.STONE.level(), Map.of(), null);
+        this(id, toolType, partType, requiredMaterials, requiredHits, translationKey, minimumTemperature, Set.of(), Set.of(), SmithingHammerLevel.STONE.level(), Map.of(), null, Map.of(), Set.of(toolType));
     }
 
     @Override
@@ -68,8 +72,9 @@ public record ForgeTemplateDefinition(
     }
 
     public ItemStack outputStack(ResourceLocation materialId, int quality) {
-        if (outputItem != null) {
-            Item item = BuiltInRegistries.ITEM.get(outputItem);
+        ResourceLocation resolvedOutputItem = outputItems.getOrDefault(materialId, outputItem);
+        if (resolvedOutputItem != null) {
+            Item item = BuiltInRegistries.ITEM.get(resolvedOutputItem);
             if (item == Items.AIR) {
                 return ItemStack.EMPTY;
             }

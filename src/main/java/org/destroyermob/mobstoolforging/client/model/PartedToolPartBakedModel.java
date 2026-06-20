@@ -97,7 +97,7 @@ public final class PartedToolPartBakedModel implements BakedModel {
     }
 
     private ResolvedPartedItemModel compose(ResourceLocation material) {
-        ResolvedToolLayerSprite resolved = sprites.resolveLayer(visual.id(), partLayer, material)
+        ResolvedToolLayerSprite resolved = sprites.resolvePartLayer(visual.id(), partLayer, material)
                 .orElseGet(() -> {
                     warnMissingPartSprite(material);
                     return ResolvedToolLayerSprite.exact(sprites.missing(), net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());

@@ -53,17 +53,9 @@ public class ModularToolRecipe extends CustomRecipe {
         if (!parts.isValid(definition)) {
             return ItemStack.EMPTY;
         }
-        ToolPartData partData = parts.part().get(ModDataComponents.TOOL_PART.get());
-        return definition.createTool(new ToolConstructionData(
-                definition.id(),
-                partData.materialId(),
-                MaterialCatalog.handleMaterial(parts.handle()),
-                parts.bindingMaterial(),
-                material(parts.wrap(), MaterialCatalog::wrapMaterial),
-                material(parts.focus(), MaterialCatalog::focusMaterial),
-                material(parts.treatment(), MaterialCatalog::treatmentMaterial),
-                parts.quality()
-        ));
+        return parts.construction(definition)
+                .map(definition::createTool)
+                .orElse(ItemStack.EMPTY);
     }
 
     @Override
@@ -165,7 +157,7 @@ public class ModularToolRecipe extends CustomRecipe {
         return new Parts(part, handle, binding, requiredParts, wrap, focus, treatment);
     }
 
-    private Optional<ResourceLocation> material(ItemStack stack, MaterialResolver resolver) {
+    private static Optional<ResourceLocation> material(ItemStack stack, MaterialResolver resolver) {
         return stack.isEmpty() ? Optional.empty() : Optional.of(resolver.resolve(stack));
     }
 
@@ -173,7 +165,7 @@ public class ModularToolRecipe extends CustomRecipe {
         if (partData == null || !partType.equals(partData.partType())) {
             return false;
         }
-        return definition.partItem(partType).map(stack::is).orElse(true);
+        return definition.matchesPartItem(partType, partData.materialId(), stack);
     }
 
     private static Optional<String> matchingRequiredPart(ToolTypeDefinition definition, ItemStack stack, ToolPartData partData) {
@@ -193,9 +185,40 @@ public class ModularToolRecipe extends CustomRecipe {
         }
 
         private boolean isValid(ToolTypeDefinition definition) {
-            return !part.isEmpty()
-                    && !handle.isEmpty()
-                    && requiredParts.keySet().containsAll(definition.requiredAssemblyParts());
+            Optional<ToolConstructionData> construction = construction(definition);
+            return construction.isPresent() && definition.canAssemble(construction.get(), partDataByType());
+        }
+
+        private Optional<ToolConstructionData> construction(ToolTypeDefinition definition) {
+            ToolPartData partData = part.get(ModDataComponents.TOOL_PART.get());
+            if (partData == null || handle.isEmpty() || !requiredParts.keySet().containsAll(definition.requiredAssemblyParts())) {
+                return Optional.empty();
+            }
+            return Optional.of(new ToolConstructionData(
+                    definition.id(),
+                    partData.materialId(),
+                    MaterialCatalog.handleMaterial(handle),
+                    bindingMaterial(),
+                    material(wrap, MaterialCatalog::wrapMaterial),
+                    material(focus, MaterialCatalog::focusMaterial),
+                    material(treatment, MaterialCatalog::treatmentMaterial),
+                    quality()
+            ));
+        }
+
+        private Map<String, ToolPartData> partDataByType() {
+            Map<String, ToolPartData> values = new LinkedHashMap<>();
+            ToolPartData primary = part.get(ModDataComponents.TOOL_PART.get());
+            if (primary != null) {
+                values.put(primary.partType(), primary);
+            }
+            requiredParts.forEach((partType, stack) -> {
+                ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
+                if (data != null) {
+                    values.put(partType, data);
+                }
+            });
+            return values;
         }
 
         private Optional<ResourceLocation> bindingMaterial() {

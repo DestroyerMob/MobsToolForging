@@ -56,13 +56,25 @@ Tool type JSON lets a datapack connect existing item classes to Mobs Tool Forgin
 
 ```json
 {
-  "tool_item": "mobs_more_weapons:greatsword",
   "primary_part_type": "greatsword_blade",
-  "primary_part_item": "mobs_more_weapons:greatsword_blade",
-  "part_items": {
-    "greatsword_guard": "mobs_more_weapons:greatsword_guard"
+  "tool_items": {
+    "mobstoolforging:iron": "mobs_more_weapons:iron_great_sword",
+    "mobstoolforging:gold": "mobs_more_weapons:golden_great_sword",
+    "mobstoolforging:diamond": "mobs_more_weapons:diamond_great_sword"
   },
-  "required_assembly_parts": ["greatsword_guard"],
+  "part_items": {
+    "greatsword_blade": {
+      "mobstoolforging:iron": "mobs_more_weapons:iron_great_sword_blade",
+      "mobstoolforging:gold": "mobs_more_weapons:golden_great_sword_blade",
+      "mobstoolforging:diamond": "mobs_more_weapons:diamond_great_sword_blade"
+    },
+    "wide_guard": {
+      "mobstoolforging:iron": "mobs_more_weapons:iron_wide_guard",
+      "mobstoolforging:gold": "mobs_more_weapons:golden_wide_guard",
+      "mobstoolforging:diamond": "mobs_more_weapons:diamond_wide_guard"
+    }
+  },
+  "required_assembly_parts": ["wide_guard"],
   "visual": "mobs_more_weapons:greatsword",
   "base_attack_damage_bonus": 5.5,
   "base_attack_speed_bonus": -2.9,
@@ -70,7 +82,9 @@ Tool type JSON lets a datapack connect existing item classes to Mobs Tool Forgin
 }
 ```
 
-Datapack tool types cannot create new item classes or custom combat callbacks. They can attach Mobs Tool Forging components, stats, recipes, and visuals to items that already exist.
+`tool_item`, `primary_part_item`, and string-valued `part_items` still work for one-item modular families. Use `tool_items`, `primary_part_items`, or object-valued `part_items` when the target mod has material-specific item ids. The keys are MTF material ids, and the values are already-registered item ids.
+
+Datapack tool types cannot create new item classes or custom combat callbacks. They can attach Mobs Tool Forging components, stats, recipes, and visuals to items that already exist. A modular recipe only matches when the resolved part items and the resolved output item are valid for the construction material.
 
 External physical patterns can use the generic `mobstoolforging:template_pattern` item with a component:
 
@@ -246,5 +260,30 @@ External visual definitions can list extra material ids per layer so the model l
   ]
 }
 ```
+
+Layer JSON can also define explicit fallback templates and texture conventions:
+
+```json
+{
+  "slot": "greatsword_blade",
+  "material_from": "headMaterial",
+  "tool_template": "mobs_more_weapons:tool_templates/greatsword/blade_tool",
+  "part_template": "mobs_more_weapons:tool_templates/greatsword/blade_part",
+  "texture_namespace": "mobs_more_weapons",
+  "texture_pattern": "item/{material}_{slot}_{usage}",
+  "z": 3
+}
+```
+
+`usage` resolves to `tool` for assembled layers and `part` for standalone part items. Available placeholders are `{namespace}`, `{material_namespace}`, `{material}`, `{material_path}`, `{slot}`, and `{usage}`.
+
+Handle layers can choose rendering priority:
+
+- `default_handle` or `exact_first`: exact texture first, then template fallback.
+- `template_first` or `template_handle`: grayscale template first, then exact texture.
+- `template_only`: grayscale template only.
+- `explicit_only` or `explicit_handle`: exact texture only.
+
+This lets a weapon add-on decide whether a custom handle silhouette should override MTF's built-in stick/blaze/breeze handle art.
 
 The texture key format is `layer_<slot>_<material>`, where non-MTF material ids include the namespace, for example `layer_greatsword_blade_mobs_more_weapons_steel`.

@@ -7,6 +7,7 @@
     {
       "emissive_allowed": false,
       "handle_strategy": "default_handle",
+      "handle_template": "mobstoolforging:tool_templates/hoe/handle",
       "large_template": "mobstoolforging:tool_templates/hoe/large_handle",
       "material_from": "handleMaterial",
       "optional": false,
@@ -21,6 +22,7 @@
       "optional": true,
       "slot": "wrap",
       "template": "mobstoolforging:tool_templates/hoe/wrap",
+      "tool_template": "mobstoolforging:tool_templates/hoe/wrap",
       "z": 2
     },
     {
@@ -28,8 +30,10 @@
       "large_template": "mobstoolforging:tool_templates/hoe/large_hoe_head",
       "material_from": "headMaterial",
       "optional": false,
+      "part_template": "mobstoolforging:tool_templates/hoe/hoe_head_part",
       "slot": "hoe_head",
       "template": "mobstoolforging:tool_templates/hoe/hoe_head",
+      "tool_template": "mobstoolforging:tool_templates/hoe/hoe_head",
       "z": 3
     },
     {
@@ -37,8 +41,10 @@
       "large_template": "mobstoolforging:tool_templates/hoe/large_binding",
       "material_from": "bindingMaterial",
       "optional": true,
+      "part_template": "mobstoolforging:tool_templates/hoe/binding_part",
       "slot": "binding",
       "template": "mobstoolforging:tool_templates/hoe/binding",
+      "tool_template": "mobstoolforging:tool_templates/hoe/binding",
       "z": 4
     },
     {
@@ -48,6 +54,7 @@
       "optional": true,
       "slot": "focus",
       "template": "mobstoolforging:tool_templates/hoe/focus",
+      "tool_template": "mobstoolforging:tool_templates/hoe/focus",
       "z": 5
     },
     {
@@ -57,6 +64,7 @@
       "optional": true,
       "slot": "treatment_overlay",
       "template": "mobstoolforging:tool_templates/hoe/treatment_overlay",
+      "tool_template": "mobstoolforging:tool_templates/hoe/treatment_overlay",
       "z": 6
     }
   ]

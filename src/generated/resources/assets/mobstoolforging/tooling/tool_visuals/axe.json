@@ -7,6 +7,7 @@
     {
       "emissive_allowed": false,
       "handle_strategy": "default_handle",
+      "handle_template": "mobstoolforging:tool_templates/axe/handle",
       "large_template": "mobstoolforging:tool_templates/axe/large_handle",
       "material_from": "handleMaterial",
       "optional": false,
@@ -21,6 +22,7 @@
       "optional": true,
       "slot": "wrap",
       "template": "mobstoolforging:tool_templates/axe/wrap",
+      "tool_template": "mobstoolforging:tool_templates/axe/wrap",
       "z": 2
     },
     {
@@ -28,8 +30,10 @@
       "large_template": "mobstoolforging:tool_templates/axe/large_axe_head",
       "material_from": "headMaterial",
       "optional": false,
+      "part_template": "mobstoolforging:tool_templates/axe/axe_head_part",
       "slot": "axe_head",
       "template": "mobstoolforging:tool_templates/axe/axe_head",
+      "tool_template": "mobstoolforging:tool_templates/axe/axe_head",
       "z": 3
     },
     {
@@ -37,8 +41,10 @@
       "large_template": "mobstoolforging:tool_templates/axe/large_binding",
       "material_from": "bindingMaterial",
       "optional": true,
+      "part_template": "mobstoolforging:tool_templates/axe/binding_part",
       "slot": "binding",
       "template": "mobstoolforging:tool_templates/axe/binding",
+      "tool_template": "mobstoolforging:tool_templates/axe/binding",
       "z": 4
     },
     {
@@ -48,6 +54,7 @@
       "optional": true,
       "slot": "focus",
       "template": "mobstoolforging:tool_templates/axe/focus",
+      "tool_template": "mobstoolforging:tool_templates/axe/focus",
       "z": 5
     },
     {
@@ -57,6 +64,7 @@
       "optional": true,
       "slot": "treatment_overlay",
       "template": "mobstoolforging:tool_templates/axe/treatment_overlay",
+      "tool_template": "mobstoolforging:tool_templates/axe/treatment_overlay",
       "z": 6
     }
   ]

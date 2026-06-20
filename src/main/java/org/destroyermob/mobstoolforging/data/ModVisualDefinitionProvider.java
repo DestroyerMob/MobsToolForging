@@ -108,8 +108,14 @@ public class ModVisualDefinitionProvider implements DataProvider {
         json.addProperty("material_from", materialFrom);
         if ("handleMaterial".equals(materialFrom)) {
             json.addProperty("handle_strategy", "default_handle");
+            json.addProperty("handle_template", modLoc("tool_templates/" + toolKind.id() + "/" + slot).toString());
+        } else {
+            json.addProperty("tool_template", modLoc("tool_templates/" + toolKind.id() + "/" + slot).toString());
         }
         json.addProperty("template", modLoc("tool_templates/" + toolKind.id() + "/" + slot).toString());
+        if ("headMaterial".equals(materialFrom) || "bindingMaterial".equals(materialFrom)) {
+            json.addProperty("part_template", modLoc("tool_templates/" + toolKind.id() + "/" + slot + "_part").toString());
+        }
         json.addProperty("large_template", modLoc("tool_templates/" + toolKind.id() + "/large_" + slot).toString());
         json.addProperty("z", z);
         json.addProperty("optional", optional);

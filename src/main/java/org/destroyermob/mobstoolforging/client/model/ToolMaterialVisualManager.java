@@ -13,9 +13,9 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 
 public final class ToolMaterialVisualManager extends SimpleJsonResourceReloadListener {
-    public static final ToolMaterialVisualManager INSTANCE = new ToolMaterialVisualManager();
     private static final Gson GSON = new Gson();
     private static final int DEFAULT_TINT = 0xFFFFFFFF;
+    public static final ToolMaterialVisualManager INSTANCE = new ToolMaterialVisualManager();
 
     private volatile Map<ResourceLocation, MaterialVisual> visuals = Map.of();
 

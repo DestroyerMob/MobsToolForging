@@ -3,20 +3,36 @@ package org.destroyermob.mobstoolforging.client.model;
 import java.util.Locale;
 
 public enum HandleRenderStrategy {
-    DEFAULT_HANDLE("default_handle", true),
-    TEMPLATE_HANDLE("template_handle", true),
-    EXPLICIT_HANDLE("explicit_handle", false);
+    DEFAULT_HANDLE("default_handle", true, true, false),
+    EXACT_FIRST("exact_first", true, true, false),
+    TEMPLATE_FIRST("template_first", true, true, true),
+    TEMPLATE_ONLY("template_only", false, true, true),
+    EXPLICIT_ONLY("explicit_only", true, false, false),
+    TEMPLATE_HANDLE("template_handle", true, true, true),
+    EXPLICIT_HANDLE("explicit_handle", true, false, false);
 
     private final String id;
+    private final boolean exactTextures;
     private final boolean templateFallback;
+    private final boolean templateFirst;
 
-    HandleRenderStrategy(String id, boolean templateFallback) {
+    HandleRenderStrategy(String id, boolean exactTextures, boolean templateFallback, boolean templateFirst) {
         this.id = id;
+        this.exactTextures = exactTextures;
         this.templateFallback = templateFallback;
+        this.templateFirst = templateFirst;
+    }
+
+    public boolean usesExactTextures() {
+        return exactTextures;
     }
 
     public boolean usesTemplateFallback() {
         return templateFallback;
+    }
+
+    public boolean prefersTemplate() {
+        return templateFirst;
     }
 
     public String id() {

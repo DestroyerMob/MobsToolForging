@@ -23,13 +23,16 @@ public final class ToolTypeDefinition {
     private final ResourceLocation visualId;
     private final Optional<ToolKind> builtInKind;
     private final Supplier<? extends Item> toolItem;
+    private final Map<ResourceLocation, Supplier<? extends Item>> materialToolItems;
     private final Map<String, Supplier<? extends Item>> partItems;
+    private final Map<String, Map<ResourceLocation, Supplier<? extends Item>>> materialPartItems;
     private final List<String> requiredAssemblyParts;
     private final float baseAttackDamageBonus;
     private final float baseAttackSpeedBonus;
     private final boolean swordLike;
     private final Optional<TagKey<Block>> miningTag;
     private final BiFunction<ToolTypeDefinition, ToolConstructionData, ItemStack> toolFactory;
+    private final boolean customToolFactory;
     private final PartFactory partFactory;
 
     private ToolTypeDefinition(Builder builder) {
@@ -38,13 +41,18 @@ public final class ToolTypeDefinition {
         this.visualId = builder.visualId == null ? builder.id : builder.visualId;
         this.builtInKind = Optional.ofNullable(builder.builtInKind);
         this.toolItem = builder.toolItem;
+        this.materialToolItems = Map.copyOf(builder.materialToolItems);
         this.partItems = Map.copyOf(builder.partItems);
+        Map<String, Map<ResourceLocation, Supplier<? extends Item>>> materialParts = new LinkedHashMap<>();
+        builder.materialPartItems.forEach((partType, items) -> materialParts.put(partType, Map.copyOf(items)));
+        this.materialPartItems = Map.copyOf(materialParts);
         this.requiredAssemblyParts = List.copyOf(builder.requiredAssemblyParts);
         this.baseAttackDamageBonus = builder.baseAttackDamageBonus;
         this.baseAttackSpeedBonus = builder.baseAttackSpeedBonus;
         this.swordLike = builder.swordLike;
         this.miningTag = Optional.ofNullable(builder.miningTag);
         this.toolFactory = builder.toolFactory == null ? ToolTypeDefinition::defaultToolStack : builder.toolFactory;
+        this.customToolFactory = builder.toolFactory != null;
         this.partFactory = builder.partFactory == null ? ToolTypeDefinition::defaultPartStack : builder.partFactory;
     }
 
@@ -68,13 +76,35 @@ public final class ToolTypeDefinition {
         return toolItem == null ? Optional.empty() : Optional.of(toolItem.get());
     }
 
+    public Optional<Item> toolItem(ResourceLocation materialId) {
+        Supplier<? extends Item> supplier = materialToolItems.get(materialId);
+        return supplier == null ? toolItem() : Optional.of(supplier.get());
+    }
+
     public Optional<Item> partItem(String partType) {
         Supplier<? extends Item> supplier = partItems.get(partType);
         return supplier == null ? Optional.empty() : Optional.of(supplier.get());
     }
 
+    public Optional<Item> partItem(String partType, ResourceLocation materialId) {
+        Supplier<? extends Item> supplier = materialPartItems.getOrDefault(partType, Map.of()).get(materialId);
+        return supplier == null ? partItem(partType) : Optional.of(supplier.get());
+    }
+
+    public boolean matchesPartItem(String partType, ResourceLocation materialId, ItemStack stack) {
+        Optional<Item> item = partItem(partType, materialId);
+        if (item.isPresent()) {
+            return stack.is(item.get());
+        }
+        return (primaryPartType.equals(partType) || requiredAssemblyParts.contains(partType))
+                && !partItems.containsKey(partType)
+                && !materialPartItems.containsKey(partType);
+    }
+
     public Set<String> partTypes() {
-        return partItems.keySet();
+        java.util.LinkedHashSet<String> values = new java.util.LinkedHashSet<>(partItems.keySet());
+        values.addAll(materialPartItems.keySet());
+        return Set.copyOf(values);
     }
 
     public List<String> requiredAssemblyParts() {
@@ -113,12 +143,29 @@ public final class ToolTypeDefinition {
         return requiredAssemblyParts.contains(partType);
     }
 
+    public boolean canAssemble(ToolConstructionData construction, Map<String, ToolPartData> parts) {
+        if (!id.equals(construction.toolType())) {
+            return false;
+        }
+        if (!customToolFactory && toolItem(construction.headMaterial()).isEmpty()) {
+            return false;
+        }
+        ToolPartData primary = parts.get(primaryPartType);
+        if (primary == null || !primaryPartType.equals(primary.partType()) || !construction.headMaterial().equals(primary.materialId())) {
+            return false;
+        }
+        if (!parts.keySet().containsAll(requiredAssemblyParts)) {
+            return false;
+        }
+        return parts.values().stream().allMatch(part -> MaterialCatalog.definition(part.materialId()).isPresent());
+    }
+
     public static Builder builder(ResourceLocation id, String primaryPartType) {
         return new Builder(id, primaryPartType);
     }
 
     private static ItemStack defaultToolStack(ToolTypeDefinition definition, ToolConstructionData construction) {
-        Optional<Item> item = definition.toolItem();
+        Optional<Item> item = definition.toolItem(construction.headMaterial());
         if (item.isEmpty()) {
             return ItemStack.EMPTY;
         }
@@ -134,7 +181,7 @@ public final class ToolTypeDefinition {
     }
 
     private static ItemStack defaultPartStack(ToolTypeDefinition definition, String partType, ResourceLocation materialId, int quality) {
-        return definition.partItem(partType)
+        return definition.partItem(partType, materialId)
                 .map(item -> {
                     if (item instanceof ModularToolPartItem partItem) {
                         return partItem.createPart(materialId, quality);
@@ -157,7 +204,9 @@ public final class ToolTypeDefinition {
         private ResourceLocation visualId;
         private ToolKind builtInKind;
         private Supplier<? extends Item> toolItem;
+        private final Map<ResourceLocation, Supplier<? extends Item>> materialToolItems = new LinkedHashMap<>();
         private final Map<String, Supplier<? extends Item>> partItems = new LinkedHashMap<>();
+        private final Map<String, Map<ResourceLocation, Supplier<? extends Item>>> materialPartItems = new LinkedHashMap<>();
         private final java.util.ArrayList<String> requiredAssemblyParts = new java.util.ArrayList<>();
         private float baseAttackDamageBonus = 1.0F;
         private float baseAttackSpeedBonus = -2.8F;
@@ -194,14 +243,29 @@ public final class ToolTypeDefinition {
             return this;
         }
 
+        public Builder toolItem(ResourceLocation materialId, Supplier<? extends Item> toolItem) {
+            this.materialToolItems.put(materialId, toolItem);
+            return this;
+        }
+
         public Builder partItem(String partType, Supplier<? extends Item> partItem) {
             this.partItems.put(partType, partItem);
+            return this;
+        }
+
+        public Builder partItem(String partType, ResourceLocation materialId, Supplier<? extends Item> partItem) {
+            this.materialPartItems.computeIfAbsent(partType, ignored -> new LinkedHashMap<>()).put(materialId, partItem);
             return this;
         }
 
         public Builder requiredAssemblyPart(String partType, Supplier<? extends Item> partItem) {
             this.requiredAssemblyParts.add(partType);
             return partItem(partType, partItem);
+        }
+
+        public Builder requiredAssemblyPart(String partType) {
+            this.requiredAssemblyParts.add(partType);
+            return this;
         }
 
         public Builder baseStats(float attackDamageBonus, float attackSpeedBonus) {
