@@ -9,7 +9,7 @@ public record HeatingForgeInsertVisual(ResourceLocation model, ResourceLocation 
     public static final ResourceLocation DEFAULT_FUEL_MODEL = modLoc("block/heating_forge/fuel_chunk");
     public static final ResourceLocation DEFAULT_FUEL_TEXTURE = ResourceLocation.withDefaultNamespace("item/coal");
     public static final ResourceLocation DEFAULT_WORKPIECE_MODEL = modLoc("block/heating_forge/billet");
-    public static final ResourceLocation DEFAULT_WORKPIECE_TEXTURE = ResourceLocation.withDefaultNamespace("item/iron_ingot");
+    public static final ResourceLocation DEFAULT_WORKPIECE_TEXTURE = ResourceLocation.withDefaultNamespace("block/iron_block");
 
     public static HeatingForgeInsertVisual defaultFuel() {
         return new HeatingForgeInsertVisual(DEFAULT_FUEL_MODEL, DEFAULT_FUEL_TEXTURE);

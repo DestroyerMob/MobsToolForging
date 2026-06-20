@@ -4,6 +4,30 @@
       "type": "minecraft:directory",
       "source": "generated/tool_parts",
       "prefix": "generated/tool_parts/"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/coal"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/charcoal"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/iron_ingot"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/gold_ingot"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/copper_ingot"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/netherite_ingot"
     }
   ]
 }

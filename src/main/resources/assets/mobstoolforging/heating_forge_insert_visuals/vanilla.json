@@ -5,7 +5,7 @@
   },
   "fallback_workpiece": {
     "model": "mobstoolforging:block/heating_forge/billet",
-    "billet_texture": "minecraft:item/iron_ingot"
+    "billet_texture": "minecraft:block/iron_block"
   },
   "entries": [
     {
@@ -27,7 +27,7 @@
       "workpiece": "minecraft:iron_ingot",
       "material": "mobstoolforging:iron",
       "model": "mobstoolforging:block/heating_forge/billet",
-      "billet_texture": "minecraft:item/iron_ingot"
+      "billet_texture": "minecraft:block/iron_block"
     },
     {
       "workpiece": "minecraft:gold_ingot",
