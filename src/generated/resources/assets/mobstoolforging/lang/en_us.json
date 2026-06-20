@@ -1,7 +1,7 @@
 {
   "block.mobstoolforging.heating_forge": "Heating Forge",
   "block.mobstoolforging.lapidary_table": "Lapidary Table",
-  "block.mobstoolforging.tool_forge": "Tool Forge",
+  "block.mobstoolforging.tool_forge": "Smithing Anvil",
   "forge_template.mobstoolforging.axe_head": "Axe Head",
   "forge_template.mobstoolforging.hoe_head": "Hoe Head",
   "forge_template.mobstoolforging.pickaxe_head": "Pickaxe Head",
@@ -77,7 +77,7 @@
   "message.mobstoolforging.template_cleared": "Template cleared.",
   "message.mobstoolforging.template_selected": "Selected %s.",
   "message.mobstoolforging.use_lapidary_table": "Gem heads are shaped on a Lapidary Table.",
-  "message.mobstoolforging.use_tool_forge": "Metal heads are forged on a Tool Forge.",
+  "message.mobstoolforging.use_tool_forge": "Metal heads are forged on a Smithing Anvil.",
   "screen.mobstoolforging.tool_forge_templates": "Tool Templates",
   "tooltip.mobstoolforging.construction": "Construction",
   "tooltip.mobstoolforging.debug": "Debug",

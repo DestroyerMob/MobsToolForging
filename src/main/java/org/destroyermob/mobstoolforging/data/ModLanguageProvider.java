@@ -13,7 +13,7 @@ public class ModLanguageProvider extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
-        addBlock(ModBlocks.TOOL_FORGE, "Tool Forge");
+        addBlock(ModBlocks.TOOL_FORGE, "Smithing Anvil");
         addBlock(ModBlocks.LAPIDARY_TABLE, "Lapidary Table");
         addBlock(ModBlocks.HEATING_FORGE, "Heating Forge");
         addItem(ModItems.SMITHING_HAMMER, "Smithing Hammer");
@@ -79,7 +79,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.need_materials", "Place the required matching materials before working.");
         add("message.mobstoolforging.mixed_materials", "Finish this part with the same material.");
         add("message.mobstoolforging.use_lapidary_table", "Gem heads are shaped on a Lapidary Table.");
-        add("message.mobstoolforging.use_tool_forge", "Metal heads are forged on a Tool Forge.");
+        add("message.mobstoolforging.use_tool_forge", "Metal heads are forged on a Smithing Anvil.");
         add("message.mobstoolforging.complete", "The tool part is ready.");
         add("message.mobstoolforging.inventory_full", "Make room before taking the finished part.");
         add("message.mobstoolforging.station_status", "Materials: %s/%s, Progress: %s/%s");

@@ -48,7 +48,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockItem(lapidaryTable, lapidaryModel);
 
         Block heatingForge = ModBlocks.HEATING_FORGE.get();
-        ModelFile heatingForgeModel = models().cubeBottomTop("heating_forge", mcLoc("block/deepslate_bricks"), mcLoc("block/deepslate_bricks"), mcLoc("block/blast_furnace_top"));
+        ModelFile heatingForgeModel = new ModelFile.UncheckedModelFile(modLoc("block/heating_forge"));
         horizontalBlock(heatingForge, heatingForgeModel);
         simpleBlockItem(heatingForge, heatingForgeModel);
 

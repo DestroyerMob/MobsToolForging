@@ -40,11 +40,17 @@ import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 public class HeatingForgeBlock extends BaseEntityBlock {
     public static final MapCodec<HeatingForgeBlock> CODEC = simpleCodec(HeatingForgeBlock::new);
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    private static final VoxelShape SHAPE = Shapes.or(
-            Block.box(0.0, 0.0, 0.0, 16.0, 3.0, 16.0),
-            Block.box(1.0, 3.0, 1.0, 15.0, 11.0, 15.0),
-            Block.box(0.0, 11.0, 0.0, 16.0, 14.0, 16.0)
+    private static final VoxelShape NORTH_SHAPE = Shapes.or(
+            Block.box(0.0, 0.0, 0.0, 16.0, 1.0, 16.0),
+            Block.box(0.0, 15.0, 0.0, 16.0, 16.0, 16.0),
+            Block.box(1.0, 8.0, 1.0, 15.0, 9.0, 15.0),
+            Block.box(0.0, 1.0, 15.0, 16.0, 15.0, 16.0),
+            Block.box(15.0, 1.0, 0.0, 16.0, 15.0, 15.0),
+            Block.box(0.0, 1.0, 0.0, 1.0, 15.0, 15.0)
     ).optimize();
+    private static final VoxelShape EAST_SHAPE = rotateClockwise(NORTH_SHAPE);
+    private static final VoxelShape SOUTH_SHAPE = rotateClockwise(EAST_SHAPE);
+    private static final VoxelShape WEST_SHAPE = rotateClockwise(SOUTH_SHAPE);
 
     public HeatingForgeBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -162,7 +168,12 @@ public class HeatingForgeBlock extends BaseEntityBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPE;
+        return switch (state.getValue(FACING)) {
+            case EAST -> EAST_SHAPE;
+            case SOUTH -> SOUTH_SHAPE;
+            case WEST -> WEST_SHAPE;
+            default -> NORTH_SHAPE;
+        };
     }
 
     @Override
@@ -206,5 +217,14 @@ public class HeatingForgeBlock extends BaseEntityBlock {
         if (!stack.isEmpty() && !player.getInventory().add(stack)) {
             player.drop(stack, false);
         }
+    }
+
+    private static VoxelShape rotateClockwise(VoxelShape shape) {
+        VoxelShape[] rotated = {Shapes.empty()};
+        shape.toAabbs().forEach(box -> rotated[0] = Shapes.or(
+                rotated[0],
+                Shapes.box(1.0D - box.maxZ, box.minY, box.minX, 1.0D - box.minZ, box.maxY, box.maxX)
+        ));
+        return rotated[0].optimize();
     }
 }

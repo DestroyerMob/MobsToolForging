@@ -7,9 +7,11 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
 
 public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlockEntity> {
@@ -23,12 +25,12 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
     public void render(HeatingForgeBlockEntity forge, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         ItemStack fuel = forge.fuelStack();
         if (!fuel.isEmpty()) {
-            renderFlatItem(forge, fuel, poseStack, bufferSource, packedLight, packedOverlay, 0.0F, 0.0F, 0.30F, 0.255F, 35.0F);
+            renderFlatItem(forge, fuel, poseStack, bufferSource, packedLight, packedOverlay, 0.0F, -0.12F, 0.28F, 0.13F, 35.0F);
         }
         ItemStack workpiece = forge.workpieceStack();
         if (!workpiece.isEmpty()) {
-            float heatScale = 0.44F + forge.heatProgressFraction() * 0.05F;
-            renderFlatItem(forge, workpiece, poseStack, bufferSource, packedLight, packedOverlay, 0.0F, 0.0F, heatScale, 0.905F, 0.0F);
+            float heatScale = 0.36F + forge.heatProgressFraction() * 0.04F;
+            renderFlatItem(forge, workpiece, poseStack, bufferSource, packedLight, packedOverlay, 0.0F, -0.12F, heatScale, 0.60F, 0.0F);
         }
     }
 
@@ -36,11 +38,21 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
         Level level = forge.getLevel();
         poseStack.pushPose();
         poseStack.translate(0.5F, surfaceY, 0.5F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(facingRotation(forge.getBlockState().getValue(HeatingForgeBlock.FACING))));
         poseStack.translate(localX, 0.0F, localZ);
         poseStack.mulPose(Axis.YP.rotationDegrees(localRotation));
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.scale(scale, scale, scale);
         itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
         poseStack.popPose();
+    }
+
+    private static float facingRotation(Direction direction) {
+        return switch (direction) {
+            case EAST -> 90.0F;
+            case SOUTH -> 180.0F;
+            case WEST -> 270.0F;
+            default -> 0.0F;
+        };
     }
 }
