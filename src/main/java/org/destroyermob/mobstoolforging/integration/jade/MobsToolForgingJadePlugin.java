@@ -65,6 +65,13 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
             }
             if (template != null) {
                 tooltip.add(Component.translatable("jade.mobstoolforging.materials", forge.materialCount(), template.requiredMaterials()).withStyle(ChatFormatting.GRAY));
+                if (forge.hasMaterialHeat()) {
+                    tooltip.add(Component.translatable(
+                            "jade.mobstoolforging.material_heat",
+                            Math.round(forge.materialHeatTemperature() * 100.0F),
+                            Component.translatable("tooltip.mobstoolforging.workpiece_status." + forge.materialHeatStatusKey())
+                    ).withStyle(forge.materialIsForgeReady() ? ChatFormatting.GOLD : ChatFormatting.DARK_GRAY));
+                }
                 tooltip.add(progressLine(forge.hitCount(), template.requiredHits()));
             } else if (accessor.getBlock() instanceof LapidaryTableBlock && !forge.hasAbrasive()) {
                 tooltip.add(Component.translatable("message.mobstoolforging.lapidary_needs_abrasive").withStyle(ChatFormatting.DARK_GRAY));
@@ -95,7 +102,8 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
                     continue;
                 }
                 int temperature = Math.round(forge.heatProgressFraction(slot) * 100.0F);
-                tooltip.add(Component.translatable("jade.mobstoolforging.workpiece", slot + 1, workpiece.getHoverName(), temperature).withStyle(ChatFormatting.GRAY));
+                String statusKey = org.destroyermob.mobstoolforging.world.WorkpieceHeat.statusKey(forge.heatProgressFraction(slot), org.destroyermob.mobstoolforging.world.WorkpieceHeat.isWorkable(workpiece), org.destroyermob.mobstoolforging.MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
+                tooltip.add(Component.translatable("jade.mobstoolforging.workpiece", slot + 1, workpiece.getHoverName(), temperature, Component.translatable("tooltip.mobstoolforging.workpiece_status." + statusKey)).withStyle(ChatFormatting.GRAY));
             }
         }
     }

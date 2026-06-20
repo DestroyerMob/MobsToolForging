@@ -3,6 +3,7 @@ package org.destroyermob.mobstoolforging.world;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,8 @@ public final class ToolTypeRegistry {
     private static final Map<ResourceLocation, ToolTypeDefinition> TOOL_TYPES = new LinkedHashMap<>();
     private static final Map<ResourceLocation, ForgeTemplateDefinition> TEMPLATES = new LinkedHashMap<>();
     private static final List<ToolStatModifier> STAT_MODIFIERS = new ArrayList<>();
+    private static final List<ToolStatModifier> DATAPACK_STAT_MODIFIERS = new ArrayList<>();
+    private static final Set<ResourceLocation> DATAPACK_TOOL_TYPES = new LinkedHashSet<>();
     private static boolean bootstrapped;
 
     private ToolTypeRegistry() {
@@ -71,6 +74,23 @@ public final class ToolTypeRegistry {
         TOOL_TYPES.put(definition.id(), definition);
     }
 
+    public static synchronized boolean registerDatapackToolType(ToolTypeDefinition definition) {
+        bootstrap();
+        if (TOOL_TYPES.containsKey(definition.id()) && !DATAPACK_TOOL_TYPES.contains(definition.id())) {
+            MobsToolForging.LOGGER.warn("Skipping datapack tool type {} because a Java or built-in tool type already uses that id.", definition.id());
+            return false;
+        }
+        TOOL_TYPES.put(definition.id(), definition);
+        DATAPACK_TOOL_TYPES.add(definition.id());
+        return true;
+    }
+
+    public static synchronized void resetDatapackToolTypes() {
+        bootstrap();
+        DATAPACK_TOOL_TYPES.forEach(TOOL_TYPES::remove);
+        DATAPACK_TOOL_TYPES.clear();
+    }
+
     public static synchronized void registerTemplate(ForgeTemplateDefinition definition) {
         TEMPLATES.put(definition.id(), definition);
     }
@@ -78,6 +98,16 @@ public final class ToolTypeRegistry {
     public static synchronized void registerStatModifier(ToolStatModifier modifier) {
         bootstrap();
         STAT_MODIFIERS.add(modifier);
+    }
+
+    public static synchronized void registerDatapackStatModifier(ToolStatModifier modifier) {
+        bootstrap();
+        DATAPACK_STAT_MODIFIERS.add(modifier);
+    }
+
+    public static synchronized void resetDatapackStatModifiers() {
+        bootstrap();
+        DATAPACK_STAT_MODIFIERS.clear();
     }
 
     public static Optional<ToolTypeDefinition> toolType(ResourceLocation id) {
@@ -126,6 +156,9 @@ public final class ToolTypeRegistry {
     static void applyStatModifiers(ToolTypeDefinition definition, ToolConstructionData construction, ToolStatBuilder.MutableStats stats) {
         bootstrap();
         for (ToolStatModifier modifier : STAT_MODIFIERS) {
+            modifier.apply(definition, construction, stats);
+        }
+        for (ToolStatModifier modifier : DATAPACK_STAT_MODIFIERS) {
             modifier.apply(definition, construction, stats);
         }
     }

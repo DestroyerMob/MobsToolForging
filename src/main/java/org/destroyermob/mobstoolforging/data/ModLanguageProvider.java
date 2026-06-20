@@ -31,6 +31,8 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.SWORD_BLADE_PATTERN, "Sword Blade Pattern");
         addItem(ModItems.SWORD_GUARD_PATTERN, "Sword Guard Pattern");
         addItem(ModItems.SMITHING_HAMMER_HEAD_PATTERN, "Smithing Hammer Head Pattern");
+        addItem(ModItems.TEMPLATE_PATTERN, "Template Pattern");
+        add("item.mobstoolforging.template_pattern.named", "%s Pattern");
         addItem(ModItems.SWORD_BLADE, "Sword Blade");
         addItem(ModItems.SWORD_GUARD, "Sword Guard");
         addItem(ModItems.SHOVEL_HEAD, "Shovel Head");
@@ -81,7 +83,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("jade.mobstoolforging.lit", "Lit");
         add("jade.mobstoolforging.unlit", "Unlit");
         add("jade.mobstoolforging.fuel", "Fuel: %s");
-        add("jade.mobstoolforging.workpiece", "Slot %s: %s, %s%%");
+        add("jade.mobstoolforging.material_heat", "Heat: %s%%, %s");
+        add("jade.mobstoolforging.workpiece", "Slot %s: %s, %s%%, %s");
         add("forge_template.mobstoolforging.sword_blade", "Sword Blade");
         add("forge_template.mobstoolforging.sword_guard", "Sword Guard");
         add("forge_template.mobstoolforging.shovel_head", "Shovel Head");
@@ -93,6 +96,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.sneak_hint", "Use a pattern item, or an empty hand to check the station.");
         add("message.mobstoolforging.template_selected", "Selected %s.");
         add("message.mobstoolforging.template_cleared", "Template cleared.");
+        add("message.mobstoolforging.invalid_template_pattern", "This pattern does not point to a known template.");
         add("message.mobstoolforging.station_cleared", "Work cleared.");
         add("message.mobstoolforging.forge_busy", "Finish or clear the current work first.");
         add("message.mobstoolforging.materials_full", "The station already has enough material.");
@@ -113,8 +117,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.complete", "The tool part is ready.");
         add("message.mobstoolforging.inventory_full", "Make room before taking the finished part.");
         add("message.mobstoolforging.station_status", "Materials: %s/%s, Progress: %s/%s");
+        add("message.mobstoolforging.station_heat_status", "Materials: %s/%s, Progress: %s/%s, Heat: %s%% %s");
         add("message.mobstoolforging.metal_needs_heat", "Heat this metal in a Heating Forge first.");
         add("message.mobstoolforging.metal_needs_heat_percent", "Heat this metal to at least %s%% first.");
+        add("message.mobstoolforging.metal_needs_heat_current", "Heat is %s%%/%s%%: %s.");
         add("message.mobstoolforging.heated_parts_cannot_craft", "Quench or cool heated parts before crafting.");
         add("message.mobstoolforging.heating_disabled", "Forge heating is disabled.");
         add("message.mobstoolforging.heating_fuel_added", "Fuel added.");
@@ -128,7 +134,16 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.workpiece_temperature", "Temperature: %s%%");
         add("tooltip.mobstoolforging.workpiece_ready", "Ready to forge");
         add("tooltip.mobstoolforging.workpiece_not_ready", "Not hot enough to forge");
+        add("tooltip.mobstoolforging.workpiece_status.heating", "Heating");
+        add("tooltip.mobstoolforging.workpiece_status.nearly_workable", "Nearly workable");
+        add("tooltip.mobstoolforging.workpiece_status.workable", "Workable heat");
+        add("tooltip.mobstoolforging.workpiece_status.white_hot", "White hot");
+        add("tooltip.mobstoolforging.workpiece_status.cooling", "Cooling");
         add("tooltip.mobstoolforging.part_quality", "Quality: %s%%");
+        add("tooltip.mobstoolforging.part_workmanship", "Workmanship: %s (%s)");
+        add("tooltip.mobstoolforging.workmanship.standard", "Standard");
+        add("tooltip.mobstoolforging.workmanship.fine", "Fine");
+        add("tooltip.mobstoolforging.workmanship.rough", "Rough");
         add("tooltip.mobstoolforging.traits", "Traits");
         add("tooltip.mobstoolforging.hold_shift", "Hold Shift for construction");
         add("tooltip.mobstoolforging.construction", "Construction");

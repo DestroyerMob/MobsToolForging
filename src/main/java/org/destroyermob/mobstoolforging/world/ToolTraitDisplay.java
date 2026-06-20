@@ -16,6 +16,11 @@ public final class ToolTraitDisplay {
         if (unique.contains(ToolTrait.NETHER_TREATED.id()) || unique.contains(ToolTrait.NETHER_FORGED.id())) {
             unique.remove(ToolTrait.KINDLED.id());
         }
+        List<ResourceLocation> suppressed = unique.stream()
+                .flatMap(traitId -> ToolTraitRegistry.definition(traitId).stream())
+                .flatMap(definition -> definition.suppresses().stream())
+                .toList();
+        unique.removeAll(suppressed);
         List<ResourceLocation> resolved = new ArrayList<>(unique);
         resolved.sort(Comparator.comparingInt(ToolTraitDisplay::priority));
         return List.copyOf(resolved);

@@ -71,8 +71,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 if (pattern.isEmpty()) {
                     continue;
                 }
-                int quality = workstation == WorkstationKind.LAPIDARY_TABLE ? 103 : ToolPartData.DEFAULT_QUALITY;
-                ItemStack output = template.outputStack(materialId, quality);
+                ItemStack output = template.outputStack(materialId);
                 if (output.isEmpty()) {
                     continue;
                 }

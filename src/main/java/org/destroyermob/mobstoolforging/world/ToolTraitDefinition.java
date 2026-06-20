@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.world;
 
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -12,15 +13,25 @@ public record ToolTraitDefinition(
         String translationKey,
         String descriptionTranslationKey,
         ChatFormatting color,
-        @Nullable String category
+        @Nullable String category,
+        List<ResourceLocation> suppresses
 ) {
+    public ToolTraitDefinition(ResourceLocation id, String translationKey, String descriptionTranslationKey, ChatFormatting color, @Nullable String category) {
+        this(id, translationKey, descriptionTranslationKey, color, category, List.of());
+    }
+
+    public ToolTraitDefinition {
+        suppresses = List.copyOf(suppresses);
+    }
+
     public static ToolTraitDefinition from(ToolTrait trait) {
         return new ToolTraitDefinition(
                 trait.id(),
                 trait.translationKey(),
                 trait.descriptionTranslationKey(),
                 trait.color(),
-                trait.category().orElse(null)
+                trait.category().orElse(null),
+                List.of()
         );
     }
 

@@ -52,7 +52,19 @@ public class ModularToolPartItem extends Item {
         super.appendHoverText(stack, context, tooltip, flag);
         ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
         if (data != null && flag.hasShiftDown()) {
-            tooltip.add(Component.translatable("tooltip.mobstoolforging.part_quality", data.quality()).withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.translatable("tooltip.mobstoolforging.part_workmanship", workmanshipName(data.quality()), data.quality()).withStyle(ChatFormatting.DARK_GRAY));
         }
+    }
+
+    private static Component workmanshipName(int quality) {
+        String key;
+        if (quality > ToolPartData.DEFAULT_QUALITY) {
+            key = "tooltip.mobstoolforging.workmanship.fine";
+        } else if (quality < ToolPartData.DEFAULT_QUALITY) {
+            key = "tooltip.mobstoolforging.workmanship.rough";
+        } else {
+            key = "tooltip.mobstoolforging.workmanship.standard";
+        }
+        return Component.translatable(key);
     }
 }

@@ -98,6 +98,10 @@ public final class ModItems {
             "smithing_hammer_head_pattern",
             () -> new ToolTemplateItem(ToolTypeRegistry.SMITHING_HAMMER_HEAD_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
     );
+    public static final DeferredItem<ToolTemplateItem> TEMPLATE_PATTERN = ITEMS.register(
+            "template_pattern",
+            () -> new ToolTemplateItem(new Item.Properties())
+    );
     public static final DeferredItem<ModularToolPartItem> SWORD_BLADE = ITEMS.register(
             "sword_blade",
             () -> new ModularToolPartItem(ToolKind.SWORD, new Item.Properties())

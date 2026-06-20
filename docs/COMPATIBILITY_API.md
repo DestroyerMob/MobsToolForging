@@ -12,6 +12,10 @@ Datapacks alone cannot create new Java item classes or new combat behavior. Full
 Datapacks can:
 
 - Add source items to `mobstoolforging:materials`, `mobstoolforging:materials/metals`, or `mobstoolforging:materials/gems`.
+- Add material definitions in `data/<namespace>/mobstoolforging/materials/<material>.json`.
+- Add tool type definitions in `data/<namespace>/mobstoolforging/tool_types/<tool_type>.json`.
+- Add trait definitions in `data/<namespace>/mobstoolforging/traits/<trait>.json`.
+- Add additive stat rules in `data/<namespace>/mobstoolforging/stat_rules/<rule>.json`.
 - Add handles to `mobstoolforging:tool_handles`.
 - Add bindings, wraps, foci, and treatments through their existing tags.
 - Add a generic modular recipe for a registered external tool type:
@@ -23,6 +27,91 @@ Datapacks can:
   "tool_type": "mobs_more_weapons:greatsword"
 }
 ```
+
+Material definition JSON lets a compat datapack say what an item or tag means to this mod:
+
+```json
+{
+  "category": "metal",
+  "display_item": "mobs_more_weapons:steel_ingot",
+  "items": ["mobs_more_weapons:steel_ingot"],
+  "tags": ["c:ingots/steel"],
+  "translation_key": "material.mobs_more_weapons.steel",
+  "tier": {
+    "base": "iron",
+    "max_damage": 420,
+    "mining_speed": 6.5,
+    "attack_damage_bonus": 2.0,
+    "enchantment_value": 16,
+    "repair_item": "mobs_more_weapons:steel_ingot"
+  },
+  "visual_slots": ["headMaterial", "bindingMaterial"],
+  "handle_items": []
+}
+```
+
+`tier` can also be a simple string such as `"iron"`, `"diamond"`, `"netherite"`, `"copper"`, or `"emerald"`. `items` and `tags` are accepted material sources. `visual_slots` controls which model layers should collect sprites for this material. `handle_items` maps specific handle items to this material id, but only use it when matching handle sprites exist.
+
+Tool type JSON lets a datapack connect existing item classes to Mobs Tool Forging construction data:
+
+```json
+{
+  "tool_item": "mobs_more_weapons:greatsword",
+  "primary_part_type": "greatsword_blade",
+  "primary_part_item": "mobs_more_weapons:greatsword_blade",
+  "part_items": {
+    "greatsword_guard": "mobs_more_weapons:greatsword_guard"
+  },
+  "required_assembly_parts": ["greatsword_guard"],
+  "visual": "mobs_more_weapons:greatsword",
+  "base_attack_damage_bonus": 5.5,
+  "base_attack_speed_bonus": -2.9,
+  "sword_like": true
+}
+```
+
+Datapack tool types cannot create new item classes or custom combat callbacks. They can attach Mobs Tool Forging components, stats, recipes, and visuals to items that already exist.
+
+External physical patterns can use the generic `mobstoolforging:template_pattern` item with a component:
+
+```json
+{
+  "id": "mobstoolforging:template_pattern",
+  "components": {
+    "mobstoolforging:forge_template": "mobs_more_weapons:greatsword_blade"
+  }
+}
+```
+
+Use that result in a normal recipe to create a pattern item for any loaded forge template.
+
+Trait JSON controls display identity:
+
+```json
+{
+  "translation_key": "tooltip.mobs_more_weapons.trait.heavy",
+  "description_translation_key": "tooltip.mobs_more_weapons.trait.heavy.desc",
+  "color": "dark_gray",
+  "category": "handling",
+  "suppresses": []
+}
+```
+
+Stat rule JSON adds small construction-based modifiers after the built-in rules:
+
+```json
+{
+  "tool_type": "mobs_more_weapons:greatsword",
+  "slot": "guard",
+  "material": "mobs_more_weapons:steel",
+  "durability_multiplier": 1.12,
+  "attack_speed_bonus": -0.05,
+  "traits": ["mobs_more_weapons:heavy"],
+  "affinities": []
+}
+```
+
+Supported `slot` values are `head`, `handle`, `binding`, `guard`, `wrap`, `focus`, `treatment`, and `any`.
 
 Resource packs can:
 

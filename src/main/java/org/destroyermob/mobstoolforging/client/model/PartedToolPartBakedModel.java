@@ -2,6 +2,7 @@ package org.destroyermob.mobstoolforging.client.model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -16,11 +17,15 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
+import org.destroyermob.mobstoolforging.world.ToolPartSpriteKey;
 
 public final class PartedToolPartBakedModel implements BakedModel {
+    private static final Set<String> REPORTED_MISSING_PART_SPRITES = ConcurrentHashMap.newKeySet();
+
     private final ToolVisualDefinition visual;
     private final String partType;
     private final ToolVisualLayer partLayer;
@@ -92,8 +97,27 @@ public final class PartedToolPartBakedModel implements BakedModel {
     }
 
     private ResolvedPartedItemModel compose(ResourceLocation material) {
-        TextureAtlasSprite sprite = sprites.resolve(visual.id(), partLayer.slot(), material).orElse(sprites.particle());
+        TextureAtlasSprite sprite = sprites.resolve(visual.id(), partLayer.slot(), material)
+                .orElseGet(() -> {
+                    warnMissingPartSprite(material);
+                    return sprites.particle();
+                });
         List<BakedQuad> quads = quadFactory.bakeLayer(0, sprite);
         return new ResolvedPartedItemModel(quads, sprite, transforms);
+    }
+
+    private void warnMissingPartSprite(ResourceLocation material) {
+        String textureKey = ToolPartSpriteKey.modelTextureKey(partLayer.slot(), material);
+        String reportKey = visual.id() + "|" + partType + "|" + partLayer.slot() + "|" + material + "|" + textureKey;
+        if (REPORTED_MISSING_PART_SPRITES.add(reportKey)) {
+            MobsToolForging.LOGGER.warn(
+                    "Missing tool part visual sprite: visual={}, partType={}, slot={}, material={}, textureKey={}",
+                    visual.id(),
+                    partType,
+                    partLayer.slot(),
+                    material,
+                    textureKey
+            );
+        }
     }
 }

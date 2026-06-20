@@ -65,6 +65,31 @@ public final class WorkpieceHeat {
         return data(stack).map(HeatedWorkpieceData::temperature).orElse(0.0F);
     }
 
+    public static boolean isWorkable(ItemStack stack) {
+        return data(stack).map(HeatedWorkpieceData::workable).orElse(false);
+    }
+
+    public static String statusKey(ItemStack stack, Level level, float minimumTemperature) {
+        return statusKey(temperature(stack, level), isWorkable(stack), minimumTemperature);
+    }
+
+    public static String statusKey(float temperature, boolean workable, float minimumTemperature) {
+        float minimum = clamp(minimumTemperature);
+        if (temperature >= 0.98F) {
+            return "white_hot";
+        }
+        if (temperature >= minimum) {
+            return "workable";
+        }
+        if (workable && temperature > 0.0F) {
+            return "cooling";
+        }
+        if (temperature >= minimum * 0.75F) {
+            return "nearly_workable";
+        }
+        return "heating";
+    }
+
     public static boolean hasHeat(ItemStack stack) {
         return storedTemperature(stack) > 0.0F;
     }

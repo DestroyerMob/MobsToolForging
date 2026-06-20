@@ -355,6 +355,29 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get()) >= template.minimumTemperature();
     }
 
+    public boolean hasMaterialHeat() {
+        return materialHeatData != null && materialHeatTemperature() > 0.0F;
+    }
+
+    public float materialHeatTemperature() {
+        if (materialHeatData == null) {
+            return 0.0F;
+        }
+        return level == null
+                ? Math.max(0.0F, Math.min(1.0F, materialHeatData.temperature()))
+                : materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
+    }
+
+    public boolean materialHeatWasWorkable() {
+        return materialHeatData != null && materialHeatData.workable();
+    }
+
+    public String materialHeatStatusKey() {
+        ForgeTemplateDefinition template = template();
+        float minimum = template == null ? MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue() : template.minimumTemperature();
+        return WorkpieceHeat.statusKey(materialHeatTemperature(), materialHeatWasWorkable(), minimum);
+    }
+
     private void captureMaterialHeat(ItemStack stack) {
         HeatedWorkpieceData heatData = stack.get(ModDataComponents.HEATED_WORKPIECE.get());
         if (heatData == null) {
@@ -402,9 +425,6 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private int workQuality(ForgeTemplateDefinition template) {
         int quality = ToolPartData.DEFAULT_QUALITY;
         WorkstationKind kind = workstationKind();
-        if (kind == WorkstationKind.LAPIDARY_TABLE && hasAbrasive()) {
-            quality += 3;
-        }
         if (kind == WorkstationKind.TOOL_FORGE && materialHeatData != null && level != null) {
             float temperature = materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
             float minimum = template.minimumTemperature();

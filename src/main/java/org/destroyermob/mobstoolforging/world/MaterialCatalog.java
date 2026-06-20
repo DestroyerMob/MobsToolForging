@@ -10,6 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -57,6 +58,9 @@ public final class MaterialCatalog {
 
     private static final Map<ResourceLocation, ToolMaterialDefinition> DEFINITIONS = new LinkedHashMap<>();
     private static final Map<String, LinkedHashSet<ResourceLocation>> EXTRA_VISUAL_MATERIALS = new LinkedHashMap<>();
+    private static final LinkedHashSet<ResourceLocation> DATAPACK_MATERIALS = new LinkedHashSet<>();
+    private static final Map<Item, ResourceLocation> MATERIAL_ITEM_IDS = new LinkedHashMap<>();
+    private static final Map<TagKey<Item>, ResourceLocation> MATERIAL_TAG_IDS = new LinkedHashMap<>();
     private static final Map<Item, ResourceLocation> CUSTOM_HANDLE_MATERIALS = new LinkedHashMap<>();
     private static final List<ResourceLocation> STARTER_MATERIALS = List.of(IRON, GOLD, COPPER, NETHERITE, DIAMOND, EMERALD);
     private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(OAK, DARK_OAK, BLAZE, BREEZE);
@@ -78,7 +82,8 @@ public final class MaterialCatalog {
     }
 
     public static Optional<ToolMaterialDefinition> resolve(ItemStack stack) {
-        Optional<MaterialCategory> category = categoryFor(stack);
+        ResourceLocation registeredId = registeredMaterialId(stack).orElse(null);
+        Optional<MaterialCategory> category = registeredId == null ? categoryFor(stack) : definition(registeredId).map(ToolMaterialDefinition::category);
         if (category.isEmpty()) {
             return Optional.empty();
         }
@@ -93,7 +98,7 @@ public final class MaterialCatalog {
     }
 
     public static boolean isMaterial(ItemStack stack) {
-        return stack.is(ModTags.Items.MATERIALS);
+        return registeredMaterialId(stack).isPresent() || stack.is(ModTags.Items.MATERIALS);
     }
 
     public static Optional<ToolMaterialDefinition> definition(ResourceLocation materialId) {
@@ -108,7 +113,11 @@ public final class MaterialCatalog {
     }
 
     public static Component displayName(ResourceLocation materialId) {
-        if (DEFINITIONS.containsKey(materialId)) {
+        ToolMaterialDefinition definition = DEFINITIONS.get(materialId);
+        if (definition != null && definition.translationKey() != null && !definition.translationKey().isBlank()) {
+            return Component.translatable(definition.translationKey());
+        }
+        if (definition != null && materialId.getNamespace().equals(MobsToolForging.MOD_ID)) {
             return Component.translatable("material.mobstoolforging." + materialId.getPath());
         }
         if (materialId.getNamespace().equals(MobsToolForging.MOD_ID)) {
@@ -125,7 +134,12 @@ public final class MaterialCatalog {
     }
 
     public static List<ResourceLocation> starterMaterialIds() {
-        return STARTER_MATERIALS;
+        LinkedHashSet<ResourceLocation> values = new LinkedHashSet<>(STARTER_MATERIALS);
+        DEFINITIONS.values().stream()
+                .filter(definition -> definition.category() == MaterialCategory.METAL || definition.category() == MaterialCategory.GEM)
+                .map(ToolMaterialDefinition::id)
+                .forEach(values::add);
+        return List.copyOf(values);
     }
 
     public static List<ResourceLocation> handleMaterialIds() {
@@ -148,13 +162,39 @@ public final class MaterialCatalog {
     }
 
     public static synchronized void registerMaterial(ToolMaterialDefinition definition) {
-        DEFINITIONS.put(definition.id(), definition);
+        putDefinition(definition);
         registerVisualMaterial("headMaterial", definition.id());
         registerVisualMaterial("bindingMaterial", definition.id());
     }
 
     public static synchronized void registerMaterial(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier) {
         registerMaterial(new ToolMaterialDefinition(id, category, displayItem, tier));
+    }
+
+    public static synchronized void registerDatapackMaterial(ToolMaterialDefinition definition, List<Item> sourceItems, List<TagKey<Item>> sourceTags, List<String> visualSlots, List<Item> handleItems) {
+        putDefinition(definition);
+        sourceItems.forEach(item -> MATERIAL_ITEM_IDS.put(item, definition.id()));
+        sourceTags.forEach(tag -> MATERIAL_TAG_IDS.put(tag, definition.id()));
+        DATAPACK_MATERIALS.add(definition.id());
+        if (visualSlots.isEmpty()) {
+            registerVisualMaterial("headMaterial", definition.id());
+            registerVisualMaterial("bindingMaterial", definition.id());
+        } else {
+            visualSlots.forEach(slot -> registerVisualMaterial(slot, definition.id()));
+        }
+        handleItems.forEach(item -> registerHandleMaterial(item, definition.id()));
+    }
+
+    public static synchronized void resetDatapackMaterials() {
+        if (DATAPACK_MATERIALS.isEmpty()) {
+            return;
+        }
+        DATAPACK_MATERIALS.forEach(DEFINITIONS::remove);
+        MATERIAL_ITEM_IDS.entrySet().removeIf(entry -> DATAPACK_MATERIALS.contains(entry.getValue()));
+        MATERIAL_TAG_IDS.entrySet().removeIf(entry -> DATAPACK_MATERIALS.contains(entry.getValue()));
+        CUSTOM_HANDLE_MATERIALS.entrySet().removeIf(entry -> DATAPACK_MATERIALS.contains(entry.getValue()));
+        EXTRA_VISUAL_MATERIALS.values().forEach(values -> values.removeIf(DATAPACK_MATERIALS::contains));
+        DATAPACK_MATERIALS.clear();
     }
 
     public static synchronized void registerVisualMaterial(String materialFrom, ResourceLocation materialId) {
@@ -223,6 +263,10 @@ public final class MaterialCatalog {
     }
 
     private static Optional<MaterialCategory> categoryFor(ItemStack stack) {
+        Optional<ResourceLocation> registered = registeredMaterialId(stack);
+        if (registered.isPresent()) {
+            return definition(registered.get()).map(ToolMaterialDefinition::category);
+        }
         if (stack.is(ModTags.Items.MATERIALS_METALS)) {
             return Optional.of(MaterialCategory.METAL);
         }
@@ -233,6 +277,21 @@ public final class MaterialCatalog {
     }
 
     private static ResourceLocation knownMaterialId(ItemStack stack, MaterialCategory category) {
+        Optional<ResourceLocation> registeredMaterial = registeredMaterialId(stack);
+        if (registeredMaterial.isPresent()) {
+            ResourceLocation registeredId = registeredMaterial.get();
+            ToolMaterialDefinition definition = DEFINITIONS.get(registeredId);
+            if (definition != null && definition.category() == category) {
+                return registeredId;
+            }
+        }
+        ResourceLocation itemMaterial = MATERIAL_ITEM_IDS.get(stack.getItem());
+        if (itemMaterial != null) {
+            ToolMaterialDefinition definition = DEFINITIONS.get(itemMaterial);
+            if (definition != null && definition.category() == category) {
+                return itemMaterial;
+            }
+        }
         if (category == MaterialCategory.METAL) {
             if (stack.is(Tags.Items.INGOTS_IRON)) {
                 return IRON;
@@ -257,8 +316,25 @@ public final class MaterialCatalog {
         return BuiltInRegistries.ITEM.getKey(stack.getItem());
     }
 
+    private static Optional<ResourceLocation> registeredMaterialId(ItemStack stack) {
+        ResourceLocation itemMaterial = MATERIAL_ITEM_IDS.get(stack.getItem());
+        if (itemMaterial != null) {
+            return Optional.of(itemMaterial);
+        }
+        return MATERIAL_TAG_IDS.entrySet().stream()
+                .filter(entry -> stack.is(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst();
+    }
+
     private static void register(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier) {
-        DEFINITIONS.put(id, new ToolMaterialDefinition(id, category, displayItem, tier));
+        ToolMaterialDefinition definition = new ToolMaterialDefinition(id, category, displayItem, tier);
+        putDefinition(definition);
+    }
+
+    private static void putDefinition(ToolMaterialDefinition definition) {
+        DEFINITIONS.put(definition.id(), definition);
+        MATERIAL_ITEM_IDS.put(definition.displayItem(), definition.id());
     }
 
     private static ResourceLocation materialId(String path) {

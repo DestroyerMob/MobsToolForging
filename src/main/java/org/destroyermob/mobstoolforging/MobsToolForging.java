@@ -51,12 +51,16 @@ import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
+import org.destroyermob.mobstoolforging.world.MaterialDefinitionReloadListener;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
+import org.destroyermob.mobstoolforging.world.ToolStatRuleReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
 import org.destroyermob.mobstoolforging.world.ToolTrait;
+import org.destroyermob.mobstoolforging.world.ToolTraitReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
+import org.destroyermob.mobstoolforging.world.ToolTypeReloadListener;
 import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 import org.slf4j.Logger;
 
@@ -115,6 +119,7 @@ public class MobsToolForging {
             event.accept(ModItems.SWORD_BLADE_PATTERN);
             event.accept(ModItems.SWORD_GUARD_PATTERN);
             event.accept(ModItems.SMITHING_HAMMER_HEAD_PATTERN);
+            event.accept(ModItems.TEMPLATE_PATTERN);
         }
         if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(ModItems.FLINT_SHARD);
@@ -230,7 +235,11 @@ public class MobsToolForging {
     }
 
     private void addReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(new MaterialDefinitionReloadListener());
+        event.addListener(new ToolTraitReloadListener());
+        event.addListener(new ToolTypeReloadListener());
         event.addListener(new ForgeTemplateReloadListener());
+        event.addListener(new ToolStatRuleReloadListener());
         event.addListener(new StationWorkRecipeReloadListener());
     }
 
@@ -295,6 +304,10 @@ public class MobsToolForging {
                 ? WorkpieceHeat.data(stack).map(data -> data.temperature() >= MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get()).orElse(false)
                 : WorkpieceHeat.isForgeReady(stack, event.getEntity().level(), MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
         event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.workpiece_temperature", Math.round(temperature * 100.0F)).withStyle(forgeReady ? ChatFormatting.GOLD : ChatFormatting.RED));
+        String statusKey = event.getEntity() == null
+                ? WorkpieceHeat.statusKey(temperature, WorkpieceHeat.isWorkable(stack), MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue())
+                : WorkpieceHeat.statusKey(stack, event.getEntity().level(), MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
+        event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.workpiece_status." + statusKey).withStyle(forgeReady ? ChatFormatting.YELLOW : ChatFormatting.DARK_GRAY));
         event.getToolTip().add(Component.translatable(forgeReady ? "tooltip.mobstoolforging.workpiece_ready" : "tooltip.mobstoolforging.workpiece_not_ready").withStyle(ChatFormatting.DARK_GRAY));
     }
 

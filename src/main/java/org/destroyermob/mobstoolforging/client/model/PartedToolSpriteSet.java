@@ -5,16 +5,20 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
+import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolPartSpriteKey;
 
 public final class PartedToolSpriteSet {
+    private static final Set<String> REPORTED_MISSING_REQUIRED_SPRITES = ConcurrentHashMap.newKeySet();
+
     private final Map<ToolPartSpriteKey, TextureAtlasSprite> sprites;
     private final TextureAtlasSprite particle;
 
@@ -36,6 +40,7 @@ public final class PartedToolSpriteSet {
                 ToolPartSpriteKey key = new ToolPartSpriteKey(visual.id(), layer.slot(), material);
                 readSprite(context, spriteGetter, textureOverrides, key.modelTextureKey()).ifPresent(sprite -> sprites.put(key, sprite));
             }
+            warnMissingRequiredSprites(visual, layer, materialIds, sprites);
         }
 
         TextureAtlasSprite particle = readSprite(context, spriteGetter, textureOverrides, "particle")
@@ -67,5 +72,27 @@ public final class PartedToolSpriteSet {
             return sprites.values().iterator().next();
         }
         throw new IllegalStateException("Parted tool model needs at least one layer sprite");
+    }
+
+    private static void warnMissingRequiredSprites(ToolVisualDefinition visual, ToolVisualLayer layer, Set<ResourceLocation> materialIds, Map<ToolPartSpriteKey, TextureAtlasSprite> sprites) {
+        if (layer.optional()) {
+            return;
+        }
+        for (ResourceLocation material : materialIds) {
+            ToolPartSpriteKey key = new ToolPartSpriteKey(visual.id(), layer.slot(), material);
+            if (sprites.containsKey(key)) {
+                continue;
+            }
+            String reportKey = visual.id() + "|" + layer.slot() + "|" + material + "|" + key.modelTextureKey();
+            if (REPORTED_MISSING_REQUIRED_SPRITES.add(reportKey)) {
+                MobsToolForging.LOGGER.warn(
+                        "Missing required tool visual sprite during bake: visual={}, slot={}, material={}, textureKey={}",
+                        visual.id(),
+                        layer.slot(),
+                        material,
+                        key.modelTextureKey()
+                );
+            }
+        }
     }
 }

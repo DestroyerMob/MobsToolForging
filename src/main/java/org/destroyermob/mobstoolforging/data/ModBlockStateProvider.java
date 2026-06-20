@@ -56,6 +56,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         patternModel(ModItems.SWORD_BLADE_PATTERN.getId().getPath());
         patternModel(ModItems.SWORD_GUARD_PATTERN.getId().getPath());
         patternModel(ModItems.SMITHING_HAMMER_HEAD_PATTERN.getId().getPath());
+        patternModel(ModItems.TEMPLATE_PATTERN.getId().getPath());
         for (ToolKind toolKind : ToolKind.values()) {
             partModel(toolKind);
             toolModel(toolKind);

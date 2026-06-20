@@ -2,6 +2,7 @@ package org.destroyermob.mobstoolforging.registry;
 
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -35,6 +36,11 @@ public final class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<HeatedWorkpieceData>> HEATED_WORKPIECE = DATA_COMPONENTS.registerComponentType(
             "heated_workpiece",
             builder -> builder.persistent(HeatedWorkpieceData.CODEC).networkSynchronized(HeatedWorkpieceData.STREAM_CODEC).cacheEncoding()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ResourceLocation>> FORGE_TEMPLATE = DATA_COMPONENTS.registerComponentType(
+            "forge_template",
+            builder -> builder.persistent(ResourceLocation.CODEC).networkSynchronized(ResourceLocation.STREAM_CODEC).cacheEncoding()
     );
 
     private ModDataComponents() {

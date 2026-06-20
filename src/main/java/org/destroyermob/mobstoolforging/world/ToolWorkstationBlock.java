@@ -82,7 +82,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return itemResult(handleSneakUse(forge, level, pos, player), level);
         }
         if (stack.getItem() instanceof ToolTemplateItem templateItem) {
-            return applyTemplateItem(templateItem, forge, level, pos, player);
+            return applyTemplateItem(stack, templateItem, forge, level, pos, player);
         }
         if (tryCollectOutput(forge, player)) {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
@@ -120,6 +120,16 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                     player.displayClientMessage(Component.translatable("message.mobstoolforging.select_template"), true);
                 } else if (kind == WorkstationKind.LAPIDARY_TABLE && !forge.hasAbrasive()) {
                     player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_needs_abrasive"), true);
+                } else if (forge.hasMaterialHeat()) {
+                    player.displayClientMessage(Component.translatable(
+                            "message.mobstoolforging.station_heat_status",
+                            forge.materialCount(),
+                            forge.template().requiredMaterials(),
+                            forge.hitCount(),
+                            forge.template().requiredHits(),
+                            Math.round(forge.materialHeatTemperature() * 100.0F),
+                            Component.translatable("tooltip.mobstoolforging.workpiece_status." + forge.materialHeatStatusKey())
+                    ), true);
                 } else {
                     player.displayClientMessage(Component.translatable("message.mobstoolforging.station_status", forge.materialCount(), forge.template().requiredMaterials(), forge.hitCount(), forge.template().requiredHits()), true);
                 }
@@ -129,13 +139,16 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         return InteractionResult.PASS;
     }
 
-    private ItemInteractionResult applyTemplateItem(ToolTemplateItem templateItem, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+    private ItemInteractionResult applyTemplateItem(ItemStack stack, ToolTemplateItem templateItem, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
         if (!templateItem.canUseOn(kind)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        ForgeTemplateDefinition template = templateItem.template().orElse(null);
+        ForgeTemplateDefinition template = templateItem.template(stack).orElse(null);
         if (template == null) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            if (!level.isClientSide) {
+                player.displayClientMessage(Component.translatable("message.mobstoolforging.invalid_template_pattern"), true);
+            }
+            return ItemInteractionResult.CONSUME;
         }
         if (level.isClientSide) {
             return ItemInteractionResult.SUCCESS;
@@ -178,7 +191,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                 && material.category() == MaterialCategory.METAL
                 && MobsToolForgingConfig.REQUIRE_HEATED_METAL.get()
                 && !WorkpieceHeat.isForgeReady(stack, level, template.minimumTemperature())) {
-            player.displayClientMessage(metalNeedsHeatMessage(template), true);
+            player.displayClientMessage(metalNeedsHeatMessage(template, stack, level), true);
             return ItemInteractionResult.CONSUME;
         }
         if (forge.materialId() != null && !forge.materialId().equals(material.id())) {
@@ -276,7 +289,16 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return ItemInteractionResult.CONSUME;
         }
         if (kind == WorkstationKind.TOOL_FORGE && MobsToolForgingConfig.REQUIRE_HEATED_METAL.get() && !forge.materialIsForgeReady()) {
-            player.displayClientMessage(template == null ? Component.translatable("message.mobstoolforging.metal_needs_heat") : metalNeedsHeatMessage(template), true);
+            if (template == null || !forge.hasMaterialHeat()) {
+                player.displayClientMessage(template == null ? Component.translatable("message.mobstoolforging.metal_needs_heat") : metalNeedsHeatMessage(template), true);
+            } else {
+                player.displayClientMessage(Component.translatable(
+                        "message.mobstoolforging.metal_needs_heat_current",
+                        Math.round(forge.materialHeatTemperature() * 100.0F),
+                        Math.round(template.minimumTemperature() * 100.0F),
+                        Component.translatable("tooltip.mobstoolforging.workpiece_status." + forge.materialHeatStatusKey())
+                ), true);
+            }
             return ItemInteractionResult.CONSUME;
         }
         if (forge.hammer()) {
@@ -363,6 +385,19 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
 
     private static Component metalNeedsHeatMessage(ForgeTemplateDefinition template) {
         return Component.translatable("message.mobstoolforging.metal_needs_heat_percent", Math.round(template.minimumTemperature() * 100.0F));
+    }
+
+    private static Component metalNeedsHeatMessage(ForgeTemplateDefinition template, ItemStack stack, Level level) {
+        float temperature = WorkpieceHeat.temperature(stack, level);
+        if (temperature <= 0.0F) {
+            return metalNeedsHeatMessage(template);
+        }
+        return Component.translatable(
+                "message.mobstoolforging.metal_needs_heat_current",
+                Math.round(temperature * 100.0F),
+                Math.round(template.minimumTemperature() * 100.0F),
+                Component.translatable("tooltip.mobstoolforging.workpiece_status." + WorkpieceHeat.statusKey(stack, level, template.minimumTemperature()))
+        );
     }
 
     @Override
