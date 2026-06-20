@@ -17,6 +17,7 @@ import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCategory;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
+import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEntity> {
     private final ItemRenderer itemRenderer;
@@ -85,6 +86,8 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.scale(scale, scale, scale);
         itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
+        float heat = level == null ? WorkpieceHeat.storedTemperature(stack) : WorkpieceHeat.temperature(stack, level);
+        HeatRenderUtil.renderHeatedItem(itemRenderer, stack, ItemDisplayContext.GROUND, packedOverlay, poseStack, bufferSource, level, heat);
         poseStack.popPose();
     }
 

@@ -206,6 +206,10 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.need_materials"), true);
             return ItemInteractionResult.CONSUME;
         }
+        if (kind == WorkstationKind.TOOL_FORGE && MobsToolForgingConfig.REQUIRE_HEATED_METAL.get() && !forge.materialIsHot()) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.metal_needs_heat"), true);
+            return ItemInteractionResult.CONSUME;
+        }
         if (forge.hammer()) {
             if (!player.getAbilities().instabuild) {
                 stack.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);

@@ -23,12 +23,12 @@ public class HeatItemDecorator implements IItemDecorator {
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
-        guiGraphics.setColor(1.0F, 0.35F + temperature * 0.45F, 0.08F, 0.25F + temperature * 0.45F);
+        guiGraphics.setColor(1.0F, 0.32F + temperature * 0.68F, 0.06F + temperature * temperature * 0.86F, 0.24F + temperature * 0.54F);
         guiGraphics.renderFakeItem(stack, xOffset, yOffset);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 
         int fillWidth = Math.max(1, Math.round(13.0F * temperature));
-        int fillColor = WorkpieceHeat.data(stack).map(data -> data.workable() ? 0xFFFFD45A : 0xFFFF6A1A).orElse(0xFFFF6A1A);
+        int fillColor = WorkpieceHeat.data(stack).map(data -> data.workable() ? 0xFFFFF1C6 : 0xFFFF6A1A).orElse(0xFFFF6A1A);
         guiGraphics.fill(xOffset + 2, yOffset + 13, xOffset + 15, yOffset + 15, 0xAA230900);
         guiGraphics.fill(xOffset + 2, yOffset + 13, xOffset + 2 + fillWidth, yOffset + 15, fillColor);
         guiGraphics.pose().popPose();

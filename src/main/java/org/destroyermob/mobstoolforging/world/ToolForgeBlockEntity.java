@@ -13,7 +13,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
+import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 
 public class ToolForgeBlockEntity extends BlockEntity {
     private static final String TEMPLATE_TAG = "Template";
@@ -22,6 +24,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private static final String MATERIAL_ID_TAG = "MaterialId";
     private static final String MATERIAL_ITEM_ID_TAG = "MaterialItemId";
     private static final String DISPLAY_ROTATION_TAG = "DisplayRotation";
+    private static final String MATERIAL_HEAT_EXPIRES_TAG = "MaterialHeatExpires";
+    private static final String MATERIAL_HEAT_TEMPERATURE_TAG = "MaterialHeatTemperature";
+    private static final String MATERIAL_HEAT_LAST_UPDATE_TAG = "MaterialHeatLastUpdate";
+    private static final String MATERIAL_HEAT_WORKABLE_TAG = "MaterialHeatWorkable";
 
     @Nullable
     private ResourceLocation templateId;
@@ -29,6 +35,8 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private ResourceLocation materialId;
     @Nullable
     private ResourceLocation materialItemId;
+    @Nullable
+    private HeatedWorkpieceData materialHeatData;
     private int materialCount;
     private int hitCount;
     private float displayRotationDegrees;
@@ -68,7 +76,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean isEmpty() {
-        return templateId == null && materialId == null && materialItemId == null && materialCount == 0 && hitCount == 0;
+        return templateId == null && materialId == null && materialItemId == null && materialHeatData == null && materialCount == 0 && hitCount == 0;
     }
 
     public boolean isComplete() {
@@ -77,7 +85,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean canChangeTemplate() {
-        return materialId == null && materialItemId == null && materialCount == 0 && hitCount == 0;
+        return materialId == null && materialItemId == null && materialHeatData == null && materialCount == 0 && hitCount == 0;
     }
 
     public boolean selectTemplate(ForgeTemplateDefinition template) {
@@ -94,6 +102,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         this.templateId = template.id();
         materialId = null;
         materialItemId = null;
+        materialHeatData = null;
         materialCount = 0;
         hitCount = 0;
         displayRotationDegrees = 0.0F;
@@ -129,6 +138,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 materialId = material.id();
                 materialItemId = BuiltInRegistries.ITEM.getKey(material.displayItem());
             }
+            captureMaterialHeat(stack);
             stack.shrink(taken);
             materialCount += taken;
             sync();
@@ -153,7 +163,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     public ItemStack outputStack() {
         ForgeTemplateDefinition template = template();
-        return isComplete() && template != null && materialId != null ? template.outputStack(materialId) : ItemStack.EMPTY;
+        return isComplete() && template != null && materialId != null ? applyMaterialHeat(template.outputStack(materialId)) : ItemStack.EMPTY;
     }
 
     public ItemStack displayMaterialStack() {
@@ -163,14 +173,14 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (materialCount <= 0 || materialItemId == null) {
             return ItemStack.EMPTY;
         }
-        return new ItemStack(BuiltInRegistries.ITEM.get(materialItemId));
+        return applyMaterialHeat(new ItemStack(BuiltInRegistries.ITEM.get(materialItemId)));
     }
 
     public ItemStack materialDropStack() {
         if (materialCount <= 0 || materialItemId == null) {
             return ItemStack.EMPTY;
         }
-        return new ItemStack(BuiltInRegistries.ITEM.get(materialItemId), materialCount);
+        return applyMaterialHeat(new ItemStack(BuiltInRegistries.ITEM.get(materialItemId), materialCount));
     }
 
     public ItemStack removeOutput() {
@@ -185,10 +195,60 @@ public class ToolForgeBlockEntity extends BlockEntity {
         templateId = null;
         materialId = null;
         materialItemId = null;
+        materialHeatData = null;
         materialCount = 0;
         hitCount = 0;
         displayRotationDegrees = 0.0F;
         sync();
+    }
+
+    public boolean materialIsHot() {
+        return materialHeatData != null && level != null && materialHeatData.workable()
+                && materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get()) > 0.0F;
+    }
+
+    private void captureMaterialHeat(ItemStack stack) {
+        HeatedWorkpieceData heatData = stack.get(ModDataComponents.HEATED_WORKPIECE.get());
+        if (heatData == null) {
+            return;
+        }
+        if (level == null) {
+            materialHeatData = heatData;
+            return;
+        }
+        float stackTemperature = heatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
+        float existingTemperature = materialHeatData == null ? 0.0F : materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
+        boolean workable = heatData.workable() || materialHeatData != null && materialHeatData.workable();
+        if (stackTemperature >= existingTemperature) {
+            materialHeatData = refreshedHeatData(stackTemperature, workable);
+        } else if (materialHeatData != null && workable && !materialHeatData.workable()) {
+            materialHeatData = refreshedHeatData(existingTemperature, true);
+        }
+    }
+
+    private ItemStack applyMaterialHeat(ItemStack stack) {
+        if (stack.isEmpty() || materialHeatData == null) {
+            return stack;
+        }
+        if (level == null) {
+            stack.set(ModDataComponents.HEATED_WORKPIECE.get(), materialHeatData);
+            return stack;
+        }
+        float temperature = materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
+        if (temperature > 0.0F) {
+            stack.set(ModDataComponents.HEATED_WORKPIECE.get(), refreshedHeatData(temperature, materialHeatData.workable()));
+        }
+        return stack;
+    }
+
+    private HeatedWorkpieceData refreshedHeatData(float temperature, boolean workable) {
+        long gameTime = level == null ? 0L : level.getGameTime();
+        return new HeatedWorkpieceData(
+                gameTime + Math.max(1L, Math.round(temperature * MobsToolForgingConfig.COOLING_TICKS.get())),
+                temperature,
+                gameTime,
+                workable
+        );
     }
 
     private void randomizeDisplayRotation() {
@@ -231,6 +291,12 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (materialItemId != null) {
             tag.putString(MATERIAL_ITEM_ID_TAG, materialItemId.toString());
         }
+        if (materialHeatData != null) {
+            tag.putLong(MATERIAL_HEAT_EXPIRES_TAG, materialHeatData.expiresAtGameTime());
+            tag.putFloat(MATERIAL_HEAT_TEMPERATURE_TAG, materialHeatData.temperature());
+            tag.putLong(MATERIAL_HEAT_LAST_UPDATE_TAG, materialHeatData.lastUpdateGameTime());
+            tag.putBoolean(MATERIAL_HEAT_WORKABLE_TAG, materialHeatData.workable());
+        }
         tag.putInt(MATERIAL_COUNT_TAG, materialCount);
         tag.putInt(HIT_COUNT_TAG, hitCount);
         tag.putFloat(DISPLAY_ROTATION_TAG, displayRotationDegrees);
@@ -242,6 +308,14 @@ public class ToolForgeBlockEntity extends BlockEntity {
         templateId = tag.contains(TEMPLATE_TAG) ? ResourceLocation.parse(tag.getString(TEMPLATE_TAG)) : null;
         materialId = tag.contains(MATERIAL_ID_TAG) ? ResourceLocation.parse(tag.getString(MATERIAL_ID_TAG)) : null;
         materialItemId = tag.contains(MATERIAL_ITEM_ID_TAG) ? ResourceLocation.parse(tag.getString(MATERIAL_ITEM_ID_TAG)) : null;
+        materialHeatData = tag.contains(MATERIAL_HEAT_TEMPERATURE_TAG)
+                ? new HeatedWorkpieceData(
+                tag.getLong(MATERIAL_HEAT_EXPIRES_TAG),
+                tag.getFloat(MATERIAL_HEAT_TEMPERATURE_TAG),
+                tag.getLong(MATERIAL_HEAT_LAST_UPDATE_TAG),
+                tag.getBoolean(MATERIAL_HEAT_WORKABLE_TAG)
+        )
+                : null;
         materialCount = tag.getInt(MATERIAL_COUNT_TAG);
         hitCount = tag.getInt(HIT_COUNT_TAG);
         displayRotationDegrees = tag.getFloat(DISPLAY_ROTATION_TAG);

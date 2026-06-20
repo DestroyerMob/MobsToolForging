@@ -4,9 +4,11 @@ import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
@@ -77,6 +79,35 @@ public class HeatingForgeBlock extends BaseEntityBlock {
     @Override
     protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
+    }
+
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        if (!(level.getBlockEntity(pos) instanceof HeatingForgeBlockEntity forge) || !forge.isLit()) {
+            return;
+        }
+        if (random.nextFloat() < 0.75F) {
+            level.addParticle(
+                    ParticleTypes.WHITE_SMOKE,
+                    pos.getX() + 0.5D + (random.nextDouble() - 0.5D) * 0.22D,
+                    pos.getY() + 0.72D,
+                    pos.getZ() + 0.5D + (random.nextDouble() - 0.5D) * 0.22D,
+                    (random.nextDouble() - 0.5D) * 0.015D,
+                    0.055D + random.nextDouble() * 0.025D,
+                    (random.nextDouble() - 0.5D) * 0.015D
+            );
+        }
+        if (random.nextFloat() < 0.25F) {
+            level.addParticle(
+                    ParticleTypes.SMALL_FLAME,
+                    pos.getX() + 0.5D + (random.nextDouble() - 0.5D) * 0.16D,
+                    pos.getY() + 0.34D,
+                    pos.getZ() + 0.5D + (random.nextDouble() - 0.5D) * 0.16D,
+                    0.0D,
+                    0.01D,
+                    0.0D
+            );
+        }
     }
 
     @Override
