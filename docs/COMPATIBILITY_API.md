@@ -115,9 +115,9 @@ External finished tools can use the dynamic model loader:
   "tool": "mobs_more_weapons:greatsword",
   "visual": "mobs_more_weapons:greatsword",
   "textures": {
-    "layer_handle_oak": "mobstoolforging:generated/tool_parts/oak/sword_handle",
-    "layer_greatsword_blade_mobs_more_weapons_steel": "mobs_more_weapons:item/tool_parts/steel_greatsword_blade",
-    "particle": "mobs_more_weapons:item/tool_parts/steel_greatsword_blade"
+    "layer_handle_oak": "mobstoolforging:source/tool_parts/stick/stick_handle_tool",
+    "layer_greatsword_blade_mobs_more_weapons_steel": "mobs_more_weapons:item/tool_parts/steel_greatsword_blade_tool",
+    "particle": "mobs_more_weapons:item/tool_parts/steel_greatsword_blade_tool"
   }
 }
 ```

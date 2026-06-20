@@ -2,8 +2,8 @@
   "sources": [
     {
       "type": "minecraft:directory",
-      "source": "generated/tool_parts",
-      "prefix": "generated/tool_parts/"
+      "source": "source/tool_parts",
+      "prefix": "source/tool_parts/"
     },
     {
       "type": "minecraft:directory",

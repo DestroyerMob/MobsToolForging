@@ -4,7 +4,6 @@ import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
@@ -25,16 +24,6 @@ import org.destroyermob.mobstoolforging.world.ToolPartData;
 public class ModBlockStateProvider extends BlockStateProvider {
     public ModBlockStateProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
         super(output, MobsToolForging.MOD_ID, existingFileHelper);
-        for (ToolKind toolKind : ToolKind.values()) {
-            for (VisualLayerSpec layer : visualLayers(toolKind)) {
-                for (ResourceLocation material : MaterialCatalog.visualMaterialIds(layer.materialFrom())) {
-                    trackGeneratedTexture(existingFileHelper, generatedTexturePath(material, generatedTextureName(toolKind, layer.slot())));
-                }
-            }
-        }
-        for (ResourceLocation material : MaterialCatalog.visualMaterialIds("bindingMaterial")) {
-            trackGeneratedTexture(existingFileHelper, generatedTexturePath(material, "sword_guard_part"));
-        }
     }
 
     @Override
@@ -128,20 +117,24 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void partModel(ToolKind toolKind) {
-        partModel(toolKind, toolKind.partType(), toolKind.partType(), toolKind.partType(), "headMaterial", generatedTextureName(toolKind, toolKind.partType()));
+        partModel(toolKind, toolKind.partType(), toolKind.partType(), toolKind.partType(), "headMaterial", toolKind.partType());
     }
 
     private void swordGuardPartModel() {
-        partModel(ToolKind.SWORD, ToolPartData.SWORD_GUARD, ToolPartData.SWORD_GUARD, "guard", "bindingMaterial", "sword_guard_part");
+        partModel(ToolKind.SWORD, ToolPartData.SWORD_GUARD, ToolPartData.SWORD_GUARD, "guard", "bindingMaterial", ToolPartData.SWORD_GUARD);
     }
 
     private void partModel(ToolKind toolKind, String itemModelName, String partType, String partSlot, String materialFrom, String textureName) {
         ItemModelBuilder builder = itemModels().withExistingParent(itemModelName, mcLoc("item/generated"));
-        builder.texture("particle", generatedTexture(MaterialCatalog.IRON, textureName));
+        builder.texture("particle", sourceTexture(MaterialCatalog.IRON, partTextureName(MaterialCatalog.IRON, textureName)));
         for (ResourceLocation material : MaterialCatalog.visualMaterialIds(materialFrom)) {
+            ResourceLocation texture = sourceTexture(material, partTextureName(material, textureName));
+            if (!sourceTextureExists(texture)) {
+                continue;
+            }
             builder.texture(
                     ToolPartSpriteKey.modelTextureKey(partSlot, material),
-                    generatedTexture(material, textureName)
+                    texture
             );
         }
         builder.customLoader((modelBuilder, helper) -> new PartedItemModelBuilder(modelBuilder, helper, toolKind, true, partType, partSlot)).end();
@@ -154,32 +147,32 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void addVisualTextures(ItemModelBuilder builder, ToolKind toolKind) {
-        builder.texture("particle", generatedTexture(MaterialCatalog.IRON, toolKind.partType()));
+        builder.texture("particle", sourceTexture(MaterialCatalog.IRON, toolTextureName(toolKind, toolKind.partType(), MaterialCatalog.IRON)));
         for (VisualLayerSpec layer : visualLayers(toolKind)) {
             for (ResourceLocation material : MaterialCatalog.visualMaterialIds(layer.materialFrom())) {
+                ResourceLocation texture = sourceTexture(material, toolTextureName(toolKind, layer.slot(), material));
+                if (!sourceTextureExists(texture)) {
+                    continue;
+                }
                 builder.texture(
                         ToolPartSpriteKey.modelTextureKey(layer.slot(), material),
-                        generatedTexture(material, generatedTextureName(toolKind, layer.slot()))
+                        texture
                 );
             }
         }
     }
 
-    private static void trackGeneratedTexture(ExistingFileHelper existingFileHelper, String path) {
-        existingFileHelper.trackGenerated(
-                ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, path),
-                PackType.CLIENT_RESOURCES,
-                ".png",
-                "textures"
-        );
+    private static ResourceLocation sourceTexture(ResourceLocation material, String spriteName) {
+        return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, sourceTexturePath(material, spriteName));
     }
 
-    private static ResourceLocation generatedTexture(ResourceLocation material, String spriteName) {
-        return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, generatedTexturePath(material, spriteName));
+    private static String sourceTexturePath(ResourceLocation material, String spriteName) {
+        return "source/tool_parts/" + sourceMaterialPath(material) + "/" + spriteName;
     }
 
-    private static String generatedTexturePath(ResourceLocation material, String spriteName) {
-        return "generated/tool_parts/" + materialPath(material) + "/" + spriteName;
+    private static boolean sourceTextureExists(ResourceLocation texture) {
+        String resourcePath = "/assets/" + texture.getNamespace() + "/textures/" + texture.getPath() + ".png";
+        return ModBlockStateProvider.class.getResource(resourcePath) != null;
     }
 
     private static String materialPath(ResourceLocation material) {
@@ -189,11 +182,47 @@ public class ModBlockStateProvider extends BlockStateProvider {
         return material.getNamespace() + "/" + material.getPath();
     }
 
-    private static String generatedTextureName(ToolKind toolKind, String slot) {
+    private static String partTextureName(ResourceLocation material, String partName) {
+        return textureMaterialPrefix(material) + "_" + partName + "_part";
+    }
+
+    private static String toolTextureName(ToolKind toolKind, String slot, ResourceLocation material) {
+        String materialPrefix = textureMaterialPrefix(material);
+        if (slot.equals("handle")) {
+            String toolSpecific = materialPrefix + "_" + toolKind.id() + "_handle_tool";
+            if (sourceTextureExists(sourceTexture(material, toolSpecific))) {
+                return toolSpecific;
+            }
+            return materialPrefix + "_handle_tool";
+        }
+        return materialPrefix + "_" + toolLayerPartName(toolKind, slot) + "_tool";
+    }
+
+    private static String toolLayerPartName(ToolKind toolKind, String slot) {
+        if (toolKind == ToolKind.SWORD && slot.equals("guard")) {
+            return ToolPartData.SWORD_GUARD;
+        }
         if (slot.equals(toolKind.partType())) {
             return toolKind.partType();
         }
         return toolKind.id() + "_" + slot;
+    }
+
+    private static String sourceMaterialPath(ResourceLocation material) {
+        if (MaterialCatalog.OAK.equals(material)) {
+            return "stick";
+        }
+        if (MaterialCatalog.BLAZE.equals(material)) {
+            return "blaze_rod";
+        }
+        if (MaterialCatalog.BREEZE.equals(material)) {
+            return "breeze_rod";
+        }
+        return materialPath(material);
+    }
+
+    private static String textureMaterialPrefix(ResourceLocation material) {
+        return sourceMaterialPath(material).replace('/', '_').replace('-', '_');
     }
 
     private static String jointSlot(ToolKind toolKind) {

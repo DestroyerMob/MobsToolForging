@@ -42,27 +42,28 @@ Each tool visual is an ordered layer list. Layers name their physical slot, such
 
 Layer order matters. Handles render first, wraps and heads render above them, binding or guards cover the joint, and treatment overlays stay subtle.
 
-## Generated Sprites
+## Source Part Sprites
 
-Generated part sprites are written to:
+Hand-authored part sprites are loaded from:
 
 ```text
-assets/mobstoolforging/textures/generated/tool_parts/<material>/<part>.png
+assets/mobstoolforging/textures/source/tool_parts/<material>/<material>_<part>_part.png
+assets/mobstoolforging/textures/source/tool_parts/<material>/<material>_<part>_tool.png
 ```
 
-These are part sprites, not full completed-tool permutations. The intended renderer should compose them dynamically from the stack's construction data.
+The `_part` texture is used for standalone part item models. The `_tool` texture is used as a layer in assembled tool models. These are part sprites, not full completed-tool permutations; the renderer composes them dynamically from the stack's construction data.
 
 ## Adding A Material
 
 1. Tag the source item as `mobstoolforging:materials/metals` or `mobstoolforging:materials/gems` if it can become a tool head.
 2. For a bridge mod, call `MaterialCatalog.registerMaterial` if the material needs custom stats instead of fallback iron/diamond-like behavior.
 3. Add or override `tooling/material_visuals/<material>.json`.
-4. Provide explicit textures for iconic materials where generated sprites are not good enough.
+4. Provide hand-authored source textures for every material and part that should render.
 5. If the material id is not one of MTF's built-ins, either call `MaterialCatalog.registerVisualMaterial` or list it in the layer's `materials` array inside the relevant tool visual JSON.
 
 ## Adding A Tool Visual
 
-Add a `tooling/tool_visuals/<tool_type>.json` file in your mod namespace. Define the ordered layers and point them at your templates and generated output paths.
+Add a `tooling/tool_visuals/<tool_type>.json` file in your mod namespace. Define the ordered layers and point them at your templates and source texture paths.
 
 Registered external tool types can use the same model loader by setting `tool` to their registered `ToolTypeDefinition` id and `visual` to the visual JSON id:
 

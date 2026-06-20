@@ -1,30 +1,42 @@
 # Art Pipeline
 
-The generated procedural sprites are placeholders. They exist so modular tools stay visible during gameplay development and so missing wiring is easy to notice.
-
-Final quality requires hand-authored greyscale templates and hand-authored source sprites. Code should not replace actual pixel art; the generator is a safety net for early testing, not the art direction.
+All tool part sprites are hand-authored source art. The mod should not generate replacement pixel art in code.
 
 ## Source Templates And Sprites
 
 Current hand-authored source sprites live under:
 
 ```text
-src/main/resources/assets/mobstoolforging/textures/source/tool_parts/<material>/<sprite>.png
+src/main/resources/assets/mobstoolforging/textures/source/tool_parts/<material>/<material>_<part>_<usage>.png
 ```
 
-Handle sprites may provide a generic base and optional tool-specific bases:
+Use lowercase names with single underscores only. Do not use double underscores or keep `_final` in committed asset names.
+
+Tool part sprites use one of these usage suffixes:
+
+- `<material>_<part>_part.png`: the standalone forged part item texture.
+- `<material>_<part>_tool.png`: the layer assembled into the finished tool texture.
+
+For example:
 
 ```text
-src/main/resources/assets/mobstoolforging/textures/source/tool_parts/<handle_material>/handle.png
-src/main/resources/assets/mobstoolforging/textures/source/tool_parts/<handle_material>/<tool>_handle.png
+src/main/resources/assets/mobstoolforging/textures/source/tool_parts/diamond/diamond_axe_head_part.png
+src/main/resources/assets/mobstoolforging/textures/source/tool_parts/diamond/diamond_axe_head_tool.png
 ```
 
-Datagen checks the tool-specific handle sprite first, then falls back to `handle.png`, then falls back to procedural drawing. The handle mask is still applied after the base sprite is selected.
+Handle sprites may provide a generic base and optional tool-specific bases. Handles are tool assembly layers, so they use the `_tool` suffix:
+
+```text
+src/main/resources/assets/mobstoolforging/textures/source/tool_parts/<handle_material>/<handle_material>_handle_tool.png
+src/main/resources/assets/mobstoolforging/textures/source/tool_parts/<handle_material>/<handle_material>_<tool>_handle_tool.png
+```
+
+Datagen checks the tool-specific handle sprite first, then falls back to the generic handle sprite.
 
 Handle visibility masks live under:
 
 ```text
-src/main/resources/assets/mobstoolforging/textures/source/tool_parts/handle_masks/<tool>.png
+src/main/resources/assets/mobstoolforging/textures/source/tool_parts/handle_masks/<tool>_handle_mask.png
 ```
 
 For built-in handles, source material folders currently map like this:
@@ -35,12 +47,6 @@ For built-in handles, source material folders currently map like this:
 
 ## Generated Outputs
 
-Datagen writes generated part sprites under:
-
-```text
-src/generated/resources/assets/mobstoolforging/textures/generated/tool_parts/<material>/<part>.png
-```
-
 Visual definitions are generated under:
 
 ```text
@@ -48,19 +54,19 @@ src/generated/resources/assets/mobstoolforging/tooling/material_visuals/<materia
 src/generated/resources/assets/mobstoolforging/tooling/tool_visuals/<tool_type>.json
 ```
 
-These generated files are useful for development and for resource-pack-friendly defaults. They should not be treated as final pixel art.
+These generated JSON files are useful for development and for resource-pack-friendly defaults. They are not pixel art.
 
 ## Override Paths
 
-Resource packs or later bridge mods can override generated textures at the normal asset paths:
+Resource packs or later bridge mods can override source textures at the normal asset paths:
 
 ```text
-assets/<namespace>/textures/generated/tool_parts/<material>/<part>.png
+assets/<namespace>/textures/source/tool_parts/<material>/<material>_<part>_<usage>.png
 assets/<namespace>/tooling/material_visuals/<material>.json
 assets/<namespace>/tooling/tool_visuals/<tool_type>.json
 ```
 
-If a material or tool shape needs to look polished, add explicit source sprites or resource-pack overrides instead of adding more procedural drawing code.
+If a material or tool shape needs to render, add explicit source sprites or resource-pack overrides.
 
 ## Bridge Mod Visuals
 

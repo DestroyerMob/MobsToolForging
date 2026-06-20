@@ -5,13 +5,10 @@
   "part_slot": "sword_blade",
   "part_type": "sword_blade",
   "textures": {
-    "layer_sword_blade_copper": "mobstoolforging:generated/tool_parts/copper/sword_blade",
-    "layer_sword_blade_diamond": "mobstoolforging:generated/tool_parts/diamond/sword_blade",
-    "layer_sword_blade_emerald": "mobstoolforging:generated/tool_parts/emerald/sword_blade",
-    "layer_sword_blade_gold": "mobstoolforging:generated/tool_parts/gold/sword_blade",
-    "layer_sword_blade_iron": "mobstoolforging:generated/tool_parts/iron/sword_blade",
-    "layer_sword_blade_netherite": "mobstoolforging:generated/tool_parts/netherite/sword_blade",
-    "particle": "mobstoolforging:generated/tool_parts/iron/sword_blade"
+    "layer_sword_blade_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_sword_blade_part",
+    "layer_sword_blade_gold": "mobstoolforging:source/tool_parts/gold/gold_sword_blade_part",
+    "layer_sword_blade_iron": "mobstoolforging:source/tool_parts/iron/iron_sword_blade_part",
+    "particle": "mobstoolforging:source/tool_parts/iron/iron_sword_blade_part"
   },
   "tool": "sword",
   "visual": "mobstoolforging:sword"

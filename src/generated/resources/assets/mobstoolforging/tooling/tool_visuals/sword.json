@@ -6,7 +6,6 @@
   "layers": [
     {
       "emissive_allowed": false,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/sword_handle",
       "large_template": "mobstoolforging:tool_templates/sword/large_handle",
       "material_from": "handleMaterial",
       "optional": false,
@@ -16,7 +15,6 @@
     },
     {
       "emissive_allowed": false,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/sword_wrap",
       "large_template": "mobstoolforging:tool_templates/sword/large_wrap",
       "material_from": "wrapMaterial",
       "optional": true,
@@ -26,7 +24,6 @@
     },
     {
       "emissive_allowed": false,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/sword_blade",
       "large_template": "mobstoolforging:tool_templates/sword/large_sword_blade",
       "material_from": "headMaterial",
       "optional": false,
@@ -36,7 +33,6 @@
     },
     {
       "emissive_allowed": false,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/sword_guard",
       "large_template": "mobstoolforging:tool_templates/sword/large_guard",
       "material_from": "bindingMaterial",
       "optional": false,
@@ -46,7 +42,6 @@
     },
     {
       "emissive_allowed": true,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/sword_focus",
       "large_template": "mobstoolforging:tool_templates/sword/large_focus",
       "material_from": "focusMaterial",
       "optional": true,
@@ -56,7 +51,6 @@
     },
     {
       "emissive_allowed": true,
-      "generated": "mobstoolforging:generated/tool_parts/{material}/sword_treatment_overlay",
       "large_template": "mobstoolforging:tool_templates/sword/large_treatment_overlay",
       "material_from": "treatment",
       "optional": true,

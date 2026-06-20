@@ -5,13 +5,10 @@
   "part_slot": "guard",
   "part_type": "sword_guard",
   "textures": {
-    "layer_guard_copper": "mobstoolforging:generated/tool_parts/copper/sword_guard_part",
-    "layer_guard_diamond": "mobstoolforging:generated/tool_parts/diamond/sword_guard_part",
-    "layer_guard_emerald": "mobstoolforging:generated/tool_parts/emerald/sword_guard_part",
-    "layer_guard_gold": "mobstoolforging:generated/tool_parts/gold/sword_guard_part",
-    "layer_guard_iron": "mobstoolforging:generated/tool_parts/iron/sword_guard_part",
-    "layer_guard_netherite": "mobstoolforging:generated/tool_parts/netherite/sword_guard_part",
-    "particle": "mobstoolforging:generated/tool_parts/iron/sword_guard_part"
+    "layer_guard_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_sword_guard_part",
+    "layer_guard_gold": "mobstoolforging:source/tool_parts/gold/gold_sword_guard_part",
+    "layer_guard_iron": "mobstoolforging:source/tool_parts/iron/iron_sword_guard_part",
+    "particle": "mobstoolforging:source/tool_parts/iron/iron_sword_guard_part"
   },
   "tool": "sword",
   "visual": "mobstoolforging:sword"

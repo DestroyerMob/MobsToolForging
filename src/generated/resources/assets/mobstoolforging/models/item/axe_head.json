@@ -5,13 +5,10 @@
   "part_slot": "axe_head",
   "part_type": "axe_head",
   "textures": {
-    "layer_axe_head_copper": "mobstoolforging:generated/tool_parts/copper/axe_head",
-    "layer_axe_head_diamond": "mobstoolforging:generated/tool_parts/diamond/axe_head",
-    "layer_axe_head_emerald": "mobstoolforging:generated/tool_parts/emerald/axe_head",
-    "layer_axe_head_gold": "mobstoolforging:generated/tool_parts/gold/axe_head",
-    "layer_axe_head_iron": "mobstoolforging:generated/tool_parts/iron/axe_head",
-    "layer_axe_head_netherite": "mobstoolforging:generated/tool_parts/netherite/axe_head",
-    "particle": "mobstoolforging:generated/tool_parts/iron/axe_head"
+    "layer_axe_head_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_axe_head_part",
+    "layer_axe_head_gold": "mobstoolforging:source/tool_parts/gold/gold_axe_head_part",
+    "layer_axe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_axe_head_part",
+    "particle": "mobstoolforging:source/tool_parts/iron/iron_axe_head_part"
   },
   "tool": "axe",
   "visual": "mobstoolforging:axe"
