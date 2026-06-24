@@ -26,7 +26,9 @@ public record ForgeTemplateDefinition(
         Map<ResourceLocation, Integer> materialHammerLevels,
         ResourceLocation outputItem,
         Map<ResourceLocation, ResourceLocation> outputItems,
-        Set<ResourceLocation> compatibleToolTypes
+        Set<ResourceLocation> compatibleToolTypes,
+        boolean patternStationEnabled,
+        int patternStationPaperCost
 ) {
     public ForgeTemplateDefinition {
         materialWhitelist = Set.copyOf(materialWhitelist);
@@ -35,6 +37,7 @@ public record ForgeTemplateDefinition(
         materialHammerLevels = Map.copyOf(materialHammerLevels);
         outputItems = Map.copyOf(outputItems);
         compatibleToolTypes = compatibleToolTypes.isEmpty() ? Set.of(toolType) : Set.copyOf(compatibleToolTypes);
+        patternStationPaperCost = Math.max(1, patternStationPaperCost);
     }
 
     public ForgeTemplateDefinition(ResourceLocation id, ResourceLocation toolType, String partType, int requiredMaterials, int requiredHits, String translationKey) {
@@ -42,7 +45,7 @@ public record ForgeTemplateDefinition(
     }
 
     public ForgeTemplateDefinition(ResourceLocation id, ResourceLocation toolType, String partType, int requiredMaterials, int requiredHits, String translationKey, float minimumTemperature) {
-        this(id, toolType, partType, requiredMaterials, requiredHits, translationKey, minimumTemperature, Set.of(), Set.of(), SmithingHammerLevel.STONE.level(), Map.of(), null, Map.of(), Set.of(toolType));
+        this(id, toolType, partType, requiredMaterials, requiredHits, translationKey, minimumTemperature, Set.of(), Set.of(), SmithingHammerLevel.STONE.level(), Map.of(), null, Map.of(), Set.of(toolType), true, 1);
     }
 
     @Override

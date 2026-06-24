@@ -7,6 +7,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -34,6 +36,8 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private static final String DIRECT_OUTPUT_TAG = "DirectOutput";
     private static final String LOOSE_WORK_RECIPE_TAG = "LooseWorkRecipe";
     private static final String ABRASIVE_STACK_TAG = "AbrasiveStack";
+    private static final String BENCH_STACKS_TAG = "BenchStacks";
+    private static final int MAX_BENCH_STACKS = 9;
 
     @Nullable
     private ResourceLocation templateId;
@@ -47,6 +51,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private ResourceLocation looseWorkRecipeId;
     private ItemStack directOutputStack = ItemStack.EMPTY;
     private ItemStack abrasiveStack = ItemStack.EMPTY;
+    private final List<ItemStack> benchStacks = new ArrayList<>();
     private int materialCount;
     private int hitCount;
     private float displayRotationDegrees;
@@ -90,6 +95,14 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return abrasiveStack.copy();
     }
 
+    public List<ItemStack> benchStacks() {
+        return benchStacks.stream().map(ItemStack::copy).toList();
+    }
+
+    public boolean hasBenchStacks() {
+        return !benchStacks.isEmpty();
+    }
+
     @Nullable
     public ResourceLocation materialId() {
         return materialId;
@@ -108,7 +121,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean isEmpty() {
-        return directOutputStack.isEmpty() && abrasiveStack.isEmpty() && templateId == null && materialId == null && materialItemId == null && materialHeatData == null && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
+        return directOutputStack.isEmpty() && abrasiveStack.isEmpty() && benchStacks.isEmpty() && templateId == null && materialId == null && materialItemId == null && materialHeatData == null && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
     }
 
     public boolean isComplete() {
@@ -120,11 +133,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean canChangeTemplate() {
-        return directOutputStack.isEmpty() && materialId == null && materialItemId == null && materialHeatData == null && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
+        return directOutputStack.isEmpty() && benchStacks.isEmpty() && materialId == null && materialItemId == null && materialHeatData == null && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
     }
 
     public boolean hasPlacedWork() {
-        return !abrasiveStack.isEmpty() || materialId != null || materialItemId != null || materialHeatData != null || looseWorkRecipeId != null || materialCount > 0 || hitCount > 0;
+        return !abrasiveStack.isEmpty() || !benchStacks.isEmpty() || materialId != null || materialItemId != null || materialHeatData != null || looseWorkRecipeId != null || materialCount > 0 || hitCount > 0;
     }
 
     public boolean selectTemplate(ForgeTemplateDefinition template) {
@@ -251,6 +264,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (!abrasiveStack.isEmpty()) {
             removed.add(abrasiveStack.copy());
         }
+        for (ItemStack benchStack : benchStacks) {
+            if (!benchStack.isEmpty()) {
+                removed.add(benchStack.copy());
+            }
+        }
 
         clearWorkState();
         abrasiveStack = ItemStack.EMPTY;
@@ -276,6 +294,52 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return true;
     }
 
+    public boolean canPlaceToolmakerStack(ItemStack stack) {
+        boolean finishedTool = ToolmakerBenchAssembly.isFinishedTool(stack);
+        return workstationKind() == WorkstationKind.TOOLMAKERS_BENCH
+                && !stack.isEmpty()
+                && benchStacks.size() < MAX_BENCH_STACKS
+                && (finishedTool ? benchStacks.isEmpty() : benchStacks.stream().noneMatch(ToolmakerBenchAssembly::isFinishedTool))
+                && directOutputStack.isEmpty()
+                && templateId == null
+                && abrasiveStack.isEmpty()
+                && materialId == null
+                && materialItemId == null
+                && materialHeatData == null
+                && looseWorkRecipeId == null
+                && materialCount == 0
+                && hitCount == 0
+                && ToolmakerBenchAssembly.isPlaceable(stack);
+    }
+
+    public boolean placeToolmakerStack(ItemStack stack) {
+        if (!canPlaceToolmakerStack(stack)) {
+            return false;
+        }
+        benchStacks.add(stack.copyWithCount(1));
+        stack.shrink(1);
+        sync();
+        return true;
+    }
+
+    public void clearToolmakerStacks() {
+        if (benchStacks.isEmpty()) {
+            return;
+        }
+        benchStacks.clear();
+        sync();
+    }
+
+    public void setDirectOutput(ItemStack output) {
+        clearWorkState();
+        if (output.isEmpty()) {
+            directOutputStack = ItemStack.EMPTY;
+        } else {
+            directOutputStack = output.copy();
+        }
+        sync();
+    }
+
     public void reset() {
         clearWorkState();
         abrasiveStack = ItemStack.EMPTY;
@@ -294,6 +358,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         materialHeatData = null;
         looseWorkRecipeId = null;
         directOutputStack = ItemStack.EMPTY;
+        benchStacks.clear();
         materialCount = 0;
         hitCount = 0;
         displayRotationDegrees = 0.0F;
@@ -306,6 +371,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && materialItemId == null
                 && materialHeatData == null
                 && looseWorkRecipeId == null
+                && benchStacks.isEmpty()
                 && materialCount == 0
                 && hitCount == 0;
     }
@@ -458,7 +524,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return wrapped;
     }
 
-    private WorkstationKind workstationKind() {
+    public WorkstationKind workstationKind() {
         return getBlockState().getBlock() instanceof ToolWorkstationBlock workstation ? workstation.kind() : WorkstationKind.TOOL_FORGE;
     }
 
@@ -497,6 +563,15 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (!abrasiveStack.isEmpty()) {
             tag.put(ABRASIVE_STACK_TAG, abrasiveStack.saveOptional(registries));
         }
+        if (!benchStacks.isEmpty()) {
+            ListTag stacks = new ListTag();
+            for (ItemStack benchStack : benchStacks) {
+                if (!benchStack.isEmpty()) {
+                    stacks.add(benchStack.saveOptional(registries));
+                }
+            }
+            tag.put(BENCH_STACKS_TAG, stacks);
+        }
         tag.putInt(MATERIAL_COUNT_TAG, materialCount);
         tag.putInt(HIT_COUNT_TAG, hitCount);
         tag.putFloat(DISPLAY_ROTATION_TAG, displayRotationDegrees);
@@ -519,6 +594,17 @@ public class ToolForgeBlockEntity extends BlockEntity {
         directOutputStack = tag.contains(DIRECT_OUTPUT_TAG) ? ItemStack.parseOptional(registries, tag.getCompound(DIRECT_OUTPUT_TAG)) : ItemStack.EMPTY;
         looseWorkRecipeId = tag.contains(LOOSE_WORK_RECIPE_TAG) ? ResourceLocation.parse(tag.getString(LOOSE_WORK_RECIPE_TAG)) : null;
         abrasiveStack = tag.contains(ABRASIVE_STACK_TAG) ? ItemStack.parseOptional(registries, tag.getCompound(ABRASIVE_STACK_TAG)) : ItemStack.EMPTY;
+        benchStacks.clear();
+        if (tag.contains(BENCH_STACKS_TAG)) {
+            ListTag stacks = tag.getList(BENCH_STACKS_TAG, Tag.TAG_COMPOUND);
+            int limit = Math.min(MAX_BENCH_STACKS, stacks.size());
+            for (int index = 0; index < limit; index++) {
+                ItemStack stack = ItemStack.parseOptional(registries, stacks.getCompound(index));
+                if (!stack.isEmpty()) {
+                    benchStacks.add(stack);
+                }
+            }
+        }
         materialCount = tag.getInt(MATERIAL_COUNT_TAG);
         hitCount = tag.getInt(HIT_COUNT_TAG);
         displayRotationDegrees = tag.getFloat(DISPLAY_ROTATION_TAG);

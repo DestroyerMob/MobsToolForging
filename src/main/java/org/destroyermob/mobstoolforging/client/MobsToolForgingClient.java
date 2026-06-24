@@ -11,12 +11,14 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.client.model.ComponentDrivenToolBakedModel;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
 import org.destroyermob.mobstoolforging.client.model.ToolMaterialVisualManager;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModItems;
+import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
 import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
 
@@ -30,6 +32,7 @@ public final class MobsToolForgingClient {
         eventBus.addListener(MobsToolForgingClient::wrapComponentDrivenItemModels);
         eventBus.addListener(MobsToolForgingClient::registerItemDecorations);
         eventBus.addListener(MobsToolForgingClient::registerReloadListeners);
+        eventBus.addListener(MobsToolForgingClient::registerMenuScreens);
     }
 
     public static void openTemplateScreen(BlockPos pos) {
@@ -79,5 +82,9 @@ public final class MobsToolForgingClient {
     private static void registerReloadListeners(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener(HeatingForgeInsertVisualManager.INSTANCE);
         event.registerReloadListener(ToolMaterialVisualManager.INSTANCE);
+    }
+
+    private static void registerMenuScreens(RegisterMenuScreensEvent event) {
+        event.register(ModMenuTypes.PATTERN_CREATION_STATION.get(), PatternCreationStationScreen::new);
     }
 }

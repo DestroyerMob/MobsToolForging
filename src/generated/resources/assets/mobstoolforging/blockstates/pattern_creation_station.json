@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "mobstoolforging:block/pattern_creation_station",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "mobstoolforging:block/pattern_creation_station"
+    },
+    "facing=south": {
+      "model": "mobstoolforging:block/pattern_creation_station",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mobstoolforging:block/pattern_creation_station",
+      "y": 270
+    }
+  }
+}

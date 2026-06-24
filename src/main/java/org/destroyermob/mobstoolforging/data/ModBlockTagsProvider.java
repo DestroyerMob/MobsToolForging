@@ -16,7 +16,7 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModBlocks.TOOL_FORGE.get(), ModBlocks.LAPIDARY_TABLE.get(), ModBlocks.HEATING_FORGE.get());
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModBlocks.TOOL_FORGE.get(), ModBlocks.LAPIDARY_TABLE.get(), ModBlocks.PATTERN_CREATION_STATION.get(), ModBlocks.TOOLMAKERS_BENCH.get(), ModBlocks.HEATING_FORGE.get());
         tag(BlockTags.NEEDS_STONE_TOOL).add(ModBlocks.TOOL_FORGE.get(), ModBlocks.HEATING_FORGE.get());
     }
 }

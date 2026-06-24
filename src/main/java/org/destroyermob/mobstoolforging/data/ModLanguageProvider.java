@@ -15,12 +15,19 @@ public class ModLanguageProvider extends LanguageProvider {
     protected void addTranslations() {
         addBlock(ModBlocks.TOOL_FORGE, "Smithing Anvil");
         addBlock(ModBlocks.LAPIDARY_TABLE, "Lapidary Table");
+        addBlock(ModBlocks.PATTERN_CREATION_STATION, "Pattern Creation Station");
+        addBlock(ModBlocks.TOOLMAKERS_BENCH, "Toolmaker's Bench");
         addBlock(ModBlocks.HEATING_FORGE, "Heating Forge");
         addItem(ModItems.SMITHING_HAMMER, "Smithing Hammer");
         addItem(ModItems.IRON_SMITHING_HAMMER, "Iron Smithing Hammer");
         addItem(ModItems.SMITHING_HAMMER_HEAD, "Iron Smithing Hammer Head");
+        addItem(ModItems.SCREWDRIVER, "Screwdriver");
+        addItem(ModItems.SCREWDRIVER_HEAD, "Screwdriver Head");
+        addItem(ModItems.GEM_CUTTERS_KNIFE, "Gem Cutter's Knife");
+        addItem(ModItems.GEM_CUTTERS_BLADE, "Gem Cutter's Blade");
         addItem(ModItems.DIAMOND_POWDER, "Diamond Powder");
         addItem(ModItems.FLINT_SHARD, "Flint Shard");
+        addItem(ModItems.FIRE_STICK, "Fire Stick");
         addItem(ModItems.FLINT_KNIFE, "Flint Knife");
         addItem(ModItems.FLINT_HATCHET, "Flint Hatchet");
         addItem(ModItems.FLINT_PICK, "Flint Pick");
@@ -31,6 +38,8 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.SWORD_BLADE_PATTERN, "Sword Blade Pattern");
         addItem(ModItems.SWORD_GUARD_PATTERN, "Sword Guard Pattern");
         addItem(ModItems.SMITHING_HAMMER_HEAD_PATTERN, "Smithing Hammer Head Pattern");
+        addItem(ModItems.SCREWDRIVER_HEAD_PATTERN, "Screwdriver Head Pattern");
+        addItem(ModItems.GEM_CUTTERS_BLADE_PATTERN, "Gem Cutter's Blade Pattern");
         addItem(ModItems.TEMPLATE_PATTERN, "Template Pattern");
         add("item.mobstoolforging.template_pattern.named", "%s Pattern");
         addItem(ModItems.SWORD_BLADE, "Sword Blade");
@@ -70,8 +79,11 @@ public class ModLanguageProvider extends LanguageProvider {
         add("material.mobstoolforging.nether", "Nether");
         add("material.mobstoolforging.sculk", "Sculk");
         add("screen.mobstoolforging.tool_forge_templates", "Tool Templates");
+        add("screen.mobstoolforging.pattern_creation_station", "Pattern Creation");
+        add("container.mobstoolforging.pattern_creation_station", "Pattern Creation");
         add("jei.mobstoolforging.forge_shaping", "Tool Part Shaping");
         add("jei.mobstoolforging.station_work", "Station Work");
+        add("jei.mobstoolforging.pattern_creation", "Pattern Creation");
         add("jei.mobstoolforging.station_detail", "%s hits, %s");
         add("jei.mobstoolforging.catalyst", "Catalyst: %s");
         add("jade.mobstoolforging.abrasive", "Abrasive: %s");
@@ -92,6 +104,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("forge_template.mobstoolforging.axe_head", "Axe Head");
         add("forge_template.mobstoolforging.hoe_head", "Hoe Head");
         add("forge_template.mobstoolforging.smithing_hammer_head", "Smithing Hammer Head");
+        add("forge_template.mobstoolforging.screwdriver_head", "Screwdriver Head");
+        add("forge_template.mobstoolforging.gem_cutters_blade", "Gem Cutter's Blade");
         add("message.mobstoolforging.select_template", "Use a pattern item on this station.");
         add("message.mobstoolforging.sneak_hint", "Use a pattern item, or an empty hand to check the station.");
         add("message.mobstoolforging.template_selected", "Selected %s.");
@@ -111,9 +125,18 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.lapidary_abrasive_placed", "Abrasive placed.");
         add("message.mobstoolforging.lapidary_abrasive_present", "The Lapidary Table already has abrasive.");
         add("message.mobstoolforging.lapidary_needs_abrasive", "Place Diamond Powder on the Lapidary Table first.");
+        add("message.mobstoolforging.lapidary_needs_knife", "Use a Gem Cutter's Knife at the Lapidary Table.");
         add("message.mobstoolforging.mixed_materials", "Finish this part with the same material.");
         add("message.mobstoolforging.use_lapidary_table", "Gem heads are shaped on a Lapidary Table.");
         add("message.mobstoolforging.use_tool_forge", "Metal heads are forged on a Smithing Anvil.");
+        add("message.mobstoolforging.use_toolmakers_bench", "Place parts here, assemble them with a Screwdriver, or split a tool with a Smithing Hammer.");
+        add("message.mobstoolforging.toolmaker_part_placed", "Part placed.");
+        add("message.mobstoolforging.toolmaker_needs_parts", "Place a compatible head and handle first.");
+        add("message.mobstoolforging.toolmaker_invalid", "That does not fit this bench.");
+        add("message.mobstoolforging.toolmaker_assembled", "Tool assembled.");
+        add("message.mobstoolforging.toolmaker_disassembled", "Tool separated.");
+        add("message.mobstoolforging.toolmaker_no_tool", "Place one assembled tool before separating it.");
+        add("message.mobstoolforging.toolmaker_status", "%s item(s) placed.");
         add("message.mobstoolforging.complete", "The tool part is ready.");
         add("message.mobstoolforging.inventory_full", "Make room before taking the finished part.");
         add("message.mobstoolforging.station_status", "Materials: %s/%s, Progress: %s/%s");

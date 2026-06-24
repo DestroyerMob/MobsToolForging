@@ -17,6 +17,10 @@ import org.destroyermob.mobstoolforging.registry.ModItems;
 public final class ToolTypeRegistry {
     public static final ResourceLocation SMITHING_HAMMER_TOOL_TYPE = modLoc("smithing_hammer");
     public static final ResourceLocation SMITHING_HAMMER_HEAD_TEMPLATE = modLoc("smithing_hammer_head");
+    public static final ResourceLocation SCREWDRIVER_TOOL_TYPE = modLoc("screwdriver");
+    public static final ResourceLocation SCREWDRIVER_HEAD_TEMPLATE = modLoc("screwdriver_head");
+    public static final ResourceLocation GEM_CUTTERS_KNIFE_TOOL_TYPE = modLoc("gem_cutters_knife");
+    public static final ResourceLocation GEM_CUTTERS_BLADE_TEMPLATE = modLoc("gem_cutters_blade");
     private static final Map<ResourceLocation, ToolTypeDefinition> TOOL_TYPES = new LinkedHashMap<>();
     private static final Map<ResourceLocation, ForgeTemplateDefinition> TEMPLATES = new LinkedHashMap<>();
     private static final List<ToolStatModifier> STAT_MODIFIERS = new ArrayList<>();
@@ -67,7 +71,45 @@ public final class ToolTypeRegistry {
                 Map.of(),
                 ModItems.SMITHING_HAMMER_HEAD.getId(),
                 Map.of(),
-                Set.of(SMITHING_HAMMER_TOOL_TYPE)
+                Set.of(SMITHING_HAMMER_TOOL_TYPE),
+                true,
+                1
+        ));
+        registerTemplate(new ForgeTemplateDefinition(
+                SCREWDRIVER_HEAD_TEMPLATE,
+                SCREWDRIVER_TOOL_TYPE,
+                ToolPartData.SCREWDRIVER_HEAD,
+                1,
+                5,
+                "forge_template.mobstoolforging.screwdriver_head",
+                Float.NaN,
+                Set.of(MaterialCatalog.COPPER),
+                Set.of(),
+                SmithingHammerLevel.STONE.level(),
+                Map.of(),
+                ModItems.SCREWDRIVER_HEAD.getId(),
+                Map.of(),
+                Set.of(SCREWDRIVER_TOOL_TYPE),
+                true,
+                1
+        ));
+        registerTemplate(new ForgeTemplateDefinition(
+                GEM_CUTTERS_BLADE_TEMPLATE,
+                GEM_CUTTERS_KNIFE_TOOL_TYPE,
+                ToolPartData.GEM_CUTTERS_BLADE,
+                1,
+                5,
+                "forge_template.mobstoolforging.gem_cutters_blade",
+                Float.NaN,
+                Set.of(MaterialCatalog.COPPER),
+                Set.of(),
+                SmithingHammerLevel.STONE.level(),
+                Map.of(),
+                ModItems.GEM_CUTTERS_BLADE.getId(),
+                Map.of(),
+                Set.of(GEM_CUTTERS_KNIFE_TOOL_TYPE),
+                true,
+                1
         ));
     }
 
@@ -142,6 +184,13 @@ public final class ToolTypeRegistry {
         bootstrap();
         return TEMPLATES.values().stream()
                 .sorted(Comparator.comparing(template -> template.id().toString()))
+                .toList();
+    }
+
+    public static List<ForgeTemplateDefinition> patternStationTemplates() {
+        return templates().stream()
+                .filter(ForgeTemplateDefinition::patternStationEnabled)
+                .filter(template -> template.patternStationPaperCost() > 0)
                 .toList();
     }
 

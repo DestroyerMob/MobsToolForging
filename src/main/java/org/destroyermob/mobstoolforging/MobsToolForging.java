@@ -49,6 +49,7 @@ import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
+import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
@@ -76,6 +77,7 @@ public class MobsToolForging {
         ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModRecipeSerializers.register(modEventBus);
+        ModMenuTypes.register(modEventBus);
         ModNetworking.register(modEventBus);
         ModDataGenerators.register(modEventBus);
         ToolTypeRegistry.bootstrap();
@@ -104,11 +106,16 @@ public class MobsToolForging {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
             event.accept(ModBlocks.TOOL_FORGE);
             event.accept(ModBlocks.LAPIDARY_TABLE);
+            event.accept(ModBlocks.PATTERN_CREATION_STATION);
+            event.accept(ModBlocks.TOOLMAKERS_BENCH);
             event.accept(ModBlocks.HEATING_FORGE);
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.SMITHING_HAMMER);
             event.accept(ModItems.IRON_SMITHING_HAMMER);
+            event.accept(ModItems.SCREWDRIVER);
+            event.accept(ModItems.GEM_CUTTERS_KNIFE);
+            event.accept(ModItems.FIRE_STICK);
             if (MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
                 event.accept(ModItems.FLINT_KNIFE);
                 event.accept(ModItems.FLINT_HATCHET);
@@ -121,6 +128,8 @@ public class MobsToolForging {
             event.accept(ModItems.SWORD_BLADE_PATTERN);
             event.accept(ModItems.SWORD_GUARD_PATTERN);
             event.accept(ModItems.SMITHING_HAMMER_HEAD_PATTERN);
+            event.accept(ModItems.SCREWDRIVER_HEAD_PATTERN);
+            event.accept(ModItems.GEM_CUTTERS_BLADE_PATTERN);
             ToolTypeRegistry.templates().stream()
                     .filter(template -> !template.id().getNamespace().equals(MOD_ID))
                     .map(MobsToolForging::templatePattern)
@@ -130,6 +139,8 @@ public class MobsToolForging {
         if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(ModItems.FLINT_SHARD);
             event.accept(ModItems.SMITHING_HAMMER_HEAD);
+            event.accept(ModItems.SCREWDRIVER_HEAD);
+            event.accept(ModItems.GEM_CUTTERS_BLADE);
             event.accept(ModItems.DIAMOND_POWDER);
         }
     }

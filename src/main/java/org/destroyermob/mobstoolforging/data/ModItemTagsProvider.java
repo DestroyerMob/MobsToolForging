@@ -38,6 +38,34 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.MATERIALS_GEMS)
                 .addTag(Tags.Items.GEMS_DIAMOND)
                 .addTag(Tags.Items.GEMS_EMERALD);
+        tag(ModTags.Items.PARTS)
+                .addTag(ModTags.Items.PART_HANDLES)
+                .addTag(ModTags.Items.PART_SWORD_BLADES)
+                .addTag(ModTags.Items.PART_SWORD_GUARDS)
+                .addTag(ModTags.Items.PART_SHOVEL_HEADS)
+                .addTag(ModTags.Items.PART_PICKAXE_HEADS)
+                .addTag(ModTags.Items.PART_AXE_HEADS)
+                .addTag(ModTags.Items.PART_HOE_HEADS)
+                .addTag(ModTags.Items.PART_SCREWDRIVER_HEADS)
+                .addTag(ModTags.Items.PART_GEM_CUTTERS_BLADES);
+        tag(ModTags.Items.PART_HANDLES)
+                .add(Items.STICK, Items.BLAZE_ROD, Items.BREEZE_ROD);
+        tag(ModTags.Items.PART_SWORD_BLADES)
+                .add(ModItems.SWORD_BLADE.get());
+        tag(ModTags.Items.PART_SWORD_GUARDS)
+                .add(ModItems.SWORD_GUARD.get());
+        tag(ModTags.Items.PART_SHOVEL_HEADS)
+                .add(ModItems.SHOVEL_HEAD.get());
+        tag(ModTags.Items.PART_PICKAXE_HEADS)
+                .add(ModItems.PICKAXE_HEAD.get());
+        tag(ModTags.Items.PART_AXE_HEADS)
+                .add(ModItems.AXE_HEAD.get());
+        tag(ModTags.Items.PART_HOE_HEADS)
+                .add(ModItems.HOE_HEAD.get());
+        tag(ModTags.Items.PART_SCREWDRIVER_HEADS)
+                .add(ModItems.SCREWDRIVER_HEAD.get());
+        tag(ModTags.Items.PART_GEM_CUTTERS_BLADES)
+                .add(ModItems.GEM_CUTTERS_BLADE.get());
         tag(ModTags.Items.TOOL_HANDLES)
                 .add(Items.STICK, Items.BLAZE_ROD, Items.BREEZE_ROD)
                 .addTag(Tags.Items.RODS_WOODEN)

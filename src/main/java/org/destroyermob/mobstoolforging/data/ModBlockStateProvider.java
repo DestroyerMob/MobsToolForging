@@ -38,6 +38,16 @@ public class ModBlockStateProvider extends BlockStateProvider {
         horizontalBlock(lapidaryTable, lapidaryModel);
         simpleBlockItem(lapidaryTable, lapidaryModel);
 
+        Block patternCreationStation = ModBlocks.PATTERN_CREATION_STATION.get();
+        ModelFile patternCreationStationModel = new ModelFile.UncheckedModelFile(modLoc("block/pattern_creation_station"));
+        horizontalBlock(patternCreationStation, patternCreationStationModel);
+        simpleBlockItem(patternCreationStation, patternCreationStationModel);
+
+        Block toolmakersBench = ModBlocks.TOOLMAKERS_BENCH.get();
+        ModelFile toolmakersBenchModel = new ModelFile.UncheckedModelFile(modLoc("block/toolmakers_bench"));
+        horizontalBlock(toolmakersBench, toolmakersBenchModel);
+        simpleBlockItem(toolmakersBench, toolmakersBenchModel);
+
         Block heatingForge = ModBlocks.HEATING_FORGE.get();
         ModelFile heatingForgeModel = new ModelFile.UncheckedModelFile(modLoc("block/heating_forge"));
         heatingForgeBlock(heatingForge, heatingForgeModel);
@@ -45,6 +55,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         smithingHammerModel();
         itemModels().withExistingParent("flint_shard", mcLoc("item/generated")).texture("layer0", modLoc("item/flint_shard"));
+        itemModels().withExistingParent("fire_stick", mcLoc("item/handheld")).texture("layer0", mcLoc("item/stick"));
         itemModels().withExistingParent("flint_knife", mcLoc("item/handheld")).texture("layer0", modLoc("item/flint_knife"));
         itemModels().withExistingParent("flint_hatchet", mcLoc("item/handheld")).texture("layer0", modLoc("item/flint_hatchet"));
         itemModels().withExistingParent("flint_pick", mcLoc("item/handheld")).texture("layer0", modLoc("item/flint_pick"));
@@ -56,6 +67,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
         patternModel(ModItems.SWORD_BLADE_PATTERN.getId().getPath());
         patternModel(ModItems.SWORD_GUARD_PATTERN.getId().getPath());
         patternModel(ModItems.SMITHING_HAMMER_HEAD_PATTERN.getId().getPath());
+        patternModel(ModItems.SCREWDRIVER_HEAD_PATTERN.getId().getPath());
+        patternModel(ModItems.GEM_CUTTERS_BLADE_PATTERN.getId().getPath());
         patternModel(ModItems.TEMPLATE_PATTERN.getId().getPath());
         for (ToolKind toolKind : ToolKind.values()) {
             partModel(toolKind);

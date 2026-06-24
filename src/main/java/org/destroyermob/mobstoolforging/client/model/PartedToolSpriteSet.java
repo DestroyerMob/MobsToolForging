@@ -2,6 +2,7 @@ package org.destroyermob.mobstoolforging.client.model;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -44,6 +45,7 @@ public final class PartedToolSpriteSet {
         for (ToolVisualLayer layer : visual.layers()) {
             loadTemplate(spriteGetter, templateSprites, templateTextures, layer.slot(), false, layer.templateId(false));
             loadTemplate(spriteGetter, templateSprites, templateTextures, layer.slot(), true, layer.templateId(true));
+            loadTemplate(spriteGetter, templateSprites, templateTextures, layer.slot(), false, handleMaskId(visual, layer));
             Optional<String> materialFrom = layer.materialFrom();
             if (materialFrom.isEmpty()) {
                 continue;
@@ -70,6 +72,19 @@ public final class PartedToolSpriteSet {
 
     public Optional<ResolvedToolLayerSprite> resolveLayer(ResourceLocation toolType, ToolVisualLayer layer, ResourceLocation material) {
         return resolveLayer(toolType, layer, material, false);
+    }
+
+    public List<ResolvedToolLayerSprite> resolveLayers(ResourceLocation toolType, ToolVisualLayer layer, ResourceLocation material) {
+        if (!layer.compositesExactAndTemplate()) {
+            return resolveLayer(toolType, layer, material).map(List::of).orElseGet(List::of);
+        }
+
+        Optional<ResolvedToolLayerSprite> template = resolveTemplate(layer.slot(), material, false);
+        ResolvedToolLayerSprite exact = sprites.get(new ToolPartSpriteKey(toolType, layer.slot(), material));
+        if (exact != null) {
+            return template.map(resolvedTemplate -> List.of(resolvedTemplate, exact)).orElseGet(() -> List.of(exact));
+        }
+        return template.map(List::of).orElseGet(List::of);
     }
 
     public Optional<ResolvedToolLayerSprite> resolvePartLayer(ResourceLocation toolType, ToolVisualLayer layer, ResourceLocation material) {
@@ -164,6 +179,34 @@ public final class PartedToolSpriteSet {
                 templateTextures.put(key, texture);
             }
         });
+    }
+
+    private static Optional<ResourceLocation> handleMaskId(ToolVisualDefinition visual, ToolVisualLayer layer) {
+        if (!layer.compositesExactAndTemplate()) {
+            return Optional.empty();
+        }
+        return Optional.of(ResourceLocation.fromNamespaceAndPath(visual.id().getNamespace(), "source/tool_parts/handle_masks/" + handleShape(visual.id()) + "_handle_mask"));
+    }
+
+    private static String handleShape(ResourceLocation visualId) {
+        String path = visualId.getPath();
+        if (path.contains("pickaxe")) {
+            return "pickaxe";
+        }
+        if (path.contains("shovel")) {
+            return "shovel";
+        }
+        if (path.contains("hoe")) {
+            return "hoe";
+        }
+        if (path.contains("axe")) {
+            return "axe";
+        }
+        if (path.contains("sword")) {
+            return "sword";
+        }
+        int slash = path.lastIndexOf('/');
+        return slash >= 0 ? path.substring(slash + 1) : path;
     }
 
     private static void warnMissingExplicitTexture(String key, ResourceLocation requestedTexture, TextureAtlasSprite sprite) {

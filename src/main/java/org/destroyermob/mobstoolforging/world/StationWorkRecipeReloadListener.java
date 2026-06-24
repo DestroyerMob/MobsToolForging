@@ -57,6 +57,9 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
         if (normalized.equals("lapidary_table")) {
             return WorkstationKind.LAPIDARY_TABLE;
         }
+        if (normalized.equals("toolmakers_bench") || normalized.equals("toolmaker_bench") || normalized.equals("tool_makers_bench")) {
+            return WorkstationKind.TOOLMAKERS_BENCH;
+        }
         return WorkstationKind.valueOf(normalized.toUpperCase(Locale.ROOT));
     }
 

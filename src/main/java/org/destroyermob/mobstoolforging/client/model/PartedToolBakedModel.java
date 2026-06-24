@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.client.model;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,18 +123,34 @@ public final class PartedToolBakedModel implements BakedModel {
                 warnMissingLayer("required layer missing material", layer, Optional.empty());
                 return Optional.empty();
             }
-            Optional<ResolvedToolLayerSprite> resolvedLayer = sprites.resolveLayer(visual.id(), layer, material.get());
-            if (resolvedLayer.isEmpty()) {
+            List<ResolvedToolLayerSprite> resolvedLayers = sprites.resolveLayers(visual.id(), layer, material.get());
+            if (resolvedLayers.isEmpty()) {
                 warnMissingLayer(layer.optional() ? "optional layer has material but missing sprite" : "required layer missing sprite", layer, material);
                 if (layer.optional()) {
                     continue;
                 }
-                resolvedLayer = Optional.of(ResolvedToolLayerSprite.exact(sprites.missing(), net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation()));
+                resolvedLayers = List.of(ResolvedToolLayerSprite.exact(sprites.missing(), net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation()));
+            }
+            boolean hasVisibleLayer = resolvedLayers.stream().anyMatch(resolvedLayer -> !isMissing(resolvedLayer.sprite()));
+            if (!hasVisibleLayer) {
+                warnMissingLayer(layer.optional() ? "optional layer has material but missing sprite" : "required layer missing sprite", layer, material);
+                if (layer.optional()) {
+                    continue;
+                }
             }
             if (particle == null && layer.materialFrom().filter("headMaterial"::equals).isPresent()) {
-                particle = resolvedLayer.get().sprite();
+                particle = resolvedLayers.stream()
+                        .filter(resolvedLayer -> !isMissing(resolvedLayer.sprite()))
+                        .findFirst()
+                        .map(ResolvedToolLayerSprite::sprite)
+                        .orElse(resolvedLayers.getFirst().sprite());
             }
-            layers.put(layer.z(), quadFactory.bakeLayer(layer.z(), resolvedLayer.get().sprite(), resolvedLayer.get().color()));
+            for (ResolvedToolLayerSprite resolvedLayer : resolvedLayers) {
+                if (hasVisibleLayer && isMissing(resolvedLayer.sprite())) {
+                    continue;
+                }
+                addLayer(layers, layer.z(), quadFactory.bakeLayer(layer.z(), resolvedLayer.sprite(), resolvedLayer.color()));
+            }
         }
         if (layers.isEmpty()) {
             return Optional.empty();
@@ -154,6 +171,19 @@ public final class PartedToolBakedModel implements BakedModel {
             case "focusMaterial" -> key.focusMaterial();
             case "treatment" -> key.treatment();
             default -> Optional.empty();
+        });
+    }
+
+    private boolean isMissing(TextureAtlasSprite sprite) {
+        return net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation().equals(sprite.contents().name());
+    }
+
+    private void addLayer(Map<Integer, List<BakedQuad>> layers, int z, List<BakedQuad> quads) {
+        layers.merge(z, quads, (existing, additions) -> {
+            List<BakedQuad> combined = new ArrayList<>(existing.size() + additions.size());
+            combined.addAll(existing);
+            combined.addAll(additions);
+            return List.copyOf(combined);
         });
     }
 

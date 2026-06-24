@@ -14,6 +14,16 @@ public final class ModTags {
         public static final TagKey<Item> MATERIALS = itemTag("materials");
         public static final TagKey<Item> MATERIALS_METALS = itemTag("materials/metals");
         public static final TagKey<Item> MATERIALS_GEMS = itemTag("materials/gems");
+        public static final TagKey<Item> PARTS = itemTag("parts");
+        public static final TagKey<Item> PART_HANDLES = itemTag("parts/handle");
+        public static final TagKey<Item> PART_SWORD_BLADES = itemTag("parts/sword_blade");
+        public static final TagKey<Item> PART_SWORD_GUARDS = itemTag("parts/sword_guard");
+        public static final TagKey<Item> PART_SHOVEL_HEADS = itemTag("parts/shovel_head");
+        public static final TagKey<Item> PART_PICKAXE_HEADS = itemTag("parts/pickaxe_head");
+        public static final TagKey<Item> PART_AXE_HEADS = itemTag("parts/axe_head");
+        public static final TagKey<Item> PART_HOE_HEADS = itemTag("parts/hoe_head");
+        public static final TagKey<Item> PART_SCREWDRIVER_HEADS = itemTag("parts/screwdriver_head");
+        public static final TagKey<Item> PART_GEM_CUTTERS_BLADES = itemTag("parts/gem_cutters_blade");
         public static final TagKey<Item> TOOL_HANDLES = itemTag("tool_handles");
         public static final TagKey<Item> TOOL_BINDINGS = itemTag("tool_bindings");
         public static final TagKey<Item> TOOL_WRAPS = itemTag("tool_wraps");

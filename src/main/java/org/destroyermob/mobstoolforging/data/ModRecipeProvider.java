@@ -6,15 +6,11 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.data.recipes.SpecialRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
-import org.destroyermob.mobstoolforging.MobsToolForging;
-import org.destroyermob.mobstoolforging.recipe.ModularToolRecipe;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModItems;
-import org.destroyermob.mobstoolforging.world.ToolKind;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -44,6 +40,23 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_copper_ingot", has(Items.COPPER_INGOT))
                 .save(output);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.PATTERN_CREATION_STATION)
+                .define('X', Items.PAPER)
+                .define('P', ItemTags.PLANKS)
+                .pattern("XX")
+                .pattern("PP")
+                .unlockedBy("has_paper", has(Items.PAPER))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.TOOLMAKERS_BENCH)
+                .define('S', Items.CHISELED_STONE_BRICKS)
+                .define('P', ItemTags.PLANKS)
+                .pattern("SSS")
+                .pattern("P P")
+                .pattern("P P")
+                .unlockedBy("has_chiseled_stone_bricks", has(Items.CHISELED_STONE_BRICKS))
+                .save(output);
+
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.SMITHING_HAMMER)
                 .define('S', Items.STICK)
                 .define('X', Items.STONE)
@@ -58,21 +71,35 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('S', Items.STICK)
                 .pattern("H")
                 .pattern("S")
-                .pattern("S")
                 .unlockedBy("has_smithing_hammer_head", has(ModItems.SMITHING_HAMMER_HEAD.get()))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.SCREWDRIVER)
+                .define('H', ModItems.SCREWDRIVER_HEAD.get())
+                .define('S', Items.STICK)
+                .pattern("H")
+                .pattern("S")
+                .unlockedBy("has_screwdriver_head", has(ModItems.SCREWDRIVER_HEAD.get()))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.GEM_CUTTERS_KNIFE)
+                .define('B', ModItems.GEM_CUTTERS_BLADE.get())
+                .define('S', Items.STICK)
+                .pattern("B")
+                .pattern("S")
+                .unlockedBy("has_gem_cutters_blade", has(ModItems.GEM_CUTTERS_BLADE.get()))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.FIRE_STICK)
+                .define('S', Items.STICK)
+                .pattern("S ")
+                .pattern(" S")
+                .unlockedBy("has_stick", has(Items.STICK))
                 .save(output);
 
         flintToolRecipe(output, ModItems.FLINT_KNIFE.get(), "F", "S");
         flintToolRecipe(output, ModItems.FLINT_HATCHET.get(), "FF", "FS", " S");
         flintToolRecipe(output, ModItems.FLINT_PICK.get(), "FFF", " S ", " S ");
-
-        patternRecipe(output, ModItems.PICKAXE_HEAD_PATTERN.get(), "PPP", " S ", " S ");
-        patternRecipe(output, ModItems.AXE_HEAD_PATTERN.get(), "PP ", "PS ", " S ");
-        patternRecipe(output, ModItems.SHOVEL_HEAD_PATTERN.get(), " P ", " P ", " S ");
-        patternRecipe(output, ModItems.HOE_HEAD_PATTERN.get(), "PP ", " S ", " S ");
-        patternRecipe(output, ModItems.SWORD_BLADE_PATTERN.get(), " P ", " P ", " P ");
-        patternRecipe(output, ModItems.SWORD_GUARD_PATTERN.get(), "P P", " S ");
-        patternRecipe(output, ModItems.SMITHING_HAMMER_HEAD_PATTERN.get(), "PPP", " S ", " S ");
 
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.LAPIDARY_TABLE)
                 .define('D', Items.DIAMOND)
@@ -83,24 +110,6 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("SSS")
                 .unlockedBy("has_diamond", has(Items.DIAMOND))
                 .save(output);
-
-        for (ToolKind toolKind : ToolKind.values()) {
-            SpecialRecipeBuilder.special(category -> new ModularToolRecipe(category, toolKind))
-                    .save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "modular_" + toolKind.id()));
-        }
-    }
-
-    private void patternRecipe(RecipeOutput output, ItemLike pattern, String... rows) {
-        ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(RecipeCategory.MISC, pattern)
-                .define('P', Items.PAPER)
-                .unlockedBy("has_paper", has(Items.PAPER));
-        if (usesSymbol(rows, 'S')) {
-            builder.define('S', Items.STICK);
-        }
-        for (String row : rows) {
-            builder.pattern(row);
-        }
-        builder.save(output);
     }
 
     private void flintToolRecipe(RecipeOutput output, ItemLike tool, String... rows) {
@@ -112,14 +121,5 @@ public class ModRecipeProvider extends RecipeProvider {
             builder.pattern(row);
         }
         builder.save(output);
-    }
-
-    private static boolean usesSymbol(String[] rows, char symbol) {
-        for (String row : rows) {
-            if (row.indexOf(symbol) >= 0) {
-                return true;
-            }
-        }
-        return false;
     }
 }

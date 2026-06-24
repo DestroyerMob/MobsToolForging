@@ -2,7 +2,9 @@ package org.destroyermob.mobstoolforging.recipe;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.HolderLookup;
@@ -19,6 +21,7 @@ import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.registry.ModTags;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.ToolAssemblyEnchantments;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
@@ -53,9 +56,13 @@ public class ModularToolRecipe extends CustomRecipe {
         if (!parts.isValid(definition)) {
             return ItemStack.EMPTY;
         }
-        return parts.construction(definition)
+        ItemStack output = parts.construction(definition)
                 .map(definition::createTool)
                 .orElse(ItemStack.EMPTY);
+        if (output.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        return ToolAssemblyEnchantments.mergeOnto(output, parts.enchantmentSources(), registries) ? output : ItemStack.EMPTY;
     }
 
     @Override
@@ -241,6 +248,14 @@ public class ModularToolRecipe extends CustomRecipe {
         private static int partQuality(ItemStack stack) {
             ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
             return data == null ? ToolPartData.DEFAULT_QUALITY : data.quality();
+        }
+
+        private List<ItemStack> enchantmentSources() {
+            List<ItemStack> sources = new ArrayList<>(ToolAssemblyEnchantments.copySources(part, requiredParts.values()));
+            if (!handle.isEmpty()) {
+                sources.add(handle);
+            }
+            return List.copyOf(sources);
         }
     }
 

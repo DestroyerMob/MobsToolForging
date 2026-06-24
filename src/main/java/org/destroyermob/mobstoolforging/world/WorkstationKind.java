@@ -7,7 +7,8 @@ import net.minecraft.sounds.SoundEvents;
 
 public enum WorkstationKind {
     TOOL_FORGE(MaterialCategory.METAL, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.ANVIL_LAND, ParticleTypes.CRIT, "message.mobstoolforging.use_lapidary_table"),
-    LAPIDARY_TABLE(MaterialCategory.GEM, SoundEvents.AMETHYST_BLOCK_CHIME, SoundEvents.GRINDSTONE_USE, ParticleTypes.CRIT, "message.mobstoolforging.use_tool_forge");
+    LAPIDARY_TABLE(MaterialCategory.GEM, SoundEvents.AMETHYST_BLOCK_CHIME, SoundEvents.GRINDSTONE_USE, ParticleTypes.CRIT, "message.mobstoolforging.use_tool_forge"),
+    TOOLMAKERS_BENCH(MaterialCategory.METAL, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.UI_STONECUTTER_SELECT_RECIPE, ParticleTypes.CRIT, "message.mobstoolforging.use_toolmakers_bench");
 
     private final MaterialCategory materialCategory;
     private final SoundEvent placeSound;

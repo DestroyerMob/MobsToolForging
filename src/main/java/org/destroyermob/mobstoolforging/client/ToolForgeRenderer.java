@@ -2,6 +2,7 @@ package org.destroyermob.mobstoolforging.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -14,9 +15,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
-import org.destroyermob.mobstoolforging.world.MaterialCategory;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
+import org.destroyermob.mobstoolforging.world.WorkstationKind;
 import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEntity> {
@@ -29,6 +30,10 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
     @Override
     public void render(ToolForgeBlockEntity forge, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         DisplayLayout layout = layout(forge);
+        if (isToolmakersBench(forge) && !forge.isComplete()) {
+            renderBenchStacks(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
+            return;
+        }
         if (forge.template() != null && !forge.isComplete()) {
             renderTemplatePreview(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
         }
@@ -63,6 +68,26 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             return;
         }
         renderFlatItem(forge, abrasive, poseStack, bufferSource, packedLight, packedOverlay, layout.abrasiveX(), layout.abrasiveZ(), layout.abrasiveScale(), layout.abrasiveSurfaceY(), 0.0F);
+    }
+
+    private void renderBenchStacks(ToolForgeBlockEntity forge, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
+        List<ItemStack> stacks = forge.benchStacks();
+        int count = stacks.size();
+        if (count == 0) {
+            return;
+        }
+        if (count == 1) {
+            renderFlatItem(forge, stacks.get(0), poseStack, bufferSource, packedLight, packedOverlay, 0.0F, 0.0F, layout.materialScale(), layout.materialSurfaceY(), forge.displayRotationDegrees());
+            return;
+        }
+        float radius = count <= 4 ? 0.18F : 0.25F;
+        float scale = count <= 4 ? layout.materialScale() : layout.centerMaterialScale();
+        for (int index = 0; index < count; index++) {
+            float angle = (float) (Math.PI * 2.0D * index / count);
+            float localX = (float) Math.cos(angle) * radius;
+            float localZ = (float) Math.sin(angle) * radius;
+            renderFlatItem(forge, stacks.get(index), poseStack, bufferSource, packedLight, packedOverlay, localX, localZ, scale, layout.materialSurfaceY(), forge.displayRotationDegrees() + index * 23.0F);
+        }
     }
 
     private void renderTemplatePreview(ToolForgeBlockEntity forge, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
@@ -105,7 +130,7 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
 
     private static ResourceLocation previewMaterial(ToolForgeBlockEntity forge) {
         BlockState state = forge.getBlockState();
-        if (state.getBlock() instanceof ToolWorkstationBlock workstation && workstation.kind().materialCategory() == MaterialCategory.GEM) {
+        if (state.getBlock() instanceof ToolWorkstationBlock workstation && workstation.kind() == WorkstationKind.LAPIDARY_TABLE) {
             return MaterialCatalog.DIAMOND;
         }
         return MaterialCatalog.IRON;
@@ -113,10 +138,20 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
 
     private static DisplayLayout layout(ToolForgeBlockEntity forge) {
         BlockState state = forge.getBlockState();
-        if (state.getBlock() instanceof ToolWorkstationBlock workstation && workstation.kind().materialCategory() == MaterialCategory.GEM) {
-            return DisplayLayout.LAPIDARY;
+        if (state.getBlock() instanceof ToolWorkstationBlock workstation) {
+            if (workstation.kind() == WorkstationKind.LAPIDARY_TABLE) {
+                return DisplayLayout.LAPIDARY;
+            }
+            if (workstation.kind() == WorkstationKind.TOOLMAKERS_BENCH) {
+                return DisplayLayout.TOOLMAKERS_BENCH;
+            }
         }
         return DisplayLayout.TOOL_FORGE;
+    }
+
+    private static boolean isToolmakersBench(ToolForgeBlockEntity forge) {
+        BlockState state = forge.getBlockState();
+        return state.getBlock() instanceof ToolWorkstationBlock workstation && workstation.kind() == WorkstationKind.TOOLMAKERS_BENCH;
     }
 
     private enum SpreadAxis {
@@ -165,6 +200,20 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
                 0.24F,
                 0.0F,
                 -0.28F
+        );
+        private static final DisplayLayout TOOLMAKERS_BENCH = new DisplayLayout(
+                0.585F,
+                0.575F,
+                0.38F,
+                0.30F,
+                0.50F,
+                0.28F,
+                0.20F,
+                SpreadAxis.X,
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F
         );
     }
 }

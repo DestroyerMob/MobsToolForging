@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.client.model;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,17 +139,34 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
                 return fallback;
             }
 
-            ResolvedToolLayerSprite resolvedLayer = resolveToolLayer(definition, layer, material.get());
-            if (isMissing(resolvedLayer.sprite())) {
-                warnMissingLayer(layer.optional() ? "optional layer has material but missing sprite" : "required layer missing sprite", visual, layer, material, resolvedLayer.texture());
+            List<ResolvedToolLayerSprite> resolvedLayers = resolveToolLayers(definition, layer, material.get());
+            if (resolvedLayers.isEmpty()) {
+                warnMissingLayer(layer.optional() ? "optional layer has material but missing sprite" : "required layer missing sprite", visual, layer, material, null);
+                if (layer.optional()) {
+                    continue;
+                }
+                resolvedLayers = List.of(missingLayer());
+            }
+            boolean hasVisibleLayer = resolvedLayers.stream().anyMatch(resolvedLayer -> !isMissing(resolvedLayer.sprite()));
+            if (!hasVisibleLayer) {
+                warnMissingLayer(layer.optional() ? "optional layer has material but missing sprite" : "required layer missing sprite", visual, layer, material, resolvedLayers.getFirst().texture());
                 if (layer.optional()) {
                     continue;
                 }
             }
             if (particle == null && layer.materialFrom().filter("headMaterial"::equals).isPresent()) {
-                particle = resolvedLayer.sprite();
+                particle = resolvedLayers.stream()
+                        .filter(resolvedLayer -> !isMissing(resolvedLayer.sprite()))
+                        .findFirst()
+                        .map(ResolvedToolLayerSprite::sprite)
+                        .orElse(resolvedLayers.getFirst().sprite());
             }
-            layers.put(layer.z(), quadFactory.bakeLayer(layer.z(), resolvedLayer.sprite(), resolvedLayer.color()));
+            for (ResolvedToolLayerSprite resolvedLayer : resolvedLayers) {
+                if (hasVisibleLayer && isMissing(resolvedLayer.sprite())) {
+                    continue;
+                }
+                addLayer(layers, layer.z(), quadFactory.bakeLayer(layer.z(), resolvedLayer.sprite(), resolvedLayer.color()));
+            }
         }
 
         if (layers.isEmpty()) {
@@ -185,6 +203,21 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         });
     }
 
+    private List<ResolvedToolLayerSprite> resolveToolLayers(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
+        if (!layer.compositesExactAndTemplate()) {
+            return List.of(resolveToolLayer(definition, layer, material));
+        }
+
+        Optional<ResolvedToolLayerSprite> template = resolveHandleTemplate(definition, layer, material);
+        ResourceLocation exactTexture = textureForToolLayer(definition, layer, material);
+        TextureAtlasSprite exactSprite = sprite(exactTexture);
+        if (!isMissing(exactSprite)) {
+            ResolvedToolLayerSprite exact = ResolvedToolLayerSprite.exact(exactSprite, exactTexture);
+            return template.map(resolvedTemplate -> List.of(resolvedTemplate, exact)).orElseGet(() -> List.of(exact));
+        }
+        return template.map(List::of).orElseGet(() -> List.of(ResolvedToolLayerSprite.exact(exactSprite, exactTexture)));
+    }
+
     private ResolvedToolLayerSprite resolveToolLayer(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
         if (layer.prefersTemplateFallback()) {
             Optional<ResolvedToolLayerSprite> template = resolveTemplateFallback(layer, material, false);
@@ -219,6 +252,15 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
             return ResolvedToolLayerSprite.exact(exactSprite, exactTexture);
         }
         return resolveTemplateFallback(layer, material, true).orElseGet(() -> ResolvedToolLayerSprite.exact(exactSprite, exactTexture));
+    }
+
+    private Optional<ResolvedToolLayerSprite> resolveHandleTemplate(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
+        ResourceLocation maskTexture = handleMaskTexture(definition);
+        TextureAtlasSprite maskSprite = sprite(maskTexture);
+        if (!isMissing(maskSprite)) {
+            return Optional.of(ResolvedToolLayerSprite.generated(maskSprite, ToolMaterialVisualManager.INSTANCE.tintColor(material), maskTexture));
+        }
+        return resolveTemplateFallback(layer, material, false);
     }
 
     private Optional<ResolvedToolLayerSprite> resolveTemplateFallback(ToolVisualLayer layer, ResourceLocation material, boolean partTemplate) {
@@ -287,6 +329,10 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "source/tool_parts/" + directory + "/" + prefix + "_" + handleShape(definition) + "_handle_tool");
     }
 
+    private ResourceLocation handleMaskTexture(ToolTypeDefinition definition) {
+        return ResourceLocation.fromNamespaceAndPath(definition.visualId().getNamespace(), "source/tool_parts/handle_masks/" + handleShape(definition) + "_handle_mask");
+    }
+
     private String handleShape(ToolTypeDefinition definition) {
         String path = definition.visualId().getPath();
         if (path.contains("pickaxe")) {
@@ -314,6 +360,15 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
 
     private ResolvedToolLayerSprite missingLayer() {
         return ResolvedToolLayerSprite.exact(sprite(MissingTextureAtlasSprite.getLocation()), MissingTextureAtlasSprite.getLocation());
+    }
+
+    private void addLayer(Map<Integer, List<BakedQuad>> layers, int z, List<BakedQuad> quads) {
+        layers.merge(z, quads, (existing, additions) -> {
+            List<BakedQuad> combined = new ArrayList<>(existing.size() + additions.size());
+            combined.addAll(existing);
+            combined.addAll(additions);
+            return List.copyOf(combined);
+        });
     }
 
     private void warnMissingLayer(String reason, ToolVisualDefinition visual, ToolVisualLayer layer, Optional<ResourceLocation> material, @Nullable ResourceLocation texture) {

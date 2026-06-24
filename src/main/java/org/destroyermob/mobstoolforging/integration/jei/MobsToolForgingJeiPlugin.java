@@ -19,6 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
@@ -27,7 +28,6 @@ import org.destroyermob.mobstoolforging.world.MaterialCategory;
 import org.destroyermob.mobstoolforging.world.SmithingHammerLevel;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipe;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeRegistry;
-import org.destroyermob.mobstoolforging.world.ToolPartData;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolMaterialDefinition;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
@@ -36,6 +36,7 @@ import org.destroyermob.mobstoolforging.world.WorkstationKind;
 public class MobsToolForgingJeiPlugin implements IModPlugin {
     public static final RecipeType<ForgeShapingJeiRecipe> FORGE_SHAPING = RecipeType.create(MobsToolForging.MOD_ID, "forge_shaping", ForgeShapingJeiRecipe.class);
     public static final RecipeType<StationWorkJeiRecipe> STATION_WORK = RecipeType.create(MobsToolForging.MOD_ID, "station_work", StationWorkJeiRecipe.class);
+    public static final RecipeType<PatternCreationJeiRecipe> PATTERN_CREATION = RecipeType.create(MobsToolForging.MOD_ID, "pattern_creation", PatternCreationJeiRecipe.class);
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -47,7 +48,8 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         var guiHelper = registration.getJeiHelpers().getGuiHelper();
         registration.addRecipeCategories(
                 new ForgeShapingCategory(guiHelper),
-                new StationWorkCategory(guiHelper)
+                new StationWorkCategory(guiHelper),
+                new PatternCreationCategory(guiHelper)
         );
     }
 
@@ -55,6 +57,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     public void registerRecipes(IRecipeRegistration registration) {
         registration.addRecipes(FORGE_SHAPING, forgeShapingRecipes());
         registration.addRecipes(STATION_WORK, stationWorkRecipes());
+        registration.addRecipes(PATTERN_CREATION, patternCreationRecipes());
     }
 
     @Override
@@ -78,6 +81,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(ModItems.TOOL_FORGE.get(), FORGE_SHAPING, STATION_WORK);
         registration.addRecipeCatalyst(ModItems.LAPIDARY_TABLE.get(), FORGE_SHAPING, STATION_WORK);
+        registration.addRecipeCatalyst(ModItems.PATTERN_CREATION_STATION.get(), PATTERN_CREATION);
     }
 
     private static List<ForgeShapingJeiRecipe> forgeShapingRecipes() {
@@ -107,7 +111,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                         pattern,
                         materialStack,
                         workstation == WorkstationKind.LAPIDARY_TABLE ? new ItemStack(ModItems.DIAMOND_POWDER.get()) : ItemStack.EMPTY,
-                        hammerFor(template.minimumHammerLevel(materialId)),
+                        workToolFor(workstation, template.minimumHammerLevel(materialId)),
                         output,
                         template.requiredHits(),
                         template.minimumHammerLevel(materialId)
@@ -137,6 +141,27 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 .toList();
     }
 
+    private static List<PatternCreationJeiRecipe> patternCreationRecipes() {
+        return ToolTypeRegistry.patternStationTemplates().stream()
+                .map(MobsToolForgingJeiPlugin::patternCreationRecipe)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+    }
+
+    private static Optional<PatternCreationJeiRecipe> patternCreationRecipe(ForgeTemplateDefinition template) {
+        ItemStack pattern = ToolTemplateItem.createPatternStack(template);
+        if (pattern.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(new PatternCreationJeiRecipe(
+                recipeId("pattern_creation/" + idPath(template.id())),
+                new ItemStack(ModItems.PATTERN_CREATION_STATION.get()),
+                new ItemStack(Items.PAPER, template.patternStationPaperCost()),
+                pattern
+        ));
+    }
+
     private static Optional<StationWorkJeiRecipe> stationWorkRecipe(StationWorkRecipe recipe) {
         List<ItemStack> inputs = inputStacks(recipe.input());
         if (inputs.isEmpty()) {
@@ -148,7 +173,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 stationFor(recipe.workstationKind()),
                 inputs,
                 ItemStack.EMPTY,
-                hammerFor(recipe.minimumHammerLevel()),
+                workToolFor(recipe.workstationKind(), recipe.minimumHammerLevel()),
                 recipe.outputCopy(),
                 recipe.requiredHits(),
                 recipe.minimumHammerLevel(),
@@ -165,7 +190,17 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     }
 
     private static ItemStack stationFor(WorkstationKind workstation) {
-        return workstation == WorkstationKind.LAPIDARY_TABLE ? new ItemStack(ModItems.LAPIDARY_TABLE.get()) : new ItemStack(ModItems.TOOL_FORGE.get());
+        if (workstation == WorkstationKind.LAPIDARY_TABLE) {
+            return new ItemStack(ModItems.LAPIDARY_TABLE.get());
+        }
+        if (workstation == WorkstationKind.TOOLMAKERS_BENCH) {
+            return new ItemStack(ModItems.TOOLMAKERS_BENCH.get());
+        }
+        return new ItemStack(ModItems.TOOL_FORGE.get());
+    }
+
+    private static ItemStack workToolFor(WorkstationKind workstation, int level) {
+        return workstation == WorkstationKind.LAPIDARY_TABLE ? new ItemStack(ModItems.GEM_CUTTERS_KNIFE.get()) : hammerFor(level);
     }
 
     private static ItemStack hammerFor(int level) {
@@ -173,25 +208,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     }
 
     private static ItemStack patternFor(ForgeTemplateDefinition template) {
-        String partType = template.partType();
-        if (template.id().getNamespace().equals(MobsToolForging.MOD_ID)) {
-            ItemStack builtInPattern = switch (partType) {
-                case ToolPartData.PICKAXE_HEAD -> new ItemStack(ModItems.PICKAXE_HEAD_PATTERN.get());
-                case ToolPartData.AXE_HEAD -> new ItemStack(ModItems.AXE_HEAD_PATTERN.get());
-                case ToolPartData.SHOVEL_HEAD -> new ItemStack(ModItems.SHOVEL_HEAD_PATTERN.get());
-                case ToolPartData.HOE_HEAD -> new ItemStack(ModItems.HOE_HEAD_PATTERN.get());
-                case ToolPartData.SWORD_BLADE -> new ItemStack(ModItems.SWORD_BLADE_PATTERN.get());
-                case ToolPartData.SWORD_GUARD -> new ItemStack(ModItems.SWORD_GUARD_PATTERN.get());
-                case ToolPartData.SMITHING_HAMMER_HEAD -> new ItemStack(ModItems.SMITHING_HAMMER_HEAD_PATTERN.get());
-                default -> ItemStack.EMPTY;
-            };
-            if (!builtInPattern.isEmpty()) {
-                return builtInPattern;
-            }
-        }
-        ItemStack pattern = new ItemStack(ModItems.TEMPLATE_PATTERN.get());
-        pattern.set(ModDataComponents.FORGE_TEMPLATE.get(), template.id());
-        return pattern;
+        return ToolTemplateItem.createPatternStack(template);
     }
 
     private static ResourceLocation recipeId(String path) {
@@ -204,5 +221,9 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     static ItemStack smithingAnvilIcon() {
         return new ItemStack(ModItems.TOOL_FORGE.get());
+    }
+
+    static ItemStack patternCreationStationIcon() {
+        return new ItemStack(ModItems.PATTERN_CREATION_STATION.get());
     }
 }

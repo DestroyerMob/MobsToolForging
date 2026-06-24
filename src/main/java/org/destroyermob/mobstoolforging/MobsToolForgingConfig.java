@@ -10,6 +10,7 @@ public final class MobsToolForgingConfig {
     public static final ModConfigSpec.BooleanValue DISABLE_STONE_TOOLS;
     public static final ModConfigSpec.BooleanValue DISABLE_WOODEN_TOOLS;
     public static final ModConfigSpec.BooleanValue COPPER_REQUIRES_WOODEN_TOOL;
+    public static final ModConfigSpec.BooleanValue ALLOW_FINISHED_TOOL_ENCHANTING;
     public static final ModConfigSpec.DoubleValue FLINT_KNAPPING_SUCCESS_CHANCE;
     public static final ModConfigSpec.DoubleValue FLINT_KNAPPING_BONUS_SHARD_CHANCE;
     public static final ModConfigSpec.BooleanValue ENABLE_FORGE_HEATING;
@@ -45,6 +46,9 @@ public final class MobsToolForgingConfig {
         COPPER_REQUIRES_WOODEN_TOOL = builder
                 .comment("When true, vanilla copper ore, copper blocks, and raw copper blocks can be harvested with wooden-tier pickaxes. Flint uses wooden-tier mining rules.")
                 .define("copperRequiresWoodenTool", true);
+        ALLOW_FINISHED_TOOL_ENCHANTING = builder
+                .comment("When true, finished Mobs Tool Forging modular tools can be enchanted directly. When false, enchantments must be placed on tool parts before assembly.")
+                .define("allowFinishedToolEnchanting", true);
         FLINT_KNAPPING_SUCCESS_CHANCE = builder
                 .comment("Chance for a flint knapping hit against a pickaxe-mineable block to produce shards.")
                 .defineInRange("flintKnappingSuccessChance", 0.6D, 0.0D, 1.0D);

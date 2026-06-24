@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_gem_cutters_blade": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mobstoolforging:gem_cutters_blade"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "mobstoolforging:gem_cutters_knife"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_gem_cutters_blade"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "mobstoolforging:gem_cutters_knife"
+    ]
+  }
+}

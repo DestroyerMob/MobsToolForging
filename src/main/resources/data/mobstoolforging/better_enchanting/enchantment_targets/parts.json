@@ -1,0 +1,8 @@
+{
+  "rules": [
+    {
+      "item_tag": "mobstoolforging:parts/handle",
+      "enchantment_tag": "betterenchanting:targets/durability"
+    }
+  ]
+}

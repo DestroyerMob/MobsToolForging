@@ -16,6 +16,8 @@ public record ToolPartData(String partType, ResourceLocation materialId, int qua
     public static final String AXE_HEAD = "axe_head";
     public static final String HOE_HEAD = "hoe_head";
     public static final String SMITHING_HAMMER_HEAD = "smithing_hammer_head";
+    public static final String SCREWDRIVER_HEAD = "screwdriver_head";
+    public static final String GEM_CUTTERS_BLADE = "gem_cutters_blade";
 
     public static final Codec<ToolPartData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("part_type").forGetter(ToolPartData::partType),

@@ -9,6 +9,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.item.FireStickItem;
 import org.destroyermob.mobstoolforging.item.ModularAxeItem;
 import org.destroyermob.mobstoolforging.item.ModularHoeItem;
 import org.destroyermob.mobstoolforging.item.ModularPickaxeItem;
@@ -34,6 +35,14 @@ public final class ModItems {
             "lapidary_table",
             () -> new BlockItem(ModBlocks.LAPIDARY_TABLE.get(), new Item.Properties())
     );
+    public static final DeferredItem<BlockItem> PATTERN_CREATION_STATION = ITEMS.register(
+            "pattern_creation_station",
+            () -> new BlockItem(ModBlocks.PATTERN_CREATION_STATION.get(), new Item.Properties())
+    );
+    public static final DeferredItem<BlockItem> TOOLMAKERS_BENCH = ITEMS.register(
+            "toolmakers_bench",
+            () -> new BlockItem(ModBlocks.TOOLMAKERS_BENCH.get(), new Item.Properties())
+    );
     public static final DeferredItem<BlockItem> HEATING_FORGE = ITEMS.register(
             "heating_forge",
             () -> new BlockItem(ModBlocks.HEATING_FORGE.get(), new Item.Properties())
@@ -50,6 +59,22 @@ public final class ModItems {
             "smithing_hammer_head",
             () -> new Item(new Item.Properties())
     );
+    public static final DeferredItem<Item> SCREWDRIVER = ITEMS.register(
+            "screwdriver",
+            () -> new Item(new Item.Properties().durability(128))
+    );
+    public static final DeferredItem<Item> SCREWDRIVER_HEAD = ITEMS.register(
+            "screwdriver_head",
+            () -> new Item(new Item.Properties())
+    );
+    public static final DeferredItem<Item> GEM_CUTTERS_KNIFE = ITEMS.register(
+            "gem_cutters_knife",
+            () -> new Item(new Item.Properties().durability(128))
+    );
+    public static final DeferredItem<Item> GEM_CUTTERS_BLADE = ITEMS.register(
+            "gem_cutters_blade",
+            () -> new Item(new Item.Properties())
+    );
     public static final DeferredItem<Item> DIAMOND_POWDER = ITEMS.register(
             "diamond_powder",
             () -> new Item(new Item.Properties())
@@ -57,6 +82,10 @@ public final class ModItems {
     public static final DeferredItem<Item> FLINT_SHARD = ITEMS.register(
             "flint_shard",
             () -> new Item(new Item.Properties())
+    );
+    public static final DeferredItem<FireStickItem> FIRE_STICK = ITEMS.register(
+            "fire_stick",
+            () -> new FireStickItem(new Item.Properties().stacksTo(1))
     );
     public static final DeferredItem<SwordItem> FLINT_KNIFE = ITEMS.register(
             "flint_knife",
@@ -97,6 +126,14 @@ public final class ModItems {
     public static final DeferredItem<ToolTemplateItem> SMITHING_HAMMER_HEAD_PATTERN = ITEMS.register(
             "smithing_hammer_head_pattern",
             () -> new ToolTemplateItem(ToolTypeRegistry.SMITHING_HAMMER_HEAD_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> SCREWDRIVER_HEAD_PATTERN = ITEMS.register(
+            "screwdriver_head_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.SCREWDRIVER_HEAD_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> GEM_CUTTERS_BLADE_PATTERN = ITEMS.register(
+            "gem_cutters_blade_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.GEM_CUTTERS_BLADE_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
     );
     public static final DeferredItem<ToolTemplateItem> TEMPLATE_PATTERN = ITEMS.register(
             "template_pattern",

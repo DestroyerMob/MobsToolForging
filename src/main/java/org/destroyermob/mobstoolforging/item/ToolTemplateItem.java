@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.world.ForgeTemplate;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
@@ -67,6 +68,43 @@ public class ToolTemplateItem extends Item {
 
     public boolean canUseOn(WorkstationKind kind) {
         return workstationKind == null || workstationKind == kind;
+    }
+
+    public static ItemStack createPatternStack(ForgeTemplateDefinition template) {
+        return createPatternStack(template.id());
+    }
+
+    public static ItemStack createPatternStack(ResourceLocation id) {
+        if (id.equals(ForgeTemplate.PICKAXE_HEAD.registryId())) {
+            return new ItemStack(ModItems.PICKAXE_HEAD_PATTERN.get());
+        }
+        if (id.equals(ForgeTemplate.AXE_HEAD.registryId())) {
+            return new ItemStack(ModItems.AXE_HEAD_PATTERN.get());
+        }
+        if (id.equals(ForgeTemplate.SHOVEL_HEAD.registryId())) {
+            return new ItemStack(ModItems.SHOVEL_HEAD_PATTERN.get());
+        }
+        if (id.equals(ForgeTemplate.HOE_HEAD.registryId())) {
+            return new ItemStack(ModItems.HOE_HEAD_PATTERN.get());
+        }
+        if (id.equals(ForgeTemplate.SWORD_BLADE.registryId())) {
+            return new ItemStack(ModItems.SWORD_BLADE_PATTERN.get());
+        }
+        if (id.equals(ForgeTemplate.SWORD_GUARD.registryId())) {
+            return new ItemStack(ModItems.SWORD_GUARD_PATTERN.get());
+        }
+        if (id.equals(ToolTypeRegistry.SMITHING_HAMMER_HEAD_TEMPLATE)) {
+            return new ItemStack(ModItems.SMITHING_HAMMER_HEAD_PATTERN.get());
+        }
+        if (id.equals(ToolTypeRegistry.SCREWDRIVER_HEAD_TEMPLATE)) {
+            return new ItemStack(ModItems.SCREWDRIVER_HEAD_PATTERN.get());
+        }
+        if (id.equals(ToolTypeRegistry.GEM_CUTTERS_BLADE_TEMPLATE)) {
+            return new ItemStack(ModItems.GEM_CUTTERS_BLADE_PATTERN.get());
+        }
+        ItemStack pattern = new ItemStack(ModItems.TEMPLATE_PATTERN.get());
+        pattern.set(ModDataComponents.FORGE_TEMPLATE.get(), id);
+        return pattern;
     }
 
     @Override

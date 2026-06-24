@@ -55,7 +55,9 @@ public class ForgeTemplateReloadListener extends SimpleJsonResourceReloadListene
                 : base == null ? null : base.outputItem();
         Map<ResourceLocation, ResourceLocation> outputItems = outputItems(json, base);
         Set<ResourceLocation> compatibleToolTypes = compatibleToolTypes(json, base, toolType);
-        return new ForgeTemplateDefinition(id, toolType, partType, requiredMaterials, requiredHits, translationKey, minimumTemperature, whitelist, blacklist, minimumHammerLevel, materialHammerLevels, outputItem, outputItems, compatibleToolTypes);
+        boolean patternStationEnabled = GsonHelper.getAsBoolean(json, "pattern_station_enabled", base == null || base.patternStationEnabled());
+        int patternStationPaperCost = Math.max(1, GsonHelper.getAsInt(json, "pattern_station_paper_cost", base == null ? 1 : base.patternStationPaperCost()));
+        return new ForgeTemplateDefinition(id, toolType, partType, requiredMaterials, requiredHits, translationKey, minimumTemperature, whitelist, blacklist, minimumHammerLevel, materialHammerLevels, outputItem, outputItems, compatibleToolTypes, patternStationEnabled, patternStationPaperCost);
     }
 
     private static float minimumTemperature(JsonObject json, ForgeTemplateDefinition base) {

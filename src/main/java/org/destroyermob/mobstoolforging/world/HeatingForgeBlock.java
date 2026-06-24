@@ -38,6 +38,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 
 public class HeatingForgeBlock extends BaseEntityBlock {
     public static final MapCodec<HeatingForgeBlock> CODEC = simpleCodec(HeatingForgeBlock::new);
@@ -125,6 +126,9 @@ public class HeatingForgeBlock extends BaseEntityBlock {
                 player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_disabled"), true);
             }
             return ItemInteractionResult.CONSUME;
+        }
+        if (isFireStick(stack)) {
+            return hasFireSticksInBothHands(player) ? ignite(stack, forge, level, pos, player) : ItemInteractionResult.CONSUME;
         }
         if (stack.is(Items.FLINT_AND_STEEL) || stack.is(Items.FIRE_CHARGE)) {
             return ignite(stack, forge, level, pos, player);
@@ -234,6 +238,8 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             if (!player.getAbilities().instabuild) {
                 if (stack.is(Items.FLINT_AND_STEEL)) {
                     stack.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
+                } else if (isFireStick(stack)) {
+                    consumeFireSticks(player);
                 } else {
                     stack.shrink(1);
                 }
@@ -242,6 +248,20 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_ignited"), true);
         }
         return ItemInteractionResult.CONSUME;
+    }
+
+    private static boolean isFireStick(ItemStack stack) {
+        return stack.is(ModItems.FIRE_STICK.get());
+    }
+
+    private static boolean hasFireSticksInBothHands(Player player) {
+        return player.getItemInHand(InteractionHand.MAIN_HAND).is(ModItems.FIRE_STICK.get())
+                && player.getItemInHand(InteractionHand.OFF_HAND).is(ModItems.FIRE_STICK.get());
+    }
+
+    private static void consumeFireSticks(Player player) {
+        player.getItemInHand(InteractionHand.MAIN_HAND).shrink(1);
+        player.getItemInHand(InteractionHand.OFF_HAND).shrink(1);
     }
 
     private static void giveOrDrop(Player player, ItemStack stack) {

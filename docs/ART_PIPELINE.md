@@ -39,11 +39,12 @@ Handle visibility masks live under:
 src/main/resources/assets/mobstoolforging/textures/source/tool_parts/handle_masks/<tool>_handle_mask.png
 ```
 
-Tools whose handle shape cannot be expressed with the shared handle plus a mask
-can provide a grayscale template and set `handle_strategy: "template_handle"` on
-the handle layer. Most tools should keep `default_handle`, which still checks
-exact hand-authored handle textures first and only uses the grayscale template
-when exact art is missing.
+With `handle_strategy: "default_handle"`, the renderer draws the mask as the
+tintable handle body and then draws the exact hand-authored handle texture above
+it. This lets shapes such as shovels combine the shared handle mask with a small
+material-specific nub. Tools whose handle shape cannot be expressed with the
+shared handle plus a mask can provide a grayscale template and set
+`handle_strategy: "template_handle"` on the handle layer.
 
 If a grayscale fallback template is not present, the renderer uses the missing
 texture and logs once. Missing art should be visible and diagnosable, never a

@@ -18,7 +18,7 @@
     {
       "fuel": "minecraft:charcoal",
       "model": "mobstoolforging:block/heating_forge/fuel_chunk",
-      "fuel_texture": "minecraft:block/charcoal_block"
+      "fuel_texture": "minecraft:block2/charcoal_block"
     },
     {
       "fuel": "minecraft:coal_block",

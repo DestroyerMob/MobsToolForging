@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.HeatedWorkpieceData;
+import org.destroyermob.mobstoolforging.world.ToolAssemblyParts;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
 import org.destroyermob.mobstoolforging.world.ToolStatProfile;
@@ -26,6 +27,11 @@ public final class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<ToolConstructionData>> TOOL_CONSTRUCTION = DATA_COMPONENTS.registerComponentType(
             "tool_construction",
             builder -> builder.persistent(ToolConstructionData.CODEC).networkSynchronized(ToolConstructionData.STREAM_CODEC).cacheEncoding()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ToolAssemblyParts>> TOOL_ASSEMBLY_PARTS = DATA_COMPONENTS.registerComponentType(
+            "tool_assembly_parts",
+            builder -> builder.persistent(ToolAssemblyParts.CODEC).networkSynchronized(ToolAssemblyParts.STREAM_CODEC)
     );
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<ToolStatProfile>> TOOL_STAT_PROFILE = DATA_COMPONENTS.registerComponentType(

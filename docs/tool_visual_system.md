@@ -113,7 +113,7 @@ Handle layers can choose how broad their fallback should be:
 }
 ```
 
-`default_handle` and `exact_first` use exact handle textures first, then fall back to the layer's grayscale template if one exists. `template_first` and the older `template_handle` alias use the grayscale handle template first, then exact art. `template_only` ignores exact art. `explicit_only` and the older `explicit_handle` alias use exact handle art only. If no exact sprite and no usable grayscale template exists, MTF renders Minecraft's missing texture and logs a warning instead of crashing.
+`default_handle` composites the tintable handle mask/template with exact handle art when both exist, which lets a shovel use the shared handle body plus a small material-specific nub. `exact_first` uses exact handle textures first, then falls back to the layer's grayscale template if one exists. `template_first` and the older `template_handle` alias use the grayscale handle template first, then exact art. `template_only` ignores exact art. `explicit_only` and the older `explicit_handle` alias use exact handle art only. If no exact sprite and no usable grayscale template exists, MTF renders Minecraft's missing texture and logs a warning instead of crashing.
 
 Part and tool layers can use separate fallback shapes:
 

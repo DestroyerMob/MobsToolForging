@@ -8,7 +8,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.LapidaryTableBlock;
+import org.destroyermob.mobstoolforging.world.PatternCreationStationBlock;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlock;
+import org.destroyermob.mobstoolforging.world.ToolmakersBenchBlock;
 
 public final class ModBlocks {
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MobsToolForging.MOD_ID);
@@ -20,6 +22,14 @@ public final class ModBlocks {
     public static final DeferredBlock<LapidaryTableBlock> LAPIDARY_TABLE = BLOCKS.register(
             "lapidary_table",
             () -> new LapidaryTableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONECUTTER).noOcclusion())
+    );
+    public static final DeferredBlock<PatternCreationStationBlock> PATTERN_CREATION_STATION = BLOCKS.register(
+            "pattern_creation_station",
+            () -> new PatternCreationStationBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONECUTTER).noOcclusion())
+    );
+    public static final DeferredBlock<ToolmakersBenchBlock> TOOLMAKERS_BENCH = BLOCKS.register(
+            "toolmakers_bench",
+            () -> new ToolmakersBenchBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CRAFTING_TABLE).noOcclusion())
     );
     public static final DeferredBlock<HeatingForgeBlock> HEATING_FORGE = BLOCKS.register(
             "heating_forge",

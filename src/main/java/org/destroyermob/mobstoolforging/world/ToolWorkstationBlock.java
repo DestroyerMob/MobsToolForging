@@ -1,6 +1,7 @@
 package org.destroyermob.mobstoolforging.world;
 
 import com.mojang.serialization.MapCodec;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -37,6 +38,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.network.ModNetworking;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModTags;
 
 public abstract class ToolWorkstationBlock extends BaseEntityBlock {
@@ -79,13 +81,16 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         if (player.isShiftKeyDown()) {
-            return itemResult(handleSneakUse(forge, level, pos, player), level);
-        }
-        if (stack.getItem() instanceof ToolTemplateItem templateItem) {
-            return applyTemplateItem(stack, templateItem, forge, level, pos, player);
+            return itemResult(handleSneakUse(forge, level, pos, player, kind), level);
         }
         if (tryCollectOutput(forge, player)) {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+        if (kind == WorkstationKind.TOOLMAKERS_BENCH) {
+            return useToolmakersBench(stack, forge, level, pos, player);
+        }
+        if (stack.getItem() instanceof ToolTemplateItem templateItem) {
+            return applyTemplateItem(stack, templateItem, forge, level, pos, player);
         }
         if (kind == WorkstationKind.LAPIDARY_TABLE && stack.is(ModTags.Items.LAPIDARY_ABRASIVES)) {
             return placeAbrasive(stack, forge, level, pos, player);
@@ -97,7 +102,16 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (MaterialCatalog.isMaterial(stack)) {
             return placeMaterial(stack, forge, level, pos, player);
         }
-        if (SmithingHammerLevel.isHammer(stack)) {
+        if (kind == WorkstationKind.LAPIDARY_TABLE && stack.is(ModItems.GEM_CUTTERS_KNIFE.get())) {
+            return work(stack, forge, level, pos, player);
+        }
+        if (kind == WorkstationKind.LAPIDARY_TABLE && SmithingHammerLevel.isHammer(stack)) {
+            if (!level.isClientSide) {
+                player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_needs_knife"), true);
+            }
+            return ItemInteractionResult.CONSUME;
+        }
+        if (kind != WorkstationKind.LAPIDARY_TABLE && SmithingHammerLevel.isHammer(stack)) {
             return work(stack, forge, level, pos, player);
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -107,10 +121,20 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (level.getBlockEntity(pos) instanceof ToolForgeBlockEntity forge) {
             if (player.isShiftKeyDown()) {
-                return handleSneakUse(forge, level, pos, player);
+                return handleSneakUse(forge, level, pos, player, kind);
             }
             if (tryCollectOutput(forge, player)) {
                 return InteractionResult.sidedSuccess(level.isClientSide);
+            }
+            if (kind == WorkstationKind.TOOLMAKERS_BENCH) {
+                if (!level.isClientSide) {
+                    if (forge.hasBenchStacks()) {
+                        player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_status", forge.benchStacks().size()), true);
+                    } else {
+                        player.displayClientMessage(Component.translatable("message.mobstoolforging.use_toolmakers_bench"), true);
+                    }
+                }
+                return InteractionResult.CONSUME;
             }
             if (!level.isClientSide) {
                 StationWorkRecipe recipe = forge.looseWorkRecipe();
@@ -208,7 +232,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         return ItemInteractionResult.CONSUME;
     }
 
-    private static InteractionResult handleSneakUse(ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+    private static InteractionResult handleSneakUse(ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player, WorkstationKind kind) {
         if (tryCollectOutput(forge, player)) {
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
@@ -228,12 +252,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
             return InteractionResult.CONSUME;
         }
-        if (debugTemplateSelectorEnabled()) {
+        if (kind != WorkstationKind.TOOLMAKERS_BENCH && debugTemplateSelectorEnabled()) {
             openTemplateSelector(level, pos, player);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
         if (!level.isClientSide) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.sneak_hint"), true);
+            player.displayClientMessage(Component.translatable(kind == WorkstationKind.TOOLMAKERS_BENCH ? "message.mobstoolforging.use_toolmakers_bench" : "message.mobstoolforging.sneak_hint"), true);
         }
         return InteractionResult.CONSUME;
     }
@@ -270,11 +294,84 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         return ItemInteractionResult.CONSUME;
     }
 
+    private ItemInteractionResult useToolmakersBench(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (stack.is(ModItems.SCREWDRIVER.get())) {
+            return assembleTool(stack, forge, level, pos, player);
+        }
+        if (SmithingHammerLevel.isHammer(stack)) {
+            return disassembleTool(stack, forge, level, pos, player);
+        }
+        if (forge.canPlaceToolmakerStack(stack)) {
+            return placeToolmakerStack(stack, forge, level, pos, player);
+        }
+        if (!level.isClientSide) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_invalid"), true);
+        }
+        return ItemInteractionResult.CONSUME;
+    }
+
+    private ItemInteractionResult placeToolmakerStack(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        var item = stack.getItem();
+        if (!forge.placeToolmakerStack(stack)) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_invalid"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.7F, 1.0F + level.random.nextFloat() * 0.1F);
+        player.awardStat(Stats.ITEM_USED.get(item));
+        player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_part_placed"), true);
+        return ItemInteractionResult.CONSUME;
+    }
+
+    private ItemInteractionResult assembleTool(ItemStack tool, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        ItemStack output = ToolmakerBenchAssembly.assemble(forge.benchStacks(), level.registryAccess());
+        if (output.isEmpty()) {
+            player.displayClientMessage(Component.translatable(forge.hasBenchStacks() ? "message.mobstoolforging.toolmaker_invalid" : "message.mobstoolforging.toolmaker_needs_parts"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        forge.setDirectOutput(output);
+        playWorkEffects(tool, level, pos, player);
+        player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_assembled"), true);
+        return ItemInteractionResult.CONSUME;
+    }
+
+    private ItemInteractionResult disassembleTool(ItemStack tool, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        List<ItemStack> benchStacks = forge.benchStacks();
+        if (benchStacks.size() != 1 || !ToolmakerBenchAssembly.isFinishedTool(benchStacks.get(0))) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_no_tool"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        List<ItemStack> parts = ToolmakerBenchAssembly.disassemble(benchStacks.get(0)).orElse(List.of());
+        if (parts.isEmpty()) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_invalid"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        forge.clearToolmakerStacks();
+        for (ItemStack part : parts) {
+            if (!part.isEmpty() && !player.getInventory().add(part)) {
+                player.drop(part, false);
+            }
+        }
+        playWorkEffects(tool, level, pos, player);
+        player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_disassembled"), true);
+        return ItemInteractionResult.CONSUME;
+    }
+
     private ItemInteractionResult work(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
         if (level.isClientSide) {
             return ItemInteractionResult.SUCCESS;
         }
-        int hammerLevel = SmithingHammerLevel.levelOf(stack);
+        int hammerLevel = stack.is(ModItems.GEM_CUTTERS_KNIFE.get()) && kind == WorkstationKind.LAPIDARY_TABLE
+                ? SmithingHammerLevel.IRON.level()
+                : SmithingHammerLevel.levelOf(stack);
         if (forge.hasLooseWork()) {
             return workStationRecipe(stack, hammerLevel, forge, level, pos, player);
         }
@@ -414,6 +511,11 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             ItemStack abrasiveDrop = forge.abrasiveStack();
             if (!abrasiveDrop.isEmpty()) {
                 Block.popResource(level, pos, abrasiveDrop);
+            }
+            for (ItemStack benchStack : forge.benchStacks()) {
+                if (!benchStack.isEmpty()) {
+                    Block.popResource(level, pos, benchStack);
+                }
             }
         }
         super.onRemove(state, level, pos, newState, movedByPiston);

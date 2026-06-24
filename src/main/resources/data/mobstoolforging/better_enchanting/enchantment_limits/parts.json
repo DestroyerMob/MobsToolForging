@@ -1,0 +1,15 @@
+{
+  "item_limits": {
+    "mobstoolforging:sword_blade": 2,
+    "mobstoolforging:sword_guard": 1,
+    "mobstoolforging:shovel_head": 2,
+    "mobstoolforging:pickaxe_head": 2,
+    "mobstoolforging:axe_head": 2,
+    "mobstoolforging:hoe_head": 2,
+    "mobstoolforging:screwdriver_head": 2,
+    "mobstoolforging:gem_cutters_blade": 2,
+    "minecraft:stick": 1,
+    "minecraft:blaze_rod": 1,
+    "minecraft:breeze_rod": 1
+  }
+}

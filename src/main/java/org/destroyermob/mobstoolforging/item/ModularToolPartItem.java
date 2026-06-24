@@ -48,6 +48,23 @@ public class ModularToolPartItem extends Item {
     }
 
     @Override
+    public boolean isEnchantable(ItemStack stack) {
+        ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
+        return data != null && partType.equals(data.partType());
+    }
+
+    @Override
+    public int getEnchantmentValue(ItemStack stack) {
+        ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
+        if (data == null || !partType.equals(data.partType())) {
+            return 0;
+        }
+        return MaterialCatalog.definition(data.materialId())
+                .map(definition -> definition.tier().getEnchantmentValue())
+                .orElse(0);
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
         ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());

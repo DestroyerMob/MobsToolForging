@@ -3,24 +3,26 @@ package org.destroyermob.mobstoolforging.client.model;
 import java.util.Locale;
 
 public enum HandleRenderStrategy {
-    DEFAULT_HANDLE("default_handle", true, true, false),
-    EXACT_FIRST("exact_first", true, true, false),
-    TEMPLATE_FIRST("template_first", true, true, true),
-    TEMPLATE_ONLY("template_only", false, true, true),
-    EXPLICIT_ONLY("explicit_only", true, false, false),
-    TEMPLATE_HANDLE("template_handle", true, true, true),
-    EXPLICIT_HANDLE("explicit_handle", true, false, false);
+    DEFAULT_HANDLE("default_handle", true, true, false, true),
+    EXACT_FIRST("exact_first", true, true, false, false),
+    TEMPLATE_FIRST("template_first", true, true, true, false),
+    TEMPLATE_ONLY("template_only", false, true, true, false),
+    EXPLICIT_ONLY("explicit_only", true, false, false, false),
+    TEMPLATE_HANDLE("template_handle", true, true, true, false),
+    EXPLICIT_HANDLE("explicit_handle", true, false, false, false);
 
     private final String id;
     private final boolean exactTextures;
     private final boolean templateFallback;
     private final boolean templateFirst;
+    private final boolean compositeExactAndTemplate;
 
-    HandleRenderStrategy(String id, boolean exactTextures, boolean templateFallback, boolean templateFirst) {
+    HandleRenderStrategy(String id, boolean exactTextures, boolean templateFallback, boolean templateFirst, boolean compositeExactAndTemplate) {
         this.id = id;
         this.exactTextures = exactTextures;
         this.templateFallback = templateFallback;
         this.templateFirst = templateFirst;
+        this.compositeExactAndTemplate = compositeExactAndTemplate;
     }
 
     public boolean usesExactTextures() {
@@ -33,6 +35,10 @@ public enum HandleRenderStrategy {
 
     public boolean prefersTemplate() {
         return templateFirst;
+    }
+
+    public boolean compositesExactAndTemplate() {
+        return compositeExactAndTemplate;
     }
 
     public String id() {

@@ -25,6 +25,16 @@ public class ModularAxeItem extends AxeItem implements ModularToolItem {
     }
 
     @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return allowsFinishedToolEnchanting(stack, super.isEnchantable(stack));
+    }
+
+    @Override
+    public int getEnchantmentValue(ItemStack stack) {
+        return finishedToolEnchantmentValue(stack, super.getEnchantmentValue(stack));
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
         appendModularTooltip(stack, tooltip, flag);
