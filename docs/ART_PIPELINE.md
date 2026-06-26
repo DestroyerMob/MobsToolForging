@@ -56,6 +56,33 @@ For built-in handles, source material folders currently map like this:
 - `mobstoolforging:blaze` -> `blaze_rod`
 - `mobstoolforging:breeze` -> `breeze_rod`
 
+## Compiled Finished Tool Templates
+
+Run this helper when you need flattened grayscale references for augment or
+overlay texture work:
+
+```text
+./gradlew compileBasicFinishedToolTextures
+```
+
+The utility composites the basic core layers for sword, shovel, pickaxe, axe,
+and hoe in the same order used by the visual definitions. It writes normal and
+`large_` grayscale PNGs, preserving the source template dimensions, to:
+
+```text
+src/main/resources/assets/mobstoolforging/textures/tool_templates/finished/
+```
+
+These files are helper templates assembled from hand-authored grayscale source
+templates; they are not replacements for the runtime layered tool renderer.
+Handle layers use the same broad handle masks as the runtime model, then place
+the grayscale handle detail template over that mask.
+
+The current Java renderer reads `large_canvas`, `large_in_hand`, and
+`large_template` from visual JSON but does not render a separate large sprite
+path yet. The compiled `large_` files are therefore reference outputs that track
+the existing `large_*` source templates, not active in-game assets.
+
 ## Generated Outputs
 
 Visual definitions are generated under:

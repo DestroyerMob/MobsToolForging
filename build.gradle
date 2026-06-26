@@ -23,6 +23,12 @@ sourceSets.main.resources {
     exclude '**/.cache/**'
 }
 
+sourceSets {
+    tools {
+        java.srcDir 'src/tools/java'
+    }
+}
+
 neoForge {
     version = project.neo_version
 
@@ -161,6 +167,16 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+tasks.register('compileBasicFinishedToolTextures', JavaExec) {
+    group = 'asset tools'
+    description = 'Composes grayscale finished-tool template PNGs from the basic tool template layers.'
+    dependsOn sourceSets.tools.classesTaskName
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'org.destroyermob.mobstoolforging.tools.BasicFinishedToolTextureCompiler'
+    workingDir = projectDir
+    args projectDir.absolutePath
 }
 
 idea {
