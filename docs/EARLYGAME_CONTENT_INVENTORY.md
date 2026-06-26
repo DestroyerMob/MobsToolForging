@@ -10,13 +10,10 @@ License: MIT. Keep the copyright and MIT license text when repurposing any asset
 
 This document inventories the jar so Mobs Tool Forging can decide what to repurpose and where. It is not an implementation plan by itself.
 
-## Already Imported
+## Current MTF Use
 
-- `flint_knife.png` -> `mobstoolforging:textures/item/flint_knife.png`
-- `flint_axe.png` -> `mobstoolforging:textures/item/flint_hatchet.png`
-- `flint_pickaxe.png` -> `mobstoolforging:textures/item/flint_pick.png`
-- `flint_saw.png` -> copied for possible future use
-- `flint_shard.png` -> copied for possible future use
+- `flint_shard.png` -> `mobstoolforging:textures/item/flint_shard.png`
+- Old EarlyGame flint tool textures are no longer used. Flint sword, pickaxe, axe, shovel, and hoe are craft-grid recipes that output MTF modular tools using the `mobstoolforging:flint` material visuals.
 
 The jar does not contain a flint shovel texture.
 
@@ -173,9 +170,9 @@ If repurposed, these should probably move into the Mobs Tool Forging namespace i
 
 Most item models are standard generated or handheld item models pointing at the matching texture.
 
-Useful model groups:
+Useful source model groups:
 
-- Flint tools: `flint_knife`, `flint_pickaxe`, `flint_axe`, `flint_saw`
+- Flint tools, not currently used by MTF: `flint_knife`, `flint_pickaxe`, `flint_axe`, `flint_saw`
 - Copper tools: `copper_sword`, `copper_knife`, `copper_shovel`, `copper_pickaxe`, `copper_axe`, `copper_saw`, `copper_hoe`
 - Knife/saw variants: iron, gold, diamond, netherite
 - Slingshot pull states: `slingshot`, `slingshot_pulling_0`, `slingshot_pulling_1`, `slingshot_pulling_2`
@@ -184,6 +181,10 @@ Useful model groups:
 ## Recipes
 
 ### Flint and Survival Recipes
+
+MTF currently uses its own flint recipes for modular sword, pickaxe, axe, shovel, and hoe outputs.
+
+Source jar recipes:
 
 - `lashing`: 2x2 `plant_fiber`
 - `fire_starter`: lashing plus sticks

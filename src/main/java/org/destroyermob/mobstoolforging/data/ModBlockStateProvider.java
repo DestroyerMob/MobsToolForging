@@ -56,9 +56,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
         smithingHammerModel();
         itemModels().withExistingParent("flint_shard", mcLoc("item/generated")).texture("layer0", modLoc("item/flint_shard"));
         itemModels().withExistingParent("fire_stick", mcLoc("item/handheld")).texture("layer0", mcLoc("item/stick"));
-        itemModels().withExistingParent("flint_knife", mcLoc("item/handheld")).texture("layer0", modLoc("item/flint_knife"));
-        itemModels().withExistingParent("flint_hatchet", mcLoc("item/handheld")).texture("layer0", modLoc("item/flint_hatchet"));
-        itemModels().withExistingParent("flint_pick", mcLoc("item/handheld")).texture("layer0", modLoc("item/flint_pick"));
         itemModels().withExistingParent("diamond_powder", mcLoc("item/generated")).texture("layer0", modLoc("item/diamond_powder"));
         patternModel(ModItems.PICKAXE_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.AXE_HEAD_PATTERN.getId().getPath());

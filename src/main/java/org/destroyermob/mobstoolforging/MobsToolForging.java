@@ -53,9 +53,11 @@ import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
+import org.destroyermob.mobstoolforging.world.FlintToolStacks;
 import org.destroyermob.mobstoolforging.world.MaterialDefinitionReloadListener;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
+import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolStatRuleReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
 import org.destroyermob.mobstoolforging.world.ToolTrait;
@@ -117,9 +119,7 @@ public class MobsToolForging {
             event.accept(ModItems.GEM_CUTTERS_KNIFE);
             event.accept(ModItems.FIRE_STICK);
             if (MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
-                event.accept(ModItems.FLINT_KNIFE);
-                event.accept(ModItems.FLINT_HATCHET);
-                event.accept(ModItems.FLINT_PICK);
+                flintToolKinds().forEach(toolKind -> event.accept(FlintToolStacks.create(toolKind)));
             }
             event.accept(ModItems.PICKAXE_HEAD_PATTERN);
             event.accept(ModItems.AXE_HEAD_PATTERN);
@@ -242,11 +242,7 @@ public class MobsToolForging {
             }
         }
         if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
-            disabledRecipes.addAll(List.of(
-                    modRecipe("flint_knife"),
-                    modRecipe("flint_hatchet"),
-                    modRecipe("flint_pick")
-            ));
+            disabledRecipes.addAll(flintToolRecipeIds());
         }
         if (disabledRecipes.isEmpty()) {
             return;
@@ -408,6 +404,20 @@ public class MobsToolForging {
                 ResourceLocation.withDefaultNamespace("netherite_pickaxe_smithing"),
                 ResourceLocation.withDefaultNamespace("netherite_axe_smithing"),
                 ResourceLocation.withDefaultNamespace("netherite_hoe_smithing")
+        );
+    }
+
+    private static List<ToolKind> flintToolKinds() {
+        return List.of(ToolKind.SWORD, ToolKind.PICKAXE, ToolKind.AXE, ToolKind.SHOVEL, ToolKind.HOE);
+    }
+
+    private static List<ResourceLocation> flintToolRecipeIds() {
+        return List.of(
+                modRecipe("flint_sword"),
+                modRecipe("flint_pickaxe"),
+                modRecipe("flint_axe"),
+                modRecipe("flint_shovel"),
+                modRecipe("flint_hoe")
         );
     }
 

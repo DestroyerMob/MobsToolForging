@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "mobstoolforging:flint_knife"
+        "recipe": "mobstoolforging:flint_shovel"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "mobstoolforging:flint_knife"
+      "mobstoolforging:flint_shovel"
     ]
   }
 }

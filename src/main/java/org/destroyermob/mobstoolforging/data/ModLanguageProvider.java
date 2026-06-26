@@ -28,9 +28,6 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.DIAMOND_POWDER, "Diamond Powder");
         addItem(ModItems.FLINT_SHARD, "Flint Shard");
         addItem(ModItems.FIRE_STICK, "Fire Stick");
-        addItem(ModItems.FLINT_KNIFE, "Flint Knife");
-        addItem(ModItems.FLINT_HATCHET, "Flint Hatchet");
-        addItem(ModItems.FLINT_PICK, "Flint Pick");
         addItem(ModItems.PICKAXE_HEAD_PATTERN, "Pickaxe Head Pattern");
         addItem(ModItems.AXE_HEAD_PATTERN, "Axe Head Pattern");
         addItem(ModItems.SHOVEL_HEAD_PATTERN, "Shovel Head Pattern");
@@ -70,6 +67,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("material.mobstoolforging.netherite", "Netherite");
         add("material.mobstoolforging.diamond", "Diamond");
         add("material.mobstoolforging.emerald", "Emerald");
+        add("material.mobstoolforging.flint", "Flint");
         add("material.mobstoolforging.oak", "Oak");
         add("material.mobstoolforging.dark_oak", "Dark Oak");
         add("material.mobstoolforging.blaze", "Blaze");

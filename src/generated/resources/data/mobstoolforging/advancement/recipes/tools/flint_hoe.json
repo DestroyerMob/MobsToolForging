@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "mobstoolforging:flint_hatchet"
+        "recipe": "mobstoolforging:flint_hoe"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "mobstoolforging:flint_hatchet"
+      "mobstoolforging:flint_hoe"
     ]
   }
 }

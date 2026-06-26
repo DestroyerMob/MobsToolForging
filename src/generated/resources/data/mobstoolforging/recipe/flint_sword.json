@@ -1,0 +1,62 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "F": {
+      "item": "mobstoolforging:flint_shard"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    "F",
+    "F",
+    "S"
+  ],
+  "result": {
+    "components": {
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "type": "minecraft:generic.attack_damage",
+            "amount": 3.5,
+            "id": "minecraft:base_attack_damage",
+            "operation": "add_value",
+            "slot": "mainhand"
+          },
+          {
+            "type": "minecraft:generic.attack_speed",
+            "amount": -2.4000000953674316,
+            "id": "minecraft:base_attack_speed",
+            "operation": "add_value",
+            "slot": "mainhand"
+          }
+        ]
+      },
+      "minecraft:max_damage": 48,
+      "mobstoolforging:tool_construction": {
+        "binding_material": "mobstoolforging:flint",
+        "handle_material": "mobstoolforging:oak",
+        "head_material": "mobstoolforging:flint",
+        "tool_type": "mobstoolforging:sword"
+      },
+      "mobstoolforging:tool_stat_profile": {
+        "attack_damage_bonus": 3.0,
+        "attack_speed_bonus": -2.4,
+        "debug_lines": [
+          "Head: Flint",
+          "Handle: Oak",
+          "Guard: Flint"
+        ],
+        "durability_multiplier": 1.0,
+        "enchant_affinity": [],
+        "fire_resistant": false,
+        "max_damage": 48,
+        "mining_speed_multiplier": 1.0
+      }
+    },
+    "count": 1,
+    "id": "mobstoolforging:sword"
+  }
+}

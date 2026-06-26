@@ -30,6 +30,7 @@ public final class MaterialCatalog {
     public static final ResourceLocation NETHERITE = materialId("netherite");
     public static final ResourceLocation DIAMOND = materialId("diamond");
     public static final ResourceLocation EMERALD = materialId("emerald");
+    public static final ResourceLocation FLINT = materialId("flint");
     public static final ResourceLocation OAK = materialId("oak");
     public static final ResourceLocation DARK_OAK = materialId("dark_oak");
     public static final ResourceLocation BLAZE = materialId("blaze");
@@ -76,6 +77,7 @@ public final class MaterialCatalog {
         register(NETHERITE, MaterialCategory.METAL, Items.NETHERITE_INGOT, Tiers.NETHERITE);
         register(DIAMOND, MaterialCategory.GEM, Items.DIAMOND, Tiers.DIAMOND);
         register(EMERALD, MaterialCategory.GEM, Items.EMERALD, EMERALD_TIER);
+        registerVirtual(FLINT, MaterialCategory.GEM, Items.FLINT, CrudeFlintTiers.FLINT);
     }
 
     private MaterialCatalog() {
@@ -330,6 +332,10 @@ public final class MaterialCatalog {
     private static void register(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier) {
         ToolMaterialDefinition definition = new ToolMaterialDefinition(id, category, displayItem, tier);
         putDefinition(definition);
+    }
+
+    private static void registerVirtual(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier) {
+        DEFINITIONS.put(id, new ToolMaterialDefinition(id, category, displayItem, tier));
     }
 
     private static void putDefinition(ToolMaterialDefinition definition) {

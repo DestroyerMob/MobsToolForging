@@ -1,0 +1,17 @@
+{
+  "type": "mobstoolforging:material_visual",
+  "emissive": false,
+  "fallbacks": [
+    "stone"
+  ],
+  "family": "stone",
+  "palette": {
+    "102": "0xFF252932",
+    "140": "0xFF3D4550",
+    "178": "0xFF59636D",
+    "216": "0xFF7C8792",
+    "255": "0xFFB7C0C8",
+    "63": "0xFF15171A"
+  },
+  "texture_noise": "chipped_edges"
+}

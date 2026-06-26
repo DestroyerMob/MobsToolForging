@@ -26,9 +26,6 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ItemTags.PICKAXES).add(ModItems.PICKAXE.get());
         tag(ItemTags.AXES).add(ModItems.AXE.get());
         tag(ItemTags.HOES).add(ModItems.HOE.get());
-        tag(ItemTags.SWORDS).add(ModItems.FLINT_KNIFE.get());
-        tag(ItemTags.PICKAXES).add(ModItems.FLINT_PICK.get());
-        tag(ItemTags.AXES).add(ModItems.FLINT_HATCHET.get());
         tag(ModTags.Items.MATERIALS).addTag(ModTags.Items.MATERIALS_METALS).addTag(ModTags.Items.MATERIALS_GEMS);
         tag(ModTags.Items.MATERIALS_METALS)
                 .addTag(Tags.Items.INGOTS_IRON)
