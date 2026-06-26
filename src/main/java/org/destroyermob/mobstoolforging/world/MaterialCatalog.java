@@ -68,7 +68,7 @@ public final class MaterialCatalog {
     private static final List<ResourceLocation> BINDING_MATERIALS = STARTER_MATERIALS;
     private static final List<ResourceLocation> WRAP_MATERIALS = List.of(LEATHER);
     private static final List<ResourceLocation> FOCUS_MATERIALS = List.of(AMETHYST);
-    private static final List<ResourceLocation> TREATMENT_MATERIALS = List.of(NETHER, SCULK);
+    private static final List<ResourceLocation> TREATMENT_MATERIALS = List.of(NETHERITE, NETHER, SCULK);
 
     static {
         register(IRON, MaterialCategory.METAL, Items.IRON_INGOT, Tiers.IRON);

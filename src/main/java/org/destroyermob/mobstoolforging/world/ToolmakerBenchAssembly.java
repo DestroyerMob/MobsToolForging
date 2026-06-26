@@ -72,6 +72,12 @@ public final class ToolmakerBenchAssembly {
         if (primary.isEmpty()) {
             return Optional.empty();
         }
+        if (construction.treatment().filter(MaterialCatalog.NETHERITE::equals).isPresent()) {
+            ToolPartData primaryData = primary.get(ModDataComponents.TOOL_PART.get());
+            if (primaryData != null) {
+                primary.set(ModDataComponents.TOOL_PART.get(), primaryData.withTreatment(MaterialCatalog.NETHERITE));
+            }
+        }
         parts.add(primary);
 
         ResourceLocation requiredPartMaterial = construction.bindingMaterial().orElse(construction.headMaterial());
@@ -89,7 +95,10 @@ public final class ToolmakerBenchAssembly {
         }
         construction.wrapMaterial().map(ToolmakerBenchAssembly::wrapStack).ifPresent(parts::add);
         construction.focusMaterial().map(ToolmakerBenchAssembly::focusStack).ifPresent(parts::add);
-        construction.treatment().map(ToolmakerBenchAssembly::treatmentStack).ifPresent(parts::add);
+        construction.treatment()
+                .filter(treatment -> !MaterialCatalog.NETHERITE.equals(treatment))
+                .map(ToolmakerBenchAssembly::treatmentStack)
+                .ifPresent(parts::add);
         return Optional.of(parts.stream().filter(item -> !item.isEmpty()).map(ItemStack::copy).toList());
     }
 
@@ -263,7 +272,7 @@ public final class ToolmakerBenchAssembly {
                     bindingMaterial(),
                     material(wrap, MaterialCatalog::wrapMaterial),
                     material(focus, MaterialCatalog::focusMaterial),
-                    material(treatment, MaterialCatalog::treatmentMaterial),
+                    partData.treatment().or(() -> material(treatment, MaterialCatalog::treatmentMaterial)),
                     quality()
             ));
         }

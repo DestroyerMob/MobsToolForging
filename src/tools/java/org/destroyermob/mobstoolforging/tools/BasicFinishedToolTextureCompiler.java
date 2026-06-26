@@ -29,6 +29,16 @@ public final class BasicFinishedToolTextureCompiler {
             "tool_parts",
             "handle_masks"
     );
+    private static final Path SOURCE_TOOL_PART_ROOT = Path.of(
+            "src",
+            "main",
+            "resources",
+            "assets",
+            "mobstoolforging",
+            "textures",
+            "source",
+            "tool_parts"
+    );
     private static final String OUTPUT_FOLDER = "finished";
     private static final List<ToolSpec> TOOLS = List.of(
             new ToolSpec("sword", List.of("handle", "sword_blade", "guard")),
@@ -86,6 +96,10 @@ public final class BasicFinishedToolTextureCompiler {
 
         Path handlePath = templateRoot.resolve(tool.name()).resolve((large ? "large_" : "") + layer + ".png");
         BufferedImage handle = readLayer(handlePath);
+        if ("shovel".equals(tool.name())) {
+            return shovelHandleImages(projectRoot, tool, large, handlePath, handle);
+        }
+
         List<LayerImage> layers = new ArrayList<>();
         readOptionalHandleMask(projectRoot, tool, large, handle)
                 .ifPresent(layers::add);
@@ -93,7 +107,44 @@ public final class BasicFinishedToolTextureCompiler {
         return List.copyOf(layers);
     }
 
+    private static List<LayerImage> shovelHandleImages(Path projectRoot, ToolSpec tool, boolean large, Path nubPath, BufferedImage nub) throws IOException {
+        Path handleBodyPath = sourceToolPartPath(projectRoot, "stick", large, "stick_handle_tool.png");
+        BufferedImage handleBody = fitToSize(readLayer(handleBodyPath), nub.getWidth(), nub.getHeight());
+        java.util.Optional<LayerImage> maskLayer = readOptionalHandleMask(projectRoot, tool, large);
+        if (maskLayer.isEmpty()) {
+            return List.of(new LayerImage(handleBodyPath, handleBody), new LayerImage(nubPath, nub));
+        }
+
+        BufferedImage mask = fitToSize(maskLayer.get().image(), nub.getWidth(), nub.getHeight());
+        BufferedImage maskedBody = applyAlphaMask(handleBody, mask);
+        return List.of(new LayerImage(handleBodyPath, maskedBody), new LayerImage(nubPath, nub));
+    }
+
+    private static Path sourceToolPartPath(Path projectRoot, String materialFolder, boolean large, String filename) {
+        Path sourceRoot = projectRoot.resolve(SOURCE_TOOL_PART_ROOT);
+        Path largePath = sourceRoot.resolve(materialFolder).resolve("large_" + filename);
+        if (large && Files.isRegularFile(largePath)) {
+            return largePath;
+        }
+        return sourceRoot.resolve(materialFolder).resolve(filename);
+    }
+
     private static java.util.Optional<LayerImage> readOptionalHandleMask(Path projectRoot, ToolSpec tool, boolean large, BufferedImage handle) throws IOException {
+        java.util.Optional<LayerImage> maskLayer = readOptionalHandleMask(projectRoot, tool, large);
+        if (maskLayer.isEmpty()) {
+            return java.util.Optional.empty();
+        }
+
+        LayerImage layerImage = maskLayer.get();
+        BufferedImage mask = layerImage.image();
+        if (mask.getWidth() != handle.getWidth() || mask.getHeight() != handle.getHeight()) {
+            System.out.println("Skipping handle mask with different dimensions: " + layerImage.path());
+            return java.util.Optional.empty();
+        }
+        return java.util.Optional.of(layerImage);
+    }
+
+    private static java.util.Optional<LayerImage> readOptionalHandleMask(Path projectRoot, ToolSpec tool, boolean large) throws IOException {
         Path handleMaskRoot = projectRoot.resolve(HANDLE_MASK_ROOT);
         Path largeMaskPath = handleMaskRoot.resolve("large_" + tool.name() + "_handle_mask.png");
         Path maskPath = Files.isRegularFile(largeMaskPath)
@@ -105,11 +156,44 @@ public final class BasicFinishedToolTextureCompiler {
         }
 
         BufferedImage mask = readLayer(maskPath);
-        if (mask.getWidth() != handle.getWidth() || mask.getHeight() != handle.getHeight()) {
-            System.out.println("Skipping handle mask with different dimensions: " + maskPath);
-            return java.util.Optional.empty();
-        }
         return java.util.Optional.of(new LayerImage(maskPath, mask));
+    }
+
+    private static BufferedImage applyAlphaMask(BufferedImage source, BufferedImage mask) {
+        BufferedImage masked = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < source.getHeight(); y++) {
+            for (int x = 0; x < source.getWidth(); x++) {
+                int sourceArgb = source.getRGB(x, y);
+                int sourceAlpha = (sourceArgb >>> 24) & 0xFF;
+                if (sourceAlpha == 0) {
+                    continue;
+                }
+
+                int maskAlpha = (mask.getRGB(x, y) >>> 24) & 0xFF;
+                int alpha = sourceAlpha * maskAlpha / 255;
+                if (alpha == 0) {
+                    continue;
+                }
+                masked.setRGB(x, y, (sourceArgb & 0x00FFFFFF) | (alpha << 24));
+            }
+        }
+        return masked;
+    }
+
+    private static BufferedImage fitToSize(BufferedImage source, int width, int height) {
+        if (source.getWidth() == width && source.getHeight() == height) {
+            return source;
+        }
+
+        BufferedImage scaled = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < height; y++) {
+            int sourceY = y * source.getHeight() / height;
+            for (int x = 0; x < width; x++) {
+                int sourceX = x * source.getWidth() / width;
+                scaled.setRGB(x, y, source.getRGB(sourceX, sourceY));
+            }
+        }
+        return scaled;
     }
 
     private static BufferedImage readLayer(Path path) throws IOException {

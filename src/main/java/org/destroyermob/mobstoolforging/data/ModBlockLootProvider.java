@@ -20,10 +20,20 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.PATTERN_CREATION_STATION.get());
         dropSelf(ModBlocks.TOOLMAKERS_BENCH.get());
         dropSelf(ModBlocks.HEATING_FORGE.get());
+        add(ModBlocks.CRUCIBLE.get(), noDrop());
+        dropSelf(ModBlocks.FOUNDRY_FORGE.get());
     }
 
     @Override
     protected Iterable<Block> getKnownBlocks() {
-        return Set.of(ModBlocks.TOOL_FORGE.get(), ModBlocks.LAPIDARY_TABLE.get(), ModBlocks.PATTERN_CREATION_STATION.get(), ModBlocks.TOOLMAKERS_BENCH.get(), ModBlocks.HEATING_FORGE.get());
+        return Set.of(
+                ModBlocks.TOOL_FORGE.get(),
+                ModBlocks.LAPIDARY_TABLE.get(),
+                ModBlocks.PATTERN_CREATION_STATION.get(),
+                ModBlocks.TOOLMAKERS_BENCH.get(),
+                ModBlocks.HEATING_FORGE.get(),
+                ModBlocks.CRUCIBLE.get(),
+                ModBlocks.FOUNDRY_FORGE.get()
+        );
     }
 }

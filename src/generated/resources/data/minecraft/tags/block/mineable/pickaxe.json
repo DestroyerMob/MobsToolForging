@@ -4,6 +4,8 @@
     "mobstoolforging:lapidary_table",
     "mobstoolforging:pattern_creation_station",
     "mobstoolforging:toolmakers_bench",
-    "mobstoolforging:heating_forge"
+    "mobstoolforging:heating_forge",
+    "mobstoolforging:crucible",
+    "mobstoolforging:foundry_forge"
   ]
 }

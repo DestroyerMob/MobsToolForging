@@ -43,6 +43,14 @@ public final class ModItems {
             "heating_forge",
             () -> new BlockItem(ModBlocks.HEATING_FORGE.get(), new Item.Properties())
     );
+    public static final DeferredItem<BlockItem> CRUCIBLE = ITEMS.register(
+            "crucible",
+            () -> new BlockItem(ModBlocks.CRUCIBLE.get(), new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<BlockItem> FOUNDRY_FORGE = ITEMS.register(
+            "foundry_forge",
+            () -> new BlockItem(ModBlocks.FOUNDRY_FORGE.get(), new Item.Properties())
+    );
     public static final DeferredItem<Item> SMITHING_HAMMER = ITEMS.register(
             "smithing_hammer",
             () -> new Item(new Item.Properties().durability(128))

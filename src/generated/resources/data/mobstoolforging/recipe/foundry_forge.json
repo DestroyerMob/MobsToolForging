@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "H": {
+      "item": "mobstoolforging:heating_forge"
+    },
+    "L": {
+      "item": "minecraft:lava_bucket"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    }
+  },
+  "pattern": [
+    "OLO",
+    "OHO",
+    "OOO"
+  ],
+  "result": {
+    "count": 1,
+    "id": "mobstoolforging:foundry_forge"
+  }
+}

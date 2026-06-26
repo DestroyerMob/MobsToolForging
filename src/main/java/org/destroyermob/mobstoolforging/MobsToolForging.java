@@ -51,9 +51,11 @@ import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
+import org.destroyermob.mobstoolforging.world.CrucibleContents;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
 import org.destroyermob.mobstoolforging.world.FlintToolStacks;
+import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialDefinitionReloadListener;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
@@ -96,6 +98,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(this::coolDroppedWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::blockHeatedCrafting);
         NeoForge.EVENT_BUS.addListener(this::addHeatTooltip);
+        NeoForge.EVENT_BUS.addListener(this::addCrucibleTooltip);
         NeoForge.EVENT_BUS.addListener(this::boostGildedBlockExperience);
         NeoForge.EVENT_BUS.addListener(this::boostGildedMobExperience);
 
@@ -111,6 +114,8 @@ public class MobsToolForging {
             event.accept(ModBlocks.PATTERN_CREATION_STATION);
             event.accept(ModBlocks.TOOLMAKERS_BENCH);
             event.accept(ModBlocks.HEATING_FORGE);
+            event.accept(ModBlocks.CRUCIBLE);
+            event.accept(ModBlocks.FOUNDRY_FORGE);
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.SMITHING_HAMMER);
@@ -332,6 +337,21 @@ public class MobsToolForging {
                 : WorkpieceHeat.statusKey(stack, event.getEntity().level(), MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
         event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.workpiece_status." + statusKey).withStyle(forgeReady ? ChatFormatting.YELLOW : ChatFormatting.DARK_GRAY));
         event.getToolTip().add(Component.translatable(forgeReady ? "tooltip.mobstoolforging.workpiece_ready" : "tooltip.mobstoolforging.workpiece_not_ready").withStyle(ChatFormatting.DARK_GRAY));
+    }
+
+    private void addCrucibleTooltip(ItemTooltipEvent event) {
+        CrucibleContents contents = event.getItemStack().get(ModDataComponents.CRUCIBLE_CONTENTS.get());
+        if (contents == null || contents.isEmpty()) {
+            return;
+        }
+        if (contents.hasItem()) {
+            event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.crucible_contains_item", contents.item().getHoverName()).withStyle(ChatFormatting.DARK_GRAY));
+            return;
+        }
+        contents.moltenMaterial().ifPresent(material -> {
+            event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.crucible_contains_molten", MaterialCatalog.displayName(material), contents.moltenAmount()).withStyle(ChatFormatting.GOLD));
+            event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.crucible_heat", Math.round(contents.heat() * 100.0F)).withStyle(contents.isWhiteHot() ? ChatFormatting.YELLOW : ChatFormatting.DARK_GRAY));
+        });
     }
 
     private static boolean isQuenching(ItemEntity itemEntity) {

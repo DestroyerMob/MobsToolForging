@@ -11,6 +11,10 @@
       "prefix": "block/heating_forge/"
     },
     {
+      "type": "minecraft:single",
+      "resource": "mobstoolforging:block/molten_liquid"
+    },
+    {
       "type": "minecraft:directory",
       "source": "item",
       "prefix": "item/"

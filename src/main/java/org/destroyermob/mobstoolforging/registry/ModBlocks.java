@@ -6,6 +6,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.world.CrucibleBlock;
+import org.destroyermob.mobstoolforging.world.FoundryForgeBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.LapidaryTableBlock;
 import org.destroyermob.mobstoolforging.world.PatternCreationStationBlock;
@@ -34,6 +36,14 @@ public final class ModBlocks {
     public static final DeferredBlock<HeatingForgeBlock> HEATING_FORGE = BLOCKS.register(
             "heating_forge",
             () -> new HeatingForgeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).noOcclusion())
+    );
+    public static final DeferredBlock<CrucibleBlock> CRUCIBLE = BLOCKS.register(
+            "crucible",
+            () -> new CrucibleBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.ANVIL).noOcclusion())
+    );
+    public static final DeferredBlock<FoundryForgeBlock> FOUNDRY_FORGE = BLOCKS.register(
+            "foundry_forge",
+            () -> new FoundryForgeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).noOcclusion())
     );
 
     private ModBlocks() {

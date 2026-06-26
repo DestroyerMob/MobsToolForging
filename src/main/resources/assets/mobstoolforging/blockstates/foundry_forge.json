@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "mobstoolforging:block/lava_foundry_forge",
+      "y": 180
+    },
+    "facing=north": {
+      "model": "mobstoolforging:block/lava_foundry_forge",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "mobstoolforging:block/lava_foundry_forge",
+      "y": 270
+    },
+    "facing=west": {
+      "model": "mobstoolforging:block/lava_foundry_forge"
+    }
+  }
+}

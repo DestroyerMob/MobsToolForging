@@ -13,6 +13,7 @@ import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -87,7 +88,7 @@ public final class ToolStatBuilder {
     public static void apply(ItemStack stack, ToolTypeDefinition definition, ToolConstructionData construction) {
         ToolStatProfile profile = build(definition, construction);
         Tier headTier = MaterialCatalog.definition(construction.headMaterial()).orElseThrow().tier();
-        Tier adjustedTier = adjustedTier(headTier, profile);
+        Tier adjustedTier = adjustedTier(headTier, profile, construction);
 
         stack.set(DataComponents.MAX_DAMAGE, profile.maxDamage());
         stack.set(DataComponents.DAMAGE, 0);
@@ -265,6 +266,12 @@ public final class ToolStatBuilder {
                 note = "+Nether";
             }
             stats.addTrait(ToolTrait.NETHER_TREATED);
+        } else if (MaterialCatalog.NETHERITE.equals(treatment)) {
+            stats.durabilityMultiplier *= 1.15F;
+            stats.fireResistant = true;
+            stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
+            note = "+Netherite Tip, +Fireproof";
+            stats.addTrait(ToolTrait.NETHER_FORGED);
         } else if (MaterialCatalog.SCULK.equals(treatment)) {
             stats.addAffinities(AFFINITY_SCULK, AFFINITY_SILENCE, AFFINITY_ECHO);
             note = "+Echo";
@@ -283,9 +290,10 @@ public final class ToolStatBuilder {
         }
     }
 
-    private static Tier adjustedTier(Tier headTier, ToolStatProfile profile) {
+    private static Tier adjustedTier(Tier headTier, ToolStatProfile profile, ToolConstructionData construction) {
+        Tier harvestTier = construction.treatment().filter(MaterialCatalog.NETHERITE::equals).isPresent() ? Tiers.NETHERITE : headTier;
         return new SimpleTier(
-                headTier.getIncorrectBlocksForDrops(),
+                harvestTier.getIncorrectBlocksForDrops(),
                 profile.maxDamage(),
                 headTier.getSpeed() * profile.miningSpeedMultiplier(),
                 headTier.getAttackDamageBonus(),
@@ -346,7 +354,7 @@ public final class ToolStatBuilder {
             }
             ToolStatProfile profile = build(definition, construction);
             Tier headTier = MaterialCatalog.definition(materialId).orElseThrow().tier();
-            Tier adjustedTier = adjustedTier(headTier, profile);
+            Tier adjustedTier = adjustedTier(headTier, profile, construction);
             ItemAttributeModifiers attributes = toolAttributes(definition, adjustedTier, profile);
             if (profile.maxDamage() <= 0
                     || !Float.isFinite(profile.attackDamageBonus())

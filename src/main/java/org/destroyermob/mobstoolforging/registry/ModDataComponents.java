@@ -7,6 +7,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.world.CrucibleContents;
 import org.destroyermob.mobstoolforging.world.HeatedWorkpieceData;
 import org.destroyermob.mobstoolforging.world.ToolAssemblyParts;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
@@ -42,6 +43,11 @@ public final class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<HeatedWorkpieceData>> HEATED_WORKPIECE = DATA_COMPONENTS.registerComponentType(
             "heated_workpiece",
             builder -> builder.persistent(HeatedWorkpieceData.CODEC).networkSynchronized(HeatedWorkpieceData.STREAM_CODEC).cacheEncoding()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<CrucibleContents>> CRUCIBLE_CONTENTS = DATA_COMPONENTS.registerComponentType(
+            "crucible_contents",
+            builder -> builder.persistent(CrucibleContents.CODEC).networkSynchronized(CrucibleContents.STREAM_CODEC).cacheEncoding()
     );
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<ResourceLocation>> FORGE_TEMPLATE = DATA_COMPONENTS.registerComponentType(

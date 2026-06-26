@@ -43,6 +43,25 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_copper_ingot", has(Items.COPPER_INGOT))
                 .save(output);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.CRUCIBLE)
+                .define('I', Items.IRON_INGOT)
+                .define('B', Items.IRON_BLOCK)
+                .pattern("I I")
+                .pattern("I I")
+                .pattern(" B ")
+                .unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.FOUNDRY_FORGE)
+                .define('H', ModBlocks.HEATING_FORGE.get())
+                .define('O', Items.OBSIDIAN)
+                .define('L', Items.LAVA_BUCKET)
+                .pattern("OLO")
+                .pattern("OHO")
+                .pattern("OOO")
+                .unlockedBy("has_lava_bucket", has(Items.LAVA_BUCKET))
+                .save(output);
+
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.PATTERN_CREATION_STATION)
                 .define('X', Items.PAPER)
                 .define('P', ItemTags.PLANKS)

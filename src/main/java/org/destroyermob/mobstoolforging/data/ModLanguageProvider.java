@@ -18,6 +18,8 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.PATTERN_CREATION_STATION, "Pattern Creation Station");
         addBlock(ModBlocks.TOOLMAKERS_BENCH, "Toolmaker's Bench");
         addBlock(ModBlocks.HEATING_FORGE, "Heating Forge");
+        addBlock(ModBlocks.CRUCIBLE, "Crucible");
+        addBlock(ModBlocks.FOUNDRY_FORGE, "Foundry Forge");
         addItem(ModItems.SMITHING_HAMMER, "Smithing Hammer");
         addItem(ModItems.IRON_SMITHING_HAMMER, "Iron Smithing Hammer");
         addItem(ModItems.SMITHING_HAMMER_HEAD, "Iron Smithing Hammer Head");
@@ -152,6 +154,18 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.heating_ignited", "Heating forge lit.");
         add("message.mobstoolforging.heating_lit", "The forge is burning.");
         add("message.mobstoolforging.heating_status", "Add fuel, place metal, then light the forge.");
+        add("message.mobstoolforging.crucible_item_inserted", "Item placed in the crucible.");
+        add("message.mobstoolforging.crucible_part_tipped", "Tool head tipped with netherite.");
+        add("message.mobstoolforging.crucible_molten_not_usable", "That cannot be dipped into this molten metal yet.");
+        add("message.mobstoolforging.crucible_status_empty", "The crucible is empty.");
+        add("message.mobstoolforging.crucible_status_item", "The crucible holds an item.");
+        add("message.mobstoolforging.crucible_status_molten", "The crucible holds molten metal.");
+        add("message.mobstoolforging.crucible_status_molten_hot", "The crucible holds white-hot molten metal.");
+        add("message.mobstoolforging.foundry_lava_added", "Lava added.");
+        add("message.mobstoolforging.foundry_crucible_added", "Crucible placed.");
+        add("message.mobstoolforging.foundry_crucible_busy", "Remove the current crucible first.");
+        add("message.mobstoolforging.foundry_lit", "The foundry forge is lava-hot.");
+        add("message.mobstoolforging.foundry_status", "Add lava and place a crucible.");
         add("tooltip.mobstoolforging.workpiece_temperature", "Temperature: %s%%");
         add("tooltip.mobstoolforging.workpiece_ready", "Ready to forge");
         add("tooltip.mobstoolforging.workpiece_not_ready", "Not hot enough to forge");
@@ -162,6 +176,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.workpiece_status.cooling", "Cooling");
         add("tooltip.mobstoolforging.part_quality", "Quality: %s%%");
         add("tooltip.mobstoolforging.part_workmanship", "Workmanship: %s (%s)");
+        add("tooltip.mobstoolforging.part_treatment", "Treatment: %s");
+        add("tooltip.mobstoolforging.crucible_contains_item", "Contains: %s");
+        add("tooltip.mobstoolforging.crucible_contains_molten", "Contains: Molten %s (%s)");
+        add("tooltip.mobstoolforging.crucible_heat", "Crucible Heat: %s%%");
         add("tooltip.mobstoolforging.workmanship.standard", "Standard");
         add("tooltip.mobstoolforging.workmanship.fine", "Fine");
         add("tooltip.mobstoolforging.workmanship.rough", "Rough");

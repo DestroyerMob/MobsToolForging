@@ -68,6 +68,9 @@ public class ModularToolPartItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
         ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
+        if (data != null && data.treatment().isPresent()) {
+            tooltip.add(Component.translatable("tooltip.mobstoolforging.part_treatment", MaterialCatalog.displayName(data.treatment().get())).withStyle(ChatFormatting.DARK_GRAY));
+        }
         if (data != null && flag.hasShiftDown()) {
             tooltip.add(Component.translatable("tooltip.mobstoolforging.part_workmanship", workmanshipName(data.quality()), data.quality()).withStyle(ChatFormatting.DARK_GRAY));
         }
