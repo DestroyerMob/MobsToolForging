@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "#mobstoolforging:parts/sword_blade",
+    "#mobstoolforging:parts/sword_guard"
+  ]
+}

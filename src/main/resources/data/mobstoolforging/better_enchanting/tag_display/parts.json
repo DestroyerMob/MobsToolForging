@@ -1,12 +1,54 @@
 {
   "item_tags": [
-    { "tag": "mobstoolforging:parts", "label": "Part", "color": "#c7a0ff" },
-    { "tag": "mobstoolforging:parts/handle", "label": "Handle", "color": "#c58a3a" },
-    { "tag": "mobstoolforging:parts/sword_blade", "label": "Sword Blade", "color": "#ff6464" },
-    { "tag": "mobstoolforging:parts/sword_guard", "label": "Sword Guard", "color": "#ff6464" },
-    { "tag": "mobstoolforging:parts/shovel_head", "label": "Shovel Head", "color": "#55d66b" },
-    { "tag": "mobstoolforging:parts/pickaxe_head", "label": "Pickaxe Head", "color": "#55d66b" },
-    { "tag": "mobstoolforging:parts/axe_head", "label": "Axe Head", "color": "#55d66b" },
-    { "tag": "mobstoolforging:parts/hoe_head", "label": "Hoe Head", "color": "#55d66b" }
+    {
+      "tag": "mobstoolforging:parts",
+      "label": "Part",
+      "color": "#c7a0ff"
+    },
+    {
+      "tag": "mobstoolforging:parts/handle",
+      "label": "Handle",
+      "color": "#c58a3a"
+    },
+    {
+      "tag": "mobstoolforging:parts/sword_blade",
+      "label": "Sword Blade",
+      "color": "#ff6464"
+    },
+    {
+      "tag": "mobstoolforging:parts/sword_guard",
+      "label": "Sword Guard",
+      "color": "#ff6464"
+    },
+    {
+      "tag": "mobstoolforging:parts/shovel_head",
+      "label": "Shovel Head",
+      "color": "#55d66b"
+    },
+    {
+      "tag": "mobstoolforging:parts/pickaxe_head",
+      "label": "Pickaxe Head",
+      "color": "#55d66b"
+    },
+    {
+      "tag": "mobstoolforging:parts/axe_head",
+      "label": "Axe Head",
+      "color": "#55d66b"
+    },
+    {
+      "tag": "mobstoolforging:parts/hoe_head",
+      "label": "Hoe Head",
+      "color": "#55d66b"
+    },
+    {
+      "tag": "mobstoolforging:parts/screwdriver_head",
+      "label": "Screwdriver Head",
+      "color": "#55d66b"
+    },
+    {
+      "tag": "mobstoolforging:parts/gem_cutters_blade",
+      "label": "Gem Cutter Blade",
+      "color": "#55d66b"
+    }
   ]
 }

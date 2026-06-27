@@ -1,7 +1,123 @@
 {
   "rules": [
     {
+      "item_tag": "mobstoolforging:parts",
+      "enchantment_tag": "betterenchanting:targets/durability"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/sword_blade",
+      "enchantment_tag": "betterenchanting:targets/durability"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/sword_blade",
+      "enchantment_tag": "betterenchanting:targets/weapons"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/sword_blade",
+      "enchantment_tag": "betterenchanting:targets/weapons/melee"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/sword_blade",
+      "enchantment_tag": "betterenchanting:targets/weapons/swords"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/sword_guard",
+      "enchantment_tag": "betterenchanting:targets/durability"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/sword_guard",
+      "enchantment_tag": "betterenchanting:targets/weapons"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/sword_guard",
+      "enchantment_tag": "betterenchanting:targets/weapons/melee"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/sword_guard",
+      "enchantment_tag": "betterenchanting:targets/weapons/swords"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/pickaxe_head",
+      "enchantment_tag": "betterenchanting:targets/durability"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/pickaxe_head",
+      "enchantment_tag": "betterenchanting:targets/tools"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/pickaxe_head",
+      "enchantment_tag": "betterenchanting:targets/tools/harvesters"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/pickaxe_head",
+      "enchantment_tag": "betterenchanting:targets/tools/pickaxes"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/axe_head",
+      "enchantment_tag": "betterenchanting:targets/durability"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/axe_head",
+      "enchantment_tag": "betterenchanting:targets/tools"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/axe_head",
+      "enchantment_tag": "betterenchanting:targets/tools/harvesters"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/axe_head",
+      "enchantment_tag": "betterenchanting:targets/tools/axes"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/axe_head",
+      "enchantment_tag": "betterenchanting:targets/weapons"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/axe_head",
+      "enchantment_tag": "betterenchanting:targets/weapons/melee"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/shovel_head",
+      "enchantment_tag": "betterenchanting:targets/durability"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/shovel_head",
+      "enchantment_tag": "betterenchanting:targets/tools"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/shovel_head",
+      "enchantment_tag": "betterenchanting:targets/tools/harvesters"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/shovel_head",
+      "enchantment_tag": "betterenchanting:targets/tools/shovels"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/hoe_head",
+      "enchantment_tag": "betterenchanting:targets/durability"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/hoe_head",
+      "enchantment_tag": "betterenchanting:targets/tools"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/hoe_head",
+      "enchantment_tag": "betterenchanting:targets/tools/harvesters"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/hoe_head",
+      "enchantment_tag": "betterenchanting:targets/tools/hoes"
+    },
+    {
       "item_tag": "mobstoolforging:parts/handle",
+      "enchantment_tag": "betterenchanting:targets/durability"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/screwdriver_head",
+      "enchantment_tag": "betterenchanting:targets/durability"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/gem_cutters_blade",
       "enchantment_tag": "betterenchanting:targets/durability"
     }
   ]
