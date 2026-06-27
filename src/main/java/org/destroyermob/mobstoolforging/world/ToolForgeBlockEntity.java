@@ -334,6 +334,13 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && ToolRepairing.isRepairMaterial(benchStacks.get(0), benchStacks.get(1));
     }
 
+    public boolean hasRepairStacks() {
+        return workstationKind() == WorkstationKind.TOOL_FORGE
+                && !benchStacks.isEmpty()
+                && directOutputStack.isEmpty()
+                && templateId == null;
+    }
+
     public ItemStack repairToolWithPlacedMaterial() {
         if (!hasRepairWork()) {
             return ItemStack.EMPTY;
@@ -343,8 +350,12 @@ public class ToolForgeBlockEntity extends BlockEntity {
             return ItemStack.EMPTY;
         }
         clearWorkState();
-        directOutputStack = repaired;
         randomizeDisplayRotation();
+        if (ToolRepairing.isRepairableModularTool(repaired)) {
+            benchStacks.add(repaired.copy());
+        } else {
+            directOutputStack = repaired.copy();
+        }
         sync();
         return repaired.copy();
     }

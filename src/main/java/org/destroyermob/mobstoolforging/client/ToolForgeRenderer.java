@@ -34,6 +34,10 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             renderBenchStacks(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
             return;
         }
+        if (forge.hasRepairStacks() && !forge.isComplete()) {
+            renderBenchStacks(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
+            return;
+        }
         if (forge.template() != null && !forge.isComplete()) {
             renderTemplatePreview(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
         }
