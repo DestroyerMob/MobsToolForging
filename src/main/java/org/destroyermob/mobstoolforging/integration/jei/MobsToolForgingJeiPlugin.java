@@ -128,7 +128,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                     recipeId("station_work/diamond_powder"),
                     WorkstationKind.TOOL_FORGE,
                     Optional.empty(),
-                    StationWorkRecipe.Input.item(ResourceLocation.withDefaultNamespace("diamond")),
+                    StationWorkRecipe.Input.item(ResourceLocation.withDefaultNamespace("iron_ingot")),
                     new ItemStack(ModItems.DIAMOND_POWDER.get(), 4),
                     4,
                     SmithingHammerLevel.IRON.level()

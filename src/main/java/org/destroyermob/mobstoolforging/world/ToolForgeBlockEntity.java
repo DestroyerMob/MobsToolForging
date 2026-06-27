@@ -246,7 +246,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public ItemStack removeOutput() {
         ItemStack output = outputStack();
         if (!output.isEmpty()) {
-            resetWork();
+            clearWorkState();
+            consumeAbrasiveAfterLapidaryCraft();
+            sync();
         }
         return output;
     }
@@ -428,6 +430,16 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private void resetWork() {
         clearWorkState();
         sync();
+    }
+
+    private void consumeAbrasiveAfterLapidaryCraft() {
+        if (workstationKind() != WorkstationKind.LAPIDARY_TABLE || abrasiveStack.isEmpty()) {
+            return;
+        }
+        abrasiveStack.shrink(1);
+        if (abrasiveStack.isEmpty()) {
+            abrasiveStack = ItemStack.EMPTY;
+        }
     }
 
     private void clearWorkState() {
