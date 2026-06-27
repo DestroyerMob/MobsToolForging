@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.world;
 
+import java.util.Optional;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
@@ -29,7 +30,7 @@ public final class VanillaToolConverter {
             return ItemStack.EMPTY;
         }
 
-        ItemStack converted = definition.createTool(ToolConstructionData.basic(toolKind, headMaterial, handleMaterial));
+        ItemStack converted = definition.createTool(construction(toolKind, headMaterial, handleMaterial));
         if (converted.isEmpty()) {
             return ItemStack.EMPTY;
         }
@@ -110,6 +111,22 @@ public final class VanillaToolConverter {
             return MaterialCatalog.NETHERITE;
         }
         return null;
+    }
+
+    private static ToolConstructionData construction(ToolKind toolKind, ResourceLocation headMaterial, ResourceLocation handleMaterial) {
+        if (toolKind != ToolKind.SWORD) {
+            return ToolConstructionData.basic(toolKind, headMaterial, handleMaterial);
+        }
+        return new ToolConstructionData(
+                ToolConstructionData.toolType(toolKind),
+                headMaterial,
+                handleMaterial,
+                Optional.of(headMaterial),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                ToolConstructionData.DEFAULT_QUALITY
+        );
     }
 
     private static void copyDamage(ItemStack original, ItemStack converted) {
