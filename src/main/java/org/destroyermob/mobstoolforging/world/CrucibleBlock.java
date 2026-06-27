@@ -88,6 +88,10 @@ public class CrucibleBlock extends BaseEntityBlock {
         }
 
         CrucibleContents contents = crucible.contents();
+        if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand) && !canUseItem(stack, crucible, contents)) {
+            return EmptyMainHandInteractions.itemResult(useWithoutItem(state, level, pos, player, hitResult), level);
+        }
+
         if (contents.moltenMaterial().filter(MaterialCatalog.NETHERITE::equals).isPresent() && canTip(stack)) {
             if (level.isClientSide) {
                 return ItemInteractionResult.SUCCESS;
@@ -160,6 +164,16 @@ public class CrucibleBlock extends BaseEntityBlock {
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
+    }
+
+    private static boolean canUseItem(ItemStack stack, CrucibleBlockEntity crucible, CrucibleContents contents) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        if (contents.moltenMaterial().filter(MaterialCatalog.NETHERITE::equals).isPresent() && canTip(stack)) {
+            return !tippedCopy(stack).isEmpty();
+        }
+        return crucible.isEmpty() && !stack.is(ModItems.CRUCIBLE.get());
     }
 
     private static boolean canTip(ItemStack stack) {

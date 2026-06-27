@@ -156,8 +156,12 @@ public class HeatingForgeBlockEntity extends BlockEntity {
         return Math.min(1.0F, heatProgress[slot] / (float) MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get());
     }
 
+    public boolean canAcceptFuel(ItemStack stack) {
+        return !stack.isEmpty() && fuelBurnTime(stack) > 0 && (fuelStack.isEmpty() || ItemStack.isSameItemSameComponents(fuelStack, stack) && fuelStack.getCount() < fuelStack.getMaxStackSize());
+    }
+
     public boolean acceptFuel(ItemStack stack) {
-        if (stack.isEmpty() || fuelBurnTime(stack) <= 0) {
+        if (!canAcceptFuel(stack)) {
             return false;
         }
         if (!fuelStack.isEmpty() && (!ItemStack.isSameItemSameComponents(fuelStack, stack) || fuelStack.getCount() >= fuelStack.getMaxStackSize())) {
@@ -173,9 +177,13 @@ public class HeatingForgeBlockEntity extends BlockEntity {
         return true;
     }
 
+    public boolean canAcceptWorkpiece(ItemStack stack) {
+        return !stack.isEmpty() && firstEmptySlot() >= 0 && isHeatableWorkpiece(stack);
+    }
+
     public boolean acceptWorkpiece(ItemStack stack) {
         int slot = firstEmptySlot();
-        if (stack.isEmpty() || slot < 0 || !isHeatableWorkpiece(stack)) {
+        if (!canAcceptWorkpiece(stack)) {
             return false;
         }
         workpieceStacks[slot] = stack.split(1);

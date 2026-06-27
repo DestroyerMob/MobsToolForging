@@ -114,8 +114,12 @@ public class FoundryForgeBlockEntity extends BlockEntity {
         return true;
     }
 
+    public boolean canAcceptCrucible(ItemStack stack) {
+        return crucibleStack.isEmpty() && !stack.isEmpty() && stack.is(ModItems.CRUCIBLE.get());
+    }
+
     public boolean acceptCrucible(ItemStack stack) {
-        if (!crucibleStack.isEmpty() || stack.isEmpty() || !stack.is(ModItems.CRUCIBLE.get())) {
+        if (!canAcceptCrucible(stack)) {
             return false;
         }
         crucibleStack = stack.split(1);

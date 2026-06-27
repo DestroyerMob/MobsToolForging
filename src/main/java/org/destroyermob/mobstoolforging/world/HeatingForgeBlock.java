@@ -127,6 +127,9 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             }
             return ItemInteractionResult.CONSUME;
         }
+        if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand) && !canUseItem(stack, forge, player)) {
+            return EmptyMainHandInteractions.itemResult(useWithoutItem(state, level, pos, player, hitResult), level);
+        }
         if (isFireStick(stack)) {
             return hasFireSticksInBothHands(player) ? ignite(stack, forge, level, pos, player) : ItemInteractionResult.CONSUME;
         }
@@ -252,6 +255,20 @@ public class HeatingForgeBlock extends BaseEntityBlock {
 
     private static boolean isFireStick(ItemStack stack) {
         return stack.is(ModItems.FIRE_STICK.get());
+    }
+
+    private static boolean canUseItem(ItemStack stack, HeatingForgeBlockEntity forge, Player player) {
+        if (isFireStick(stack)) {
+            return hasFireSticksInBothHands(player);
+        }
+        if (stack.is(Items.FLINT_AND_STEEL) || stack.is(Items.FIRE_CHARGE)) {
+            return true;
+        }
+        if (HeatingForgeBlockEntity.fuelBurnTime(stack) > 0) {
+            return forge.canAcceptFuel(stack);
+        }
+        return HeatingForgeBlockEntity.isHeatableWorkpiece(stack)
+                && forge.canAcceptWorkpiece(stack);
     }
 
     private static boolean hasFireSticksInBothHands(Player player) {

@@ -87,6 +87,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (tryCollectOutput(forge, player)) {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
+        if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand) && !canUseItem(stack, forge, level)) {
+            return EmptyMainHandInteractions.itemResult(useWithoutItem(state, level, pos, player, hitResult), level);
+        }
         if (kind == WorkstationKind.TOOLMAKERS_BENCH) {
             return useToolmakersBench(stack, forge, level, pos, player);
         }
@@ -174,6 +177,69 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;
+    }
+
+    private boolean canUseItem(ItemStack stack, ToolForgeBlockEntity forge, Level level) {
+        if (kind == WorkstationKind.TOOLMAKERS_BENCH) {
+            return stack.is(ModItems.SCREWDRIVER.get())
+                    || SmithingHammerLevel.isHammer(stack)
+                    || forge.canPlaceToolmakerStack(stack);
+        }
+        if (kind == WorkstationKind.TOOL_FORGE && (forge.canPlaceRepairTool(stack) || forge.canPlaceRepairMaterial(stack))) {
+            return true;
+        }
+        if (stack.getItem() instanceof ToolTemplateItem templateItem) {
+            return canApplyTemplate(stack, templateItem, forge);
+        }
+        if (kind == WorkstationKind.LAPIDARY_TABLE && stack.is(ModTags.Items.LAPIDARY_ABRASIVES)) {
+            return forge.canPlaceAbrasive(stack);
+        }
+        StationWorkRecipe stationWorkRecipe = StationWorkRecipeRegistry.findStartRecipe(kind, forge.templateId(), stack).orElse(null);
+        if (stationWorkRecipe != null) {
+            return forge.canPlaceLooseWork(stationWorkRecipe, stack);
+        }
+        if (MaterialCatalog.isMaterial(stack)) {
+            return canPlaceMaterial(stack, forge, level);
+        }
+        if (kind == WorkstationKind.LAPIDARY_TABLE) {
+            return stack.is(ModItems.GEM_CUTTERS_KNIFE.get());
+        }
+        return SmithingHammerLevel.isHammer(stack);
+    }
+
+    private boolean canApplyTemplate(ItemStack stack, ToolTemplateItem templateItem, ToolForgeBlockEntity forge) {
+        if (!templateItem.canUseOn(kind)) {
+            return false;
+        }
+        ForgeTemplateDefinition template = templateItem.template(stack).orElse(null);
+        if (template == null) {
+            return false;
+        }
+        return template.id().equals(forge.templateId()) || forge.canChangeTemplate();
+    }
+
+    private boolean canPlaceMaterial(ItemStack stack, ToolForgeBlockEntity forge, Level level) {
+        ForgeTemplateDefinition template = forge.template();
+        if (template == null || forge.remainingMaterials() <= 0) {
+            return false;
+        }
+        ToolMaterialDefinition material = MaterialCatalog.resolve(stack).orElse(null);
+        if (material == null || material.category() != kind.materialCategory()) {
+            return false;
+        }
+        if (kind == WorkstationKind.LAPIDARY_TABLE && !forge.hasAbrasive()) {
+            return false;
+        }
+        if (!template.allowsMaterial(material.id())) {
+            return false;
+        }
+        if (kind == WorkstationKind.TOOL_FORGE
+                && material.category() == MaterialCategory.METAL
+                && MobsToolForgingConfig.REQUIRE_HEATED_METAL.get()
+                && !WorkpieceHeat.isForgeReady(stack, level, template.minimumTemperature())) {
+            return false;
+        }
+        return forge.materialId() == null || forge.materialId().equals(material.id());
     }
 
     private ItemInteractionResult applyTemplateItem(ItemStack stack, ToolTemplateItem templateItem, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {

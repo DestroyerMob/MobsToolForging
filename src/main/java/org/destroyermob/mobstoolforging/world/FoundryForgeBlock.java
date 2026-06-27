@@ -104,6 +104,9 @@ public class FoundryForgeBlock extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof FoundryForgeBlockEntity forge)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
+        if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand) && !canUseItem(stack, forge)) {
+            return EmptyMainHandInteractions.itemResult(useWithoutItem(state, level, pos, player, hitResult), level);
+        }
         if (stack.is(Items.LAVA_BUCKET)) {
             if (level.isClientSide) {
                 return ItemInteractionResult.SUCCESS;
@@ -173,6 +176,10 @@ public class FoundryForgeBlock extends BaseEntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
+    }
+
+    private static boolean canUseItem(ItemStack stack, FoundryForgeBlockEntity forge) {
+        return stack.is(Items.LAVA_BUCKET) || forge.canAcceptCrucible(stack);
     }
 
     private static void consumeLavaBucket(Player player, InteractionHand hand, ItemStack stack) {
