@@ -33,6 +33,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -64,6 +65,7 @@ import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolStatRuleReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
+import org.destroyermob.mobstoolforging.world.ToolRepairing;
 import org.destroyermob.mobstoolforging.world.ToolTrait;
 import org.destroyermob.mobstoolforging.world.ToolTraitReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
@@ -100,6 +102,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(this::coolPlayerWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::coolDroppedWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::blockHeatedCrafting);
+        NeoForge.EVENT_BUS.addListener(this::blockVanillaModularToolRepair);
         NeoForge.EVENT_BUS.addListener(this::addHeatTooltip);
         NeoForge.EVENT_BUS.addListener(this::addCrucibleTooltip);
         NeoForge.EVENT_BUS.addListener(this::boostGildedBlockExperience);
@@ -323,6 +326,12 @@ public class MobsToolForging {
                 event.getEntity().displayClientMessage(Component.translatable("message.mobstoolforging.heated_parts_cannot_craft"), true);
                 return;
             }
+        }
+    }
+
+    private void blockVanillaModularToolRepair(AnvilUpdateEvent event) {
+        if (ToolRepairing.shouldBlockVanillaAnvilRepair(event.getLeft(), event.getRight())) {
+            event.setCanceled(true);
         }
     }
 

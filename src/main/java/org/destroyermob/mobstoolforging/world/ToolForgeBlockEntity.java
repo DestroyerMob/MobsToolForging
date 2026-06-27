@@ -294,6 +294,74 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return true;
     }
 
+    public boolean canPlaceRepairTool(ItemStack stack) {
+        return canUseRepairStacks()
+                && benchStacks.isEmpty()
+                && ToolRepairing.isRepairableModularTool(stack);
+    }
+
+    public boolean placeRepairTool(ItemStack stack) {
+        if (!canPlaceRepairTool(stack)) {
+            return false;
+        }
+        benchStacks.add(stack.copyWithCount(1));
+        stack.shrink(1);
+        sync();
+        return true;
+    }
+
+    public boolean canPlaceRepairMaterial(ItemStack stack) {
+        return canUseRepairStacks()
+                && benchStacks.size() == 1
+                && ToolRepairing.isRepairableModularTool(benchStacks.get(0))
+                && ToolRepairing.isRepairMaterial(benchStacks.get(0), stack);
+    }
+
+    public boolean placeRepairMaterial(ItemStack stack) {
+        if (!canPlaceRepairMaterial(stack)) {
+            return false;
+        }
+        benchStacks.add(stack.copyWithCount(1));
+        stack.shrink(1);
+        sync();
+        return true;
+    }
+
+    public boolean hasRepairWork() {
+        return canUseRepairStacks()
+                && benchStacks.size() == 2
+                && ToolRepairing.isRepairableModularTool(benchStacks.get(0))
+                && ToolRepairing.isRepairMaterial(benchStacks.get(0), benchStacks.get(1));
+    }
+
+    public ItemStack repairToolWithPlacedMaterial() {
+        if (!hasRepairWork()) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack repaired = ToolRepairing.repairWithOneMaterial(benchStacks.get(0));
+        if (repaired.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        clearWorkState();
+        directOutputStack = repaired;
+        randomizeDisplayRotation();
+        sync();
+        return repaired.copy();
+    }
+
+    private boolean canUseRepairStacks() {
+        return workstationKind() == WorkstationKind.TOOL_FORGE
+                && directOutputStack.isEmpty()
+                && templateId == null
+                && abrasiveStack.isEmpty()
+                && materialId == null
+                && materialItemId == null
+                && materialHeatData == null
+                && looseWorkRecipeId == null
+                && materialCount == 0
+                && hitCount == 0;
+    }
+
     public boolean canPlaceToolmakerStack(ItemStack stack) {
         boolean finishedTool = ToolmakerBenchAssembly.isFinishedTool(stack);
         return workstationKind() == WorkstationKind.TOOLMAKERS_BENCH

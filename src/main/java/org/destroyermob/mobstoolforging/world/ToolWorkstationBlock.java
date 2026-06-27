@@ -90,6 +90,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (kind == WorkstationKind.TOOLMAKERS_BENCH) {
             return useToolmakersBench(stack, forge, level, pos, player);
         }
+        if (kind == WorkstationKind.TOOL_FORGE) {
+            ItemInteractionResult repairResult = useSmithingAnvilRepair(stack, forge, level, pos, player);
+            if (repairResult != ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION) {
+                return repairResult;
+            }
+        }
         if (stack.getItem() instanceof ToolTemplateItem templateItem) {
             return applyTemplateItem(stack, templateItem, forge, level, pos, player);
         }
@@ -134,6 +140,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                     } else {
                         player.displayClientMessage(Component.translatable("message.mobstoolforging.use_toolmakers_bench"), true);
                     }
+                }
+                return InteractionResult.CONSUME;
+            }
+            if (kind == WorkstationKind.TOOL_FORGE && forge.hasBenchStacks()) {
+                if (!level.isClientSide) {
+                    player.displayClientMessage(Component.translatable(forge.hasRepairWork() ? "message.mobstoolforging.tool_repair_ready" : "message.mobstoolforging.tool_repair_needs_material"), true);
                 }
                 return InteractionResult.CONSUME;
             }
@@ -282,6 +294,39 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         return ItemInteractionResult.CONSUME;
     }
 
+    private ItemInteractionResult useSmithingAnvilRepair(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (stack.isEmpty() || SmithingHammerLevel.isHammer(stack)) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        if (forge.canPlaceRepairTool(stack)) {
+            if (level.isClientSide) {
+                return ItemInteractionResult.SUCCESS;
+            }
+            var item = stack.getItem();
+            if (!forge.placeRepairTool(stack)) {
+                return ItemInteractionResult.CONSUME;
+            }
+            level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.7F, 1.0F + level.random.nextFloat() * 0.1F);
+            player.awardStat(Stats.ITEM_USED.get(item));
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.tool_repair_tool_placed"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        if (forge.canPlaceRepairMaterial(stack)) {
+            if (level.isClientSide) {
+                return ItemInteractionResult.SUCCESS;
+            }
+            var item = stack.getItem();
+            if (!forge.placeRepairMaterial(stack)) {
+                return ItemInteractionResult.CONSUME;
+            }
+            level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.7F, 1.0F + level.random.nextFloat() * 0.1F);
+            player.awardStat(Stats.ITEM_USED.get(item));
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.tool_repair_material_placed"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
     private ItemInteractionResult placeStationWork(ItemStack stack, StationWorkRecipe recipe, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
         if (level.isClientSide) {
             return ItemInteractionResult.SUCCESS;
@@ -378,6 +423,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         int hammerLevel = stack.is(ModItems.GEM_CUTTERS_KNIFE.get()) && kind == WorkstationKind.LAPIDARY_TABLE
                 ? SmithingHammerLevel.IRON.level()
                 : SmithingHammerLevel.levelOf(stack);
+        if (kind == WorkstationKind.TOOL_FORGE && forge.hasRepairWork()) {
+            return repairTool(stack, forge, level, pos, player);
+        }
         if (forge.hasLooseWork()) {
             return workStationRecipe(stack, hammerLevel, forge, level, pos, player);
         }
@@ -410,6 +458,17 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                 player.displayClientMessage(Component.translatable("message.mobstoolforging.complete"), true);
             }
         }
+        return ItemInteractionResult.CONSUME;
+    }
+
+    private ItemInteractionResult repairTool(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        ItemStack output = forge.repairToolWithPlacedMaterial();
+        if (output.isEmpty()) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.need_materials"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        playWorkEffects(stack, level, pos, player);
+        player.displayClientMessage(Component.translatable("message.mobstoolforging.tool_repaired"), true);
         return ItemInteractionResult.CONSUME;
     }
 

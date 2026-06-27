@@ -21,7 +21,6 @@ import net.neoforged.neoforge.common.extensions.IItemExtension;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
-import org.destroyermob.mobstoolforging.world.ToolMaterialDefinition;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
@@ -133,14 +132,7 @@ public interface ModularToolItem extends IItemExtension {
     }
 
     default boolean isValidModularRepairItem(ItemStack stack, ItemStack repairCandidate, boolean fallback) {
-        ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
-        if (construction == null) {
-            return fallback;
-        }
-        return MaterialCatalog.definition(construction.headMaterial())
-                .map(ToolMaterialDefinition::tier)
-                .map(tier -> tier.getRepairIngredient().test(repairCandidate))
-                .orElse(fallback);
+        return stack.get(ModDataComponents.TOOL_CONSTRUCTION.get()) == null ? fallback : false;
     }
 
     default boolean onEntityItemUpdate(ItemStack stack, ItemEntity entity) {

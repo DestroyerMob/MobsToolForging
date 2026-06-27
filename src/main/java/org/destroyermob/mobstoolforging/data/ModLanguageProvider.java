@@ -130,6 +130,11 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.lapidary_needs_knife", "Use a Gem Cutter's Knife at the Lapidary Table.");
         add("message.mobstoolforging.mixed_materials", "Finish this part with the same material.");
         add("message.mobstoolforging.use_lapidary_table", "Gem heads are shaped on a Lapidary Table.");
+        add("message.mobstoolforging.tool_repair_tool_placed", "Tool placed for repair.");
+        add("message.mobstoolforging.tool_repair_material_placed", "Repair material placed.");
+        add("message.mobstoolforging.tool_repair_needs_material", "Add a matching head repair material.");
+        add("message.mobstoolforging.tool_repair_ready", "Strike the Smithing Anvil with a Smithing Hammer to repair.");
+        add("message.mobstoolforging.tool_repaired", "Tool repaired.");
         add("message.mobstoolforging.use_tool_forge", "Metal heads are forged on a Smithing Anvil.");
         add("message.mobstoolforging.use_toolmakers_bench", "Place parts here, assemble them with a Screwdriver, or split a tool with a Smithing Hammer.");
         add("message.mobstoolforging.toolmaker_part_placed", "Part placed.");
