@@ -11,6 +11,7 @@ import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
+import org.destroyermob.mobstoolforging.world.ToolPartWear;
 
 public class ModularToolPartItem extends Item {
     private final String partType;
@@ -70,6 +71,10 @@ public class ModularToolPartItem extends Item {
         ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
         if (data != null && data.treatment().isPresent()) {
             tooltip.add(Component.translatable("tooltip.mobstoolforging.part_treatment", MaterialCatalog.displayName(data.treatment().get())).withStyle(ChatFormatting.DARK_GRAY));
+        }
+        int remainingDurability = ToolPartWear.remainingDurabilityPercent(stack);
+        if (remainingDurability < 100) {
+            tooltip.add(Component.translatable("tooltip.mobstoolforging.part_durability", remainingDurability).withStyle(ChatFormatting.DARK_GRAY));
         }
         if (data != null && flag.hasShiftDown()) {
             tooltip.add(Component.translatable("tooltip.mobstoolforging.part_workmanship", workmanshipName(data.quality()), data.quality()).withStyle(ChatFormatting.DARK_GRAY));

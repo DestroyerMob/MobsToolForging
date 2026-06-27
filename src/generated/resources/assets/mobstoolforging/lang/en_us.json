@@ -169,6 +169,7 @@
   "tooltip.mobstoolforging.part.handle": "Handle",
   "tooltip.mobstoolforging.part.head": "Head",
   "tooltip.mobstoolforging.part.treatment": "Treatment",
+  "tooltip.mobstoolforging.part_durability": "Durability: %s%%",
   "tooltip.mobstoolforging.part.wrap": "Wrap",
   "tooltip.mobstoolforging.part_quality": "Quality: %s%%",
   "tooltip.mobstoolforging.part_treatment": "Treatment: %s",

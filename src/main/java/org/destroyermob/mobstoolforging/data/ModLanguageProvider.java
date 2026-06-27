@@ -177,6 +177,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.workpiece_status.workable", "Workable heat");
         add("tooltip.mobstoolforging.workpiece_status.white_hot", "White hot");
         add("tooltip.mobstoolforging.workpiece_status.cooling", "Cooling");
+        add("tooltip.mobstoolforging.part_durability", "Durability: %s%%");
         add("tooltip.mobstoolforging.part_quality", "Quality: %s%%");
         add("tooltip.mobstoolforging.part_workmanship", "Workmanship: %s (%s)");
         add("tooltip.mobstoolforging.broken_tool", "Broken - repair before use");

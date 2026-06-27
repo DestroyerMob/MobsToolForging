@@ -45,7 +45,11 @@ public final class ToolmakerBenchAssembly {
                 continue;
             }
             ItemStack output = definition.createTool(construction.get());
-            if (!output.isEmpty() && ToolAssemblyEnchantments.mergeOnto(output, parts.enchantmentSources(), registries)) {
+            if (output.isEmpty()) {
+                continue;
+            }
+            ToolPartWear.applyStoredWear(output, parts.part());
+            if (ToolAssemblyEnchantments.mergeOnto(output, parts.enchantmentSources(), registries)) {
                 output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(stacks));
                 return output;
             }
@@ -54,10 +58,6 @@ public final class ToolmakerBenchAssembly {
     }
 
     public static Optional<List<ItemStack>> disassemble(ItemStack stack) {
-        ToolAssemblyParts storedParts = stack.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
-        if (storedParts != null && !storedParts.stacks().isEmpty()) {
-            return Optional.of(storedParts.copyStacks());
-        }
         ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
         if (construction == null) {
             return Optional.empty();
@@ -65,6 +65,10 @@ public final class ToolmakerBenchAssembly {
         ToolTypeDefinition definition = ToolTypeRegistry.toolType(construction.toolType()).orElse(null);
         if (definition == null) {
             return Optional.empty();
+        }
+        ToolAssemblyParts storedParts = stack.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
+        if (storedParts != null && !storedParts.stacks().isEmpty()) {
+            return Optional.of(ToolPartWear.copyWithWearFromTool(definition, stack, storedParts.copyStacks()));
         }
 
         List<ItemStack> parts = new ArrayList<>();
@@ -99,7 +103,8 @@ public final class ToolmakerBenchAssembly {
                 .filter(treatment -> !MaterialCatalog.NETHERITE.equals(treatment))
                 .map(ToolmakerBenchAssembly::treatmentStack)
                 .ifPresent(parts::add);
-        return Optional.of(parts.stream().filter(item -> !item.isEmpty()).map(ItemStack::copy).toList());
+        List<ItemStack> result = parts.stream().filter(item -> !item.isEmpty()).map(ItemStack::copy).toList();
+        return Optional.of(ToolPartWear.copyWithWearFromTool(definition, stack, result));
     }
 
     public static boolean isFinishedTool(ItemStack stack) {

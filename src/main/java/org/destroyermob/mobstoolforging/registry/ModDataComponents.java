@@ -27,6 +27,11 @@ public final class ModDataComponents {
             builder -> builder.persistent(ToolPartData.CODEC).networkSynchronized(ToolPartData.STREAM_CODEC).cacheEncoding()
     );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> TOOL_PART_WEAR = DATA_COMPONENTS.registerComponentType(
+            "tool_part_wear",
+            builder -> builder.persistent(Codec.intRange(0, 10000)).networkSynchronized(ByteBufCodecs.VAR_INT).cacheEncoding()
+    );
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<ToolConstructionData>> TOOL_CONSTRUCTION = DATA_COMPONENTS.registerComponentType(
             "tool_construction",
             builder -> builder.persistent(ToolConstructionData.CODEC).networkSynchronized(ToolConstructionData.STREAM_CODEC).cacheEncoding()
