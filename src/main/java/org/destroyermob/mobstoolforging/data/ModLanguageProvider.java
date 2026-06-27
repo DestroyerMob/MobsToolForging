@@ -20,6 +20,8 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.HEATING_FORGE, "Heating Forge");
         addBlock(ModBlocks.CRUCIBLE, "Crucible");
         addBlock(ModBlocks.FOUNDRY_FORGE, "Foundry Forge");
+        add("commands.mobstoolforging.convert_vanilla_tool.not_vanilla", "Hold a vanilla tool or weapon to convert.");
+        add("commands.mobstoolforging.convert_vanilla_tool.success", "Converted %s into %s.");
         addItem(ModItems.SMITHING_HAMMER, "Smithing Hammer");
         addItem(ModItems.IRON_SMITHING_HAMMER, "Iron Smithing Hammer");
         addItem(ModItems.SMITHING_HAMMER_HEAD, "Iron Smithing Hammer Head");
@@ -135,6 +137,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.toolmaker_invalid", "That does not fit this bench.");
         add("message.mobstoolforging.toolmaker_assembled", "Tool assembled.");
         add("message.mobstoolforging.toolmaker_disassembled", "Tool separated.");
+        add("message.mobstoolforging.toolmaker_broken_tool", "Repair this tool before separating it.");
         add("message.mobstoolforging.toolmaker_no_tool", "Place one assembled tool before separating it.");
         add("message.mobstoolforging.toolmaker_status", "%s item(s) placed.");
         add("message.mobstoolforging.complete", "The tool part is ready.");
@@ -176,6 +179,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.workpiece_status.cooling", "Cooling");
         add("tooltip.mobstoolforging.part_quality", "Quality: %s%%");
         add("tooltip.mobstoolforging.part_workmanship", "Workmanship: %s (%s)");
+        add("tooltip.mobstoolforging.broken_tool", "Broken - repair before use");
         add("tooltip.mobstoolforging.part_treatment", "Treatment: %s");
         add("tooltip.mobstoolforging.crucible_contains_item", "Contains: %s");
         add("tooltip.mobstoolforging.crucible_contains_molten", "Contains: Molten %s (%s)");

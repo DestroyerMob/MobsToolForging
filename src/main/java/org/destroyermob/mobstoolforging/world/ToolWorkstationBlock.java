@@ -39,6 +39,7 @@ import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.network.ModNetworking;
 import org.destroyermob.mobstoolforging.registry.ModItems;
+import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModTags;
 
 public abstract class ToolWorkstationBlock extends BaseEntityBlock {
@@ -349,7 +350,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_no_tool"), true);
             return ItemInteractionResult.CONSUME;
         }
-        List<ItemStack> parts = ToolmakerBenchAssembly.disassemble(benchStacks.get(0)).orElse(List.of());
+        ItemStack benchTool = benchStacks.get(0);
+        if (Boolean.TRUE.equals(benchTool.get(ModDataComponents.TOOL_BROKEN.get()))) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_broken_tool"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        List<ItemStack> parts = ToolmakerBenchAssembly.disassemble(benchTool).orElse(List.of());
         if (parts.isEmpty()) {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_invalid"), true);
             return ItemInteractionResult.CONSUME;

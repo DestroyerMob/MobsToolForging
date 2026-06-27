@@ -181,6 +181,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
                         ToolPartSpriteKey.modelTextureKey(layer.slot(), material),
                         texture
                 );
+                if ("handle".equals(layer.slot())) {
+                    ResourceLocation handleBodyTexture = sourceTexture(material, handleBodyTextureName(toolKind, material));
+                    if (sourceTextureExists(handleBodyTexture)) {
+                        builder.texture(ToolPartSpriteKey.handleBodyTextureKey(material), handleBodyTexture);
+                    }
+                }
             }
         }
     }
@@ -219,6 +225,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
             return materialPrefix + "_handle_tool";
         }
         return materialPrefix + "_" + toolLayerPartName(toolKind, slot) + "_tool";
+    }
+
+    private static String handleBodyTextureName(ToolKind toolKind, ResourceLocation material) {
+        return textureMaterialPrefix(material) + "_" + toolKind.id() + "_handle_body_tool";
     }
 
     private static String toolLayerPartName(ToolKind toolKind, String slot) {

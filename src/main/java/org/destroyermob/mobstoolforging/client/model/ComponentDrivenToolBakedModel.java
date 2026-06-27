@@ -208,7 +208,7 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
             return List.of(resolveToolLayer(definition, layer, material));
         }
 
-        Optional<ResolvedToolLayerSprite> template = resolveHandleTemplate(definition, layer, material);
+        Optional<ResolvedToolLayerSprite> template = resolveHandleBody(definition, layer, material);
         ResourceLocation exactTexture = textureForToolLayer(definition, layer, material);
         TextureAtlasSprite exactSprite = sprite(exactTexture);
         if (!isMissing(exactSprite)) {
@@ -252,6 +252,16 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
             return ResolvedToolLayerSprite.exact(exactSprite, exactTexture);
         }
         return resolveTemplateFallback(layer, material, true).orElseGet(() -> ResolvedToolLayerSprite.exact(exactSprite, exactTexture));
+    }
+
+    private Optional<ResolvedToolLayerSprite> resolveHandleBody(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
+        ResourceLocation bodyTexture = handleBodyTexture(definition, material);
+        TextureAtlasSprite bodySprite = sprite(bodyTexture);
+        if (!isMissing(bodySprite)) {
+            return Optional.of(ResolvedToolLayerSprite.exact(bodySprite, bodyTexture));
+        }
+
+        return resolveHandleTemplate(definition, layer, material);
     }
 
     private Optional<ResolvedToolLayerSprite> resolveHandleTemplate(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
@@ -327,6 +337,22 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
             prefix = "stick";
         }
         return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "source/tool_parts/" + directory + "/" + prefix + "_" + handleShape(definition) + "_handle_tool");
+    }
+
+    private ResourceLocation handleBodyTexture(ToolTypeDefinition definition, ResourceLocation material) {
+        String directory;
+        String prefix;
+        if (MaterialCatalog.BLAZE.equals(material)) {
+            directory = "blaze_rod";
+            prefix = "blaze_rod";
+        } else if (MaterialCatalog.BREEZE.equals(material)) {
+            directory = "breeze_rod";
+            prefix = "breeze_rod";
+        } else {
+            directory = "stick";
+            prefix = "stick";
+        }
+        return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "source/tool_parts/" + directory + "/" + prefix + "_" + handleShape(definition) + "_handle_body_tool");
     }
 
     private ResourceLocation handleMaskTexture(ToolTypeDefinition definition) {

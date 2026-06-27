@@ -43,6 +43,7 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.destroyermob.mobstoolforging.client.MobsToolForgingClient;
+import org.destroyermob.mobstoolforging.command.ModCommands;
 import org.destroyermob.mobstoolforging.data.ModDataGenerators;
 import org.destroyermob.mobstoolforging.network.ModNetworking;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
@@ -51,6 +52,7 @@ import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
+import org.destroyermob.mobstoolforging.registry.ModLootModifiers;
 import org.destroyermob.mobstoolforging.world.CrucibleContents;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
@@ -84,6 +86,7 @@ public class MobsToolForging {
         ModMenuTypes.register(modEventBus);
         ModNetworking.register(modEventBus);
         ModDataGenerators.register(modEventBus);
+        ModLootModifiers.register(modEventBus);
         ToolTypeRegistry.bootstrap();
         ToolStatBuilder.validateStarterMaterialAttributes();
         modContainer.registerConfig(ModConfig.Type.COMMON, MobsToolForgingConfig.COMMON_SPEC);
@@ -101,6 +104,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(this::addCrucibleTooltip);
         NeoForge.EVENT_BUS.addListener(this::boostGildedBlockExperience);
         NeoForge.EVENT_BUS.addListener(this::boostGildedMobExperience);
+        NeoForge.EVENT_BUS.addListener(ModCommands::register);
 
         if (FMLEnvironment.dist.isClient()) {
             MobsToolForgingClient.register(modEventBus);

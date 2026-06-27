@@ -12,6 +12,10 @@ public record ToolPartSpriteKey(ResourceLocation toolType, String slot, Resource
         return "layer_" + sanitize(slot) + "_" + materialKey(material);
     }
 
+    public static String handleBodyTextureKey(ResourceLocation material) {
+        return "layer_handle_body_" + materialKey(material);
+    }
+
     public static String materialKey(ResourceLocation material) {
         if (material.getNamespace().equals(MobsToolForging.MOD_ID)) {
             return sanitize(material.getPath());
