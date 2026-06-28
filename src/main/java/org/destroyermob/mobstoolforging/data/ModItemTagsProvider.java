@@ -78,5 +78,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .add(Items.BLAZE_POWDER, Items.MAGMA_CREAM, Items.NETHERITE_SCRAP, Items.ECHO_SHARD, Items.SCULK_CATALYST);
         tag(ModTags.Items.LAPIDARY_ABRASIVES)
                 .add(ModItems.DIAMOND_POWDER.get());
+        tag(ModTags.Items.KNAPPING_TOOLS)
+                .add(Items.FLINT);
     }
 }

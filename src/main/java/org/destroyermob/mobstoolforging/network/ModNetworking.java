@@ -11,7 +11,9 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.destroyermob.mobstoolforging.client.MobsToolForgingClient;
+import org.destroyermob.mobstoolforging.registry.ModTags;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
+import org.destroyermob.mobstoolforging.world.KnappingFlintBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
 
 public final class ModNetworking {
@@ -33,6 +35,7 @@ public final class ModNetworking {
         PayloadRegistrar registrar = event.registrar(NETWORK_VERSION).optional();
         registrar.playToClient(OpenForgeTemplateScreenPayload.TYPE, OpenForgeTemplateScreenPayload.STREAM_CODEC, ModNetworking::handleOpenTemplateScreen);
         registrar.playToServer(SetForgeTemplatePayload.TYPE, SetForgeTemplatePayload.STREAM_CODEC, ModNetworking::handleSetTemplate);
+        registrar.playToServer(CycleKnappingTargetPayload.TYPE, CycleKnappingTargetPayload.STREAM_CODEC, ModNetworking::handleCycleKnappingTarget);
     }
 
     private static void handleOpenTemplateScreen(OpenForgeTemplateScreenPayload payload, IPayloadContext context) {
@@ -58,6 +61,22 @@ public final class ModNetworking {
             } else {
                 player.displayClientMessage(Component.translatable("message.mobstoolforging.forge_busy"), true);
             }
+        }
+    }
+
+    private static void handleCycleKnappingTarget(CycleKnappingTargetPayload payload, IPayloadContext context) {
+        if (!(context.player() instanceof ServerPlayer player)) {
+            return;
+        }
+        if (player.distanceToSqr(Vec3.atCenterOf(payload.pos())) > MAX_TEMPLATE_DISTANCE_SQUARED) {
+            return;
+        }
+        if (!player.getMainHandItem().is(ModTags.Items.KNAPPING_TOOLS) && !player.getOffhandItem().is(ModTags.Items.KNAPPING_TOOLS)) {
+            return;
+        }
+        if (player.level().getBlockEntity(payload.pos()) instanceof KnappingFlintBlockEntity knapping) {
+            knapping.cycleTarget(payload.delta());
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.knapping_status", knapping.target().displayName(), knapping.hitCount(), KnappingFlintBlockEntity.REQUIRED_HITS), true);
         }
     }
 }

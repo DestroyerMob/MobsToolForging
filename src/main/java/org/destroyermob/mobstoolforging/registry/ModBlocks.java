@@ -8,7 +8,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.CrucibleBlock;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlock;
+import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
+import org.destroyermob.mobstoolforging.world.KnappingFlintBlock;
 import org.destroyermob.mobstoolforging.world.LapidaryTableBlock;
 import org.destroyermob.mobstoolforging.world.PatternCreationStationBlock;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlock;
@@ -44,6 +46,14 @@ public final class ModBlocks {
     public static final DeferredBlock<FoundryForgeBlock> FOUNDRY_FORGE = BLOCKS.register(
             "foundry_forge",
             () -> new FoundryForgeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).noOcclusion())
+    );
+    public static final DeferredBlock<KnappingFlintBlock> KNAPPING_FLINT = BLOCKS.register(
+            "knapping_flint",
+            () -> new KnappingFlintBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRAVEL).strength(0.1F).noCollission().noOcclusion())
+    );
+    public static final DeferredBlock<GroundToolAssemblyBlock> GROUND_TOOL_ASSEMBLY = BLOCKS.register(
+            "ground_tool_assembly",
+            () -> new GroundToolAssemblyBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON).strength(0.1F).noCollission().noOcclusion())
     );
 
     private ModBlocks() {

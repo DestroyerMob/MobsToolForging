@@ -20,6 +20,8 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.HEATING_FORGE, "Heating Forge");
         addBlock(ModBlocks.CRUCIBLE, "Crucible");
         addBlock(ModBlocks.FOUNDRY_FORGE, "Foundry Forge");
+        addBlock(ModBlocks.KNAPPING_FLINT, "Knapping Flint");
+        addBlock(ModBlocks.GROUND_TOOL_ASSEMBLY, "Ground Tool Assembly");
         add("commands.mobstoolforging.convert_vanilla_tool.not_vanilla", "Hold a vanilla tool or weapon to convert.");
         add("commands.mobstoolforging.convert_vanilla_tool.success", "Converted %s into %s.");
         addItem(ModItems.SMITHING_HAMMER, "Smithing Hammer");
@@ -31,6 +33,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.GEM_CUTTERS_BLADE, "Gem Cutter's Blade");
         addItem(ModItems.DIAMOND_POWDER, "Diamond Powder");
         addItem(ModItems.FLINT_SHARD, "Flint Shard");
+        addItem(ModItems.PLANT_FIBER, "Plant Fiber");
         addItem(ModItems.FIRE_STICK, "Fire Stick");
         addItem(ModItems.PICKAXE_HEAD_PATTERN, "Pickaxe Head Pattern");
         addItem(ModItems.AXE_HEAD_PATTERN, "Axe Head Pattern");
@@ -108,6 +111,12 @@ public class ModLanguageProvider extends LanguageProvider {
         add("forge_template.mobstoolforging.smithing_hammer_head", "Smithing Hammer Head");
         add("forge_template.mobstoolforging.screwdriver_head", "Screwdriver Head");
         add("forge_template.mobstoolforging.gem_cutters_blade", "Gem Cutter's Blade");
+        add("knapping_target.mobstoolforging.sword_blade", "Flint Sword Blade");
+        add("knapping_target.mobstoolforging.sword_guard", "Flint Sword Guard");
+        add("knapping_target.mobstoolforging.shovel_head", "Flint Shovel Head");
+        add("knapping_target.mobstoolforging.pickaxe_head", "Flint Pickaxe Head");
+        add("knapping_target.mobstoolforging.axe_head", "Flint Axe Head");
+        add("knapping_target.mobstoolforging.hoe_head", "Flint Hoe Head");
         add("message.mobstoolforging.select_template", "Use a pattern item on this station.");
         add("message.mobstoolforging.sneak_hint", "Use a pattern item, or an empty hand to check the station.");
         add("message.mobstoolforging.template_selected", "Selected %s.");
@@ -145,6 +154,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.toolmaker_broken_tool", "Repair this tool before separating it.");
         add("message.mobstoolforging.toolmaker_no_tool", "Place one assembled tool before separating it.");
         add("message.mobstoolforging.toolmaker_status", "%s item(s) placed.");
+        add("message.mobstoolforging.knapping_status", "Knapping: %s (%s/%s)");
+        add("message.mobstoolforging.knapping_complete", "Knapped %s.");
+        add("message.mobstoolforging.ground_assembly_part_placed", "Part placed.");
+        add("message.mobstoolforging.ground_assembly_needs_parts", "Add the required handle or guard first.");
         add("message.mobstoolforging.complete", "The tool part is ready.");
         add("message.mobstoolforging.inventory_full", "Make room before taking the finished part.");
         add("message.mobstoolforging.station_status", "Materials: %s/%s, Progress: %s/%s");

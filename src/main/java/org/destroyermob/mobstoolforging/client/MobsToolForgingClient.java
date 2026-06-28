@@ -3,22 +3,33 @@ package org.destroyermob.mobstoolforging.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.client.model.ComponentDrivenToolBakedModel;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
 import org.destroyermob.mobstoolforging.client.model.ToolMaterialVisualManager;
+import org.destroyermob.mobstoolforging.network.CycleKnappingTargetPayload;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
+import org.destroyermob.mobstoolforging.registry.ModTags;
+import org.destroyermob.mobstoolforging.world.KnappingFlintBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
 
@@ -33,6 +44,8 @@ public final class MobsToolForgingClient {
         eventBus.addListener(MobsToolForgingClient::registerItemDecorations);
         eventBus.addListener(MobsToolForgingClient::registerReloadListeners);
         eventBus.addListener(MobsToolForgingClient::registerMenuScreens);
+        NeoForge.EVENT_BUS.addListener(MobsToolForgingClient::handleKnappingScroll);
+        NeoForge.EVENT_BUS.addListener(MobsToolForgingClient::showKnappingActionbar);
     }
 
     public static void openTemplateScreen(BlockPos pos) {
@@ -52,6 +65,8 @@ public final class MobsToolForgingClient {
         event.registerBlockEntityRenderer(ModBlockEntities.HEATING_FORGE.get(), HeatingForgeRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.CRUCIBLE.get(), CrucibleRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.FOUNDRY_FORGE.get(), FoundryForgeRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.KNAPPING_FLINT.get(), KnappingFlintRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.GROUND_TOOL_ASSEMBLY.get(), GroundToolAssemblyRenderer::new);
     }
 
     private static void registerGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
@@ -88,5 +103,61 @@ public final class MobsToolForgingClient {
 
     private static void registerMenuScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenuTypes.PATTERN_CREATION_STATION.get(), PatternCreationStationScreen::new);
+    }
+
+    private static void handleKnappingScroll(InputEvent.MouseScrollingEvent event) {
+        KnappingLookTarget target = knappingLookTarget(true);
+        if (target == null) {
+            return;
+        }
+        double scrollDelta = event.getScrollDeltaY();
+        if (scrollDelta == 0.0D) {
+            return;
+        }
+        PacketDistributor.sendToServer(new CycleKnappingTargetPayload(target.pos(), scrollDelta > 0.0D ? 1 : -1));
+        event.setCanceled(true);
+    }
+
+    private static void showKnappingActionbar(ClientTickEvent.Post event) {
+        KnappingLookTarget target = knappingLookTarget(false);
+        if (target == null) {
+            return;
+        }
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player != null) {
+            minecraft.player.displayClientMessage(Component.translatable(
+                    "message.mobstoolforging.knapping_status",
+                    target.knapping().target().displayName(),
+                    target.knapping().hitCount(),
+                    KnappingFlintBlockEntity.REQUIRED_HITS
+            ), true);
+        }
+    }
+
+    private static KnappingLookTarget knappingLookTarget(boolean requireSneaking) {
+        if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
+            return null;
+        }
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null || minecraft.level == null || minecraft.screen != null) {
+            return null;
+        }
+        if (requireSneaking && !minecraft.player.isShiftKeyDown()) {
+            return null;
+        }
+        if (!minecraft.player.getMainHandItem().is(ModTags.Items.KNAPPING_TOOLS) && !minecraft.player.getOffhandItem().is(ModTags.Items.KNAPPING_TOOLS)) {
+            return null;
+        }
+        if (minecraft.hitResult == null || minecraft.hitResult.getType() != HitResult.Type.BLOCK) {
+            return null;
+        }
+        BlockPos pos = ((BlockHitResult) minecraft.hitResult).getBlockPos();
+        if (minecraft.level.getBlockEntity(pos) instanceof KnappingFlintBlockEntity knapping) {
+            return new KnappingLookTarget(pos, knapping);
+        }
+        return null;
+    }
+
+    private record KnappingLookTarget(BlockPos pos, KnappingFlintBlockEntity knapping) {
     }
 }

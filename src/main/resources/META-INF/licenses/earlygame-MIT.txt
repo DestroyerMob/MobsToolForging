@@ -3,6 +3,7 @@ EarlyGame texture assets
 Source: /Users/ethanhellyer/Downloads/earlygame-1.19-1.1.2.jar
 Used assets:
 - assets/earlygame/textures/item/flint_shard.png
+- assets/earlygame/textures/item/plant_fiber.png
 
 MIT License
 

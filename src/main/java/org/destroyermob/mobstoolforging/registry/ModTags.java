@@ -30,6 +30,7 @@ public final class ModTags {
         public static final TagKey<Item> TOOL_FOCI = itemTag("tool_foci");
         public static final TagKey<Item> TREATMENT_CATALYSTS = itemTag("treatment_catalysts");
         public static final TagKey<Item> LAPIDARY_ABRASIVES = itemTag("lapidary_abrasives");
+        public static final TagKey<Item> KNAPPING_TOOLS = itemTag("knapping_tools");
 
         private Items() {
         }

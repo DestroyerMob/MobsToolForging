@@ -57,6 +57,7 @@ import org.destroyermob.mobstoolforging.registry.ModLootModifiers;
 import org.destroyermob.mobstoolforging.world.CrucibleContents;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
+import org.destroyermob.mobstoolforging.world.FlintKnappingEvents;
 import org.destroyermob.mobstoolforging.world.FlintToolStacks;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialDefinitionReloadListener;
@@ -94,7 +95,9 @@ public class MobsToolForging {
         modContainer.registerConfig(ModConfig.Type.COMMON, MobsToolForgingConfig.COMMON_SPEC);
 
         modEventBus.addListener(this::addCreativeTabContents);
-        NeoForge.EVENT_BUS.addListener(this::knapFlintShard);
+        NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::placeKnappingFlint);
+        NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::placeGroundAssembly);
+        NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::dropPlantFiber);
         NeoForge.EVENT_BUS.addListener(this::lowerCopperHarvestTier);
         NeoForge.EVENT_BUS.addListener(this::quenchInWaterCauldron);
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
@@ -150,6 +153,7 @@ public class MobsToolForging {
         }
         if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(ModItems.FLINT_SHARD);
+            event.accept(ModItems.PLANT_FIBER);
             event.accept(ModItems.SMITHING_HAMMER_HEAD);
             event.accept(ModItems.SCREWDRIVER_HEAD);
             event.accept(ModItems.GEM_CUTTERS_BLADE);
@@ -161,54 +165,6 @@ public class MobsToolForging {
         ItemStack stack = new ItemStack(ModItems.TEMPLATE_PATTERN.get());
         stack.set(ModDataComponents.FORGE_TEMPLATE.get(), template.id());
         return stack;
-    }
-
-    private void knapFlintShard(PlayerInteractEvent.RightClickBlock event) {
-        ItemStack held = event.getItemStack();
-        if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get() || !held.is(Items.FLINT)) {
-            return;
-        }
-        Level level = event.getLevel();
-        BlockPos pos = event.getPos();
-        BlockState state = level.getBlockState(pos);
-        if (!state.is(BlockTags.MINEABLE_WITH_PICKAXE)) {
-            return;
-        }
-        event.setCanceled(true);
-        event.setCancellationResult(InteractionResult.SUCCESS);
-        if (level.isClientSide) {
-            return;
-        }
-
-        boolean success = level.random.nextDouble() < MobsToolForgingConfig.FLINT_KNAPPING_SUCCESS_CHANCE.get();
-        level.playSound(null, pos, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 0.35F, 1.25F + level.random.nextFloat() * 0.25F);
-        if (!success) {
-            return;
-        }
-
-        held.shrink(1);
-        int shardCount = 1;
-        if (level.random.nextDouble() < MobsToolForgingConfig.FLINT_KNAPPING_BONUS_SHARD_CHANCE.get()) {
-            shardCount++;
-        }
-        ItemStack shards = new ItemStack(ModItems.FLINT_SHARD.get(), shardCount);
-        if (!event.getEntity().getInventory().add(shards)) {
-            event.getEntity().drop(shards, false);
-        }
-        level.playSound(null, pos, SoundEvents.GRAVEL_BREAK, SoundSource.PLAYERS, 0.35F, 1.15F + level.random.nextFloat() * 0.2F);
-        if (level instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(
-                    new net.minecraft.core.particles.ItemParticleOption(net.minecraft.core.particles.ParticleTypes.ITEM, new ItemStack(Items.FLINT)),
-                    event.getHitVec().getLocation().x,
-                    event.getHitVec().getLocation().y,
-                    event.getHitVec().getLocation().z,
-                    8,
-                    0.08,
-                    0.08,
-                    0.08,
-                    0.02
-            );
-        }
     }
 
     private void lowerCopperHarvestTier(PlayerEvent.HarvestCheck event) {

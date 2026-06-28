@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_flint_shard": {
+    "has_lava_bucket": {
       "conditions": {
         "items": [
           {
-            "items": "mobstoolforging:flint_shard"
+            "items": "minecraft:lava_bucket"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "mobstoolforging:flint_hoe"
+        "recipe": "mobstoolforging:foundry_forge"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_flint_shard"
+      "has_lava_bucket"
     ]
   ],
   "rewards": {
     "recipes": [
-      "mobstoolforging:flint_hoe"
+      "mobstoolforging:foundry_forge"
     ]
   }
 }

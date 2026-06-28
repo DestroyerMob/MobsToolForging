@@ -87,6 +87,10 @@ public final class ModItems {
             "flint_shard",
             () -> new Item(new Item.Properties())
     );
+    public static final DeferredItem<Item> PLANT_FIBER = ITEMS.register(
+            "plant_fiber",
+            () -> new Item(new Item.Properties())
+    );
     public static final DeferredItem<FireStickItem> FIRE_STICK = ITEMS.register(
             "fire_stick",
             () -> new FireStickItem(new Item.Properties().stacksTo(1))

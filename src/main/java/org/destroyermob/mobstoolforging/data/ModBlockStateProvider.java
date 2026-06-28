@@ -53,18 +53,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
         heatingForgeBlock(heatingForge, heatingForgeModel);
         simpleBlockItem(heatingForge, heatingForgeModel);
 
-        Block crucible = ModBlocks.CRUCIBLE.get();
-        ModelFile crucibleModel = new ModelFile.UncheckedModelFile(modLoc("block/crucible"));
-        simpleBlock(crucible, crucibleModel);
-        simpleBlockItem(crucible, crucibleModel);
-
-        Block foundryForge = ModBlocks.FOUNDRY_FORGE.get();
-        ModelFile foundryForgeModel = new ModelFile.UncheckedModelFile(modLoc("block/lava_foundry_forge"));
-        heatingForgeBlock(foundryForge, foundryForgeModel);
-        simpleBlockItem(foundryForge, foundryForgeModel);
-
         smithingHammerModel();
         itemModels().withExistingParent("flint_shard", mcLoc("item/generated")).texture("layer0", modLoc("item/flint_shard"));
+        itemModels().withExistingParent("plant_fiber", mcLoc("item/generated")).texture("layer0", modLoc("item/plant_fiber"));
         itemModels().withExistingParent("fire_stick", mcLoc("item/handheld")).texture("layer0", mcLoc("item/stick"));
         itemModels().withExistingParent("diamond_powder", mcLoc("item/generated")).texture("layer0", modLoc("item/diamond_powder"));
         patternModel(ModItems.PICKAXE_HEAD_PATTERN.getId().getPath());

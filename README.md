@@ -12,7 +12,7 @@ A NeoForge 1.21.1 mod that adds physical, modular tool making without changing v
 - In-world station previews show the selected part shape before material is added.
 - Smithing Hammer workflow with material placement, progress, and block-entity visuals.
 - Modular vanilla-style tool and weapon set: sword, shovel, pickaxe, axe, and hoe.
-- Crude flint starter tools, flint knapping, and early copper/iron progression rules.
+- In-world flint knapping and Plant Fiber ground assembly for modular starter flint tools.
 - Tag-driven starter materials:
   - Metals: iron, gold, copper, netherite
   - Gems: diamond, emerald
@@ -46,7 +46,7 @@ The built jar is written to `build/libs/`.
 The common config controls progression and unfinished systems:
 
 - Vanilla material tool recipes are disabled by default so the forging loop owns tool progression.
-- Crude flint tools, flint knapping, copper harvest rules, heated metal requirements, and loot conversion are configurable.
+- Starter flint progression, copper harvest rules, heated metal requirements, and loot conversion are configurable.
 - `debugTemplateSelector=false` keeps the old template selector screen disabled during normal play.
 - Bloomery, crucible, and casting switches are present but reserved for future work and default to off.
 
@@ -62,5 +62,5 @@ Procedural sprites are placeholder defaults. Final-quality art should come from 
 - The old template selector screen is a debug fallback only and is disabled during normal play unless the debug config is enabled.
 - Bridge support is data-driven. MoreWeapons currently supplies bridge data for great swords, katanas, battle axes, knives, and machetes; other non-vanilla families still need bridge data from their owning mods.
 - Generated part sprites are useful for wiring tests, but they are not final art.
-- Early progression uses crude flint tools into copper, then copper into iron. See `docs/PROGRESSION.md`.
+- Early progression uses grass/fern Plant Fiber, placed flint knapping, and ground assembly to make modular flint tools before copper and iron. See `docs/PROGRESSION.md`.
 - Bloomery, crucible, and casting progression are scaffolded in config/data but are not the active production path yet.

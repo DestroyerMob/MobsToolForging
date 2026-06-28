@@ -13,7 +13,8 @@ This document inventories the jar so Mobs Tool Forging can decide what to repurp
 ## Current MTF Use
 
 - `flint_shard.png` -> `mobstoolforging:textures/item/flint_shard.png`
-- Old EarlyGame flint tool textures are no longer used. Flint sword, pickaxe, axe, shovel, and hoe are craft-grid recipes that output MTF modular tools using the `mobstoolforging:flint` material visuals.
+- `plant_fiber.png` -> `mobstoolforging:textures/item/plant_fiber.png`
+- Old EarlyGame flint tool textures are no longer used. Starter flint tools now come from placed flint knapping and ground assembly, producing MTF modular tools from actual flint parts.
 
 The jar does not contain a flint shovel texture.
 
@@ -182,7 +183,7 @@ Useful source model groups:
 
 ### Flint and Survival Recipes
 
-MTF currently uses its own flint recipes for modular sword, pickaxe, axe, shovel, and hoe outputs.
+MTF does not use EarlyGame's flint-shard crafting recipes. The active starter loop uses placed flint knapping, sticks/handles, and Plant Fiber as a ground-assembly catalyst.
 
 Source jar recipes:
 
@@ -407,9 +408,10 @@ Likely roles based on names, config, and lang keys:
 
 ### Strong Fit For Mobs Tool Forging
 
-- flint knife, hatchet, and pick textures for crude survival tools
-- flint shard texture as a crude-part or knapping result
-- plant fiber and lashing textures for primitive binding or handle-wrap progression
+- flint knife, hatchet, and pick textures as reference only; MTF renders modular flint tools from part visuals
+- flint shard texture for compatibility content
+- plant fiber texture for starter ground assembly
+- lashing texture for possible future primitive binding or handle-wrap progression
 - copper tool textures as reference or temporary placeholders for copper modular tools
 - copper nugget texture if copper recycling becomes useful
 - copper armor textures only if armor becomes part of the mod later

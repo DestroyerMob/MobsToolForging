@@ -8,7 +8,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.CrucibleBlockEntity;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlockEntity;
+import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlockEntity;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
+import org.destroyermob.mobstoolforging.world.KnappingFlintBlockEntity;
 import org.destroyermob.mobstoolforging.world.PatternCreationStationBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
 
@@ -37,6 +39,14 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PatternCreationStationBlockEntity>> PATTERN_CREATION_STATION = BLOCK_ENTITIES.register(
             "pattern_creation_station",
             () -> BlockEntityType.Builder.of(PatternCreationStationBlockEntity::new, ModBlocks.PATTERN_CREATION_STATION.get()).build(null)
+    );
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<KnappingFlintBlockEntity>> KNAPPING_FLINT = BLOCK_ENTITIES.register(
+            "knapping_flint",
+            () -> BlockEntityType.Builder.of(KnappingFlintBlockEntity::new, ModBlocks.KNAPPING_FLINT.get()).build(null)
+    );
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GroundToolAssemblyBlockEntity>> GROUND_TOOL_ASSEMBLY = BLOCK_ENTITIES.register(
+            "ground_tool_assembly",
+            () -> BlockEntityType.Builder.of(GroundToolAssemblyBlockEntity::new, ModBlocks.GROUND_TOOL_ASSEMBLY.get()).build(null)
     );
 
     private ModBlockEntities() {

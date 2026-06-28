@@ -22,6 +22,8 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.HEATING_FORGE.get());
         add(ModBlocks.CRUCIBLE.get(), noDrop());
         dropSelf(ModBlocks.FOUNDRY_FORGE.get());
+        add(ModBlocks.KNAPPING_FLINT.get(), noDrop());
+        add(ModBlocks.GROUND_TOOL_ASSEMBLY.get(), noDrop());
     }
 
     @Override
@@ -33,7 +35,9 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
                 ModBlocks.TOOLMAKERS_BENCH.get(),
                 ModBlocks.HEATING_FORGE.get(),
                 ModBlocks.CRUCIBLE.get(),
-                ModBlocks.FOUNDRY_FORGE.get()
+                ModBlocks.FOUNDRY_FORGE.get(),
+                ModBlocks.KNAPPING_FLINT.get(),
+                ModBlocks.GROUND_TOOL_ASSEMBLY.get()
         );
     }
 }

@@ -6,14 +6,10 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
-import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModItems;
-import org.destroyermob.mobstoolforging.world.FlintToolStacks;
-import org.destroyermob.mobstoolforging.world.ToolKind;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -119,12 +115,6 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_stick", has(Items.STICK))
                 .save(output);
 
-        flintToolRecipe(output, ToolKind.SWORD, "flint_sword", "F", "F", "S");
-        flintToolRecipe(output, ToolKind.PICKAXE, "flint_pickaxe", "FFF", " S ", " S ");
-        flintToolRecipe(output, ToolKind.AXE, "flint_axe", "FF", "FS", " S");
-        flintToolRecipe(output, ToolKind.SHOVEL, "flint_shovel", "F", "S", "S");
-        flintToolRecipe(output, ToolKind.HOE, "flint_hoe", "FF", " S", " S");
-
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.LAPIDARY_TABLE)
                 .define('D', Items.DIAMOND)
                 .define('C', Items.CRAFTING_TABLE)
@@ -134,16 +124,5 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("SSS")
                 .unlockedBy("has_diamond", has(Items.DIAMOND))
                 .save(output);
-    }
-
-    private void flintToolRecipe(RecipeOutput output, ToolKind toolKind, String recipeName, String... rows) {
-        ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, FlintToolStacks.create(toolKind))
-                .define('F', ModItems.FLINT_SHARD.get())
-                .define('S', Items.STICK)
-                .unlockedBy("has_flint_shard", has(ModItems.FLINT_SHARD.get()));
-        for (String row : rows) {
-            builder.pattern(row);
-        }
-        builder.save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, recipeName));
     }
 }
