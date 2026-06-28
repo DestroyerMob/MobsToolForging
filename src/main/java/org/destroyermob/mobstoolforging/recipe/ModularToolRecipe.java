@@ -23,6 +23,7 @@ import org.destroyermob.mobstoolforging.registry.ModTags;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolAssemblyEnchantments;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
+import org.destroyermob.mobstoolforging.world.ToolExternalComponents;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
 import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
@@ -62,7 +63,11 @@ public class ModularToolRecipe extends CustomRecipe {
         if (output.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        return ToolAssemblyEnchantments.mergeOnto(output, parts.enchantmentSources(), registries) ? output : ItemStack.EMPTY;
+        if (!ToolAssemblyEnchantments.mergeOnto(output, parts.enchantmentSources(), registries)) {
+            return ItemStack.EMPTY;
+        }
+        ToolExternalComponents.copyPrimaryHeadComponentsToTool(parts.part(), output);
+        return output;
     }
 
     @Override
@@ -236,18 +241,7 @@ public class ModularToolRecipe extends CustomRecipe {
         }
 
         private int quality() {
-            int total = partQuality(part);
-            int count = 1;
-            for (ItemStack requiredPart : requiredParts.values()) {
-                total += partQuality(requiredPart);
-                count++;
-            }
-            return Math.round(total / (float) count);
-        }
-
-        private static int partQuality(ItemStack stack) {
-            ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
-            return data == null ? ToolPartData.DEFAULT_QUALITY : data.quality();
+            return ToolConstructionData.DEFAULT_QUALITY;
         }
 
         private List<ItemStack> enchantmentSources() {

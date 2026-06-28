@@ -220,7 +220,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
             return directOutputStack.copy();
         }
         ForgeTemplateDefinition template = template();
-        return isComplete() && template != null && materialId != null ? applyMaterialHeat(template.outputStack(materialId, workQuality(template))) : ItemStack.EMPTY;
+        return isComplete() && template != null && materialId != null ? applyMaterialHeat(template.outputStack(materialId, ToolPartData.DEFAULT_QUALITY)) : ItemStack.EMPTY;
     }
 
     public ItemStack displayMaterialStack() {
@@ -577,22 +577,6 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 gameTime,
                 workable
         );
-    }
-
-    private int workQuality(ForgeTemplateDefinition template) {
-        int quality = ToolPartData.DEFAULT_QUALITY;
-        WorkstationKind kind = workstationKind();
-        if (kind == WorkstationKind.TOOL_FORGE && materialHeatData != null && level != null) {
-            float temperature = materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
-            float minimum = template.minimumTemperature();
-            if (temperature >= minimum) {
-                float headroom = Math.max(0.01F, 1.0F - minimum);
-                quality += Math.round(Math.min(1.0F, (temperature - minimum) / headroom) * 10.0F);
-            } else {
-                quality -= Math.round((minimum - temperature) * 20.0F);
-            }
-        }
-        return Math.max(90, Math.min(110, quality));
     }
 
     private void randomizeDisplayRotation() {

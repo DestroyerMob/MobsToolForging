@@ -4,6 +4,7 @@ import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -76,20 +77,21 @@ public class ModularToolPartItem extends Item {
         if (remainingDurability < 100) {
             tooltip.add(Component.translatable("tooltip.mobstoolforging.part_durability", remainingDurability).withStyle(ChatFormatting.DARK_GRAY));
         }
-        if (data != null && flag.hasShiftDown()) {
-            tooltip.add(Component.translatable("tooltip.mobstoolforging.part_workmanship", workmanshipName(data.quality()), data.quality()).withStyle(ChatFormatting.DARK_GRAY));
-        }
     }
 
-    private static Component workmanshipName(int quality) {
-        String key;
-        if (quality > ToolPartData.DEFAULT_QUALITY) {
-            key = "tooltip.mobstoolforging.workmanship.fine";
-        } else if (quality < ToolPartData.DEFAULT_QUALITY) {
-            key = "tooltip.mobstoolforging.workmanship.rough";
-        } else {
-            key = "tooltip.mobstoolforging.workmanship.standard";
-        }
-        return Component.translatable(key);
+    @Override
+    public boolean isBarVisible(ItemStack stack) {
+        return ToolPartWear.remainingDurabilityPercent(stack) < 100;
+    }
+
+    @Override
+    public int getBarWidth(ItemStack stack) {
+        return Math.round(ToolPartWear.remainingDurabilityPercent(stack) * 13.0F / 100.0F);
+    }
+
+    @Override
+    public int getBarColor(ItemStack stack) {
+        float durability = ToolPartWear.remainingDurabilityPercent(stack) / 100.0F;
+        return Mth.hsvToRgb(Math.max(0.0F, durability) / 3.0F, 1.0F, 1.0F);
     }
 }

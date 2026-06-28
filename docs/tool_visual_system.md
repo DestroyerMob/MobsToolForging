@@ -18,7 +18,7 @@ Finished tools store `mobstoolforging:tool_construction`:
 }
 ```
 
-Required fields are `tool_type`, `head_material`, and `handle_material`. Optional fields are `binding_material`, `wrap_material`, `focus_material`, and `treatment`.
+Required fields are `tool_type`, `head_material`, and `handle_material`. Optional fields are `binding_material`, `wrap_material`, `focus_material`, and `treatment`. The `quality` field is retained for compatibility and should remain `100`; it does not affect stats or tooltips.
 
 ## Material Visuals
 

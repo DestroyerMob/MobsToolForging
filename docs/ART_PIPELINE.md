@@ -106,6 +106,26 @@ assets/<namespace>/tooling/tool_visuals/<tool_type>.json
 
 If a material or tool shape needs to render, add explicit source sprites or resource-pack overrides.
 
+## Pattern Item Textures
+
+Built-in physical pattern items use per-item textures when present. Add outline
+art at:
+
+```text
+src/main/resources/assets/mobstoolforging/textures/item/<pattern_item_name>.png
+```
+
+For example:
+
+```text
+src/main/resources/assets/mobstoolforging/textures/item/pickaxe_head_pattern.png
+src/main/resources/assets/mobstoolforging/textures/item/sword_guard_pattern.png
+```
+
+If a pattern texture is missing, datagen falls back to vanilla paper so unfinished
+pattern art does not render as missing texture. After adding or replacing pattern
+art, run `./gradlew runData` to regenerate the item models.
+
 ## Diagnostics And Fallbacks
 
 The layered tool model logs missing sprites once per unique layer/material/key. Required missing layers render with Minecraft's missing-texture sprite so the broken layer is visible in-game instead of silently disappearing or replacing the whole tool with an unrelated fallback. Optional missing layers are skipped and logged once when that optional material is actually present on the stack.

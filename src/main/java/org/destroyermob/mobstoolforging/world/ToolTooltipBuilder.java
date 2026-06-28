@@ -47,7 +47,7 @@ public final class ToolTooltipBuilder {
     }
 
     private static void addNormalTooltip(List<Component> lines, ToolStatProfile profile) {
-        List<ResourceLocation> displayTraits = ToolTraitDisplay.resolve(profile.traits());
+        List<ResourceLocation> displayTraits = displayTraits(profile);
         if (displayTraits.isEmpty()) {
             return;
         }
@@ -78,7 +78,7 @@ public final class ToolTooltipBuilder {
         lines.add(partLine("tooltip.mobstoolforging.part.focus", construction.focusMaterial()));
         lines.add(partLine("tooltip.mobstoolforging.part.treatment", construction.treatment()));
 
-        List<ResourceLocation> displayTraits = ToolTraitDisplay.resolve(profile.traits());
+        List<ResourceLocation> displayTraits = displayTraits(profile);
         if (!displayTraits.isEmpty()) {
             lines.add(Component.empty());
             lines.add(Component.translatable("tooltip.mobstoolforging.traits").withStyle(ChatFormatting.GRAY));
@@ -97,14 +97,31 @@ public final class ToolTooltipBuilder {
         lines.add(rawLine("tooltip.mobstoolforging.stat.attack_speed_bonus", decimal(profile.attackSpeedBonus())));
         lines.add(rawLine("tooltip.mobstoolforging.stat.fire_resistant", Boolean.toString(profile.fireResistant())));
         lines.add(rawLine("tooltip.mobstoolforging.stat.enchant_affinities", idList(profile.enchantAffinity())));
-        lines.add(rawLine("tooltip.mobstoolforging.stat.traits", idList(profile.traits())));
+        lines.add(rawLine("tooltip.mobstoolforging.stat.traits", idList(nonQualityTraits(profile.traits()))));
         lines.add(rawLine("tooltip.mobstoolforging.stat.construction", rawConstruction(construction)));
-        if (!profile.debugLines().isEmpty()) {
+        List<String> debugLines = nonQualityDebugLines(profile.debugLines());
+        if (!debugLines.isEmpty()) {
             lines.add(Component.translatable("tooltip.mobstoolforging.debug").withStyle(ChatFormatting.DARK_GRAY));
-            for (String debugLine : profile.debugLines()) {
+            for (String debugLine : debugLines) {
                 lines.add(Component.literal(debugLine).withStyle(ChatFormatting.DARK_GRAY));
             }
         }
+    }
+
+    private static List<ResourceLocation> displayTraits(ToolStatProfile profile) {
+        return ToolTraitDisplay.resolve(nonQualityTraits(profile.traits()));
+    }
+
+    private static List<ResourceLocation> nonQualityTraits(List<ResourceLocation> traits) {
+        return traits.stream().filter(trait -> !isQualityTrait(trait)).toList();
+    }
+
+    private static boolean isQualityTrait(ResourceLocation trait) {
+        return ToolTrait.WORKMANSHIP_GOOD.id().equals(trait) || ToolTrait.WORKMANSHIP_ROUGH.id().equals(trait);
+    }
+
+    private static List<String> nonQualityDebugLines(List<String> debugLines) {
+        return debugLines.stream().filter(line -> !line.startsWith("Quality:")).toList();
     }
 
     private static Component partLine(String labelKey, Optional<ResourceLocation> material) {
@@ -156,8 +173,7 @@ public final class ToolTooltipBuilder {
                 + ", binding=" + construction.bindingMaterial().map(ResourceLocation::toString).orElse("-")
                 + ", wrap=" + construction.wrapMaterial().map(ResourceLocation::toString).orElse("-")
                 + ", focus=" + construction.focusMaterial().map(ResourceLocation::toString).orElse("-")
-                + ", treatment=" + construction.treatment().map(ResourceLocation::toString).orElse("-")
-                + ", quality=" + construction.quality();
+                + ", treatment=" + construction.treatment().map(ResourceLocation::toString).orElse("-");
     }
 
     private static void addBlankIfNeeded(List<Component> lines) {

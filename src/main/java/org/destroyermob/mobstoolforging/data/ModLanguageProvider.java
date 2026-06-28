@@ -183,16 +183,11 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.workpiece_status.white_hot", "White hot");
         add("tooltip.mobstoolforging.workpiece_status.cooling", "Cooling");
         add("tooltip.mobstoolforging.part_durability", "Durability: %s%%");
-        add("tooltip.mobstoolforging.part_quality", "Quality: %s%%");
-        add("tooltip.mobstoolforging.part_workmanship", "Workmanship: %s (%s)");
         add("tooltip.mobstoolforging.broken_tool", "Broken - repair before use");
         add("tooltip.mobstoolforging.part_treatment", "Treatment: %s");
         add("tooltip.mobstoolforging.crucible_contains_item", "Contains: %s");
         add("tooltip.mobstoolforging.crucible_contains_molten", "Contains: Molten %s (%s)");
         add("tooltip.mobstoolforging.crucible_heat", "Crucible Heat: %s%%");
-        add("tooltip.mobstoolforging.workmanship.standard", "Standard");
-        add("tooltip.mobstoolforging.workmanship.fine", "Fine");
-        add("tooltip.mobstoolforging.workmanship.rough", "Rough");
         add("tooltip.mobstoolforging.traits", "Traits");
         add("tooltip.mobstoolforging.hold_shift", "Hold Shift for construction");
         add("tooltip.mobstoolforging.construction", "Construction");
@@ -243,9 +238,5 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.trait.nether_treated.desc", "favours fire and Nether magic");
         add("tooltip.mobstoolforging.trait.echoing", "Echoing");
         add("tooltip.mobstoolforging.trait.echoing.desc", "favours silence, sculk, and echo magic");
-        add("tooltip.mobstoolforging.trait.workmanship_good", "Fine Workmanship");
-        add("tooltip.mobstoolforging.trait.workmanship_good.desc", "slightly improves the finish");
-        add("tooltip.mobstoolforging.trait.workmanship_rough", "Rough Workmanship");
-        add("tooltip.mobstoolforging.trait.workmanship_rough.desc", "slightly weakens the finish");
     }
 }

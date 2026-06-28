@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 
 public final class VanillaToolConverter {
     private VanillaToolConverter() {
@@ -41,6 +42,9 @@ public final class VanillaToolConverter {
         copyIfPresent(original, converted, DataComponents.ENCHANTMENTS);
         copyIfPresent(original, converted, DataComponents.REPAIR_COST);
         copyIfPresent(original, converted, DataComponents.CUSTOM_DATA);
+        ToolExternalComponents.copyCompatibleExternalComponents(original, converted);
+        ToolmakerBenchAssembly.disassemble(converted)
+                .ifPresent(parts -> converted.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts)));
         return converted;
     }
 

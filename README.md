@@ -14,7 +14,7 @@ A NeoForge 1.21.1 mod that adds physical, modular tool making without changing v
   - Metals: iron, gold, copper, netherite
   - Gems: diamond, emerald
   - Handles: sticks, blaze rods, breeze rods, and common rod tags
-- Finished tools store construction data and a stat profile built from head, handle, binding/guard, wrap, focus, treatment, and quality.
+- Finished tools store construction data and a stat profile built from head, handle, binding/guard, wrap, focus, and treatment.
 - Layered item models render visible heads, handles, bindings/guards, wraps, foci, and treatments.
 - Generated visual-definition data and part sprites provide placeholder defaults for the dynamic layered tool model system.
 

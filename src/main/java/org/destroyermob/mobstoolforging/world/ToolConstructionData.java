@@ -21,6 +21,10 @@ public record ToolConstructionData(
 ) {
     public static final int DEFAULT_QUALITY = 100;
 
+    public ToolConstructionData {
+        quality = DEFAULT_QUALITY;
+    }
+
     public static final Codec<ToolConstructionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("tool_type").forGetter(ToolConstructionData::toolType),
             ResourceLocation.CODEC.fieldOf("head_material").forGetter(ToolConstructionData::headMaterial),

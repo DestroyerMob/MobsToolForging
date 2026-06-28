@@ -16,7 +16,7 @@ Mobs Tool Forging does not use wood or stone as tool-head materials. Wood remain
 
 ## Flint
 
-Flint tools are crude survival tools, not modular tools. They do not use bindings, foci, treatments, quality, or traits.
+Flint tools are crude survival tools, not modular tools. They do not use bindings, foci, treatments, or traits.
 
 Flint shards come from right-clicking a hard surface with vanilla flint. Any block tagged `minecraft:mineable/pickaxe` counts as a hard surface for this first pass. Knapping has a chance to fail so the player may need a few hits. A successful hit consumes one flint, gives one shard, and has a bonus roll for a second shard.
 

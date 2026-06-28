@@ -64,7 +64,6 @@ public final class ToolStatBuilder {
         applyWrap(stats, construction.wrapMaterial());
         applyFocus(stats, construction.focusMaterial());
         applyTreatment(stats, construction);
-        applyQuality(stats, construction.quality());
         ToolTypeRegistry.applyStatModifiers(definition, construction, stats);
 
         int maxDamage = Math.max(1, Math.round(stats.baseMaxDamage * stats.durabilityMultiplier));
@@ -278,16 +277,6 @@ public final class ToolStatBuilder {
             stats.addTrait(ToolTrait.ECHOING);
         }
         stats.addDebug(line("Treatment", treatment, note));
-    }
-
-    private static void applyQuality(MutableStats stats, int quality) {
-        float qualityMultiplier = Math.max(0.90F, Math.min(1.10F, 1.0F + (quality - ToolConstructionData.DEFAULT_QUALITY) * 0.002F));
-        stats.durabilityMultiplier *= qualityMultiplier;
-        stats.miningSpeedMultiplier *= 1.0F + (qualityMultiplier - 1.0F) * 0.5F;
-        if (quality != ToolConstructionData.DEFAULT_QUALITY) {
-            stats.addTrait(quality > ToolConstructionData.DEFAULT_QUALITY ? ToolTrait.WORKMANSHIP_GOOD : ToolTrait.WORKMANSHIP_ROUGH);
-            stats.addDebug("Quality: " + quality + "%");
-        }
     }
 
     private static Tier adjustedTier(Tier headTier, ToolStatProfile profile, ToolConstructionData construction) {

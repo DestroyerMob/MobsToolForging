@@ -38,7 +38,7 @@ public record ToolPartData(String partType, ResourceLocation materialId, int qua
     }
 
     public ToolPartData {
-        quality = Math.max(1, quality);
+        quality = DEFAULT_QUALITY;
     }
 
     public ToolPartData withTreatment(ResourceLocation treatment) {

@@ -50,6 +50,7 @@ public final class ToolmakerBenchAssembly {
             }
             ToolPartWear.applyStoredWear(output, parts.part());
             if (ToolAssemblyEnchantments.mergeOnto(output, parts.enchantmentSources(), registries)) {
+                ToolExternalComponents.copyPrimaryHeadComponentsToTool(parts.part(), output);
                 output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(stacks));
                 return output;
             }
@@ -68,7 +69,8 @@ public final class ToolmakerBenchAssembly {
         }
         ToolAssemblyParts storedParts = stack.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
         if (storedParts != null && !storedParts.stacks().isEmpty()) {
-            return Optional.of(ToolPartWear.copyWithWearFromTool(definition, stack, storedParts.copyStacks()));
+            List<ItemStack> parts = ToolPartWear.copyWithWearFromTool(definition, stack, storedParts.copyStacks());
+            return Optional.of(ToolExternalComponents.copyToolComponentsToPrimaryHead(definition, stack, parts));
         }
 
         List<ItemStack> parts = new ArrayList<>();
@@ -104,7 +106,8 @@ public final class ToolmakerBenchAssembly {
                 .map(ToolmakerBenchAssembly::treatmentStack)
                 .ifPresent(parts::add);
         List<ItemStack> result = parts.stream().filter(item -> !item.isEmpty()).map(ItemStack::copy).toList();
-        return Optional.of(ToolPartWear.copyWithWearFromTool(definition, stack, result));
+        List<ItemStack> wornParts = ToolPartWear.copyWithWearFromTool(definition, stack, result);
+        return Optional.of(ToolExternalComponents.copyToolComponentsToPrimaryHead(definition, stack, wornParts));
     }
 
     public static boolean isFinishedTool(ItemStack stack) {
@@ -305,13 +308,7 @@ public final class ToolmakerBenchAssembly {
         }
 
         private int quality() {
-            int total = partQuality(part);
-            int count = 1;
-            for (ItemStack requiredPart : requiredParts.values()) {
-                total += partQuality(requiredPart);
-                count++;
-            }
-            return Math.round(total / (float) count);
+            return ToolConstructionData.DEFAULT_QUALITY;
         }
 
         private List<ItemStack> enchantmentSources() {
@@ -322,9 +319,5 @@ public final class ToolmakerBenchAssembly {
             return List.copyOf(sources);
         }
 
-        private static int partQuality(ItemStack stack) {
-            ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
-            return data == null ? ToolPartData.DEFAULT_QUALITY : data.quality();
-        }
     }
 }

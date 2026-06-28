@@ -136,7 +136,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void patternModel(String name) {
-        itemModels().withExistingParent(name, mcLoc("item/generated")).texture("layer0", mcLoc("item/paper"));
+        ResourceLocation texture = modLoc("item/" + name);
+        itemModels().withExistingParent(name, mcLoc("item/generated")).texture("layer0", textureExists(texture) ? texture : mcLoc("item/paper"));
     }
 
     private void partModel(ToolKind toolKind) {
@@ -200,6 +201,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private static boolean sourceTextureExists(ResourceLocation texture) {
+        return textureExists(texture);
+    }
+
+    private static boolean textureExists(ResourceLocation texture) {
         String resourcePath = "/assets/" + texture.getNamespace() + "/textures/" + texture.getPath() + ".png";
         return ModBlockStateProvider.class.getResource(resourcePath) != null;
     }
