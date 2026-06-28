@@ -80,6 +80,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("material.mobstoolforging.blaze", "Blaze");
         add("material.mobstoolforging.breeze", "Breeze");
         add("material.mobstoolforging.leather", "Leather");
+        add("material.mobstoolforging.plant_fiber", "Plant Fiber");
         add("material.mobstoolforging.amethyst", "Amethyst");
         add("material.mobstoolforging.nether", "Nether");
         add("material.mobstoolforging.sculk", "Sculk");

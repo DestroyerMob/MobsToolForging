@@ -27,8 +27,8 @@ public class KnappingFlintRenderer implements BlockEntityRenderer<KnappingFlintB
         poseStack.translate(0.5F, 0.11F, 0.5F);
         poseStack.mulPose(Axis.YP.rotationDegrees(-facingRotation));
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-        poseStack.scale(1.85F, 1.85F, 1.85F);
-        itemRenderer.renderStatic(new ItemStack(Items.FLINT), ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, knapping.getLevel(), 0);
+        poseStack.scale(0.96F, 0.96F, 0.96F);
+        itemRenderer.renderStatic(new ItemStack(Items.FLINT), ItemDisplayContext.NONE, packedLight, packedOverlay, poseStack, bufferSource, knapping.getLevel(), 0);
         poseStack.popPose();
     }
 }

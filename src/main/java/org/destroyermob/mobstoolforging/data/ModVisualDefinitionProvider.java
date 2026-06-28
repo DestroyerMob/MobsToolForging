@@ -171,6 +171,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 new MaterialVisualSpec(MaterialCatalog.BLAZE, "nether", "heat_cracks", true, 7, palette(0xFF4A1604, 0xFF7C2705, 0xFFB84307, 0xFFF07412, 0xFFFFB12E, 0xFFFFF0A4)),
                 new MaterialVisualSpec(MaterialCatalog.BREEZE, "crystal", "facets", false, 0, palette(0xFF5B6170, 0xFF7D879A, 0xFFA3B2C7, 0xFFC3D7E8, 0xFFE4F5FF, 0xFFFFFFFF)),
                 new MaterialVisualSpec(MaterialCatalog.LEATHER, "leather", "rough_wrap", false, 0, palette(0xFF2A170E, 0xFF4A2817, 0xFF704024, 0xFF9C6139, 0xFFC68555, 0xFFE4AF7C)),
+                new MaterialVisualSpec(MaterialCatalog.PLANT_FIBER, "plant", "fibrous", false, 0, palette(0xFF2B2A12, 0xFF4A4A22, 0xFF6D7133, 0xFF969D4B, 0xFFC0C876, 0xFFE7E3A8)),
                 new MaterialVisualSpec(MaterialCatalog.AMETHYST, "crystal", "facets", false, 0, palette(0xFF28164A, 0xFF422478, 0xFF6636A8, 0xFF905CE0, 0xFFC8A4FF, 0xFFF5E9FF)),
                 new MaterialVisualSpec(MaterialCatalog.NETHER, "nether", "heat_cracks", true, 8, palette(0xFF160503, 0xFF2A0904, 0xFF4D1309, 0xFF8A260D, 0xFFFF6A1A, 0xFFFFD06A)),
                 new MaterialVisualSpec(MaterialCatalog.SCULK, "sculk", "veins", true, 8, palette(0xFF05090A, 0xFF071417, 0xFF0A2428, 0xFF0E3D45, 0xFF0C8395, 0xFF4AF5FF))

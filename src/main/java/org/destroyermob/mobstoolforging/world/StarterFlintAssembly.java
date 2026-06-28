@@ -7,6 +7,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 
 public final class StarterFlintAssembly {
     private StarterFlintAssembly() {
@@ -33,7 +34,34 @@ public final class StarterFlintAssembly {
         if (!isComplete(stacks)) {
             return ItemStack.EMPTY;
         }
-        return ToolmakerBenchAssembly.assemble(stacks, registries);
+        ItemStack output = ToolmakerBenchAssembly.assemble(stacks, registries);
+        if (output.isEmpty()) {
+            return output;
+        }
+        applyPlantFiberBinding(output);
+        List<ItemStack> assemblyParts = new ArrayList<>(stacks.stream().map(stack -> stack.copyWithCount(1)).toList());
+        assemblyParts.add(new ItemStack(ModItems.PLANT_FIBER.get()));
+        output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(assemblyParts));
+        return output;
+    }
+
+    private static void applyPlantFiberBinding(ItemStack output) {
+        ToolConstructionData construction = output.get(ModDataComponents.TOOL_CONSTRUCTION.get());
+        if (construction == null || construction.bindingMaterial().isPresent()) {
+            return;
+        }
+        ToolConstructionData updated = new ToolConstructionData(
+                construction.toolType(),
+                construction.headMaterial(),
+                construction.handleMaterial(),
+                Optional.of(MaterialCatalog.PLANT_FIBER),
+                construction.wrapMaterial(),
+                construction.focusMaterial(),
+                construction.treatment(),
+                construction.quality()
+        );
+        output.set(ModDataComponents.TOOL_CONSTRUCTION.get(), updated);
+        ToolTypeRegistry.toolType(updated.toolType()).ifPresent(definition -> ToolStatBuilder.apply(output, definition, updated));
     }
 
     private static Optional<KnappingTarget> target(ItemStack stack) {

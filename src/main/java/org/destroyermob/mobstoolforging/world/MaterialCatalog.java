@@ -21,6 +21,7 @@ import net.neoforged.neoforge.common.SimpleTier;
 import net.neoforged.neoforge.common.Tags;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModTags;
 
 public final class MaterialCatalog {
@@ -36,6 +37,7 @@ public final class MaterialCatalog {
     public static final ResourceLocation BLAZE = materialId("blaze");
     public static final ResourceLocation BREEZE = materialId("breeze");
     public static final ResourceLocation LEATHER = materialId("leather");
+    public static final ResourceLocation PLANT_FIBER = materialId("plant_fiber");
     public static final ResourceLocation AMETHYST = materialId("amethyst");
     public static final ResourceLocation NETHER = materialId("nether");
     public static final ResourceLocation SCULK = materialId("sculk");
@@ -209,6 +211,9 @@ public final class MaterialCatalog {
     }
 
     public static ItemStack displayStack(ResourceLocation materialId) {
+        if (PLANT_FIBER.equals(materialId)) {
+            return new ItemStack(ModItems.PLANT_FIBER.get());
+        }
         return new ItemStack(definition(materialId).orElseThrow().displayItem());
     }
 
@@ -234,6 +239,9 @@ public final class MaterialCatalog {
         ToolPartData partData = stack.get(ModDataComponents.TOOL_PART.get());
         if (partData != null) {
             return partData.materialId();
+        }
+        if (stack.is(ModItems.PLANT_FIBER.get())) {
+            return PLANT_FIBER;
         }
         return resolve(stack)
                 .map(ToolMaterialDefinition::id)

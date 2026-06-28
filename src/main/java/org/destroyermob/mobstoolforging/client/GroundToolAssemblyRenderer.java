@@ -32,11 +32,11 @@ public class GroundToolAssemblyRenderer implements BlockEntityRenderer<GroundToo
         }
         float facingRotation = assembly.getBlockState().getValue(GroundToolAssemblyBlock.FACING).toYRot();
         if (count == 1) {
-            renderFlatItem(assembly.getLevel(), stacks.getFirst(), poseStack, bufferSource, packedLight, packedOverlay, facingRotation, 0.0F, 0.0F, 1.0F, 0);
+            renderFlatItem(assembly.getLevel(), stacks.getFirst(), poseStack, bufferSource, packedLight, packedOverlay, facingRotation, 0.0F, 0.0F, 0.9F, 0);
             return;
         }
-        float radius = count == 2 ? 0.28F : 0.34F;
-        float scale = count == 2 ? 0.72F : 0.58F;
+        float radius = count == 2 ? 0.23F : 0.27F;
+        float scale = count == 2 ? 0.46F : 0.34F;
         for (int index = 0; index < count; index++) {
             float angle = (float) (Math.PI * 2.0D * index / count);
             float localX = (float) Math.cos(angle) * radius;
@@ -55,7 +55,7 @@ public class GroundToolAssemblyRenderer implements BlockEntityRenderer<GroundToo
         poseStack.translate(localX, 0.0F, localZ);
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.scale(scale, scale, scale);
-        itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, seed);
+        itemRenderer.renderStatic(stack, ItemDisplayContext.NONE, packedLight, packedOverlay, poseStack, bufferSource, level, seed);
         poseStack.popPose();
     }
 }

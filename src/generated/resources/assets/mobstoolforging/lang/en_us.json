@@ -100,6 +100,7 @@
   "material.mobstoolforging.nether": "Nether",
   "material.mobstoolforging.netherite": "Netherite",
   "material.mobstoolforging.oak": "Oak",
+  "material.mobstoolforging.plant_fiber": "Plant Fiber",
   "material.mobstoolforging.sculk": "Sculk",
   "message.mobstoolforging.complete": "The tool part is ready.",
   "message.mobstoolforging.crucible_item_inserted": "Item placed in the crucible.",
