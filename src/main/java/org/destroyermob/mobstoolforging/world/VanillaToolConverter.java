@@ -129,6 +129,7 @@ public final class VanillaToolConverter {
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
+                Optional.empty(),
                 ToolConstructionData.DEFAULT_QUALITY
         );
     }

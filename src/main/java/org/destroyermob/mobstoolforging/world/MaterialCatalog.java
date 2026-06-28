@@ -67,7 +67,8 @@ public final class MaterialCatalog {
     private static final Map<Item, ResourceLocation> CUSTOM_HANDLE_MATERIALS = new LinkedHashMap<>();
     private static final List<ResourceLocation> STARTER_MATERIALS = List.of(IRON, GOLD, COPPER, NETHERITE, DIAMOND, EMERALD);
     private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(OAK, DARK_OAK, BLAZE, BREEZE);
-    private static final List<ResourceLocation> BINDING_MATERIALS = STARTER_MATERIALS;
+    private static final List<ResourceLocation> GUARD_MATERIALS = STARTER_MATERIALS;
+    private static final List<ResourceLocation> BINDING_MATERIALS = List.of(IRON, GOLD, COPPER, NETHERITE, DIAMOND, EMERALD, PLANT_FIBER);
     private static final List<ResourceLocation> WRAP_MATERIALS = List.of(LEATHER);
     private static final List<ResourceLocation> FOCUS_MATERIALS = List.of(AMETHYST);
     private static final List<ResourceLocation> TREATMENT_MATERIALS = List.of(NETHERITE, NETHER, SCULK);
@@ -154,6 +155,7 @@ public final class MaterialCatalog {
         List<ResourceLocation> base = switch (materialFrom) {
             case "headMaterial" -> STARTER_MATERIALS;
             case "handleMaterial" -> HANDLE_MATERIALS;
+            case "guardMaterial" -> GUARD_MATERIALS;
             case "bindingMaterial" -> BINDING_MATERIALS;
             case "wrapMaterial" -> WRAP_MATERIALS;
             case "focusMaterial" -> FOCUS_MATERIALS;
@@ -168,6 +170,7 @@ public final class MaterialCatalog {
     public static synchronized void registerMaterial(ToolMaterialDefinition definition) {
         putDefinition(definition);
         registerVisualMaterial("headMaterial", definition.id());
+        registerVisualMaterial("guardMaterial", definition.id());
         registerVisualMaterial("bindingMaterial", definition.id());
     }
 
@@ -182,6 +185,7 @@ public final class MaterialCatalog {
         DATAPACK_MATERIALS.add(definition.id());
         if (visualSlots.isEmpty()) {
             registerVisualMaterial("headMaterial", definition.id());
+            registerVisualMaterial("guardMaterial", definition.id());
             registerVisualMaterial("bindingMaterial", definition.id());
         } else {
             visualSlots.forEach(slot -> registerVisualMaterial(slot, definition.id()));

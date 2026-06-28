@@ -195,6 +195,7 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         return layer.materialFrom().flatMap(materialFrom -> switch (materialFrom) {
             case "headMaterial" -> Optional.of(key.headMaterial());
             case "handleMaterial" -> Optional.of(key.handleMaterial());
+            case "guardMaterial" -> key.guardMaterial();
             case "bindingMaterial" -> key.bindingMaterial();
             case "wrapMaterial" -> key.wrapMaterial();
             case "focusMaterial" -> key.focusMaterial();

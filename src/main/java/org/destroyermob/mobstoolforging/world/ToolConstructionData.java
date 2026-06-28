@@ -13,6 +13,7 @@ public record ToolConstructionData(
         ResourceLocation toolType,
         ResourceLocation headMaterial,
         ResourceLocation handleMaterial,
+        Optional<ResourceLocation> guardMaterial,
         Optional<ResourceLocation> bindingMaterial,
         Optional<ResourceLocation> wrapMaterial,
         Optional<ResourceLocation> focusMaterial,
@@ -22,13 +23,38 @@ public record ToolConstructionData(
     public static final int DEFAULT_QUALITY = 100;
 
     public ToolConstructionData {
+        guardMaterial = guardMaterial == null ? Optional.empty() : guardMaterial;
+        bindingMaterial = bindingMaterial == null ? Optional.empty() : bindingMaterial;
+        wrapMaterial = wrapMaterial == null ? Optional.empty() : wrapMaterial;
+        focusMaterial = focusMaterial == null ? Optional.empty() : focusMaterial;
+        treatment = treatment == null ? Optional.empty() : treatment;
+        if (guardMaterial.isEmpty()
+                && bindingMaterial.isPresent()
+                && toolType(ToolKind.SWORD).equals(toolType)) {
+            guardMaterial = bindingMaterial;
+            bindingMaterial = Optional.empty();
+        }
         quality = DEFAULT_QUALITY;
+    }
+
+    public ToolConstructionData(
+            ResourceLocation toolType,
+            ResourceLocation headMaterial,
+            ResourceLocation handleMaterial,
+            Optional<ResourceLocation> bindingMaterial,
+            Optional<ResourceLocation> wrapMaterial,
+            Optional<ResourceLocation> focusMaterial,
+            Optional<ResourceLocation> treatment,
+            int quality
+    ) {
+        this(toolType, headMaterial, handleMaterial, Optional.empty(), bindingMaterial, wrapMaterial, focusMaterial, treatment, quality);
     }
 
     public static final Codec<ToolConstructionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("tool_type").forGetter(ToolConstructionData::toolType),
             ResourceLocation.CODEC.fieldOf("head_material").forGetter(ToolConstructionData::headMaterial),
             ResourceLocation.CODEC.fieldOf("handle_material").forGetter(ToolConstructionData::handleMaterial),
+            ResourceLocation.CODEC.optionalFieldOf("guard_material").forGetter(ToolConstructionData::guardMaterial),
             ResourceLocation.CODEC.optionalFieldOf("binding_material").forGetter(ToolConstructionData::bindingMaterial),
             ResourceLocation.CODEC.optionalFieldOf("wrap_material").forGetter(ToolConstructionData::wrapMaterial),
             ResourceLocation.CODEC.optionalFieldOf("focus_material").forGetter(ToolConstructionData::focusMaterial),
@@ -43,6 +69,7 @@ public record ToolConstructionData(
                 toolType(toolKind),
                 headMaterial,
                 handleMaterial,
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),

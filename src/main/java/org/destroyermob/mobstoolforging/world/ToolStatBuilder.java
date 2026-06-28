@@ -60,7 +60,8 @@ public final class ToolStatBuilder {
             stats.addDebug("Head: Gilded experience");
         }
         applyHandle(stats, construction.handleMaterial());
-        applyBindingOrGuard(stats, definition.swordLike(), construction.bindingMaterial());
+        applyBindingOrGuard(stats, true, construction.guardMaterial());
+        applyBindingOrGuard(stats, false, construction.bindingMaterial());
         applyWrap(stats, construction.wrapMaterial());
         applyFocus(stats, construction.focusMaterial());
         applyTreatment(stats, construction);
@@ -258,6 +259,7 @@ public final class ToolStatBuilder {
             stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
             if (MaterialCatalog.BLAZE.equals(construction.handleMaterial())
                     || MaterialCatalog.NETHERITE.equals(construction.headMaterial())
+                    || construction.guardMaterial().filter(MaterialCatalog.NETHERITE::equals).isPresent()
                     || construction.bindingMaterial().filter(MaterialCatalog.NETHERITE::equals).isPresent()) {
                 stats.fireResistant = true;
                 note = "+Nether, +Fireproof";

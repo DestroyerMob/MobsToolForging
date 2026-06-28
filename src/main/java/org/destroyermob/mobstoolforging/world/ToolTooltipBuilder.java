@@ -73,7 +73,10 @@ public final class ToolTooltipBuilder {
         lines.add(Component.translatable("tooltip.mobstoolforging.construction").withStyle(ChatFormatting.GRAY));
         lines.add(partLine("tooltip.mobstoolforging.part.head", Optional.of(construction.headMaterial())));
         lines.add(partLine("tooltip.mobstoolforging.part.handle", Optional.of(construction.handleMaterial())));
-        lines.add(partLine(definition.swordLike() || !definition.requiredAssemblyParts().isEmpty() ? "tooltip.mobstoolforging.part.guard" : "tooltip.mobstoolforging.part.binding", construction.bindingMaterial()));
+        if (!definition.requiredAssemblyParts().isEmpty()) {
+            lines.add(partLine("tooltip.mobstoolforging.part.guard", construction.guardMaterial()));
+        }
+        lines.add(partLine("tooltip.mobstoolforging.part.binding", construction.bindingMaterial()));
         lines.add(partLine("tooltip.mobstoolforging.part.wrap", construction.wrapMaterial()));
         lines.add(partLine("tooltip.mobstoolforging.part.focus", construction.focusMaterial()));
         lines.add(partLine("tooltip.mobstoolforging.part.treatment", construction.treatment()));
@@ -170,6 +173,7 @@ public final class ToolTooltipBuilder {
     private static String rawConstruction(ToolConstructionData construction) {
         return "head=" + construction.headMaterial()
                 + ", handle=" + construction.handleMaterial()
+                + ", guard=" + construction.guardMaterial().map(ResourceLocation::toString).orElse("-")
                 + ", binding=" + construction.bindingMaterial().map(ResourceLocation::toString).orElse("-")
                 + ", wrap=" + construction.wrapMaterial().map(ResourceLocation::toString).orElse("-")
                 + ", focus=" + construction.focusMaterial().map(ResourceLocation::toString).orElse("-")

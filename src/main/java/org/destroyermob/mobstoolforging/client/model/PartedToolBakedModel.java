@@ -53,6 +53,7 @@ public final class PartedToolBakedModel implements BakedModel {
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
+                Optional.empty(),
                 ToolConstructionData.DEFAULT_QUALITY,
                 0
         )).orElseGet(this::particleFallback);
@@ -166,6 +167,7 @@ public final class PartedToolBakedModel implements BakedModel {
         return layer.materialFrom().flatMap(materialFrom -> switch (materialFrom) {
             case "headMaterial" -> Optional.of(key.headMaterial());
             case "handleMaterial" -> Optional.of(key.handleMaterial());
+            case "guardMaterial" -> key.guardMaterial();
             case "bindingMaterial" -> key.bindingMaterial();
             case "wrapMaterial" -> key.wrapMaterial();
             case "focusMaterial" -> key.focusMaterial();

@@ -136,7 +136,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void swordGuardPartModel() {
-        partModel(ToolKind.SWORD, ToolPartData.SWORD_GUARD, ToolPartData.SWORD_GUARD, "guard", "bindingMaterial", ToolPartData.SWORD_GUARD);
+        partModel(ToolKind.SWORD, ToolPartData.SWORD_GUARD, ToolPartData.SWORD_GUARD, "guard", "guardMaterial", ToolPartData.SWORD_GUARD);
     }
 
     private void partModel(ToolKind toolKind, String itemModelName, String partType, String partSlot, String materialFrom, String textureName) {
@@ -263,10 +263,14 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 new VisualLayerSpec("handle", "handleMaterial"),
                 new VisualLayerSpec("wrap", "wrapMaterial"),
                 new VisualLayerSpec(toolKind.partType(), "headMaterial"),
-                new VisualLayerSpec(jointSlot(toolKind), "bindingMaterial"),
+                new VisualLayerSpec(jointSlot(toolKind), jointMaterial(toolKind)),
                 new VisualLayerSpec("focus", "focusMaterial"),
                 new VisualLayerSpec("treatment_overlay", "treatment")
         );
+    }
+
+    private static String jointMaterial(ToolKind toolKind) {
+        return toolKind == ToolKind.SWORD ? "guardMaterial" : "bindingMaterial";
     }
 
     private record VisualLayerSpec(String slot, String materialFrom) {

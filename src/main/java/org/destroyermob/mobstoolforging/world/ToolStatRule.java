@@ -50,12 +50,14 @@ public record ToolStatRule(
         return switch (slot) {
             case "head", "headMaterial" -> material.equals(construction.headMaterial());
             case "handle", "handleMaterial" -> material.equals(construction.handleMaterial());
-            case "binding", "guard", "bindingMaterial" -> construction.bindingMaterial().filter(material::equals).isPresent();
+            case "guard", "guardMaterial" -> construction.guardMaterial().filter(material::equals).isPresent();
+            case "binding", "bindingMaterial" -> construction.bindingMaterial().filter(material::equals).isPresent();
             case "wrap", "wrapMaterial" -> construction.wrapMaterial().filter(material::equals).isPresent();
             case "focus", "focusMaterial" -> construction.focusMaterial().filter(material::equals).isPresent();
             case "treatment" -> construction.treatment().filter(material::equals).isPresent();
             case "any", "anyPart" -> material.equals(construction.headMaterial())
                     || material.equals(construction.handleMaterial())
+                    || construction.guardMaterial().filter(material::equals).isPresent()
                     || construction.bindingMaterial().filter(material::equals).isPresent()
                     || construction.wrapMaterial().filter(material::equals).isPresent()
                     || construction.focusMaterial().filter(material::equals).isPresent()

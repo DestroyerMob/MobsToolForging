@@ -134,9 +134,6 @@ public class ModularToolRecipe extends CustomRecipe {
                 continue;
             }
             if (stack.is(ModTags.Items.TOOL_BINDINGS)) {
-                if (!definition.requiredAssemblyParts().isEmpty()) {
-                    return Parts.invalid();
-                }
                 if (!binding.isEmpty()) {
                     return Parts.invalid();
                 }
@@ -210,6 +207,7 @@ public class ModularToolRecipe extends CustomRecipe {
                     definition.id(),
                     partData.materialId(),
                     MaterialCatalog.handleMaterial(handle),
+                    guardMaterial(),
                     bindingMaterial(),
                     material(wrap, MaterialCatalog::wrapMaterial),
                     material(focus, MaterialCatalog::focusMaterial),
@@ -233,10 +231,11 @@ public class ModularToolRecipe extends CustomRecipe {
             return values;
         }
 
+        private Optional<ResourceLocation> guardMaterial() {
+            return requiredParts.values().stream().findFirst().map(MaterialCatalog::bindingMaterial);
+        }
+
         private Optional<ResourceLocation> bindingMaterial() {
-            if (!requiredParts.isEmpty()) {
-                return requiredParts.values().stream().findFirst().map(MaterialCatalog::bindingMaterial);
-            }
             return binding.isEmpty() ? Optional.empty() : Optional.of(MaterialCatalog.bindingMaterial(binding));
         }
 

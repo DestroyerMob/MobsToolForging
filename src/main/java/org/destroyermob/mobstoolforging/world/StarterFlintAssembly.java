@@ -47,13 +47,14 @@ public final class StarterFlintAssembly {
 
     private static void applyPlantFiberBinding(ItemStack output) {
         ToolConstructionData construction = output.get(ModDataComponents.TOOL_CONSTRUCTION.get());
-        if (construction == null || construction.bindingMaterial().isPresent()) {
+        if (construction == null || construction.bindingMaterial().filter(MaterialCatalog.PLANT_FIBER::equals).isPresent()) {
             return;
         }
         ToolConstructionData updated = new ToolConstructionData(
                 construction.toolType(),
                 construction.headMaterial(),
                 construction.handleMaterial(),
+                construction.guardMaterial(),
                 Optional.of(MaterialCatalog.PLANT_FIBER),
                 construction.wrapMaterial(),
                 construction.focusMaterial(),

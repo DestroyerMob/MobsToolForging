@@ -22,6 +22,7 @@ public final class FlintToolStacks {
                 MaterialCatalog.FLINT,
                 MaterialCatalog.OAK,
                 toolKind == ToolKind.SWORD ? Optional.of(MaterialCatalog.FLINT) : Optional.empty(),
+                Optional.of(MaterialCatalog.PLANT_FIBER),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),

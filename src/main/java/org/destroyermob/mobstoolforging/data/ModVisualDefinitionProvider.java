@@ -95,7 +95,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
         layers.add(layer(toolKind, "handle", "handleMaterial", 1, false, false));
         layers.add(layer(toolKind, "wrap", "wrapMaterial", 2, true, false));
         layers.add(layer(toolKind, toolKind.partType(), "headMaterial", 3, false, false));
-        layers.add(layer(toolKind, jointSlot(toolKind), "bindingMaterial", 4, toolKind != ToolKind.SWORD, false));
+        layers.add(layer(toolKind, jointSlot(toolKind), jointMaterial(toolKind), 4, toolKind != ToolKind.SWORD, false));
         layers.add(layer(toolKind, "focus", "focusMaterial", 5, true, true));
         layers.add(layer(toolKind, "treatment_overlay", "treatment", 6, true, true));
         json.add("layers", layers);
@@ -113,7 +113,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
             json.addProperty("tool_template", modLoc("tool_templates/" + toolKind.id() + "/" + slot).toString());
         }
         json.addProperty("template", modLoc("tool_templates/" + toolKind.id() + "/" + slot).toString());
-        if ("headMaterial".equals(materialFrom) || "bindingMaterial".equals(materialFrom)) {
+        if ("headMaterial".equals(materialFrom) || "guardMaterial".equals(materialFrom) || "bindingMaterial".equals(materialFrom)) {
             json.addProperty("part_template", modLoc("tool_templates/" + toolKind.id() + "/" + slot + "_part").toString());
         }
         json.addProperty("large_template", modLoc("tool_templates/" + toolKind.id() + "/large_" + slot).toString());
@@ -147,6 +147,10 @@ public class ModVisualDefinitionProvider implements DataProvider {
 
     private static String jointSlot(ToolKind toolKind) {
         return toolKind == ToolKind.SWORD ? "guard" : "binding";
+    }
+
+    private static String jointMaterial(ToolKind toolKind) {
+        return toolKind == ToolKind.SWORD ? "guardMaterial" : "bindingMaterial";
     }
 
     private static ResourceLocation toolType(ToolKind toolKind) {

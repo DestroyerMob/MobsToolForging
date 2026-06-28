@@ -86,7 +86,7 @@ public final class ToolmakerBenchAssembly {
         }
         parts.add(primary);
 
-        ResourceLocation requiredPartMaterial = construction.bindingMaterial().orElse(construction.headMaterial());
+        ResourceLocation requiredPartMaterial = construction.guardMaterial().orElse(construction.headMaterial());
         for (String partType : definition.requiredAssemblyParts()) {
             ItemStack part = definition.createPart(partType, requiredPartMaterial, construction.quality());
             if (part.isEmpty()) {
@@ -96,9 +96,7 @@ public final class ToolmakerBenchAssembly {
         }
 
         parts.add(handleStack(construction.handleMaterial()));
-        if (definition.requiredAssemblyParts().isEmpty()) {
-            construction.bindingMaterial().map(MaterialCatalog::displayStack).ifPresent(parts::add);
-        }
+        construction.bindingMaterial().map(MaterialCatalog::displayStack).ifPresent(parts::add);
         construction.wrapMaterial().map(ToolmakerBenchAssembly::wrapStack).ifPresent(parts::add);
         construction.focusMaterial().map(ToolmakerBenchAssembly::focusStack).ifPresent(parts::add);
         construction.treatment()
@@ -154,7 +152,7 @@ public final class ToolmakerBenchAssembly {
                 continue;
             }
             if (stack.is(ModTags.Items.TOOL_BINDINGS)) {
-                if (!definition.requiredAssemblyParts().isEmpty() || !binding.isEmpty()) {
+                if (!binding.isEmpty()) {
                     return Parts.invalid();
                 }
                 binding = stack;
@@ -277,6 +275,7 @@ public final class ToolmakerBenchAssembly {
                     definition.id(),
                     partData.materialId(),
                     MaterialCatalog.handleMaterial(handle),
+                    guardMaterial(),
                     bindingMaterial(),
                     material(wrap, MaterialCatalog::wrapMaterial),
                     material(focus, MaterialCatalog::focusMaterial),
@@ -300,10 +299,11 @@ public final class ToolmakerBenchAssembly {
             return values;
         }
 
+        private Optional<ResourceLocation> guardMaterial() {
+            return requiredParts.values().stream().findFirst().map(MaterialCatalog::bindingMaterial);
+        }
+
         private Optional<ResourceLocation> bindingMaterial() {
-            if (!requiredParts.isEmpty()) {
-                return requiredParts.values().stream().findFirst().map(MaterialCatalog::bindingMaterial);
-            }
             return binding.isEmpty() ? Optional.empty() : Optional.of(MaterialCatalog.bindingMaterial(binding));
         }
 

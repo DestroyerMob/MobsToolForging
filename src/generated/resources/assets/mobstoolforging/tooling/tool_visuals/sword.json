@@ -39,7 +39,7 @@
     {
       "emissive_allowed": false,
       "large_template": "mobstoolforging:tool_templates/sword/large_guard",
-      "material_from": "bindingMaterial",
+      "material_from": "guardMaterial",
       "optional": false,
       "part_template": "mobstoolforging:tool_templates/sword/guard_part",
       "slot": "guard",
