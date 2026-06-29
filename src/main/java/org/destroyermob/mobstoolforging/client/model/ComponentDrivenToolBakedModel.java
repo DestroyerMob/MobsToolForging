@@ -28,6 +28,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
+import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
+import org.destroyermob.mobstoolforging.world.ArmorVisualKey;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
@@ -43,6 +45,7 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
     private final PartedToolQuadFactory quadFactory = new PartedToolQuadFactory(BlockModelRotation.X0_Y0);
     private final Map<ToolVisualKey, BakedModel> toolCache = new ConcurrentHashMap<>();
     private final Map<PartKey, BakedModel> partCache = new ConcurrentHashMap<>();
+    private final Map<ArmorVisualKey, BakedModel> armorCache = new ConcurrentHashMap<>();
     private final ItemOverrides overrides;
 
     public ComponentDrivenToolBakedModel(BakedModel fallback) {
@@ -66,6 +69,11 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
                         return partCache.computeIfAbsent(new PartKey(definition.id(), partData.partType(), partData.materialId()), key -> composePart(definition, partData));
                     }
                     warnOnce("missing_part_type|" + partData.partType() + "|" + BuiltInRegistries.ITEM.getKey(stack.getItem()), "Cannot render MTF part stack because no tool type owns part {} for item {}.", partData.partType(), BuiltInRegistries.ITEM.getKey(stack.getItem()));
+                }
+
+                Optional<ArmorVisualKey> armorKey = ArmorVisualKey.from(stack);
+                if (armorKey.isPresent()) {
+                    return armorCache.computeIfAbsent(armorKey.get(), ComponentDrivenToolBakedModel.this::composeArmor);
                 }
 
                 return resolveFallback(stack, level, entity, seed);
@@ -183,6 +191,14 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
             warnMissingLayer("part layer missing sprite", visual, layer, Optional.of(partData.materialId()), resolvedLayer.texture());
         }
         return new ResolvedPartedItemModel(quadFactory.bakeLayer(0, resolvedLayer.sprite(), resolvedLayer.color()), resolvedLayer.sprite(), fallback.getTransforms());
+    }
+
+    private BakedModel composeArmor(ArmorVisualKey key) {
+        if (!ArmorConstructionData.HELMET_TYPE.equals(key.armorType())) {
+            warnOnce("missing_armor_type|" + key.armorType(), "Cannot render MTF armor stack because armor type {} is not loaded on the client.", key.armorType());
+            return fallback;
+        }
+        return ModularHelmetItemModel.compose(key, fallback.getTransforms());
     }
 
     private Optional<ToolTypeDefinition> findPartDefinition(ItemStack stack, ToolPartData partData) {

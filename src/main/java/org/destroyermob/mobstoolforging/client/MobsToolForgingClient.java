@@ -1,15 +1,19 @@
 package org.destroyermob.mobstoolforging.client;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
@@ -21,7 +25,9 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
+import org.destroyermob.mobstoolforging.client.model.ArmorMaterialTextureManager;
 import org.destroyermob.mobstoolforging.client.model.ComponentDrivenToolBakedModel;
+import org.destroyermob.mobstoolforging.client.model.ModularHelmetModel;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
 import org.destroyermob.mobstoolforging.client.model.ToolMaterialVisualManager;
 import org.destroyermob.mobstoolforging.network.CycleKnappingTargetPayload;
@@ -39,6 +45,9 @@ public final class MobsToolForgingClient {
 
     public static void register(IEventBus eventBus) {
         eventBus.addListener(MobsToolForgingClient::registerRenderers);
+        eventBus.addListener(MobsToolForgingClient::registerLayerDefinitions);
+        eventBus.addListener(MobsToolForgingClient::addEntityLayers);
+        eventBus.addListener(MobsToolForgingClient::registerClientExtensions);
         eventBus.addListener(MobsToolForgingClient::registerGeometryLoaders);
         eventBus.addListener(MobsToolForgingClient::wrapComponentDrivenItemModels);
         eventBus.addListener(MobsToolForgingClient::registerItemDecorations);
@@ -67,6 +76,32 @@ public final class MobsToolForgingClient {
         event.registerBlockEntityRenderer(ModBlockEntities.FOUNDRY_FORGE.get(), FoundryForgeRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.KNAPPING_FLINT.get(), KnappingFlintRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.GROUND_TOOL_ASSEMBLY.get(), GroundToolAssemblyRenderer::new);
+    }
+
+    private static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(ModularHelmetModel.LAYER_LOCATION, ModularHelmetModel::createBodyLayer);
+        event.registerLayerDefinition(ModularHelmetModel.BLANK_ARMOR_LAYER, ModularHelmetModel::createBlankArmorLayer);
+    }
+
+    private static void addEntityLayers(EntityRenderersEvent.AddLayers event) {
+        for (var skin : event.getSkins()) {
+            addHelmetLayer(event.getSkin(skin), event.getEntityModels());
+        }
+        for (var entityType : event.getEntityTypes()) {
+            addHelmetLayer(event.getRenderer(entityType), event.getEntityModels());
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void addHelmetLayer(Object renderer, EntityModelSet modelSet) {
+        if (renderer instanceof net.minecraft.client.renderer.entity.LivingEntityRenderer livingRenderer
+                && livingRenderer.getModel() instanceof HumanoidModel) {
+            livingRenderer.addLayer(new ModularHelmetLayer(livingRenderer, new ModularHelmetModel(modelSet.bakeLayer(ModularHelmetModel.LAYER_LOCATION))));
+        }
+    }
+
+    private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
+        event.registerItem(ModularHelmetClientExtensions.INSTANCE, ModItems.MODULAR_HELMET);
     }
 
     private static void registerGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
@@ -99,6 +134,7 @@ public final class MobsToolForgingClient {
     private static void registerReloadListeners(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener(HeatingForgeInsertVisualManager.INSTANCE);
         event.registerReloadListener(ToolMaterialVisualManager.INSTANCE);
+        event.registerReloadListener(ArmorMaterialTextureManager.INSTANCE);
     }
 
     private static void registerMenuScreens(RegisterMenuScreensEvent event) {

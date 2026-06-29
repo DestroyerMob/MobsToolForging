@@ -18,11 +18,13 @@ public class ModVisualDefinitionProvider implements DataProvider {
 
     private final PackOutput.PathProvider materialVisuals;
     private final PackOutput.PathProvider toolVisuals;
+    private final PackOutput.PathProvider armorMaterialTextures;
     private final PackOutput.PathProvider examples;
 
     public ModVisualDefinitionProvider(PackOutput output) {
         this.materialVisuals = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "tooling/material_visuals");
         this.toolVisuals = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "tooling/tool_visuals");
+        this.armorMaterialTextures = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "tooling/armor_material_textures");
         this.examples = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "tooling/examples");
     }
 
@@ -35,6 +37,9 @@ public class ModVisualDefinitionProvider implements DataProvider {
         }
         for (ToolKind toolKind : ToolKind.values()) {
             futures.add(DataProvider.saveStable(output, toolVisual(toolKind), toolVisuals.json(toolType(toolKind))));
+        }
+        for (ArmorMaterialTextureSpec material : armorMaterialTextureSpecs()) {
+            futures.add(DataProvider.saveStable(output, armorMaterialTexture(material), armorMaterialTextures.json(material.id())));
         }
         writeExamples(output, futures);
 
@@ -145,6 +150,13 @@ public class ModVisualDefinitionProvider implements DataProvider {
         return json;
     }
 
+    private JsonObject armorMaterialTexture(ArmorMaterialTextureSpec material) {
+        JsonObject json = new JsonObject();
+        json.addProperty("material", material.id().toString());
+        json.addProperty("texture", material.texture().toString());
+        return json;
+    }
+
     private static String jointSlot(ToolKind toolKind) {
         return toolKind == ToolKind.SWORD ? "guard" : "binding";
     }
@@ -182,6 +194,17 @@ public class ModVisualDefinitionProvider implements DataProvider {
         );
     }
 
+    private static List<ArmorMaterialTextureSpec> armorMaterialTextureSpecs() {
+        return List.of(
+                new ArmorMaterialTextureSpec(MaterialCatalog.IRON, ResourceLocation.withDefaultNamespace("block/iron_block")),
+                new ArmorMaterialTextureSpec(MaterialCatalog.GOLD, ResourceLocation.withDefaultNamespace("block/gold_block")),
+                new ArmorMaterialTextureSpec(MaterialCatalog.COPPER, ResourceLocation.withDefaultNamespace("block/copper_block")),
+                new ArmorMaterialTextureSpec(MaterialCatalog.NETHERITE, ResourceLocation.withDefaultNamespace("block/netherite_block")),
+                new ArmorMaterialTextureSpec(MaterialCatalog.DIAMOND, ResourceLocation.withDefaultNamespace("block/diamond_block")),
+                new ArmorMaterialTextureSpec(MaterialCatalog.EMERALD, ResourceLocation.withDefaultNamespace("block/emerald_block"))
+        );
+    }
+
     private static int[] palette(int c0, int c1, int c2, int c3, int c4, int c5) {
         return new int[]{c0, c1, c2, c3, c4, c5};
     }
@@ -206,5 +229,8 @@ public class ModVisualDefinitionProvider implements DataProvider {
             }
             return json;
         }
+    }
+
+    private record ArmorMaterialTextureSpec(ResourceLocation id, ResourceLocation texture) {
     }
 }

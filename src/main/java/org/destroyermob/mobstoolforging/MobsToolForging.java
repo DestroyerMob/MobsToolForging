@@ -3,6 +3,7 @@ package org.destroyermob.mobstoolforging;
 import com.mojang.logging.LogUtils;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -150,6 +151,9 @@ public class MobsToolForging {
                     .map(MobsToolForging::templatePattern)
                     .forEach(event::accept);
             event.accept(ModItems.TEMPLATE_PATTERN);
+        }
+        if (event.getTabKey() == CreativeModeTabs.COMBAT) {
+            event.accept(ModItems.MODULAR_HELMET.get().create(MaterialCatalog.IRON, Optional.empty(), Optional.empty()));
         }
         if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(ModItems.FLINT_SHARD);

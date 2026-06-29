@@ -1,12 +1,14 @@
 package org.destroyermob.mobstoolforging.registry;
 
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.item.FireStickItem;
+import org.destroyermob.mobstoolforging.item.ModularHelmetItem;
 import org.destroyermob.mobstoolforging.item.ModularAxeItem;
 import org.destroyermob.mobstoolforging.item.ModularHoeItem;
 import org.destroyermob.mobstoolforging.item.ModularPickaxeItem;
@@ -178,6 +180,10 @@ public final class ModItems {
     public static final DeferredItem<ModularHoeItem> HOE = ITEMS.register(
             "hoe",
             () -> new ModularHoeItem(new Item.Properties())
+    );
+    public static final DeferredItem<ModularHelmetItem> MODULAR_HELMET = ITEMS.register(
+            "modular_helmet",
+            () -> new ModularHelmetItem(ArmorMaterials.LEATHER, new Item.Properties().stacksTo(1))
     );
 
     private ModItems() {
