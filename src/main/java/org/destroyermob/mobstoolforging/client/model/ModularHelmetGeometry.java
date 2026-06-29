@@ -13,23 +13,24 @@ public final class ModularHelmetGeometry {
     private static final int WHITE = 0xFFFFFFFF;
 
     public static final List<Cuboid> SKULL = List.of(
-            cuboid(-5, -9, -5, 5, -8, 5, -8, -8),
-            cuboid(4, -8, -5, 5, 0, 5, -8, -8),
-            cuboid(-5, -8, -5, -4, 0, 5, -8, -8),
-            cuboid(-4, -8, 4, 4, 0, 5, 1, 1)
+            cuboid(-4, -8, -4, 4, -8, 4, -6, -6),
+            cuboid(-4, -8, 4, 4, -2, 4, -1, 2),
+            cuboid(-2, -2, 4, 2, -1, 4, 1, 2),
+            cuboid(-4, -8, -4, 4, -5, -4, -1, 2),
+            cuboid(4, -8, -4, 4, -3, 4, -6, -6),
+            cuboid(-4, -8, -4, -4, -3, 4, -6, -6),
+            cuboid(-4, -3, 0, -4, -2, 4, -2, -2),
+            cuboid(4, -3, 0, 4, -2, 4, -2, -2)
     );
     public static final List<Cuboid> COMB = List.of(
-            cuboid(-1, -10, -5, 1, -9, 6, -9, -9),
-            cuboid(-1, -10, -6, 1, -6, -5, 1, 1),
-            cuboid(-1, -9, 5, 1, 0, 6, 1, 1)
+            cuboid(-1, -9, -5, 1, -8, 5, -8, -8),
+            cuboid(-1, -8, -5, 1, -3, -4, 1, 1),
+            cuboid(-1, -8, 4, 1, -3, 5, 1, 1)
     );
     public static final List<Cuboid> VISOR = List.of(
-            cuboid(-5, -9, -7, 5, -7, -6, -7, 1),
-            cuboid(-5, -7, -7, -4, -6, -6, -1, 1),
-            cuboid(-5, -6, -7, 5, 0, -6, -8, 1),
-            cuboid(4, -7, -7, 5, -6, -6, -1, 1),
-            cuboid(5, -4, -7, 6, -2, 3, -8, -8),
-            cuboid(-6, -4, -7, -5, -2, 3, -8, -8)
+            cuboid(-5, -3, -5, -4, -1, 1, -3, -4),
+            cuboid(4, -3, -5, 5, -1, 1, -3, -4),
+            cuboid(-4, -2, -5, 4, 0, -4, -5, 1)
     );
 
     private ModularHelmetGeometry() {
@@ -42,7 +43,7 @@ public final class ModularHelmetGeometry {
     }
 
     private static void renderBox(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int light, int overlay, Cuboid cuboid) {
-        if (cuboid.maxX <= cuboid.minX || cuboid.maxY <= cuboid.minY || cuboid.maxZ <= cuboid.minZ) {
+        if (cuboid.maxX < cuboid.minX || cuboid.maxY < cuboid.minY || cuboid.maxZ < cuboid.minZ || cuboid.hasNoSurface()) {
             return;
         }
         float minX = cuboid.minX * MODEL_SCALE;
@@ -95,8 +96,22 @@ public final class ModularHelmetGeometry {
 
     public record Cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float textureU, float textureV) {
         public Cuboid headAligned() {
-            // Helmet(1).java is already authored in humanoid head space, with the face opening on -Z.
+            // Helmet3.java has been converted from root entity coordinates into humanoid head space.
             return this;
+        }
+
+        private boolean hasNoSurface() {
+            int flatAxes = 0;
+            if (maxX == minX) {
+                flatAxes++;
+            }
+            if (maxY == minY) {
+                flatAxes++;
+            }
+            if (maxZ == minZ) {
+                flatAxes++;
+            }
+            return flatAxes >= 2;
         }
 
         public Vector3f itemFrom() {
