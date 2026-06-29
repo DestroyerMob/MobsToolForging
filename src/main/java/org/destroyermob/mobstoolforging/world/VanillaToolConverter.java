@@ -3,6 +3,7 @@ package org.destroyermob.mobstoolforging.world;
 import java.util.Optional;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -41,6 +42,10 @@ public final class VanillaToolConverter {
     }
 
     private static ToolConversion conversion(Item item, ResourceLocation handleMaterial) {
+        Optional<ToolConversion> knownExternal = knownExternalConversion(item, handleMaterial);
+        if (knownExternal.isPresent()) {
+            return knownExternal.get();
+        }
         ToolKind toolKind = toolKind(item);
         if (toolKind != null) {
             ResourceLocation headMaterial = headMaterial(item);
@@ -50,6 +55,16 @@ public final class VanillaToolConverter {
             }
         }
         return externalConversion(item, handleMaterial).orElse(null);
+    }
+
+    private static Optional<ToolConversion> knownExternalConversion(Item item, ResourceLocation handleMaterial) {
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+        if (!"mobsmoreweapons".equals(itemId.getNamespace())) {
+            return Optional.empty();
+        }
+        return moreWeaponsMatch(itemId.getPath())
+                .flatMap(match -> ToolTypeRegistry.toolType(match.toolType())
+                        .map(definition -> new ToolConversion(definition, construction(definition, match.headMaterial(), handleMaterial, match.treatment()))));
     }
 
     private static Optional<ToolConversion> externalConversion(Item item, ResourceLocation handleMaterial) {
@@ -145,6 +160,10 @@ public final class VanillaToolConverter {
     }
 
     private static ToolConstructionData construction(ToolTypeDefinition definition, ResourceLocation headMaterial, ResourceLocation handleMaterial) {
+        return construction(definition, normalizedHeadMaterial(headMaterial), handleMaterial, treatmentFor(headMaterial));
+    }
+
+    private static ToolConstructionData construction(ToolTypeDefinition definition, ResourceLocation headMaterial, ResourceLocation handleMaterial, Optional<ResourceLocation> treatment) {
         Optional<ResourceLocation> guardMaterial = definition.requiredAssemblyParts().isEmpty()
                 ? Optional.empty()
                 : Optional.of(headMaterial);
@@ -156,9 +175,49 @@ public final class VanillaToolConverter {
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
-                Optional.empty(),
+                treatment,
                 ToolConstructionData.DEFAULT_QUALITY
         );
+    }
+
+    private static ResourceLocation normalizedHeadMaterial(ResourceLocation headMaterial) {
+        return MaterialCatalog.NETHERITE.equals(headMaterial) ? MaterialCatalog.DIAMOND : headMaterial;
+    }
+
+    private static Optional<ResourceLocation> treatmentFor(ResourceLocation headMaterial) {
+        return MaterialCatalog.NETHERITE.equals(headMaterial) ? Optional.of(MaterialCatalog.NETHERITE) : Optional.empty();
+    }
+
+    private static Optional<MoreWeaponsMatch> moreWeaponsMatch(String path) {
+        MaterialSelection material = materialSelection(path);
+        if (material == null) {
+            return Optional.empty();
+        }
+        String toolType = path.substring(material.prefix().length());
+        return switch (toolType) {
+            case "great_sword", "katana", "battle_axe", "knife", "machete" -> Optional.of(new MoreWeaponsMatch(
+                    ResourceLocation.fromNamespaceAndPath("mobsmoreweapons", toolType),
+                    material.headMaterial(),
+                    material.treatment()
+            ));
+            default -> Optional.empty();
+        };
+    }
+
+    private static MaterialSelection materialSelection(String path) {
+        if (path.startsWith("iron_")) {
+            return new MaterialSelection("iron_", MaterialCatalog.IRON, Optional.empty());
+        }
+        if (path.startsWith("golden_")) {
+            return new MaterialSelection("golden_", MaterialCatalog.GOLD, Optional.empty());
+        }
+        if (path.startsWith("diamond_")) {
+            return new MaterialSelection("diamond_", MaterialCatalog.DIAMOND, Optional.empty());
+        }
+        if (path.startsWith("netherite_")) {
+            return new MaterialSelection("netherite_", MaterialCatalog.DIAMOND, Optional.of(MaterialCatalog.NETHERITE));
+        }
+        return null;
     }
 
     private static void copyDamage(ItemStack original, ItemStack converted) {
@@ -186,5 +245,11 @@ public final class VanillaToolConverter {
     }
 
     private record ToolConversion(ToolTypeDefinition definition, ToolConstructionData construction) {
+    }
+
+    private record MoreWeaponsMatch(ResourceLocation toolType, ResourceLocation headMaterial, Optional<ResourceLocation> treatment) {
+    }
+
+    private record MaterialSelection(String prefix, ResourceLocation headMaterial, Optional<ResourceLocation> treatment) {
     }
 }

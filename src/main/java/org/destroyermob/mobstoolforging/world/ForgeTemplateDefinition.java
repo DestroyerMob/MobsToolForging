@@ -65,7 +65,9 @@ public record ForgeTemplateDefinition(
     }
 
     public boolean allowsMaterial(ResourceLocation materialId) {
-        return (materialWhitelist.isEmpty() || materialWhitelist.contains(materialId)) && !materialBlacklist.contains(materialId);
+        return MaterialCatalog.isNormalForgingMaterial(materialId)
+                && (materialWhitelist.isEmpty() || materialWhitelist.contains(materialId))
+                && !materialBlacklist.contains(materialId);
     }
 
     public int minimumHammerLevel(ResourceLocation materialId) {

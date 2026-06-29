@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.recipe.ModularToolRecipe;
+import org.destroyermob.mobstoolforging.recipe.ToolConversionRecipe;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 
 public final class ModRecipeSerializers {
@@ -45,6 +46,11 @@ public final class ModRecipeSerializers {
             RECIPE_SERIALIZERS.register(
                     "crafting_special_modular_tool",
                     ModularToolRecipe.Serializer::new
+            );
+    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<ToolConversionRecipe>> TOOL_CONVERSION =
+            RECIPE_SERIALIZERS.register(
+                    "crafting_special_tool_conversion",
+                    () -> new SimpleCraftingRecipeSerializer<>(ToolConversionRecipe::new)
             );
 
     private ModRecipeSerializers() {

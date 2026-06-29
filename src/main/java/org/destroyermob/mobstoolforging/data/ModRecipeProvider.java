@@ -6,8 +6,12 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.SpecialRecipeBuilder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
+import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.recipe.ToolConversionRecipe;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 
@@ -20,6 +24,9 @@ public class ModRecipeProvider extends RecipeProvider {
 
     @Override
     protected void buildRecipes(RecipeOutput output) {
+        SpecialRecipeBuilder.special(ToolConversionRecipe::new)
+                .save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "tool_conversion").toString());
+
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.TOOL_FORGE)
                 .define('B', Items.COPPER_BLOCK)
                 .define('I', Items.COPPER_INGOT)

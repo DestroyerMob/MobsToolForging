@@ -30,8 +30,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.MATERIALS_METALS)
                 .addTag(Tags.Items.INGOTS_IRON)
                 .addTag(Tags.Items.INGOTS_GOLD)
-                .addTag(Tags.Items.INGOTS_COPPER)
-                .addTag(Tags.Items.INGOTS_NETHERITE);
+                .addTag(Tags.Items.INGOTS_COPPER);
         tag(ModTags.Items.MATERIALS_GEMS)
                 .addTag(Tags.Items.GEMS_DIAMOND)
                 .addTag(Tags.Items.GEMS_EMERALD);

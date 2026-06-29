@@ -65,10 +65,10 @@ public final class MaterialCatalog {
     private static final Map<Item, ResourceLocation> MATERIAL_ITEM_IDS = new LinkedHashMap<>();
     private static final Map<TagKey<Item>, ResourceLocation> MATERIAL_TAG_IDS = new LinkedHashMap<>();
     private static final Map<Item, ResourceLocation> CUSTOM_HANDLE_MATERIALS = new LinkedHashMap<>();
-    private static final List<ResourceLocation> STARTER_MATERIALS = List.of(IRON, GOLD, COPPER, NETHERITE, DIAMOND, EMERALD);
+    private static final List<ResourceLocation> STARTER_MATERIALS = List.of(IRON, GOLD, COPPER, DIAMOND, EMERALD);
     private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(OAK, DARK_OAK, BLAZE, BREEZE);
     private static final List<ResourceLocation> GUARD_MATERIALS = STARTER_MATERIALS;
-    private static final List<ResourceLocation> BINDING_MATERIALS = List.of(IRON, GOLD, COPPER, NETHERITE, DIAMOND, EMERALD, PLANT_FIBER);
+    private static final List<ResourceLocation> BINDING_MATERIALS = List.of(IRON, GOLD, COPPER, DIAMOND, EMERALD, PLANT_FIBER);
     private static final List<ResourceLocation> WRAP_MATERIALS = List.of(LEATHER);
     private static final List<ResourceLocation> FOCUS_MATERIALS = List.of(AMETHYST);
     private static final List<ResourceLocation> TREATMENT_MATERIALS = List.of(NETHERITE, NETHER, SCULK);
@@ -103,7 +103,8 @@ public final class MaterialCatalog {
     }
 
     public static boolean isMaterial(ItemStack stack) {
-        return registeredMaterialId(stack).isPresent() || stack.is(ModTags.Items.MATERIALS);
+        return registeredMaterialId(stack).filter(MaterialCatalog::isNormalForgingMaterial).isPresent()
+                || stack.is(ModTags.Items.MATERIALS);
     }
 
     public static Optional<ToolMaterialDefinition> definition(ResourceLocation materialId) {
@@ -141,10 +142,15 @@ public final class MaterialCatalog {
     public static List<ResourceLocation> starterMaterialIds() {
         LinkedHashSet<ResourceLocation> values = new LinkedHashSet<>(STARTER_MATERIALS);
         DEFINITIONS.values().stream()
+                .filter(definition -> isNormalForgingMaterial(definition.id()))
                 .filter(definition -> definition.category() == MaterialCategory.METAL || definition.category() == MaterialCategory.GEM)
                 .map(ToolMaterialDefinition::id)
                 .forEach(values::add);
         return List.copyOf(values);
+    }
+
+    public static boolean isNormalForgingMaterial(ResourceLocation materialId) {
+        return !NETHERITE.equals(materialId);
     }
 
     public static List<ResourceLocation> handleMaterialIds() {

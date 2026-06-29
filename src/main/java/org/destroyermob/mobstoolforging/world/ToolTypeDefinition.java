@@ -151,6 +151,11 @@ public final class ToolTypeDefinition {
         if (!id.equals(construction.toolType())) {
             return false;
         }
+        if (!MaterialCatalog.isNormalForgingMaterial(construction.headMaterial())
+                || construction.guardMaterial().filter(material -> !MaterialCatalog.isNormalForgingMaterial(material)).isPresent()
+                || construction.bindingMaterial().filter(material -> !MaterialCatalog.isNormalForgingMaterial(material)).isPresent()) {
+            return false;
+        }
         if (!customToolFactory && toolItem(construction.headMaterial()).isEmpty()) {
             return false;
         }
@@ -161,7 +166,8 @@ public final class ToolTypeDefinition {
         if (!parts.keySet().containsAll(requiredAssemblyParts)) {
             return false;
         }
-        return parts.values().stream().allMatch(part -> MaterialCatalog.definition(part.materialId()).isPresent());
+        return parts.values().stream()
+                .allMatch(part -> MaterialCatalog.isNormalForgingMaterial(part.materialId()) && MaterialCatalog.definition(part.materialId()).isPresent());
     }
 
     public static Builder builder(ResourceLocation id, String primaryPartType) {
