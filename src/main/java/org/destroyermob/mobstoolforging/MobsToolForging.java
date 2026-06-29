@@ -155,6 +155,8 @@ public class MobsToolForging {
         if (event.getTabKey() == CreativeModeTabs.COMBAT) {
             event.accept(ModItems.MODULAR_HELMET.get().create(MaterialCatalog.IRON, Optional.empty(), Optional.empty()));
             event.accept(ModItems.MODULAR_CHESTPLATE.get().create(MaterialCatalog.IRON));
+            event.accept(ModItems.MODULAR_LEGGINGS.get().create(MaterialCatalog.IRON));
+            event.accept(ModItems.MODULAR_BOOTS.get().create(MaterialCatalog.IRON));
         }
         if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(ModItems.FLINT_SHARD);

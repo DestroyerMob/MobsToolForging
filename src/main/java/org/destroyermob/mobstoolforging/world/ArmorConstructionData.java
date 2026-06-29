@@ -19,6 +19,8 @@ public record ArmorConstructionData(
     public static final int DEFAULT_QUALITY = 100;
     public static final ResourceLocation HELMET_TYPE = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "helmet");
     public static final ResourceLocation CHESTPLATE_TYPE = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "chestplate");
+    public static final ResourceLocation LEGGINGS_TYPE = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "leggings");
+    public static final ResourceLocation BOOTS_TYPE = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "boots");
 
     public ArmorConstructionData {
         combMaterial = combMaterial == null ? Optional.empty() : combMaterial;
@@ -42,5 +44,13 @@ public record ArmorConstructionData(
 
     public static ArmorConstructionData chestplate(ResourceLocation bodyMaterial) {
         return new ArmorConstructionData(CHESTPLATE_TYPE, bodyMaterial, Optional.empty(), Optional.empty(), DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData leggings(ResourceLocation legMaterial) {
+        return new ArmorConstructionData(LEGGINGS_TYPE, legMaterial, Optional.empty(), Optional.empty(), DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData boots(ResourceLocation footMaterial) {
+        return new ArmorConstructionData(BOOTS_TYPE, footMaterial, Optional.empty(), Optional.empty(), DEFAULT_QUALITY);
     }
 }

@@ -100,12 +100,15 @@ public final class MobsToolForgingClient {
                 && livingRenderer.getModel() instanceof HumanoidModel) {
             livingRenderer.addLayer(new ModularHelmetLayer(livingRenderer, new ModularHelmetModel(modelSet.bakeLayer(ModularHelmetModel.LAYER_LOCATION))));
             livingRenderer.addLayer(new ModularBodyArmourLayer(livingRenderer, new ModularBodyArmourModel(modelSet.bakeLayer(ModularBodyArmourModel.LAYER_LOCATION))));
+            livingRenderer.addLayer(new ModularLowerArmourLayer(livingRenderer));
         }
     }
 
     private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
         event.registerItem(ModularHelmetClientExtensions.INSTANCE, ModItems.MODULAR_HELMET);
         event.registerItem(ModularHelmetClientExtensions.INSTANCE, ModItems.MODULAR_CHESTPLATE);
+        event.registerItem(ModularHelmetClientExtensions.INSTANCE, ModItems.MODULAR_LEGGINGS);
+        event.registerItem(ModularHelmetClientExtensions.INSTANCE, ModItems.MODULAR_BOOTS);
     }
 
     private static void registerGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {

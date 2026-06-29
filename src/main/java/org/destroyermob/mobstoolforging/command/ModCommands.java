@@ -63,7 +63,9 @@ public final class ModCommands {
     private static LiteralArgumentBuilder<CommandSourceStack> armorRoot(boolean targetBranch) {
         return Commands.literal("armor")
                 .then(helmetCommand(targetBranch))
-                .then(chestplateCommand(targetBranch));
+                .then(chestplateCommand(targetBranch))
+                .then(leggingsCommand(targetBranch))
+                .then(bootsCommand(targetBranch));
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> helmetCommand(boolean targetBranch) {
@@ -80,6 +82,18 @@ public final class ModCommands {
         RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> body = materialArgument("body", true);
         body.executes(context -> giveChestplate(context, targetBranch, material(context, "body")));
         return Commands.literal("chestplate").then(body);
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> leggingsCommand(boolean targetBranch) {
+        RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> legs = materialArgument("legs", true);
+        legs.executes(context -> giveLeggings(context, targetBranch, material(context, "legs")));
+        return Commands.literal("leggings").then(legs);
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> bootsCommand(boolean targetBranch) {
+        RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> feet = materialArgument("feet", true);
+        feet.executes(context -> giveBoots(context, targetBranch, material(context, "feet")));
+        return Commands.literal("boots").then(feet);
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> toolRoot(boolean targetBranch) {
@@ -192,6 +206,24 @@ public final class ModCommands {
             return 0;
         }
         ItemStack stack = ModItems.MODULAR_CHESTPLATE.get().create(body);
+        return giveStack(context, targetBranch, stack);
+    }
+
+    private static int giveLeggings(CommandContext<CommandSourceStack> context, boolean targetBranch, ResourceLocation legs) throws CommandSyntaxException {
+        if (!ArmorStatsCatalog.isSupportedArmorMaterial(legs)) {
+            context.getSource().sendFailure(Component.translatable("commands.mobstoolforging.give_debug.invalid_armor_material", MaterialCatalog.displayName(legs)));
+            return 0;
+        }
+        ItemStack stack = ModItems.MODULAR_LEGGINGS.get().create(legs);
+        return giveStack(context, targetBranch, stack);
+    }
+
+    private static int giveBoots(CommandContext<CommandSourceStack> context, boolean targetBranch, ResourceLocation feet) throws CommandSyntaxException {
+        if (!ArmorStatsCatalog.isSupportedArmorMaterial(feet)) {
+            context.getSource().sendFailure(Component.translatable("commands.mobstoolforging.give_debug.invalid_armor_material", MaterialCatalog.displayName(feet)));
+            return 0;
+        }
+        ItemStack stack = ModItems.MODULAR_BOOTS.get().create(feet);
         return giveStack(context, targetBranch, stack);
     }
 

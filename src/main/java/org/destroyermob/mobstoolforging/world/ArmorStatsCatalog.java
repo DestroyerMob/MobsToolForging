@@ -15,8 +15,12 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 public final class ArmorStatsCatalog {
     private static final ResourceLocation HELMET_ARMOR_ID = ResourceLocation.withDefaultNamespace("armor.helmet");
     private static final ResourceLocation CHESTPLATE_ARMOR_ID = ResourceLocation.withDefaultNamespace("armor.chestplate");
+    private static final ResourceLocation LEGGINGS_ARMOR_ID = ResourceLocation.withDefaultNamespace("armor.leggings");
+    private static final ResourceLocation BOOTS_ARMOR_ID = ResourceLocation.withDefaultNamespace("armor.boots");
     private static final Map<ResourceLocation, ArmorStats> HELMET_STATS = builtInHelmetStats();
     private static final Map<ResourceLocation, ArmorStats> CHESTPLATE_STATS = builtInChestplateStats();
+    private static final Map<ResourceLocation, ArmorStats> LEGGINGS_STATS = builtInLeggingsStats();
+    private static final Map<ResourceLocation, ArmorStats> BOOTS_STATS = builtInBootsStats();
 
     private ArmorStatsCatalog() {
     }
@@ -42,6 +46,14 @@ public final class ArmorStatsCatalog {
         return CHESTPLATE_STATS.getOrDefault(materialId, CHESTPLATE_STATS.get(MaterialCatalog.IRON));
     }
 
+    public static ArmorStats leggingsStats(ResourceLocation materialId) {
+        return LEGGINGS_STATS.getOrDefault(materialId, LEGGINGS_STATS.get(MaterialCatalog.IRON));
+    }
+
+    public static ArmorStats bootsStats(ResourceLocation materialId) {
+        return BOOTS_STATS.getOrDefault(materialId, BOOTS_STATS.get(MaterialCatalog.IRON));
+    }
+
     public static ArmorStats stats(ArmorConstructionData construction) {
         return slotStats(construction).stats();
     }
@@ -51,10 +63,29 @@ public final class ArmorStatsCatalog {
     }
 
     public static boolean isSupportedArmorMaterial(ResourceLocation materialId) {
-        return HELMET_STATS.containsKey(materialId) || CHESTPLATE_STATS.containsKey(materialId);
+        return HELMET_STATS.containsKey(materialId)
+                || CHESTPLATE_STATS.containsKey(materialId)
+                || LEGGINGS_STATS.containsKey(materialId)
+                || BOOTS_STATS.containsKey(materialId);
     }
 
     private static ArmorSlotStats slotStats(ArmorConstructionData construction) {
+        if (ArmorConstructionData.BOOTS_TYPE.equals(construction.armorType())) {
+            return new ArmorSlotStats(
+                    ArmorItem.Type.BOOTS,
+                    EquipmentSlotGroup.FEET,
+                    BOOTS_ARMOR_ID,
+                    bootsStats(construction.skullMaterial())
+            );
+        }
+        if (ArmorConstructionData.LEGGINGS_TYPE.equals(construction.armorType())) {
+            return new ArmorSlotStats(
+                    ArmorItem.Type.LEGGINGS,
+                    EquipmentSlotGroup.LEGS,
+                    LEGGINGS_ARMOR_ID,
+                    leggingsStats(construction.skullMaterial())
+            );
+        }
         if (ArmorConstructionData.CHESTPLATE_TYPE.equals(construction.armorType())) {
             return new ArmorSlotStats(
                     ArmorItem.Type.CHESTPLATE,
@@ -114,6 +145,28 @@ public final class ArmorStatsCatalog {
         stats.put(MaterialCatalog.NETHERITE, new ArmorStats(8, 37, 15, 3.0F, 0.1F, true));
         stats.put(MaterialCatalog.DIAMOND, new ArmorStats(8, 33, 10, 2.0F, 0.0F, false));
         stats.put(MaterialCatalog.EMERALD, new ArmorStats(7, 30, 18, 2.0F, 0.0F, false));
+        return Map.copyOf(stats);
+    }
+
+    private static Map<ResourceLocation, ArmorStats> builtInLeggingsStats() {
+        Map<ResourceLocation, ArmorStats> stats = new LinkedHashMap<>();
+        stats.put(MaterialCatalog.IRON, new ArmorStats(5, 15, 9, 0.0F, 0.0F, false));
+        stats.put(MaterialCatalog.GOLD, new ArmorStats(3, 7, 25, 0.0F, 0.0F, false));
+        stats.put(MaterialCatalog.COPPER, new ArmorStats(4, 12, 16, 0.0F, 0.0F, false));
+        stats.put(MaterialCatalog.NETHERITE, new ArmorStats(6, 37, 15, 3.0F, 0.1F, true));
+        stats.put(MaterialCatalog.DIAMOND, new ArmorStats(6, 33, 10, 2.0F, 0.0F, false));
+        stats.put(MaterialCatalog.EMERALD, new ArmorStats(6, 30, 18, 2.0F, 0.0F, false));
+        return Map.copyOf(stats);
+    }
+
+    private static Map<ResourceLocation, ArmorStats> builtInBootsStats() {
+        Map<ResourceLocation, ArmorStats> stats = new LinkedHashMap<>();
+        stats.put(MaterialCatalog.IRON, new ArmorStats(2, 15, 9, 0.0F, 0.0F, false));
+        stats.put(MaterialCatalog.GOLD, new ArmorStats(1, 7, 25, 0.0F, 0.0F, false));
+        stats.put(MaterialCatalog.COPPER, new ArmorStats(2, 12, 16, 0.0F, 0.0F, false));
+        stats.put(MaterialCatalog.NETHERITE, new ArmorStats(3, 37, 15, 3.0F, 0.1F, true));
+        stats.put(MaterialCatalog.DIAMOND, new ArmorStats(3, 33, 10, 2.0F, 0.0F, false));
+        stats.put(MaterialCatalog.EMERALD, new ArmorStats(3, 30, 18, 2.0F, 0.0F, false));
         return Map.copyOf(stats);
     }
 

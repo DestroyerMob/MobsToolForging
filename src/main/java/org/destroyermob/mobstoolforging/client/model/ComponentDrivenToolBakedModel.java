@@ -200,6 +200,12 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         if (ArmorConstructionData.CHESTPLATE_TYPE.equals(key.armorType())) {
             return ModularBodyArmourItemModel.compose(key, fallback.getTransforms());
         }
+        if (ArmorConstructionData.LEGGINGS_TYPE.equals(key.armorType())) {
+            return ModularLowerArmourItemModel.composeLeggings(key, fallback.getTransforms());
+        }
+        if (ArmorConstructionData.BOOTS_TYPE.equals(key.armorType())) {
+            return ModularLowerArmourItemModel.composeBoots(key, fallback.getTransforms());
+        }
         warnOnce("missing_armor_type|" + key.armorType(), "Cannot render MTF armor stack because armor type {} is not loaded on the client.", key.armorType());
         return fallback;
     }

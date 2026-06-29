@@ -59,6 +59,8 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.HOE, "Hoe");
         addItem(ModItems.MODULAR_HELMET, "Modular Helmet");
         addItem(ModItems.MODULAR_CHESTPLATE, "Modular Body Armour");
+        addItem(ModItems.MODULAR_LEGGINGS, "Modular Leggings");
+        addItem(ModItems.MODULAR_BOOTS, "Modular Boots");
         add("item.mobstoolforging.material_sword_blade", "%s Sword Blade");
         add("item.mobstoolforging.material_sword_guard", "%s Sword Guard");
         add("item.mobstoolforging.material_shovel_head", "%s Shovel Head");
@@ -72,6 +74,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.mobstoolforging.material_hoe", "%s Hoe");
         add("item.mobstoolforging.material_modular_helmet", "%s Helmet");
         add("item.mobstoolforging.material_modular_chestplate", "%s Body Armour");
+        add("item.mobstoolforging.material_modular_leggings", "%s Leggings");
+        add("item.mobstoolforging.material_modular_boots", "%s Boots");
         add("material.mobstoolforging.iron", "Iron");
         add("material.mobstoolforging.gold", "Gold");
         add("material.mobstoolforging.copper", "Copper");
@@ -218,6 +222,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.part.focus", "Focus");
         add("tooltip.mobstoolforging.part.treatment", "Treatment");
         add("tooltip.mobstoolforging.armor_part.body", "Body: %s");
+        add("tooltip.mobstoolforging.armor_part.legs", "Legs: %s");
+        add("tooltip.mobstoolforging.armor_part.feet", "Feet: %s");
         add("tooltip.mobstoolforging.armor_part.skull", "Skull: %s");
         add("tooltip.mobstoolforging.armor_part.comb", "Comb: %s");
         add("tooltip.mobstoolforging.armor_part.visor", "Visor: %s");
