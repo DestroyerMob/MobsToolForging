@@ -12,7 +12,6 @@ public final class ModularHelmetGeometry {
     private static final int WHITE = 0xFFFFFFFF;
 
     public static final List<Cuboid> SKULL = List.of(
-            cuboid(-5, -8, -4, -4, 0, 4),
             cuboid(4, -8, -4, 5, 0, 4),
             cuboid(-5, -8, 4, 5, 0, 5),
             cuboid(-5, -8, -5, 5, 0, -4),
@@ -20,26 +19,26 @@ public final class ModularHelmetGeometry {
     );
     public static final List<Cuboid> COMB = List.of(
             cuboid(-5, -10, -1, 5, -9, 1),
-            cuboid(-6, -10, -1, -5, 0, 1)
+            cuboid(5, -10, -1, 6, 0, 1)
     );
     public static final List<Cuboid> VISOR = List.of(
-            cuboid(5, -1, -5, 6, 0, 5),
-            cuboid(5, -5, -5, 6, -3, 5),
-            cuboid(5, -9, -5, 6, -6, 5),
-            cuboid(5, -6, 3, 6, -5, 5),
-            cuboid(5, -6, -5, 6, -5, -3),
-            cuboid(5, -3, -5, 6, -1, -4),
-            cuboid(5, -3, 4, 6, -1, 5),
-            cuboid(5, -3, 1, 6, -2, 2),
-            cuboid(5, -3, 3, 6, -2, 4),
-            cuboid(5, -2, -4, 6, -1, -3),
-            cuboid(5, -3, -3, 6, -2, -2),
-            cuboid(5, -3, -1, 6, -2, 0),
-            cuboid(5, -2, -2, 6, -1, -1),
-            cuboid(5, -2, 0, 6, -1, 1),
-            cuboid(5, -2, 2, 6, -1, 3),
-            cuboid(-2, -7, -6, 6, -4, -5),
-            cuboid(-2, -7, 5, 6, -4, 6)
+            cuboid(-6, -1, -5, -5, 0, 5),
+            cuboid(-6, -5, -5, -5, -3, 5),
+            cuboid(-6, -9, -5, -5, -6, 5),
+            cuboid(-6, -6, 3, -5, -5, 5),
+            cuboid(-6, -6, -5, -5, -5, -3),
+            cuboid(-6, -3, -5, -5, -1, -4),
+            cuboid(-6, -3, 4, -5, -1, 5),
+            cuboid(-6, -3, 1, -5, -2, 2),
+            cuboid(-6, -3, 3, -5, -2, 4),
+            cuboid(-6, -2, -4, -5, -1, -3),
+            cuboid(-6, -3, -3, -5, -2, -2),
+            cuboid(-6, -3, -1, -5, -2, 0),
+            cuboid(-6, -2, -2, -5, -1, -1),
+            cuboid(-6, -2, 0, -5, -1, 1),
+            cuboid(-6, -2, 2, -5, -1, 3),
+            cuboid(-6, -7, -6, 2, -4, -5),
+            cuboid(-6, -7, 5, 2, -4, 6)
     );
 
     private ModularHelmetGeometry() {
@@ -95,8 +94,8 @@ public final class ModularHelmetGeometry {
 
     public record Cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
         public Cuboid headAligned() {
-            // The exported helmet faces +X; Minecraft humanoid heads face -Z.
-            return new Cuboid(minZ, minY, -maxX, maxZ, maxY, -minX);
+            // The exported helmet face opening is -X; Minecraft humanoid heads face -Z.
+            return new Cuboid(minZ, minY, minX, maxZ, maxY, maxX);
         }
 
         public Vector3f itemFrom() {
