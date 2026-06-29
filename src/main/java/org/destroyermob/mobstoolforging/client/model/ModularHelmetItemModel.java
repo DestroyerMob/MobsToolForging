@@ -21,29 +21,33 @@ public final class ModularHelmetItemModel {
     private static final float ITEM_Y_OFFSET = 12.0F;
     private static final float ITEM_Z_OFFSET = 8.0F;
     private static final List<Cuboid> SKULL = List.of(
-            cuboid(-4, -7, -4, 4, -6, 4),
-            cuboid(-4, -6, -5, 4, -1, -4),
-            cuboid(4, -6, -4, 5, -1, 4),
-            cuboid(-5, -6, -4, -4, -1, 4)
+            cuboid(-5, -8, -4, -4, 0, 4),
+            cuboid(-5, -8, 4, 5, 0, 5),
+            cuboid(-5, -8, -5, 5, 0, -4),
+            cuboid(-5, -9, -5, 5, -8, 5)
     );
     private static final List<Cuboid> COMB = List.of(
-            cuboid(-1, -9, -1, 1, -1, 1),
-            cuboid(-1, -1, -1, 1, 0, 1)
+            cuboid(-5, -10, -1, 5, -9, 1),
+            cuboid(-6, -10, -1, -5, 0, 1)
     );
     private static final List<Cuboid> VISOR = List.of(
-            cuboid(1, -1, -6, 3, 0, -5),
-            cuboid(-3, -1, -6, -1, 0, -5),
-            cuboid(0, -1, -6, 2, 0, -5),
-            cuboid(-2, -1, -6, 0, 0, -5),
-            cuboid(-4, -1, -6, -2, 0, -5),
-            cuboid(2, -1, -6, 4, 0, -5),
-            cuboid(3, -2, -6, 4, -1, -5),
-            cuboid(-5, -2, -6, -4, -1, -5),
-            cuboid(-4, -3, -6, -3, -2, -5),
-            cuboid(2, -3, -6, 3, -2, -5),
-            cuboid(-3, -4, -6, -2, -3, -5),
-            cuboid(1, -4, -6, 2, -3, -5),
-            cuboid(-2, -5, -6, 2, -4, -5)
+            cuboid(5, -1, -5, 6, 0, 5),
+            cuboid(5, -5, -5, 6, -3, 5),
+            cuboid(5, -9, -5, 6, -6, 5),
+            cuboid(5, -6, 3, 6, -5, 5),
+            cuboid(5, -6, -5, 6, -5, -3),
+            cuboid(5, -3, -5, 6, -1, -4),
+            cuboid(5, -3, 4, 6, -1, 5),
+            cuboid(5, -3, 1, 6, -2, 2),
+            cuboid(5, -3, 3, 6, -2, 4),
+            cuboid(5, -2, -4, 6, -1, -3),
+            cuboid(5, -3, -3, 6, -2, -2),
+            cuboid(5, -3, -1, 6, -2, 0),
+            cuboid(5, -2, -2, 6, -1, -1),
+            cuboid(5, -2, 0, 6, -1, 1),
+            cuboid(5, -2, 2, 6, -1, 3),
+            cuboid(-2, -7, -6, 6, -4, -5),
+            cuboid(-2, -7, 5, 6, -4, 6)
     );
 
     private ModularHelmetItemModel() {
