@@ -43,39 +43,46 @@ public final class ModularHelmetModel {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
 
-        partdefinition.addOrReplaceChild("skull", CubeListBuilder.create()
-                .texOffs(-6, -6).addBox(-5.0F, -8.0F, -4.0F, 1.0F, 8.0F, 8.0F, new CubeDeformation(0.0F))
-                .texOffs(-3, 1).addBox(-5.0F, -8.0F, 4.0F, 10.0F, 8.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(-3, 1).addBox(-5.0F, -8.0F, -5.0F, 10.0F, 8.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(-8, -8).addBox(-5.0F, -9.0F, -5.0F, 10.0F, 1.0F, 10.0F, new CubeDeformation(0.0F)),
-                PartPose.ZERO);
+        CubeListBuilder skullBuilder = CubeListBuilder.create();
+        addHeadAlignedBox(skullBuilder, -6, -6, -5.0F, -8.0F, -4.0F, 1.0F, 8.0F, 8.0F);
+        addHeadAlignedBox(skullBuilder, -3, 1, -5.0F, -8.0F, 4.0F, 10.0F, 8.0F, 1.0F);
+        addHeadAlignedBox(skullBuilder, -3, 1, -5.0F, -8.0F, -5.0F, 10.0F, 8.0F, 1.0F);
+        addHeadAlignedBox(skullBuilder, -8, -8, -5.0F, -9.0F, -5.0F, 10.0F, 1.0F, 10.0F);
+        partdefinition.addOrReplaceChild("skull", skullBuilder, PartPose.ZERO);
 
-        partdefinition.addOrReplaceChild("comb", CubeListBuilder.create()
-                .texOffs(-4, 0).addBox(-5.0F, -10.0F, -1.0F, 10.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
-                .texOffs(0, 0).addBox(-6.0F, -10.0F, -1.0F, 1.0F, 10.0F, 2.0F, new CubeDeformation(0.0F)),
-                PartPose.ZERO);
+        CubeListBuilder combBuilder = CubeListBuilder.create();
+        addHeadAlignedBox(combBuilder, -4, 0, -5.0F, -10.0F, -1.0F, 10.0F, 1.0F, 2.0F);
+        addHeadAlignedBox(combBuilder, 0, 0, -6.0F, -10.0F, -1.0F, 1.0F, 10.0F, 2.0F);
+        partdefinition.addOrReplaceChild("comb", combBuilder, PartPose.ZERO);
 
-        partdefinition.addOrReplaceChild("visor", CubeListBuilder.create()
-                .texOffs(-7, -8).addBox(5.0F, -1.0F, -5.0F, 1.0F, 1.0F, 10.0F, new CubeDeformation(0.0F))
-                .texOffs(-7, -8).addBox(5.0F, -5.0F, -5.0F, 1.0F, 2.0F, 10.0F, new CubeDeformation(0.0F))
-                .texOffs(-7, -8).addBox(5.0F, -9.0F, -5.0F, 1.0F, 3.0F, 10.0F, new CubeDeformation(0.0F))
-                .texOffs(1, 0).addBox(5.0F, -6.0F, 3.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
-                .texOffs(1, 0).addBox(5.0F, -6.0F, -5.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
-                .texOffs(2, 1).addBox(5.0F, -3.0F, -5.0F, 1.0F, 2.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(2, 1).addBox(5.0F, -3.0F, 4.0F, 1.0F, 2.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(2, 1).addBox(5.0F, -3.0F, 1.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(2, 1).addBox(5.0F, -3.0F, 3.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(2, 1).addBox(5.0F, -2.0F, -4.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(2, 1).addBox(5.0F, -3.0F, -3.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(2, 1).addBox(5.0F, -3.0F, -1.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(2, 1).addBox(5.0F, -2.0F, -2.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(2, 1).addBox(5.0F, -2.0F, 0.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(2, 1).addBox(5.0F, -2.0F, 2.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(-5, 1).addBox(-2.0F, -7.0F, -6.0F, 8.0F, 3.0F, 1.0F, new CubeDeformation(0.0F))
-                .texOffs(-5, 1).addBox(-2.0F, -7.0F, 5.0F, 8.0F, 3.0F, 1.0F, new CubeDeformation(0.0F)),
-                PartPose.ZERO);
+        CubeListBuilder visorBuilder = CubeListBuilder.create();
+        addHeadAlignedBox(visorBuilder, -7, -8, 5.0F, -1.0F, -5.0F, 1.0F, 1.0F, 10.0F);
+        addHeadAlignedBox(visorBuilder, -7, -8, 5.0F, -5.0F, -5.0F, 1.0F, 2.0F, 10.0F);
+        addHeadAlignedBox(visorBuilder, -7, -8, 5.0F, -9.0F, -5.0F, 1.0F, 3.0F, 10.0F);
+        addHeadAlignedBox(visorBuilder, 1, 0, 5.0F, -6.0F, 3.0F, 1.0F, 1.0F, 2.0F);
+        addHeadAlignedBox(visorBuilder, 1, 0, 5.0F, -6.0F, -5.0F, 1.0F, 1.0F, 2.0F);
+        addHeadAlignedBox(visorBuilder, 2, 1, 5.0F, -3.0F, -5.0F, 1.0F, 2.0F, 1.0F);
+        addHeadAlignedBox(visorBuilder, 2, 1, 5.0F, -3.0F, 4.0F, 1.0F, 2.0F, 1.0F);
+        addHeadAlignedBox(visorBuilder, 2, 1, 5.0F, -3.0F, 1.0F, 1.0F, 1.0F, 1.0F);
+        addHeadAlignedBox(visorBuilder, 2, 1, 5.0F, -3.0F, 3.0F, 1.0F, 1.0F, 1.0F);
+        addHeadAlignedBox(visorBuilder, 2, 1, 5.0F, -2.0F, -4.0F, 1.0F, 1.0F, 1.0F);
+        addHeadAlignedBox(visorBuilder, 2, 1, 5.0F, -3.0F, -3.0F, 1.0F, 1.0F, 1.0F);
+        addHeadAlignedBox(visorBuilder, 2, 1, 5.0F, -3.0F, -1.0F, 1.0F, 1.0F, 1.0F);
+        addHeadAlignedBox(visorBuilder, 2, 1, 5.0F, -2.0F, -2.0F, 1.0F, 1.0F, 1.0F);
+        addHeadAlignedBox(visorBuilder, 2, 1, 5.0F, -2.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+        addHeadAlignedBox(visorBuilder, 2, 1, 5.0F, -2.0F, 2.0F, 1.0F, 1.0F, 1.0F);
+        addHeadAlignedBox(visorBuilder, -5, 1, -2.0F, -7.0F, -6.0F, 8.0F, 3.0F, 1.0F);
+        addHeadAlignedBox(visorBuilder, -5, 1, -2.0F, -7.0F, 5.0F, 8.0F, 3.0F, 1.0F);
+        partdefinition.addOrReplaceChild("visor", visorBuilder, PartPose.ZERO);
 
         return LayerDefinition.create(meshdefinition, 16, 16);
+    }
+
+    private static void addHeadAlignedBox(CubeListBuilder builder, int texU, int texV, float x, float y, float z, float dx, float dy, float dz) {
+        // The exported helmet faces +X; Minecraft humanoid heads face -Z.
+        float minX = z;
+        float minZ = -(x + dx);
+        builder.texOffs(texU, texV).addBox(minX, y, minZ, dz, dy, dx, new CubeDeformation(0.0F));
     }
 
     public static LayerDefinition createBlankArmorLayer() {

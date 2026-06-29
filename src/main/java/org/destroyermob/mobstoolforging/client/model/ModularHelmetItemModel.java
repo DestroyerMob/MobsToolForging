@@ -18,7 +18,7 @@ import org.joml.Vector3f;
 public final class ModularHelmetItemModel {
     private static final FaceBakery FACE_BAKERY = new FaceBakery();
     private static final float ITEM_X_OFFSET = 8.0F;
-    private static final float ITEM_Y_OFFSET = 12.0F;
+    private static final float ITEM_Y_OFFSET = 3.0F;
     private static final float ITEM_Z_OFFSET = 8.0F;
     private static final List<Cuboid> SKULL = List.of(
             cuboid(-5, -8, -4, -4, 0, 4),
@@ -85,9 +85,13 @@ public final class ModularHelmetItemModel {
     }
 
     private static Cuboid cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+        float rotatedMinX = minZ;
+        float rotatedMaxX = maxZ;
+        float rotatedMinZ = -maxX;
+        float rotatedMaxZ = -minX;
         return new Cuboid(
-                new Vector3f(minX + ITEM_X_OFFSET, minY + ITEM_Y_OFFSET, minZ + ITEM_Z_OFFSET),
-                new Vector3f(maxX + ITEM_X_OFFSET, maxY + ITEM_Y_OFFSET, maxZ + ITEM_Z_OFFSET)
+                new Vector3f(rotatedMinX + ITEM_X_OFFSET, ITEM_Y_OFFSET - maxY, rotatedMinZ + ITEM_Z_OFFSET),
+                new Vector3f(rotatedMaxX + ITEM_X_OFFSET, ITEM_Y_OFFSET - minY, rotatedMaxZ + ITEM_Z_OFFSET)
         );
     }
 
