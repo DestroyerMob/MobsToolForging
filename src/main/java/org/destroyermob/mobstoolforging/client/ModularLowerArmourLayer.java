@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -28,28 +29,36 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, T livingEntity, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (livingEntity.isInvisible() || !(getParentModel() instanceof HumanoidModel<?>)) {
+        if (livingEntity.isInvisible() || !(getParentModel() instanceof HumanoidModel<?> humanoidModel)) {
             return;
         }
-        renderSlot(poseStack, bufferSource, packedLight, livingEntity, EquipmentSlot.LEGS, ArmorConstructionData.LEGGINGS_TYPE, ModularLowerArmourGeometry.LEGGINGS);
-        renderSlot(poseStack, bufferSource, packedLight, livingEntity, EquipmentSlot.FEET, ArmorConstructionData.BOOTS_TYPE, ModularLowerArmourGeometry.BOOTS);
+        renderSlot(poseStack, bufferSource, packedLight, humanoidModel, livingEntity, EquipmentSlot.LEGS, ArmorConstructionData.LEGGINGS_TYPE, ModularLowerArmourGeometry.LEGGINGS);
+        renderSlot(poseStack, bufferSource, packedLight, humanoidModel, livingEntity, EquipmentSlot.FEET, ArmorConstructionData.BOOTS_TYPE, ModularLowerArmourGeometry.BOOTS);
     }
 
-    private void renderSlot(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, T livingEntity, EquipmentSlot slot, ResourceLocation armorType, List<ModularLowerArmourGeometry.Cuboid> cuboids) {
+    private void renderSlot(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, HumanoidModel<?> humanoidModel, T livingEntity, EquipmentSlot slot, ResourceLocation armorType, List<ModularLowerArmourGeometry.Cuboid> cuboids) {
         ItemStack stack = livingEntity.getItemBySlot(slot);
         ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
         if (construction == null || !armorType.equals(construction.armorType())) {
             return;
         }
         TextureAtlasSprite sprite = sprite(construction.skullMaterial());
-        renderCuboids(poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), packedLight, cuboids, sprite);
+        renderLegs(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), packedLight, cuboids, sprite);
         if (stack.hasFoil()) {
-            renderCuboids(poseStack, bufferSource.getBuffer(RenderType.armorEntityGlint()), packedLight, cuboids, sprite);
+            renderLegs(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), packedLight, cuboids, sprite);
         }
     }
 
-    private void renderCuboids(PoseStack poseStack, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
-        ModularLowerArmourGeometry.renderCuboids(cuboids, poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+    private void renderLegs(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
+        renderLeg(poseStack, humanoidModel.rightLeg, consumer, packedLight, cuboids, sprite, ModularLowerArmourGeometry.LegSide.RIGHT);
+        renderLeg(poseStack, humanoidModel.leftLeg, consumer, packedLight, cuboids, sprite, ModularLowerArmourGeometry.LegSide.LEFT);
+    }
+
+    private void renderLeg(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite, ModularLowerArmourGeometry.LegSide side) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        ModularLowerArmourGeometry.renderLegCuboids(cuboids, side, parentPart.x, parentPart.y, parentPart.z, poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
     }
 
     private TextureAtlasSprite sprite(ResourceLocation materialId) {

@@ -35,21 +35,29 @@ public final class ModularLowerArmourGeometry {
 
     public static void renderCuboids(List<Cuboid> cuboids, PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int light, int overlay) {
         for (Cuboid cuboid : cuboids) {
-            renderBox(poseStack, consumer, sprite, light, overlay, cuboid);
+            renderBox(poseStack, consumer, sprite, light, overlay, cuboid.yRotatedQuarter(), 0.0F, 0.0F, 0.0F);
         }
     }
 
-    private static void renderBox(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int light, int overlay, Cuboid cuboid) {
-        cuboid = cuboid.yRotatedQuarter();
+    public static void renderLegCuboids(List<Cuboid> cuboids, LegSide side, float parentX, float parentY, float parentZ, PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int light, int overlay) {
+        for (Cuboid cuboid : cuboids) {
+            Cuboid rotated = cuboid.yRotatedQuarter();
+            if (side.includes(rotated)) {
+                renderBox(poseStack, consumer, sprite, light, overlay, rotated, parentX, parentY, parentZ);
+            }
+        }
+    }
+
+    private static void renderBox(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int light, int overlay, Cuboid cuboid, float parentX, float parentY, float parentZ) {
         if (cuboid.maxX <= cuboid.minX || cuboid.maxY <= cuboid.minY || cuboid.maxZ <= cuboid.minZ) {
             return;
         }
-        float minX = cuboid.minX * MODEL_SCALE;
-        float minY = cuboid.minY * MODEL_SCALE;
-        float minZ = cuboid.minZ * MODEL_SCALE;
-        float maxX = cuboid.maxX * MODEL_SCALE;
-        float maxY = cuboid.maxY * MODEL_SCALE;
-        float maxZ = cuboid.maxZ * MODEL_SCALE;
+        float minX = (cuboid.minX - parentX) * MODEL_SCALE;
+        float minY = (cuboid.minY - parentY) * MODEL_SCALE;
+        float minZ = (cuboid.minZ - parentZ) * MODEL_SCALE;
+        float maxX = (cuboid.maxX - parentX) * MODEL_SCALE;
+        float maxY = (cuboid.maxY - parentY) * MODEL_SCALE;
+        float maxZ = (cuboid.maxZ - parentZ) * MODEL_SCALE;
         ArmorCubeUv.Face up = cuboid.faceUv(Direction.UP);
         ArmorCubeUv.Face down = cuboid.faceUv(Direction.DOWN);
         ArmorCubeUv.Face north = cuboid.faceUv(Direction.NORTH);
@@ -92,9 +100,30 @@ public final class ModularLowerArmourGeometry {
         return new Cuboid(minX, minY, minZ, maxX, maxY, maxZ, textureU, textureV);
     }
 
+    public enum LegSide {
+        RIGHT {
+            @Override
+            boolean includes(Cuboid cuboid) {
+                return cuboid.centerX() < 0.0F;
+            }
+        },
+        LEFT {
+            @Override
+            boolean includes(Cuboid cuboid) {
+                return cuboid.centerX() >= 0.0F;
+            }
+        };
+
+        abstract boolean includes(Cuboid cuboid);
+    }
+
     public record Cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float textureU, float textureV) {
         public Cuboid yRotatedQuarter() {
             return new Cuboid(minZ, minY, -maxX, maxZ, maxY, -minX, textureU, textureV);
+        }
+
+        private float centerX() {
+            return (minX + maxX) * 0.5F;
         }
 
         public Vector3f itemFrom() {
