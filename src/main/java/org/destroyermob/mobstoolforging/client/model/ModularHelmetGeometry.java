@@ -12,33 +12,23 @@ public final class ModularHelmetGeometry {
     private static final int WHITE = 0xFFFFFFFF;
 
     public static final List<Cuboid> SKULL = List.of(
-            cuboid(4, -8, -4, 5, 0, 4),
-            cuboid(-5, -8, 4, 5, 0, 5),
-            cuboid(-5, -8, -5, 5, 0, -4),
-            cuboid(-5, -9, -5, 5, -8, 5)
+            cuboid(-5, -9, -5, 5, -8, 5),
+            cuboid(4, -8, -5, 5, 0, 5),
+            cuboid(-5, -8, -5, -4, 0, 5),
+            cuboid(-4, -8, 4, 4, 0, 5)
     );
     public static final List<Cuboid> COMB = List.of(
-            cuboid(-5, -10, -1, 5, -9, 1),
-            cuboid(5, -10, -1, 6, 0, 1)
+            cuboid(-1, -10, -5, 1, -9, 6),
+            cuboid(-1, -10, -6, 1, -6, -5),
+            cuboid(-1, -9, 5, 1, 0, 6)
     );
     public static final List<Cuboid> VISOR = List.of(
-            cuboid(-6, -1, -5, -5, 0, 5),
-            cuboid(-6, -5, -5, -5, -3, 5),
-            cuboid(-6, -9, -5, -5, -6, 5),
-            cuboid(-6, -6, 3, -5, -5, 5),
-            cuboid(-6, -6, -5, -5, -5, -3),
-            cuboid(-6, -3, -5, -5, -1, -4),
-            cuboid(-6, -3, 4, -5, -1, 5),
-            cuboid(-6, -3, 1, -5, -2, 2),
-            cuboid(-6, -3, 3, -5, -2, 4),
-            cuboid(-6, -2, -4, -5, -1, -3),
-            cuboid(-6, -3, -3, -5, -2, -2),
-            cuboid(-6, -3, -1, -5, -2, 0),
-            cuboid(-6, -2, -2, -5, -1, -1),
-            cuboid(-6, -2, 0, -5, -1, 1),
-            cuboid(-6, -2, 2, -5, -1, 3),
-            cuboid(-6, -7, -6, 2, -4, -5),
-            cuboid(-6, -7, 5, 2, -4, 6)
+            cuboid(-5, -9, -7, 5, -7, -6),
+            cuboid(-5, -7, -7, -4, -6, -6),
+            cuboid(-5, -6, -7, 5, 0, -6),
+            cuboid(4, -7, -7, 5, -6, -6),
+            cuboid(5, -4, -7, 6, -2, 3),
+            cuboid(-6, -4, -7, -5, -2, 3)
     );
 
     private ModularHelmetGeometry() {
@@ -94,8 +84,8 @@ public final class ModularHelmetGeometry {
 
     public record Cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
         public Cuboid headAligned() {
-            // The exported helmet face opening is -X; Minecraft humanoid heads face -Z.
-            return new Cuboid(minZ, minY, minX, maxZ, maxY, maxX);
+            // Helmet(1).java is already authored in humanoid head space, with the face opening on -Z.
+            return this;
         }
 
         public Vector3f itemFrom() {
