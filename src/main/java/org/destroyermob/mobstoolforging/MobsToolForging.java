@@ -206,6 +206,7 @@ public class MobsToolForging {
 
     private void removeDisabledEarlyToolRecipes(ServerStartedEvent event) {
         Set<ResourceLocation> disabledRecipes = new HashSet<>();
+        disabledRecipes.add(ResourceLocation.withDefaultNamespace("repair_item"));
         if (!MobsToolForgingConfig.ENABLE_VANILLA_TOOL_RECIPES.get()) {
             disabledRecipes.addAll(vanillaToolRecipes());
         } else {
@@ -228,7 +229,7 @@ public class MobsToolForging {
         int removed = event.getServer().getRecipeManager().getRecipes().size() - keptRecipes.size();
         if (removed > 0) {
             event.getServer().getRecipeManager().replaceRecipes(keptRecipes);
-            LOGGER.info("Removed {} tool recipe(s) from config.", removed);
+            LOGGER.info("Removed {} recipe(s) for MTF progression.", removed);
         }
     }
 
