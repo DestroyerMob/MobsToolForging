@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
@@ -48,28 +49,28 @@ public final class ModularHelmetLayer<T extends LivingEntity, M extends EntityMo
     }
 
     private void renderParts(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
-        renderSkull(poseStack, spriteConsumer(bufferSource, construction.skullMaterial()), packedLight);
-        construction.combMaterial().ifPresent(material -> helmetModel.renderComb(poseStack, spriteConsumer(bufferSource, material), packedLight, OverlayTexture.NO_OVERLAY));
-        construction.visorMaterial().ifPresent(material -> helmetModel.renderVisor(poseStack, spriteConsumer(bufferSource, material), packedLight, OverlayTexture.NO_OVERLAY));
+        VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
+        renderSkull(poseStack, consumer, sprite(construction.skullMaterial()), packedLight);
+        construction.combMaterial().ifPresent(material -> helmetModel.renderComb(poseStack, consumer, sprite(material), packedLight, OverlayTexture.NO_OVERLAY));
+        construction.visorMaterial().ifPresent(material -> helmetModel.renderVisor(poseStack, consumer, sprite(material), packedLight, OverlayTexture.NO_OVERLAY));
     }
 
     private void renderGlint(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
         VertexConsumer glint = bufferSource.getBuffer(RenderType.armorEntityGlint());
-        renderSkull(poseStack, glint, packedLight);
+        renderSkull(poseStack, glint, sprite(construction.skullMaterial()), packedLight);
         if (construction.combMaterial().isPresent()) {
-            helmetModel.renderComb(poseStack, glint, packedLight, OverlayTexture.NO_OVERLAY);
+            helmetModel.renderComb(poseStack, glint, sprite(construction.combMaterial().get()), packedLight, OverlayTexture.NO_OVERLAY);
         }
         if (construction.visorMaterial().isPresent()) {
-            helmetModel.renderVisor(poseStack, glint, packedLight, OverlayTexture.NO_OVERLAY);
+            helmetModel.renderVisor(poseStack, glint, sprite(construction.visorMaterial().get()), packedLight, OverlayTexture.NO_OVERLAY);
         }
     }
 
-    private void renderSkull(PoseStack poseStack, VertexConsumer consumer, int packedLight) {
-        helmetModel.renderSkull(poseStack, consumer, packedLight, OverlayTexture.NO_OVERLAY);
+    private void renderSkull(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight) {
+        helmetModel.renderSkull(poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
     }
 
-    private VertexConsumer spriteConsumer(MultiBufferSource bufferSource, ResourceLocation materialId) {
-        return ArmorMaterialTextureManager.INSTANCE.sprite(materialId)
-                .wrap(bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)));
+    private TextureAtlasSprite sprite(ResourceLocation materialId) {
+        return ArmorMaterialTextureManager.INSTANCE.sprite(materialId);
     }
 }
