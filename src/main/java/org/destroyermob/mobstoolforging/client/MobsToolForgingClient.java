@@ -27,6 +27,7 @@ import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.client.model.ArmorMaterialTextureManager;
 import org.destroyermob.mobstoolforging.client.model.ComponentDrivenToolBakedModel;
+import org.destroyermob.mobstoolforging.client.model.ModularBodyArmourModel;
 import org.destroyermob.mobstoolforging.client.model.ModularHelmetModel;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
 import org.destroyermob.mobstoolforging.client.model.ToolMaterialVisualManager;
@@ -80,28 +81,31 @@ public final class MobsToolForgingClient {
 
     private static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(ModularHelmetModel.LAYER_LOCATION, ModularHelmetModel::createBodyLayer);
+        event.registerLayerDefinition(ModularBodyArmourModel.LAYER_LOCATION, ModularBodyArmourModel::createBodyLayer);
         event.registerLayerDefinition(ModularHelmetModel.BLANK_ARMOR_LAYER, ModularHelmetModel::createBlankArmorLayer);
     }
 
     private static void addEntityLayers(EntityRenderersEvent.AddLayers event) {
         for (var skin : event.getSkins()) {
-            addHelmetLayer(event.getSkin(skin), event.getEntityModels());
+            addArmorLayers(event.getSkin(skin), event.getEntityModels());
         }
         for (var entityType : event.getEntityTypes()) {
-            addHelmetLayer(event.getRenderer(entityType), event.getEntityModels());
+            addArmorLayers(event.getRenderer(entityType), event.getEntityModels());
         }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static void addHelmetLayer(Object renderer, EntityModelSet modelSet) {
+    private static void addArmorLayers(Object renderer, EntityModelSet modelSet) {
         if (renderer instanceof net.minecraft.client.renderer.entity.LivingEntityRenderer livingRenderer
                 && livingRenderer.getModel() instanceof HumanoidModel) {
             livingRenderer.addLayer(new ModularHelmetLayer(livingRenderer, new ModularHelmetModel(modelSet.bakeLayer(ModularHelmetModel.LAYER_LOCATION))));
+            livingRenderer.addLayer(new ModularBodyArmourLayer(livingRenderer, new ModularBodyArmourModel(modelSet.bakeLayer(ModularBodyArmourModel.LAYER_LOCATION))));
         }
     }
 
     private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
         event.registerItem(ModularHelmetClientExtensions.INSTANCE, ModItems.MODULAR_HELMET);
+        event.registerItem(ModularHelmetClientExtensions.INSTANCE, ModItems.MODULAR_CHESTPLATE);
     }
 
     private static void registerGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {

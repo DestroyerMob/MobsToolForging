@@ -59,6 +59,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         itemModels().withExistingParent("fire_stick", mcLoc("item/handheld")).texture("layer0", mcLoc("item/stick"));
         itemModels().withExistingParent("diamond_powder", mcLoc("item/generated")).texture("layer0", modLoc("item/diamond_powder"));
         itemModels().withExistingParent("modular_helmet", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_helmet"));
+        itemModels().withExistingParent("modular_chestplate", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_chestplate"));
         patternModel(ModItems.PICKAXE_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.AXE_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.SHOVEL_HEAD_PATTERN.getId().getPath());

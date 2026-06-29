@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.item.FireStickItem;
+import org.destroyermob.mobstoolforging.item.ModularChestplateItem;
 import org.destroyermob.mobstoolforging.item.ModularHelmetItem;
 import org.destroyermob.mobstoolforging.item.ModularAxeItem;
 import org.destroyermob.mobstoolforging.item.ModularHoeItem;
@@ -184,6 +185,10 @@ public final class ModItems {
     public static final DeferredItem<ModularHelmetItem> MODULAR_HELMET = ITEMS.register(
             "modular_helmet",
             () -> new ModularHelmetItem(ArmorMaterials.LEATHER, new Item.Properties().stacksTo(1))
+    );
+    public static final DeferredItem<ModularChestplateItem> MODULAR_CHESTPLATE = ITEMS.register(
+            "modular_chestplate",
+            () -> new ModularChestplateItem(ArmorMaterials.LEATHER, new Item.Properties().stacksTo(1))
     );
 
     private ModItems() {

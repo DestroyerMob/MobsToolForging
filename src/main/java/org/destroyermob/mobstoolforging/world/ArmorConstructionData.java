@@ -18,6 +18,7 @@ public record ArmorConstructionData(
 ) {
     public static final int DEFAULT_QUALITY = 100;
     public static final ResourceLocation HELMET_TYPE = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "helmet");
+    public static final ResourceLocation CHESTPLATE_TYPE = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "chestplate");
 
     public ArmorConstructionData {
         combMaterial = combMaterial == null ? Optional.empty() : combMaterial;
@@ -37,5 +38,9 @@ public record ArmorConstructionData(
 
     public static ArmorConstructionData helmet(ResourceLocation skullMaterial, Optional<ResourceLocation> combMaterial, Optional<ResourceLocation> visorMaterial) {
         return new ArmorConstructionData(HELMET_TYPE, skullMaterial, combMaterial, visorMaterial, DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData chestplate(ResourceLocation bodyMaterial) {
+        return new ArmorConstructionData(CHESTPLATE_TYPE, bodyMaterial, Optional.empty(), Optional.empty(), DEFAULT_QUALITY);
     }
 }

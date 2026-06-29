@@ -61,7 +61,9 @@ public final class ModCommands {
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> armorRoot(boolean targetBranch) {
-        return Commands.literal("armor").then(helmetCommand(targetBranch));
+        return Commands.literal("armor")
+                .then(helmetCommand(targetBranch))
+                .then(chestplateCommand(targetBranch));
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> helmetCommand(boolean targetBranch) {
@@ -72,6 +74,12 @@ public final class ModCommands {
                 .then(optionalMaterialArgument("visor", true)
                         .executes(context -> giveHelmet(context, targetBranch, material(context, "skull"), optionalMaterial(context, "comb"), optionalMaterial(context, "visor")))));
         return Commands.literal("helmet").then(skull);
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> chestplateCommand(boolean targetBranch) {
+        RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> body = materialArgument("body", true);
+        body.executes(context -> giveChestplate(context, targetBranch, material(context, "body")));
+        return Commands.literal("chestplate").then(body);
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> toolRoot(boolean targetBranch) {
@@ -138,7 +146,7 @@ public final class ModCommands {
 
     private static List<ResourceLocation> armorMaterials() {
         return MaterialCatalog.starterMaterialIds().stream()
-                .filter(ArmorStatsCatalog::isSupportedHelmetMaterial)
+                .filter(ArmorStatsCatalog::isSupportedArmorMaterial)
                 .toList();
     }
 
@@ -162,19 +170,28 @@ public final class ModCommands {
     }
 
     private static int giveHelmet(CommandContext<CommandSourceStack> context, boolean targetBranch, ResourceLocation skull, Optional<ResourceLocation> comb, Optional<ResourceLocation> visor) throws CommandSyntaxException {
-        if (!ArmorStatsCatalog.isSupportedHelmetMaterial(skull)) {
+        if (!ArmorStatsCatalog.isSupportedArmorMaterial(skull)) {
             context.getSource().sendFailure(Component.translatable("commands.mobstoolforging.give_debug.invalid_armor_material", MaterialCatalog.displayName(skull)));
             return 0;
         }
-        if (comb.isPresent() && !ArmorStatsCatalog.isSupportedHelmetMaterial(comb.get())) {
+        if (comb.isPresent() && !ArmorStatsCatalog.isSupportedArmorMaterial(comb.get())) {
             context.getSource().sendFailure(Component.translatable("commands.mobstoolforging.give_debug.invalid_armor_material", MaterialCatalog.displayName(comb.get())));
             return 0;
         }
-        if (visor.isPresent() && !ArmorStatsCatalog.isSupportedHelmetMaterial(visor.get())) {
+        if (visor.isPresent() && !ArmorStatsCatalog.isSupportedArmorMaterial(visor.get())) {
             context.getSource().sendFailure(Component.translatable("commands.mobstoolforging.give_debug.invalid_armor_material", MaterialCatalog.displayName(visor.get())));
             return 0;
         }
         ItemStack stack = ModItems.MODULAR_HELMET.get().create(skull, comb, visor);
+        return giveStack(context, targetBranch, stack);
+    }
+
+    private static int giveChestplate(CommandContext<CommandSourceStack> context, boolean targetBranch, ResourceLocation body) throws CommandSyntaxException {
+        if (!ArmorStatsCatalog.isSupportedArmorMaterial(body)) {
+            context.getSource().sendFailure(Component.translatable("commands.mobstoolforging.give_debug.invalid_armor_material", MaterialCatalog.displayName(body)));
+            return 0;
+        }
+        ItemStack stack = ModItems.MODULAR_CHESTPLATE.get().create(body);
         return giveStack(context, targetBranch, stack);
     }
 

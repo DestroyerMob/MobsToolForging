@@ -194,11 +194,14 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
     }
 
     private BakedModel composeArmor(ArmorVisualKey key) {
-        if (!ArmorConstructionData.HELMET_TYPE.equals(key.armorType())) {
-            warnOnce("missing_armor_type|" + key.armorType(), "Cannot render MTF armor stack because armor type {} is not loaded on the client.", key.armorType());
-            return fallback;
+        if (ArmorConstructionData.HELMET_TYPE.equals(key.armorType())) {
+            return ModularHelmetItemModel.compose(key, fallback.getTransforms());
         }
-        return ModularHelmetItemModel.compose(key, fallback.getTransforms());
+        if (ArmorConstructionData.CHESTPLATE_TYPE.equals(key.armorType())) {
+            return ModularBodyArmourItemModel.compose(key, fallback.getTransforms());
+        }
+        warnOnce("missing_armor_type|" + key.armorType(), "Cannot render MTF armor stack because armor type {} is not loaded on the client.", key.armorType());
+        return fallback;
     }
 
     private Optional<ToolTypeDefinition> findPartDefinition(ItemStack stack, ToolPartData partData) {

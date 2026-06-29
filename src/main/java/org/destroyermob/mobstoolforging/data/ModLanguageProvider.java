@@ -58,6 +58,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.AXE, "Axe");
         addItem(ModItems.HOE, "Hoe");
         addItem(ModItems.MODULAR_HELMET, "Modular Helmet");
+        addItem(ModItems.MODULAR_CHESTPLATE, "Modular Body Armour");
         add("item.mobstoolforging.material_sword_blade", "%s Sword Blade");
         add("item.mobstoolforging.material_sword_guard", "%s Sword Guard");
         add("item.mobstoolforging.material_shovel_head", "%s Shovel Head");
@@ -70,6 +71,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.mobstoolforging.material_axe", "%s Axe");
         add("item.mobstoolforging.material_hoe", "%s Hoe");
         add("item.mobstoolforging.material_modular_helmet", "%s Helmet");
+        add("item.mobstoolforging.material_modular_chestplate", "%s Body Armour");
         add("material.mobstoolforging.iron", "Iron");
         add("material.mobstoolforging.gold", "Gold");
         add("material.mobstoolforging.copper", "Copper");
@@ -215,6 +217,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.part.wrap", "Wrap");
         add("tooltip.mobstoolforging.part.focus", "Focus");
         add("tooltip.mobstoolforging.part.treatment", "Treatment");
+        add("tooltip.mobstoolforging.armor_part.body", "Body: %s");
         add("tooltip.mobstoolforging.armor_part.skull", "Skull: %s");
         add("tooltip.mobstoolforging.armor_part.comb", "Comb: %s");
         add("tooltip.mobstoolforging.armor_part.visor", "Visor: %s");
@@ -257,7 +260,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.trait.nether_treated.desc", "favours fire and Nether magic");
         add("tooltip.mobstoolforging.trait.echoing", "Echoing");
         add("tooltip.mobstoolforging.trait.echoing.desc", "favours silence, sculk, and echo magic");
-        add("commands.mobstoolforging.give_debug.invalid_armor_material", "%s is not supported for modular helmets yet.");
+        add("commands.mobstoolforging.give_debug.invalid_armor_material", "%s is not supported for modular armour yet.");
         add("commands.mobstoolforging.give_debug.sword_needs_guard", "A modular sword needs a guard material.");
         add("commands.mobstoolforging.give_debug.unknown_tool", "Unknown modular tool type: %s.");
         add("commands.mobstoolforging.give_debug.tool_failed", "Could not create modular %s.");
