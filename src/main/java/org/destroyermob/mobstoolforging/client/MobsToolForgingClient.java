@@ -3,6 +3,7 @@ package org.destroyermob.mobstoolforging.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -87,7 +88,9 @@ public final class MobsToolForgingClient {
 
     private static void addEntityLayers(EntityRenderersEvent.AddLayers event) {
         for (var skin : event.getSkins()) {
-            addArmorLayers(event.getSkin(skin), event.getEntityModels());
+            PlayerRenderer renderer = event.getSkin(skin);
+            addArmorLayers(renderer, event.getEntityModels());
+            addModularCapeLayer(renderer);
         }
         for (var entityType : event.getEntityTypes()) {
             addArmorLayers(event.getRenderer(entityType), event.getEntityModels());
@@ -101,6 +104,12 @@ public final class MobsToolForgingClient {
             livingRenderer.addLayer(new ModularHelmetLayer(livingRenderer, new ModularHelmetModel(modelSet.bakeLayer(ModularHelmetModel.LAYER_LOCATION))));
             livingRenderer.addLayer(new ModularBodyArmourLayer(livingRenderer, new ModularBodyArmourModel(modelSet.bakeLayer(ModularBodyArmourModel.LAYER_LOCATION))));
             livingRenderer.addLayer(new ModularLowerArmourLayer(livingRenderer));
+        }
+    }
+
+    private static void addModularCapeLayer(PlayerRenderer renderer) {
+        if (renderer != null) {
+            renderer.addLayer(new ModularCapeLayer(renderer));
         }
     }
 

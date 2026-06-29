@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "org.destroyermob.mobstoolforging.mixin",
+  "refmap": "mobstoolforging.refmap.json",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "client.CapeLayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
