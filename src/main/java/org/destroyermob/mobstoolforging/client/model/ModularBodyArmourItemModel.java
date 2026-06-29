@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
-import net.minecraft.client.renderer.block.model.BlockFaceUV;
 import net.minecraft.client.renderer.block.model.FaceBakery;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -30,7 +29,7 @@ public final class ModularBodyArmourItemModel {
     }
 
     private static BakedQuad bakeFace(ModularBodyArmourGeometry.ItemCuboid cuboid, Direction direction, TextureAtlasSprite sprite) {
-        BlockElementFace face = new BlockElementFace(null, BlockElementFace.NO_TINT, "#texture", new BlockFaceUV(new float[]{0.0F, 0.0F, 16.0F, 16.0F}, 0));
+        BlockElementFace face = new BlockElementFace(null, BlockElementFace.NO_TINT, "#texture", cuboid.blockFaceUv(direction));
         return FACE_BAKERY.bakeQuad(
                 cuboid.itemFrom(),
                 cuboid.itemTo(),

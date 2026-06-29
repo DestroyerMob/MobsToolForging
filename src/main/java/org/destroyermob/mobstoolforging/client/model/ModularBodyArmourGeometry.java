@@ -3,6 +3,7 @@ package org.destroyermob.mobstoolforging.client.model;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
+import net.minecraft.client.renderer.block.model.BlockFaceUV;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import org.joml.Vector3f;
@@ -13,36 +14,36 @@ public final class ModularBodyArmourGeometry {
     private static final int WHITE = 0xFFFFFFFF;
 
     public static final List<Cuboid> BODY = List.of(
-            cuboid(-4, 0, -3, 4, 12, -2),
-            cuboid(-4, 0, 2, 4, 12, 3),
-            cuboid(4, 4, -3, 5, 12, 3),
-            cuboid(-5, 4, -3, -4, 12, 3)
+            cuboid(-4, 0, -3, 4, 12, -2, -5, 1),
+            cuboid(-4, 0, 2, 4, 12, 3, -5, 1),
+            cuboid(4, 4, -3, 5, 12, 3, -3, -4),
+            cuboid(-5, 4, -3, -4, 12, 3, -3, -4)
     );
     public static final List<Cuboid> RIGHT_ARM = List.of(
-            cuboid(-3, -2, 2, 1, 2, 3),
-            cuboid(-4, -3, -3, 1, -2, 3),
-            cuboid(-4, -2, -3, -3, 2, 3),
-            cuboid(-3, -2, -3, 1, 2, -2)
+            cuboid(-3, -2, 2, 1, 2, 3, -1, 1),
+            cuboid(-4, -3, -3, 1, -2, 3, -4, -4),
+            cuboid(-4, -2, -3, -3, 2, 3, -3, -4),
+            cuboid(-3, -2, -3, 1, 2, -2, -1, 1)
     );
     public static final List<Cuboid> LEFT_ARM = List.of(
-            cuboid(-1, -2, -3, 3, 2, -2),
-            cuboid(-1, -2, 2, 3, 2, 3),
-            cuboid(3, -2, -3, 4, 2, 3),
-            cuboid(-1, -3, -3, 4, -2, 3)
+            cuboid(-1, -2, -3, 3, 2, -2, -1, 1),
+            cuboid(-1, -2, 2, 3, 2, 3, -1, 1),
+            cuboid(3, -2, -3, 4, 2, 3, -3, -4),
+            cuboid(-1, -3, -3, 4, -2, 3, -4, -4)
     );
     public static final List<ItemCuboid> ITEM = List.of(
-            itemCuboid(-4, 12, -3, 4, 24, -2),
-            itemCuboid(-4, 12, 2, 4, 24, 3),
-            itemCuboid(4, 16, -3, 5, 24, 3),
-            itemCuboid(-5, 16, -3, -4, 24, 3),
-            itemCuboid(-8, 12, 2, -4, 16, 3),
-            itemCuboid(-9, 11, -3, -4, 12, 3),
-            itemCuboid(-9, 12, -3, -8, 16, 3),
-            itemCuboid(-8, 12, -3, -4, 16, -2),
-            itemCuboid(4, 12, -3, 8, 16, -2),
-            itemCuboid(4, 12, 2, 8, 16, 3),
-            itemCuboid(8, 12, -3, 9, 16, 3),
-            itemCuboid(4, 11, -3, 9, 12, 3)
+            itemCuboid(-4, 12, -3, 4, 24, -2, -5, 1),
+            itemCuboid(-4, 12, 2, 4, 24, 3, -5, 1),
+            itemCuboid(4, 16, -3, 5, 24, 3, -3, -4),
+            itemCuboid(-5, 16, -3, -4, 24, 3, -3, -4),
+            itemCuboid(-8, 12, 2, -4, 16, 3, -1, 1),
+            itemCuboid(-9, 11, -3, -4, 12, 3, -4, -4),
+            itemCuboid(-9, 12, -3, -8, 16, 3, -3, -4),
+            itemCuboid(-8, 12, -3, -4, 16, -2, -1, 1),
+            itemCuboid(4, 12, -3, 8, 16, -2, -1, 1),
+            itemCuboid(4, 12, 2, 8, 16, 3, -1, 1),
+            itemCuboid(8, 12, -3, 9, 16, 3, -3, -4),
+            itemCuboid(4, 11, -3, 9, 12, 3, -4, -4)
     );
 
     private ModularBodyArmourGeometry() {
@@ -64,16 +65,18 @@ public final class ModularBodyArmourGeometry {
         float maxX = cuboid.maxX * MODEL_SCALE;
         float maxY = cuboid.maxY * MODEL_SCALE;
         float maxZ = cuboid.maxZ * MODEL_SCALE;
-        float u0 = sprite.getU(0.0F);
-        float v0 = sprite.getV(0.0F);
-        float u1 = sprite.getU(1.0F);
-        float v1 = sprite.getV(1.0F);
-        quad(poseStack, consumer, Direction.UP.step(), light, overlay, minX, maxY, minZ, u0, v1, minX, maxY, maxZ, u0, v0, maxX, maxY, maxZ, u1, v0, maxX, maxY, minZ, u1, v1);
-        quad(poseStack, consumer, Direction.DOWN.step(), light, overlay, minX, minY, maxZ, u0, v1, minX, minY, minZ, u0, v0, maxX, minY, minZ, u1, v0, maxX, minY, maxZ, u1, v1);
-        quad(poseStack, consumer, Direction.NORTH.step(), light, overlay, minX, minY, minZ, u0, v1, minX, maxY, minZ, u0, v0, maxX, maxY, minZ, u1, v0, maxX, minY, minZ, u1, v1);
-        quad(poseStack, consumer, Direction.SOUTH.step(), light, overlay, maxX, minY, maxZ, u0, v1, maxX, maxY, maxZ, u0, v0, minX, maxY, maxZ, u1, v0, minX, minY, maxZ, u1, v1);
-        quad(poseStack, consumer, Direction.WEST.step(), light, overlay, minX, minY, maxZ, u0, v1, minX, maxY, maxZ, u0, v0, minX, maxY, minZ, u1, v0, minX, minY, minZ, u1, v1);
-        quad(poseStack, consumer, Direction.EAST.step(), light, overlay, maxX, minY, minZ, u0, v1, maxX, maxY, minZ, u0, v0, maxX, maxY, maxZ, u1, v0, maxX, minY, maxZ, u1, v1);
+        ArmorCubeUv.Face up = cuboid.faceUv(Direction.UP);
+        ArmorCubeUv.Face down = cuboid.faceUv(Direction.DOWN);
+        ArmorCubeUv.Face north = cuboid.faceUv(Direction.NORTH);
+        ArmorCubeUv.Face south = cuboid.faceUv(Direction.SOUTH);
+        ArmorCubeUv.Face west = cuboid.faceUv(Direction.WEST);
+        ArmorCubeUv.Face east = cuboid.faceUv(Direction.EAST);
+        quad(poseStack, consumer, Direction.UP.step(), light, overlay, minX, maxY, minZ, u(sprite, up.u0()), v(sprite, up.v1()), minX, maxY, maxZ, u(sprite, up.u0()), v(sprite, up.v0()), maxX, maxY, maxZ, u(sprite, up.u1()), v(sprite, up.v0()), maxX, maxY, minZ, u(sprite, up.u1()), v(sprite, up.v1()));
+        quad(poseStack, consumer, Direction.DOWN.step(), light, overlay, minX, minY, maxZ, u(sprite, down.u0()), v(sprite, down.v1()), minX, minY, minZ, u(sprite, down.u0()), v(sprite, down.v0()), maxX, minY, minZ, u(sprite, down.u1()), v(sprite, down.v0()), maxX, minY, maxZ, u(sprite, down.u1()), v(sprite, down.v1()));
+        quad(poseStack, consumer, Direction.NORTH.step(), light, overlay, minX, minY, minZ, u(sprite, north.u0()), v(sprite, north.v1()), minX, maxY, minZ, u(sprite, north.u0()), v(sprite, north.v0()), maxX, maxY, minZ, u(sprite, north.u1()), v(sprite, north.v0()), maxX, minY, minZ, u(sprite, north.u1()), v(sprite, north.v1()));
+        quad(poseStack, consumer, Direction.SOUTH.step(), light, overlay, maxX, minY, maxZ, u(sprite, south.u0()), v(sprite, south.v1()), maxX, maxY, maxZ, u(sprite, south.u0()), v(sprite, south.v0()), minX, maxY, maxZ, u(sprite, south.u1()), v(sprite, south.v0()), minX, minY, maxZ, u(sprite, south.u1()), v(sprite, south.v1()));
+        quad(poseStack, consumer, Direction.WEST.step(), light, overlay, minX, minY, maxZ, u(sprite, west.u0()), v(sprite, west.v1()), minX, maxY, maxZ, u(sprite, west.u0()), v(sprite, west.v0()), minX, maxY, minZ, u(sprite, west.u1()), v(sprite, west.v0()), minX, minY, minZ, u(sprite, west.u1()), v(sprite, west.v1()));
+        quad(poseStack, consumer, Direction.EAST.step(), light, overlay, maxX, minY, minZ, u(sprite, east.u0()), v(sprite, east.v1()), maxX, maxY, minZ, u(sprite, east.u0()), v(sprite, east.v0()), maxX, maxY, maxZ, u(sprite, east.u1()), v(sprite, east.v0()), maxX, minY, maxZ, u(sprite, east.u1()), v(sprite, east.v1()));
     }
 
     private static void quad(PoseStack poseStack, VertexConsumer consumer, Vector3f normal, int light, int overlay, float x0, float y0, float z0, float u0, float v0, float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3) {
@@ -92,24 +95,39 @@ public final class ModularBodyArmourGeometry {
                 .setNormal(poseStack.last(), normal.x(), normal.y(), normal.z());
     }
 
-    private static Cuboid cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
-        return new Cuboid(minX, minY, minZ, maxX, maxY, maxZ);
+    private static float u(TextureAtlasSprite sprite, float textureU) {
+        return sprite.getU(textureU);
     }
 
-    private static ItemCuboid itemCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
-        return new ItemCuboid(minX, minY, minZ, maxX, maxY, maxZ);
+    private static float v(TextureAtlasSprite sprite, float textureV) {
+        return sprite.getV(textureV);
     }
 
-    public record Cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+    private static Cuboid cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float textureU, float textureV) {
+        return new Cuboid(minX, minY, minZ, maxX, maxY, maxZ, textureU, textureV);
     }
 
-    public record ItemCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+    private static ItemCuboid itemCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float textureU, float textureV) {
+        return new ItemCuboid(minX, minY, minZ, maxX, maxY, maxZ, textureU, textureV);
+    }
+
+    public record Cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float textureU, float textureV) {
+        public ArmorCubeUv.Face faceUv(Direction direction) {
+            return ArmorCubeUv.face(direction, textureU, textureV, maxX - minX, maxY - minY, maxZ - minZ);
+        }
+    }
+
+    public record ItemCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float textureU, float textureV) {
         public Vector3f itemFrom() {
             return new Vector3f((minX + 9.0F) * ITEM_X_SCALE, 2.0F + 24.0F - maxY, minZ + 8.0F);
         }
 
         public Vector3f itemTo() {
             return new Vector3f((maxX + 9.0F) * ITEM_X_SCALE, 2.0F + 24.0F - minY, maxZ + 8.0F);
+        }
+
+        public BlockFaceUV blockFaceUv(Direction direction) {
+            return ArmorCubeUv.blockFaceUv(direction, textureU, textureV, maxX - minX, maxY - minY, maxZ - minZ);
         }
     }
 }
