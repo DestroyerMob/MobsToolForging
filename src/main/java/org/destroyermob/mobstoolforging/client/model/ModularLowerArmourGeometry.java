@@ -81,11 +81,11 @@ public final class ModularLowerArmourGeometry {
     }
 
     private static float u(TextureAtlasSprite sprite, float textureU) {
-        return sprite.getU(textureU);
+        return sprite.getU(textureU / 16.0F);
     }
 
     private static float v(TextureAtlasSprite sprite, float textureV) {
-        return sprite.getV(textureV);
+        return sprite.getV(textureV / 16.0F);
     }
 
     private static Cuboid cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float textureU, float textureV) {

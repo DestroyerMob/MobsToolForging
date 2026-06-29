@@ -47,6 +47,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.destroyermob.mobstoolforging.client.MobsToolForgingClient;
 import org.destroyermob.mobstoolforging.command.ModCommands;
 import org.destroyermob.mobstoolforging.data.ModDataGenerators;
+import org.destroyermob.mobstoolforging.item.ModularToolItem;
 import org.destroyermob.mobstoolforging.network.ModNetworking;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
@@ -70,6 +71,7 @@ import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
 import org.destroyermob.mobstoolforging.world.ToolRepairing;
 import org.destroyermob.mobstoolforging.world.ToolTrait;
 import org.destroyermob.mobstoolforging.world.ToolTraitReloadListener;
+import org.destroyermob.mobstoolforging.world.ToolTooltipBuilder;
 import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolTypeReloadListener;
@@ -107,6 +109,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(this::coolDroppedWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::blockHeatedCrafting);
         NeoForge.EVENT_BUS.addListener(this::blockVanillaModularToolRepair);
+        NeoForge.EVENT_BUS.addListener(this::addExternalModularToolTooltip);
         NeoForge.EVENT_BUS.addListener(this::addHeatTooltip);
         NeoForge.EVENT_BUS.addListener(this::addCrucibleTooltip);
         NeoForge.EVENT_BUS.addListener(this::boostGildedBlockExperience);
@@ -314,6 +317,20 @@ public class MobsToolForging {
                 : WorkpieceHeat.statusKey(stack, event.getEntity().level(), MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
         event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.workpiece_status." + statusKey).withStyle(forgeReady ? ChatFormatting.YELLOW : ChatFormatting.DARK_GRAY));
         event.getToolTip().add(Component.translatable(forgeReady ? "tooltip.mobstoolforging.workpiece_ready" : "tooltip.mobstoolforging.workpiece_not_ready").withStyle(ChatFormatting.DARK_GRAY));
+    }
+
+    private void addExternalModularToolTooltip(ItemTooltipEvent event) {
+        ItemStack stack = event.getItemStack();
+        ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
+        if (construction == null || stack.getItem() instanceof ModularToolItem) {
+            return;
+        }
+        ToolTypeRegistry.toolType(construction.toolType()).ifPresent(definition -> {
+            if (Boolean.TRUE.equals(stack.get(ModDataComponents.TOOL_BROKEN.get()))) {
+                event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.broken_tool").withStyle(ChatFormatting.RED));
+            }
+            event.getToolTip().addAll(ToolTooltipBuilder.tooltip(stack, definition, event.getFlags()));
+        });
     }
 
     private void addCrucibleTooltip(ItemTooltipEvent event) {
