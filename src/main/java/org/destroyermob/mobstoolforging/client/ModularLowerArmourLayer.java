@@ -32,8 +32,20 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
         if (livingEntity.isInvisible() || !(getParentModel() instanceof HumanoidModel<?> humanoidModel)) {
             return;
         }
-        renderSlot(poseStack, bufferSource, packedLight, humanoidModel, livingEntity, EquipmentSlot.LEGS, ArmorConstructionData.LEGGINGS_TYPE, ModularLowerArmourGeometry.LEGGINGS);
+        renderLeggingsSlot(poseStack, bufferSource, packedLight, humanoidModel, livingEntity);
         renderSlot(poseStack, bufferSource, packedLight, humanoidModel, livingEntity, EquipmentSlot.FEET, ArmorConstructionData.BOOTS_TYPE, ModularLowerArmourGeometry.BOOTS);
+    }
+
+    private void renderLeggingsSlot(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, HumanoidModel<?> humanoidModel, T livingEntity) {
+        ItemStack stack = livingEntity.getItemBySlot(EquipmentSlot.LEGS);
+        ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
+        if (construction == null || !ArmorConstructionData.LEGGINGS_TYPE.equals(construction.armorType())) {
+            return;
+        }
+        renderLeggingsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), packedLight, construction);
+        if (stack.hasFoil()) {
+            renderLeggingsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), packedLight, construction);
+        }
     }
 
     private void renderSlot(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, HumanoidModel<?> humanoidModel, T livingEntity, EquipmentSlot slot, ResourceLocation armorType, List<ModularLowerArmourGeometry.Cuboid> cuboids) {
@@ -49,6 +61,12 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
         }
     }
 
+    private void renderLeggingsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int packedLight, ArmorConstructionData construction) {
+        renderLegs(poseStack, humanoidModel, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_LEGS, sprite(construction.skullMaterial()));
+        construction.combMaterial().ifPresent(material -> renderLegs(poseStack, humanoidModel, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_KNEES, sprite(material)));
+        construction.visorMaterial().ifPresent(material -> renderBody(poseStack, humanoidModel.body, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_TASSETS, sprite(material)));
+    }
+
     private void renderLegs(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
         renderLeg(poseStack, humanoidModel.rightLeg, consumer, packedLight, cuboids, sprite, ModularLowerArmourGeometry.LegSide.RIGHT);
         renderLeg(poseStack, humanoidModel.leftLeg, consumer, packedLight, cuboids, sprite, ModularLowerArmourGeometry.LegSide.LEFT);
@@ -58,6 +76,13 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
         ModularLowerArmourGeometry.renderLegCuboids(cuboids, side, parentPart.x, parentPart.y, parentPart.z, poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderBody(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        ModularLowerArmourGeometry.renderBodyCuboids(cuboids, parentPart.x, parentPart.y, parentPart.z, poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 

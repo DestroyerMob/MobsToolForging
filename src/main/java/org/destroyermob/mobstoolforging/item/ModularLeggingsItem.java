@@ -1,6 +1,7 @@
 package org.destroyermob.mobstoolforging.item;
 
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -25,7 +26,11 @@ public class ModularLeggingsItem extends ArmorItem {
     }
 
     public ItemStack create(ResourceLocation legMaterial) {
-        ArmorConstructionData construction = ArmorConstructionData.leggings(legMaterial);
+        return create(legMaterial, Optional.empty(), Optional.empty());
+    }
+
+    public ItemStack create(ResourceLocation legMaterial, Optional<ResourceLocation> kneeMaterial, Optional<ResourceLocation> tassetMaterial) {
+        ArmorConstructionData construction = ArmorConstructionData.leggings(legMaterial, kneeMaterial, tassetMaterial);
         ItemStack stack = new ItemStack(this);
         stack.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction);
         ArmorStatsCatalog.apply(stack, construction);
@@ -72,6 +77,14 @@ public class ModularLeggingsItem extends ArmorItem {
         }
         tooltip.add(Component.translatable("tooltip.mobstoolforging.construction").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.legs", MaterialCatalog.displayName(construction.skullMaterial())).withStyle(ChatFormatting.DARK_GRAY));
+        tooltip.add(Component.translatable(
+                "tooltip.mobstoolforging.armor_part.knees",
+                construction.combMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
+        ).withStyle(ChatFormatting.DARK_GRAY));
+        tooltip.add(Component.translatable(
+                "tooltip.mobstoolforging.armor_part.tassets",
+                construction.visorMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
+        ).withStyle(ChatFormatting.DARK_GRAY));
     }
 
     @Override

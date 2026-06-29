@@ -50,6 +50,10 @@ public record ArmorConstructionData(
         return new ArmorConstructionData(LEGGINGS_TYPE, legMaterial, Optional.empty(), Optional.empty(), DEFAULT_QUALITY);
     }
 
+    public static ArmorConstructionData leggings(ResourceLocation legMaterial, Optional<ResourceLocation> kneeMaterial, Optional<ResourceLocation> tassetMaterial) {
+        return new ArmorConstructionData(LEGGINGS_TYPE, legMaterial, kneeMaterial, tassetMaterial, DEFAULT_QUALITY);
+    }
+
     public static ArmorConstructionData boots(ResourceLocation footMaterial) {
         return new ArmorConstructionData(BOOTS_TYPE, footMaterial, Optional.empty(), Optional.empty(), DEFAULT_QUALITY);
     }

@@ -224,6 +224,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.part.treatment", "Treatment");
         add("tooltip.mobstoolforging.armor_part.body", "Body: %s");
         add("tooltip.mobstoolforging.armor_part.legs", "Legs: %s");
+        add("tooltip.mobstoolforging.armor_part.knees", "Knees: %s");
+        add("tooltip.mobstoolforging.armor_part.tassets", "Tassets: %s");
         add("tooltip.mobstoolforging.armor_part.feet", "Feet: %s");
         add("tooltip.mobstoolforging.armor_part.skull", "Skull: %s");
         add("tooltip.mobstoolforging.armor_part.comb", "Comb: %s");

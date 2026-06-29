@@ -88,7 +88,11 @@ public final class ModCommands {
 
     private static LiteralArgumentBuilder<CommandSourceStack> leggingsCommand(boolean targetBranch) {
         RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> legs = materialArgument("legs", true);
-        legs.executes(context -> giveLeggings(context, targetBranch, material(context, "legs")));
+        legs.executes(context -> giveLeggings(context, targetBranch, material(context, "legs"), Optional.empty(), Optional.empty()));
+        legs.then(optionalMaterialArgument("knees", true)
+                .executes(context -> giveLeggings(context, targetBranch, material(context, "legs"), optionalMaterial(context, "knees"), Optional.empty()))
+                .then(optionalMaterialArgument("tassets", true)
+                        .executes(context -> giveLeggings(context, targetBranch, material(context, "legs"), optionalMaterial(context, "knees"), optionalMaterial(context, "tassets")))));
         return Commands.literal("leggings").then(legs);
     }
 
@@ -211,12 +215,20 @@ public final class ModCommands {
         return giveStack(context, targetBranch, stack);
     }
 
-    private static int giveLeggings(CommandContext<CommandSourceStack> context, boolean targetBranch, ResourceLocation legs) throws CommandSyntaxException {
+    private static int giveLeggings(CommandContext<CommandSourceStack> context, boolean targetBranch, ResourceLocation legs, Optional<ResourceLocation> knees, Optional<ResourceLocation> tassets) throws CommandSyntaxException {
         if (!ArmorStatsCatalog.isSupportedArmorMaterial(legs)) {
             context.getSource().sendFailure(Component.translatable("commands.mobstoolforging.give_debug.invalid_armor_material", MaterialCatalog.displayName(legs)));
             return 0;
         }
-        ItemStack stack = ModItems.MODULAR_LEGGINGS.get().create(legs);
+        if (knees.isPresent() && !ArmorStatsCatalog.isSupportedArmorMaterial(knees.get())) {
+            context.getSource().sendFailure(Component.translatable("commands.mobstoolforging.give_debug.invalid_armor_material", MaterialCatalog.displayName(knees.get())));
+            return 0;
+        }
+        if (tassets.isPresent() && !ArmorStatsCatalog.isSupportedArmorMaterial(tassets.get())) {
+            context.getSource().sendFailure(Component.translatable("commands.mobstoolforging.give_debug.invalid_armor_material", MaterialCatalog.displayName(tassets.get())));
+            return 0;
+        }
+        ItemStack stack = ModItems.MODULAR_LEGGINGS.get().create(legs, knees, tassets);
         return giveStack(context, targetBranch, stack);
     }
 

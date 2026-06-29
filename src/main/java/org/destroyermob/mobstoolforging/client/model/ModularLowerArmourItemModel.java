@@ -18,7 +18,12 @@ public final class ModularLowerArmourItemModel {
     }
 
     public static ResolvedArmorItemModel composeLeggings(ArmorVisualKey key, ItemTransforms transforms) {
-        return compose(key, ModularLowerArmourGeometry.LEGGINGS, transforms);
+        TextureAtlasSprite legsSprite = ArmorMaterialTextureManager.INSTANCE.sprite(key.skullMaterial());
+        List<BakedQuad> quads = new ArrayList<>();
+        addCuboids(quads, ModularLowerArmourGeometry.LEGGING_LEGS, legsSprite);
+        key.combMaterial().ifPresent(material -> addCuboids(quads, ModularLowerArmourGeometry.LEGGING_KNEES, ArmorMaterialTextureManager.INSTANCE.sprite(material)));
+        key.visorMaterial().ifPresent(material -> addCuboids(quads, ModularLowerArmourGeometry.LEGGING_TASSETS, ArmorMaterialTextureManager.INSTANCE.sprite(material)));
+        return new ResolvedArmorItemModel(List.copyOf(quads), legsSprite, transforms);
     }
 
     public static ResolvedArmorItemModel composeBoots(ArmorVisualKey key, ItemTransforms transforms) {
@@ -28,12 +33,16 @@ public final class ModularLowerArmourItemModel {
     private static ResolvedArmorItemModel compose(ArmorVisualKey key, List<ModularLowerArmourGeometry.Cuboid> cuboids, ItemTransforms transforms) {
         TextureAtlasSprite sprite = ArmorMaterialTextureManager.INSTANCE.sprite(key.skullMaterial());
         List<BakedQuad> quads = new ArrayList<>();
+        addCuboids(quads, cuboids, sprite);
+        return new ResolvedArmorItemModel(List.copyOf(quads), sprite, transforms);
+    }
+
+    private static void addCuboids(List<BakedQuad> quads, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
         for (ModularLowerArmourGeometry.Cuboid cuboid : cuboids) {
-            for (Direction direction : Direction.values()) {
+            for (Direction direction : cuboid.itemRenderDirections()) {
                 quads.add(bakeFace(cuboid, direction, sprite));
             }
         }
-        return new ResolvedArmorItemModel(List.copyOf(quads), sprite, transforms);
     }
 
     private static BakedQuad bakeFace(ModularLowerArmourGeometry.Cuboid cuboid, Direction direction, TextureAtlasSprite sprite) {
