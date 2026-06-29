@@ -39,6 +39,7 @@ public final class ModularLowerArmourGeometry {
     }
 
     private static void renderBox(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int light, int overlay, Cuboid cuboid) {
+        cuboid = cuboid.yRotatedQuarter();
         if (cuboid.maxX <= cuboid.minX || cuboid.maxY <= cuboid.minY || cuboid.maxZ <= cuboid.minZ) {
             return;
         }
@@ -81,12 +82,18 @@ public final class ModularLowerArmourGeometry {
     }
 
     public record Cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+        public Cuboid yRotatedQuarter() {
+            return new Cuboid(minZ, minY, -maxX, maxZ, maxY, -minX);
+        }
+
         public Vector3f itemFrom() {
-            return new Vector3f((minX + 5.0F) * ITEM_SCALE, 2.0F + 24.0F - maxY, (minZ + 5.0F) * ITEM_SCALE);
+            Cuboid rotated = yRotatedQuarter();
+            return new Vector3f((rotated.minX + 5.0F) * ITEM_SCALE, 2.0F + 24.0F - rotated.maxY, (rotated.minZ + 5.0F) * ITEM_SCALE);
         }
 
         public Vector3f itemTo() {
-            return new Vector3f((maxX + 5.0F) * ITEM_SCALE, 2.0F + 24.0F - minY, (maxZ + 5.0F) * ITEM_SCALE);
+            Cuboid rotated = yRotatedQuarter();
+            return new Vector3f((rotated.maxX + 5.0F) * ITEM_SCALE, 2.0F + 24.0F - rotated.minY, (rotated.maxZ + 5.0F) * ITEM_SCALE);
         }
     }
 }
