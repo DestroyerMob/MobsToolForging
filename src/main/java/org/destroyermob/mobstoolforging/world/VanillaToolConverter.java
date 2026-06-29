@@ -14,24 +14,16 @@ public final class VanillaToolConverter {
     }
 
     public static ItemStack convert(ItemStack original, ResourceLocation handleMaterial) {
-        if (original.isEmpty()) {
+        if (original.isEmpty() || original.get(ModDataComponents.TOOL_CONSTRUCTION.get()) != null) {
             return ItemStack.EMPTY;
         }
 
-        ToolKind toolKind = toolKind(original.getItem());
-        if (toolKind == null) {
-            return ItemStack.EMPTY;
-        }
-        ResourceLocation headMaterial = headMaterial(original.getItem());
-        if (headMaterial == null) {
-            return ItemStack.EMPTY;
-        }
-        ToolTypeDefinition definition = ToolTypeRegistry.toolType(toolKind).orElse(null);
-        if (definition == null) {
+        ToolConversion conversion = conversion(original.getItem(), handleMaterial);
+        if (conversion == null) {
             return ItemStack.EMPTY;
         }
 
-        ItemStack converted = definition.createTool(construction(toolKind, headMaterial, handleMaterial));
+        ItemStack converted = conversion.definition().createTool(conversion.construction());
         if (converted.isEmpty()) {
             return ItemStack.EMPTY;
         }
@@ -46,6 +38,37 @@ public final class VanillaToolConverter {
         ToolmakerBenchAssembly.disassemble(converted)
                 .ifPresent(parts -> converted.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts)));
         return converted;
+    }
+
+    private static ToolConversion conversion(Item item, ResourceLocation handleMaterial) {
+        ToolKind toolKind = toolKind(item);
+        if (toolKind != null) {
+            ResourceLocation headMaterial = headMaterial(item);
+            ToolTypeDefinition definition = ToolTypeRegistry.toolType(toolKind).orElse(null);
+            if (headMaterial != null && definition != null) {
+                return new ToolConversion(definition, construction(definition, headMaterial, handleMaterial));
+            }
+        }
+        return externalConversion(item, handleMaterial).orElse(null);
+    }
+
+    private static Optional<ToolConversion> externalConversion(Item item, ResourceLocation handleMaterial) {
+        for (ToolTypeDefinition definition : ToolTypeRegistry.toolTypes()) {
+            if (definition.builtInKind().isPresent()) {
+                continue;
+            }
+            for (ResourceLocation headMaterial : definition.toolItemMaterials()) {
+                Optional<Item> candidate = definition.toolItem(headMaterial);
+                if (candidate.isPresent() && candidate.get() == item) {
+                    return Optional.of(new ToolConversion(definition, construction(definition, headMaterial, handleMaterial)));
+                }
+            }
+            Optional<Item> defaultItem = definition.toolItem();
+            if (defaultItem.isPresent() && defaultItem.get() == item) {
+                return Optional.of(new ToolConversion(definition, construction(definition, MaterialCatalog.IRON, handleMaterial)));
+            }
+        }
+        return Optional.empty();
     }
 
     private static ToolKind toolKind(Item item) {
@@ -118,14 +141,18 @@ public final class VanillaToolConverter {
     }
 
     private static ToolConstructionData construction(ToolKind toolKind, ResourceLocation headMaterial, ResourceLocation handleMaterial) {
-        if (toolKind != ToolKind.SWORD) {
-            return ToolConstructionData.basic(toolKind, headMaterial, handleMaterial);
-        }
+        return construction(ToolTypeRegistry.toolType(toolKind).orElseThrow(), headMaterial, handleMaterial);
+    }
+
+    private static ToolConstructionData construction(ToolTypeDefinition definition, ResourceLocation headMaterial, ResourceLocation handleMaterial) {
+        Optional<ResourceLocation> guardMaterial = definition.requiredAssemblyParts().isEmpty()
+                ? Optional.empty()
+                : Optional.of(headMaterial);
         return new ToolConstructionData(
-                ToolConstructionData.toolType(toolKind),
+                definition.id(),
                 headMaterial,
                 handleMaterial,
-                Optional.of(headMaterial),
+                guardMaterial,
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
@@ -156,5 +183,8 @@ public final class VanillaToolConverter {
             }
         }
         return false;
+    }
+
+    private record ToolConversion(ToolTypeDefinition definition, ToolConstructionData construction) {
     }
 }

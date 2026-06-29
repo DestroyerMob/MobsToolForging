@@ -81,6 +81,10 @@ public final class ToolTypeDefinition {
         return supplier == null ? toolItem() : Optional.of(supplier.get());
     }
 
+    public Set<ResourceLocation> toolItemMaterials() {
+        return materialToolItems.keySet();
+    }
+
     public Optional<Item> partItem(String partType) {
         Supplier<? extends Item> supplier = partItems.get(partType);
         return supplier == null ? Optional.empty() : Optional.of(supplier.get());

@@ -22,7 +22,8 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.FOUNDRY_FORGE, "Foundry Forge");
         addBlock(ModBlocks.KNAPPING_FLINT, "Knapping Flint");
         addBlock(ModBlocks.GROUND_TOOL_ASSEMBLY, "Ground Tool Assembly");
-        add("commands.mobstoolforging.convert_vanilla_tool.not_vanilla", "Hold a vanilla tool or weapon to convert.");
+        add("commands.mobstoolforging.convert_vanilla_tool.not_supported", "Hold a supported vanilla or More Weapons tool to convert.");
+        add("commands.mobstoolforging.convert_vanilla_tool.not_vanilla", "Hold a supported vanilla or More Weapons tool to convert.");
         add("commands.mobstoolforging.convert_vanilla_tool.success", "Converted %s into %s.");
         addItem(ModItems.SMITHING_HAMMER, "Smithing Hammer");
         addItem(ModItems.IRON_SMITHING_HAMMER, "Iron Smithing Hammer");

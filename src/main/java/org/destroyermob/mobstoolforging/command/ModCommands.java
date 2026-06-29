@@ -43,6 +43,8 @@ public final class ModCommands {
     public static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal(MobsToolForging.MOD_ID)
                 .requires(source -> source.hasPermission(2))
+                .then(Commands.literal("convert_tool")
+                        .executes(ModCommands::convertVanillaTool))
                 .then(Commands.literal("convert_vanilla_tool")
                         .executes(ModCommands::convertVanillaTool))
                 .then(giveDebug(false))
@@ -322,7 +324,7 @@ public final class ModCommands {
         Component originalName = original.getHoverName().copy();
         ItemStack converted = VanillaToolConverter.convert(original, MaterialCatalog.OAK);
         if (converted.isEmpty()) {
-            source.sendFailure(Component.translatable("commands.mobstoolforging.convert_vanilla_tool.not_vanilla"));
+            source.sendFailure(Component.translatable("commands.mobstoolforging.convert_vanilla_tool.not_supported"));
             return 0;
         }
 
