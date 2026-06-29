@@ -13,24 +13,24 @@ public final class ModularHelmetGeometry {
     private static final int WHITE = 0xFFFFFFFF;
 
     public static final List<Cuboid> SKULL = List.of(
-            cuboid(-4, -8, -4, 4, -8, 4, -6, -6),
-            cuboid(-4, -8, 4, 4, -2, 4, -1, 2),
-            cuboid(-2, -2, 4, 2, -1, 4, 1, 2),
-            cuboid(-4, -8, -4, 4, -5, -4, -1, 2),
-            cuboid(4, -8, -4, 4, -3, 4, -6, -6),
-            cuboid(-4, -8, -4, -4, -3, 4, -6, -6),
-            cuboid(-4, -3, 0, -4, -2, 4, -2, -2),
-            cuboid(4, -3, 0, 4, -2, 4, -2, -2)
+            cuboid(-5, -9, -5, 5, -9, 5, -8, -8),
+            cuboid(-5, -9, 5, 5, -2, 5, -3, 2),
+            cuboid(-2, -2, 5, 2, -1, 5, 1, 2),
+            cuboid(-5, -9, -5, 5, -5, -5, -3, 2),
+            cuboid(5, -9, -5, 5, -3, 5, -8, -8),
+            cuboid(-5, -9, -5, -5, -3, 5, -8, -8),
+            cuboid(-5, -3, 1, -5, -2, 5, -2, -2),
+            cuboid(5, -3, 1, 5, -2, 5, -2, -2)
     );
     public static final List<Cuboid> COMB = List.of(
-            cuboid(-1, -9, -5, 1, -8, 5, -8, -8),
-            cuboid(-1, -8, -5, 1, -3, -4, 1, 1),
-            cuboid(-1, -8, 4, 1, -3, 5, 1, 1)
+            cuboid(-1, -10, -6, 1, -9, 6, -10, -10),
+            cuboid(-1, -9, -6, 1, -4, -5, 1, 1),
+            cuboid(-1, -9, 5, 1, -4, 6, 1, 1)
     );
     public static final List<Cuboid> VISOR = List.of(
-            cuboid(-5, -3, -5, -4, -1, 1, -3, -4),
-            cuboid(4, -3, -5, 5, -1, 1, -3, -4),
-            cuboid(-4, -2, -5, 4, 0, -4, -5, 1)
+            cuboid(-6, -3, -6, -5, -1, 2, -5, -6),
+            cuboid(5, -3, -6, 6, -1, 2, -5, -6),
+            cuboid(-5, -2, -6, 5, 0, -5, -7, 1)
     );
 
     private ModularHelmetGeometry() {
@@ -96,7 +96,7 @@ public final class ModularHelmetGeometry {
 
     public record Cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float textureU, float textureV) {
         public Cuboid headAligned() {
-            // Helmet3.java has been converted from root entity coordinates into humanoid head space.
+            // Helmet3(1).java has been converted from root entity coordinates into humanoid head space.
             return this;
         }
 
