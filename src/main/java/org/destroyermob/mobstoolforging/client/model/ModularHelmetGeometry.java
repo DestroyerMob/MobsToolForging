@@ -11,6 +11,7 @@ import org.joml.Vector3f;
 public final class ModularHelmetGeometry {
     private static final float MODEL_SCALE = 1.0F / 16.0F;
     private static final int WHITE = 0xFFFFFFFF;
+    private static final List<Direction> FULL_CUBE_DIRECTIONS = List.of(Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST);
 
     public static final List<Cuboid> SKULL = List.of(
             cuboid(-5, -9, -5, 5, -9, 5, -8, -8),
@@ -52,18 +53,31 @@ public final class ModularHelmetGeometry {
         float maxX = cuboid.maxX * MODEL_SCALE;
         float maxY = cuboid.maxY * MODEL_SCALE;
         float maxZ = cuboid.maxZ * MODEL_SCALE;
-        ArmorCubeUv.Face up = cuboid.faceUv(Direction.UP);
-        ArmorCubeUv.Face down = cuboid.faceUv(Direction.DOWN);
-        ArmorCubeUv.Face north = cuboid.faceUv(Direction.NORTH);
-        ArmorCubeUv.Face south = cuboid.faceUv(Direction.SOUTH);
-        ArmorCubeUv.Face west = cuboid.faceUv(Direction.WEST);
-        ArmorCubeUv.Face east = cuboid.faceUv(Direction.EAST);
-        quad(poseStack, consumer, Direction.UP.step(), light, overlay, minX, maxY, minZ, u(sprite, up.u0()), v(sprite, up.v1()), minX, maxY, maxZ, u(sprite, up.u0()), v(sprite, up.v0()), maxX, maxY, maxZ, u(sprite, up.u1()), v(sprite, up.v0()), maxX, maxY, minZ, u(sprite, up.u1()), v(sprite, up.v1()));
-        quad(poseStack, consumer, Direction.DOWN.step(), light, overlay, minX, minY, maxZ, u(sprite, down.u0()), v(sprite, down.v1()), minX, minY, minZ, u(sprite, down.u0()), v(sprite, down.v0()), maxX, minY, minZ, u(sprite, down.u1()), v(sprite, down.v0()), maxX, minY, maxZ, u(sprite, down.u1()), v(sprite, down.v1()));
-        quad(poseStack, consumer, Direction.NORTH.step(), light, overlay, minX, minY, minZ, u(sprite, north.u0()), v(sprite, north.v1()), minX, maxY, minZ, u(sprite, north.u0()), v(sprite, north.v0()), maxX, maxY, minZ, u(sprite, north.u1()), v(sprite, north.v0()), maxX, minY, minZ, u(sprite, north.u1()), v(sprite, north.v1()));
-        quad(poseStack, consumer, Direction.SOUTH.step(), light, overlay, maxX, minY, maxZ, u(sprite, south.u0()), v(sprite, south.v1()), maxX, maxY, maxZ, u(sprite, south.u0()), v(sprite, south.v0()), minX, maxY, maxZ, u(sprite, south.u1()), v(sprite, south.v0()), minX, minY, maxZ, u(sprite, south.u1()), v(sprite, south.v1()));
-        quad(poseStack, consumer, Direction.WEST.step(), light, overlay, minX, minY, maxZ, u(sprite, west.u0()), v(sprite, west.v1()), minX, maxY, maxZ, u(sprite, west.u0()), v(sprite, west.v0()), minX, maxY, minZ, u(sprite, west.u1()), v(sprite, west.v0()), minX, minY, minZ, u(sprite, west.u1()), v(sprite, west.v1()));
-        quad(poseStack, consumer, Direction.EAST.step(), light, overlay, maxX, minY, minZ, u(sprite, east.u0()), v(sprite, east.v1()), maxX, maxY, minZ, u(sprite, east.u0()), v(sprite, east.v0()), maxX, maxY, maxZ, u(sprite, east.u1()), v(sprite, east.v0()), maxX, minY, maxZ, u(sprite, east.u1()), v(sprite, east.v1()));
+        List<Direction> directions = cuboid.renderDirections();
+        if (directions.contains(Direction.UP)) {
+            ArmorCubeUv.Face up = cuboid.faceUv(Direction.UP);
+            quad(poseStack, consumer, Direction.UP.step(), light, overlay, minX, maxY, minZ, u(sprite, up.u0()), v(sprite, up.v1()), minX, maxY, maxZ, u(sprite, up.u0()), v(sprite, up.v0()), maxX, maxY, maxZ, u(sprite, up.u1()), v(sprite, up.v0()), maxX, maxY, minZ, u(sprite, up.u1()), v(sprite, up.v1()));
+        }
+        if (directions.contains(Direction.DOWN)) {
+            ArmorCubeUv.Face down = cuboid.faceUv(Direction.DOWN);
+            quad(poseStack, consumer, Direction.DOWN.step(), light, overlay, minX, minY, maxZ, u(sprite, down.u0()), v(sprite, down.v1()), minX, minY, minZ, u(sprite, down.u0()), v(sprite, down.v0()), maxX, minY, minZ, u(sprite, down.u1()), v(sprite, down.v0()), maxX, minY, maxZ, u(sprite, down.u1()), v(sprite, down.v1()));
+        }
+        if (directions.contains(Direction.NORTH)) {
+            ArmorCubeUv.Face north = cuboid.faceUv(Direction.NORTH);
+            quad(poseStack, consumer, Direction.NORTH.step(), light, overlay, minX, minY, minZ, u(sprite, north.u0()), v(sprite, north.v1()), minX, maxY, minZ, u(sprite, north.u0()), v(sprite, north.v0()), maxX, maxY, minZ, u(sprite, north.u1()), v(sprite, north.v0()), maxX, minY, minZ, u(sprite, north.u1()), v(sprite, north.v1()));
+        }
+        if (directions.contains(Direction.SOUTH)) {
+            ArmorCubeUv.Face south = cuboid.faceUv(Direction.SOUTH);
+            quad(poseStack, consumer, Direction.SOUTH.step(), light, overlay, maxX, minY, maxZ, u(sprite, south.u0()), v(sprite, south.v1()), maxX, maxY, maxZ, u(sprite, south.u0()), v(sprite, south.v0()), minX, maxY, maxZ, u(sprite, south.u1()), v(sprite, south.v0()), minX, minY, maxZ, u(sprite, south.u1()), v(sprite, south.v1()));
+        }
+        if (directions.contains(Direction.WEST)) {
+            ArmorCubeUv.Face west = cuboid.faceUv(Direction.WEST);
+            quad(poseStack, consumer, Direction.WEST.step(), light, overlay, minX, minY, maxZ, u(sprite, west.u0()), v(sprite, west.v1()), minX, maxY, maxZ, u(sprite, west.u0()), v(sprite, west.v0()), minX, maxY, minZ, u(sprite, west.u1()), v(sprite, west.v0()), minX, minY, minZ, u(sprite, west.u1()), v(sprite, west.v1()));
+        }
+        if (directions.contains(Direction.EAST)) {
+            ArmorCubeUv.Face east = cuboid.faceUv(Direction.EAST);
+            quad(poseStack, consumer, Direction.EAST.step(), light, overlay, maxX, minY, minZ, u(sprite, east.u0()), v(sprite, east.v1()), maxX, maxY, minZ, u(sprite, east.u0()), v(sprite, east.v0()), maxX, maxY, maxZ, u(sprite, east.u1()), v(sprite, east.v0()), maxX, minY, maxZ, u(sprite, east.u1()), v(sprite, east.v1()));
+        }
     }
 
     private static void quad(PoseStack poseStack, VertexConsumer consumer, Vector3f normal, int light, int overlay, float x0, float y0, float z0, float u0, float v0, float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3) {
@@ -112,6 +126,22 @@ public final class ModularHelmetGeometry {
                 flatAxes++;
             }
             return flatAxes >= 2;
+        }
+
+        public List<Direction> renderDirections() {
+            if (hasNoSurface()) {
+                return List.of();
+            }
+            if (maxX == minX) {
+                return List.of(minX + maxX >= 0.0F ? Direction.EAST : Direction.WEST);
+            }
+            if (maxY == minY) {
+                return List.of(minY + maxY <= 0.0F ? Direction.UP : Direction.DOWN);
+            }
+            if (maxZ == minZ) {
+                return List.of(minZ + maxZ <= 0.0F ? Direction.NORTH : Direction.SOUTH);
+            }
+            return FULL_CUBE_DIRECTIONS;
         }
 
         public Vector3f itemFrom() {

@@ -28,7 +28,7 @@ public final class ModularHelmetItemModel {
 
     private static void addCuboids(List<BakedQuad> quads, List<ModularHelmetGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
         for (ModularHelmetGeometry.Cuboid cuboid : cuboids) {
-            for (Direction direction : Direction.values()) {
+            for (Direction direction : cuboid.renderDirections()) {
                 quads.add(bakeFace(cuboid, direction, sprite));
             }
         }
