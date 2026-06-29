@@ -14,7 +14,7 @@ public final class ModularLowerArmourGeometry {
     private static final int WHITE = 0xFFFFFFFF;
     private static final List<Direction> FULL_CUBE_DIRECTIONS = List.of(Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST);
 
-    public static final List<Cuboid> LEGGING_LEGS = List.of(
+    public static final List<Cuboid> LEGGING_LEFT_LEG = List.of(
             cuboid(3, 12, -1, 3, 16, 5, -2, -4),
             cuboid(-3, 17, 5, 3, 20, 5, -2, 2),
             cuboid(-3, 17, -1, 3, 20, -1, -2, 2),
@@ -22,7 +22,9 @@ public final class ModularLowerArmourGeometry {
             cuboid(3, 17, -1, 3, 20, 5, -2, -4),
             cuboid(-3, 12, -1, -3, 16, 5, -2, -4),
             cuboid(-3, 12, -1, 3, 16, -1, -2, 2),
-            cuboid(-3, 12, 5, 3, 16, 5, -2, 2),
+            cuboid(-3, 12, 5, 3, 16, 5, -2, 2)
+    );
+    public static final List<Cuboid> LEGGING_RIGHT_LEG = List.of(
             cuboid(-3, 12, -5, 3, 16, -5, -2, 2),
             cuboid(-3, 17, 1, 3, 20, 1, -2, 2),
             cuboid(3, 17, -5, 3, 20, 1, -2, -4),
@@ -32,8 +34,10 @@ public final class ModularLowerArmourGeometry {
             cuboid(3, 12, -5, 3, 16, 1, -2, -4),
             cuboid(-3, 12, 1, 3, 16, 1, -2, 2)
     );
-    public static final List<Cuboid> LEGGING_KNEES = List.of(
-            cuboid(-4, 15, -5, -3, 18, 0, -3, -3),
+    public static final List<Cuboid> LEGGING_RIGHT_KNEE = List.of(
+            cuboid(-4, 15, -5, -3, 18, 0, -3, -3)
+    );
+    public static final List<Cuboid> LEGGING_LEFT_KNEE = List.of(
             cuboid(-4, 15, 0, -3, 18, 5, -3, -3)
     );
     public static final List<Cuboid> LEGGING_TASSETS = List.of(
@@ -65,6 +69,18 @@ public final class ModularLowerArmourGeometry {
     public static void renderBodyCuboids(List<Cuboid> cuboids, float parentX, float parentY, float parentZ, PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int light, int overlay) {
         for (Cuboid cuboid : cuboids) {
             renderBox(poseStack, consumer, sprite, light, overlay, cuboid.yRotatedQuarter(), parentX, parentY, parentZ);
+        }
+    }
+
+    public static void renderForwardBodyCuboids(List<Cuboid> cuboids, float parentX, float parentY, float parentZ, PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int light, int overlay) {
+        for (Cuboid cuboid : cuboids) {
+            renderBox(poseStack, consumer, sprite, light, overlay, cuboid.yRotatedQuarterFacingForward(), parentX, parentY, parentZ);
+        }
+    }
+
+    public static void renderForwardLegCuboids(List<Cuboid> cuboids, float parentX, float parentY, float parentZ, PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int light, int overlay) {
+        for (Cuboid cuboid : cuboids) {
+            renderBox(poseStack, consumer, sprite, light, overlay, cuboid.yRotatedQuarterFacingForward(), parentX, parentY, parentZ);
         }
     }
 
@@ -164,6 +180,10 @@ public final class ModularLowerArmourGeometry {
             return new Cuboid(minZ, minY, -maxX, maxZ, maxY, -minX, textureU, textureV);
         }
 
+        public Cuboid yRotatedQuarterFacingForward() {
+            return new Cuboid(minZ, minY, minX, maxZ, maxY, maxX, textureU, textureV);
+        }
+
         private boolean hasNoSurface() {
             int flatAxes = 0;
             if (maxX == minX) {
@@ -198,6 +218,10 @@ public final class ModularLowerArmourGeometry {
             return yRotatedQuarter().renderDirections();
         }
 
+        public List<Direction> forwardItemRenderDirections() {
+            return yRotatedQuarterFacingForward().renderDirections();
+        }
+
         private float centerX() {
             return (minX + maxX) * 0.5F;
         }
@@ -207,8 +231,18 @@ public final class ModularLowerArmourGeometry {
             return new Vector3f((rotated.minX + 5.0F) * ITEM_SCALE, 2.0F + 24.0F - rotated.maxY, (rotated.minZ + 5.0F) * ITEM_SCALE);
         }
 
+        public Vector3f forwardItemFrom() {
+            Cuboid rotated = yRotatedQuarterFacingForward();
+            return new Vector3f((rotated.minX + 5.0F) * ITEM_SCALE, 2.0F + 24.0F - rotated.maxY, (rotated.minZ + 5.0F) * ITEM_SCALE);
+        }
+
         public Vector3f itemTo() {
             Cuboid rotated = yRotatedQuarter();
+            return new Vector3f((rotated.maxX + 5.0F) * ITEM_SCALE, 2.0F + 24.0F - rotated.minY, (rotated.maxZ + 5.0F) * ITEM_SCALE);
+        }
+
+        public Vector3f forwardItemTo() {
+            Cuboid rotated = yRotatedQuarterFacingForward();
             return new Vector3f((rotated.maxX + 5.0F) * ITEM_SCALE, 2.0F + 24.0F - rotated.minY, (rotated.maxZ + 5.0F) * ITEM_SCALE);
         }
 
@@ -218,6 +252,11 @@ public final class ModularLowerArmourGeometry {
 
         public BlockFaceUV blockFaceUv(Direction direction) {
             Cuboid rotated = yRotatedQuarter();
+            return ArmorCubeUv.blockFaceUv(direction, textureU, textureV, rotated.maxX - rotated.minX, rotated.maxY - rotated.minY, rotated.maxZ - rotated.minZ);
+        }
+
+        public BlockFaceUV forwardBlockFaceUv(Direction direction) {
+            Cuboid rotated = yRotatedQuarterFacingForward();
             return ArmorCubeUv.blockFaceUv(direction, textureU, textureV, rotated.maxX - rotated.minX, rotated.maxY - rotated.minY, rotated.maxZ - rotated.minZ);
         }
     }

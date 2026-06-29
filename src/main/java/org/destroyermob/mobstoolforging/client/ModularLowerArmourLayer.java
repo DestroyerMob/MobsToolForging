@@ -62,9 +62,15 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
     }
 
     private void renderLeggingsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int packedLight, ArmorConstructionData construction) {
-        renderLegs(poseStack, humanoidModel, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_LEGS, sprite(construction.skullMaterial()));
-        construction.combMaterial().ifPresent(material -> renderLegs(poseStack, humanoidModel, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_KNEES, sprite(material)));
-        construction.visorMaterial().ifPresent(material -> renderBody(poseStack, humanoidModel.body, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_TASSETS, sprite(material)));
+        TextureAtlasSprite legsSprite = sprite(construction.skullMaterial());
+        renderForwardLeg(poseStack, humanoidModel.rightLeg, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_RIGHT_LEG, legsSprite);
+        renderForwardLeg(poseStack, humanoidModel.leftLeg, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_LEFT_LEG, legsSprite);
+        construction.combMaterial().ifPresent(material -> {
+            TextureAtlasSprite kneesSprite = sprite(material);
+            renderForwardLeg(poseStack, humanoidModel.rightLeg, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_RIGHT_KNEE, kneesSprite);
+            renderForwardLeg(poseStack, humanoidModel.leftLeg, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_LEFT_KNEE, kneesSprite);
+        });
+        construction.visorMaterial().ifPresent(material -> renderForwardBody(poseStack, humanoidModel.body, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_TASSETS, sprite(material)));
     }
 
     private void renderLegs(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
@@ -79,10 +85,17 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
         poseStack.popPose();
     }
 
-    private void renderBody(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
+    private void renderForwardLeg(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        ModularLowerArmourGeometry.renderBodyCuboids(cuboids, parentPart.x, parentPart.y, parentPart.z, poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        ModularLowerArmourGeometry.renderForwardLegCuboids(cuboids, parentPart.x, parentPart.y, parentPart.z, poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderForwardBody(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        ModularLowerArmourGeometry.renderForwardBodyCuboids(cuboids, parentPart.x, parentPart.y, parentPart.z, poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
