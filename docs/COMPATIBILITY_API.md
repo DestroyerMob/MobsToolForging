@@ -78,11 +78,15 @@ Tool type JSON lets a datapack connect existing item classes to Mobs Tool Forgin
   "visual": "mobs_more_weapons:greatsword",
   "base_attack_damage_bonus": 5.5,
   "base_attack_speed_bonus": -2.9,
+  "entity_interaction_range_bonus": 1.5,
+  "block_interaction_range_bonus": 0.0,
   "sword_like": true
 }
 ```
 
 `tool_item`, `primary_part_item`, and string-valued `part_items` still work for one-item modular families. Use `tool_items`, `primary_part_items`, or object-valued `part_items` when the target mod has material-specific item ids. The keys are MTF material ids, and the values are already-registered item ids.
+
+`entity_interaction_range_bonus` and `block_interaction_range_bonus` are optional main-hand attribute modifiers for bridge tools whose original items change reach. Leave them out for vanilla-range tools.
 
 Datapack tool types cannot create new item classes or custom combat callbacks. They can attach Mobs Tool Forging components, stats, recipes, and visuals to items that already exist. A modular recipe only matches when the resolved part items and the resolved output item are valid for the construction material.
 

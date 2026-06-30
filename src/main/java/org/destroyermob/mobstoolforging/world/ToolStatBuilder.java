@@ -9,6 +9,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Unit;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
@@ -326,13 +329,37 @@ public final class ToolStatBuilder {
     }
 
     private static ItemAttributeModifiers toolAttributes(ToolTypeDefinition definition, Tier tier, ToolStatProfile profile) {
+        ItemAttributeModifiers attributes;
         if (definition.builtInKind().isPresent()) {
-            return toolAttributes(definition.builtInKind().get(), tier, profile);
+            attributes = toolAttributes(definition.builtInKind().get(), tier, profile);
+        } else if (definition.swordLike()) {
+            attributes = SwordItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
+        } else {
+            attributes = DiggerItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
         }
-        if (definition.swordLike()) {
-            return SwordItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
+        return addInteractionRangeAttributes(attributes, definition);
+    }
+
+    private static ItemAttributeModifiers addInteractionRangeAttributes(ItemAttributeModifiers attributes, ToolTypeDefinition definition) {
+        if (definition.entityInteractionRangeBonus() != 0.0D) {
+            attributes = attributes.withModifierAdded(
+                    Attributes.ENTITY_INTERACTION_RANGE,
+                    new AttributeModifier(attributeModifierId(definition, "entity_interaction_range"), definition.entityInteractionRangeBonus(), AttributeModifier.Operation.ADD_VALUE),
+                    EquipmentSlotGroup.MAINHAND
+            );
         }
-        return DiggerItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
+        if (definition.blockInteractionRangeBonus() != 0.0D) {
+            attributes = attributes.withModifierAdded(
+                    Attributes.BLOCK_INTERACTION_RANGE,
+                    new AttributeModifier(attributeModifierId(definition, "block_interaction_range"), definition.blockInteractionRangeBonus(), AttributeModifier.Operation.ADD_VALUE),
+                    EquipmentSlotGroup.MAINHAND
+            );
+        }
+        return attributes;
+    }
+
+    private static ResourceLocation attributeModifierId(ToolTypeDefinition definition, String suffix) {
+        return ResourceLocation.fromNamespaceAndPath(definition.id().getNamespace(), definition.id().getPath() + "_" + suffix);
     }
 
     private static void validateStarterMaterialAttributes(ResourceLocation materialId) {

@@ -29,6 +29,8 @@ public final class ToolTypeDefinition {
     private final List<String> requiredAssemblyParts;
     private final float baseAttackDamageBonus;
     private final float baseAttackSpeedBonus;
+    private final double entityInteractionRangeBonus;
+    private final double blockInteractionRangeBonus;
     private final boolean swordLike;
     private final Optional<TagKey<Block>> miningTag;
     private final BiFunction<ToolTypeDefinition, ToolConstructionData, ItemStack> toolFactory;
@@ -49,6 +51,8 @@ public final class ToolTypeDefinition {
         this.requiredAssemblyParts = List.copyOf(builder.requiredAssemblyParts);
         this.baseAttackDamageBonus = builder.baseAttackDamageBonus;
         this.baseAttackSpeedBonus = builder.baseAttackSpeedBonus;
+        this.entityInteractionRangeBonus = builder.entityInteractionRangeBonus;
+        this.blockInteractionRangeBonus = builder.blockInteractionRangeBonus;
         this.swordLike = builder.swordLike;
         this.miningTag = Optional.ofNullable(builder.miningTag);
         this.toolFactory = builder.toolFactory == null ? ToolTypeDefinition::defaultToolStack : builder.toolFactory;
@@ -121,6 +125,14 @@ public final class ToolTypeDefinition {
 
     public float baseAttackSpeedBonus(ResourceLocation materialId) {
         return builtInKind.map(kind -> ToolStatBuilder.builtInBaseAttackSpeedBonus(kind, materialId)).orElse(baseAttackSpeedBonus);
+    }
+
+    public double entityInteractionRangeBonus() {
+        return entityInteractionRangeBonus;
+    }
+
+    public double blockInteractionRangeBonus() {
+        return blockInteractionRangeBonus;
     }
 
     public boolean swordLike() {
@@ -222,6 +234,8 @@ public final class ToolTypeDefinition {
         private final java.util.ArrayList<String> requiredAssemblyParts = new java.util.ArrayList<>();
         private float baseAttackDamageBonus = 1.0F;
         private float baseAttackSpeedBonus = -2.8F;
+        private double entityInteractionRangeBonus;
+        private double blockInteractionRangeBonus;
         private boolean swordLike;
         private TagKey<Block> miningTag = BlockTags.MINEABLE_WITH_PICKAXE;
         private BiFunction<ToolTypeDefinition, ToolConstructionData, ItemStack> toolFactory;
@@ -283,6 +297,12 @@ public final class ToolTypeDefinition {
         public Builder baseStats(float attackDamageBonus, float attackSpeedBonus) {
             this.baseAttackDamageBonus = attackDamageBonus;
             this.baseAttackSpeedBonus = attackSpeedBonus;
+            return this;
+        }
+
+        public Builder interactionRangeBonuses(double entityInteractionRangeBonus, double blockInteractionRangeBonus) {
+            this.entityInteractionRangeBonus = entityInteractionRangeBonus;
+            this.blockInteractionRangeBonus = blockInteractionRangeBonus;
             return this;
         }
 
