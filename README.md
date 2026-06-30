@@ -12,9 +12,10 @@ A NeoForge 1.21.1 mod that adds physical, modular tool making without changing v
 - In-world station previews show the selected part shape before material is added.
 - Smithing Hammer workflow with material placement, progress, and block-entity visuals.
 - Modular vanilla-style tool and weapon set: sword, shovel, pickaxe, axe, and hoe.
+- Modular armour base pieces with material add-ons: helmet, chestplate, leggings, and boots.
 - In-world flint knapping and Plant Fiber ground assembly for modular starter flint tools.
 - Tag-driven starter materials:
-  - Metals: iron, gold, copper, netherite
+  - Metals: iron, gold, copper
   - Gems: diamond, emerald
   - Handles: sticks, blaze rods, breeze rods, and common rod tags
 - Finished tools store construction data and a stat profile built from head, handle, binding/guard, wrap, focus, and treatment.
@@ -59,6 +60,8 @@ Procedural sprites are placeholder defaults. Final-quality art should come from 
 ## Current Limitations
 
 - Pattern items currently define shape only. The station defines the material process: metals are shaped on the Smithing Anvil, and gems are shaped on the Lapidary Table.
+- Armour base patterns create the finished wearable armour piece directly. Add-on patterns such as helmet combs, helmet visors, knees, and tassets install onto that armour afterward.
+- Armour add-ons follow the same material split as tool heads: metal additions are forged on the Smithing Anvil, while gem additions are set on the Lapidary Table with Diamond Powder and a Gem Cutter's Knife.
 - The old template selector screen is a debug fallback only and is disabled during normal play unless the debug config is enabled.
 - Bridge support is data-driven. MoreWeapons currently supplies bridge data for great swords, katanas, battle axes, knives, and machetes; other non-vanilla families still need bridge data from their owning mods.
 - Generated part sprites are useful for wiring tests, but they are not final art.

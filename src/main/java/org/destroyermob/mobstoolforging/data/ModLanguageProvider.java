@@ -45,7 +45,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.SMITHING_HAMMER_HEAD_PATTERN, "Smithing Hammer Head Pattern");
         addItem(ModItems.SCREWDRIVER_HEAD_PATTERN, "Screwdriver Head Pattern");
         addItem(ModItems.GEM_CUTTERS_BLADE_PATTERN, "Gem Cutter's Blade Pattern");
-        addItem(ModItems.HELMET_SKULL_PATTERN, "Helmet Skull Pattern");
+        addItem(ModItems.HELMET_SKULL_PATTERN, "Helmet Pattern");
         addItem(ModItems.HELMET_COMB_PATTERN, "Helmet Comb Pattern");
         addItem(ModItems.HELMET_VISOR_PATTERN, "Helmet Visor Pattern");
         addItem(ModItems.CHESTPLATE_BODY_PATTERN, "Body Armour Pattern");
@@ -61,7 +61,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.PICKAXE_HEAD, "Pickaxe Head");
         addItem(ModItems.AXE_HEAD, "Axe Head");
         addItem(ModItems.HOE_HEAD, "Hoe Head");
-        addItem(ModItems.HELMET_SKULL, "Helmet Skull");
+        addItem(ModItems.HELMET_SKULL, "Helmet Base");
         addItem(ModItems.CHESTPLATE_BODY, "Body Armour Piece");
         addItem(ModItems.LEGGINGS_LEGS, "Leggings Base");
         addItem(ModItems.BOOTS_FEET, "Boots Base");
@@ -80,7 +80,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.mobstoolforging.material_pickaxe_head", "%s Pickaxe Head");
         add("item.mobstoolforging.material_axe_head", "%s Axe Head");
         add("item.mobstoolforging.material_hoe_head", "%s Hoe Head");
-        add("item.mobstoolforging.material_helmet_skull", "%s Helmet Skull");
+        add("item.mobstoolforging.material_helmet_skull", "%s Helmet Base");
         add("item.mobstoolforging.material_chestplate_body", "%s Body Armour Piece");
         add("item.mobstoolforging.material_leggings_legs", "%s Leggings Base");
         add("item.mobstoolforging.material_boots_feet", "%s Boots Base");
@@ -137,7 +137,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("forge_template.mobstoolforging.smithing_hammer_head", "Smithing Hammer Head");
         add("forge_template.mobstoolforging.screwdriver_head", "Screwdriver Head");
         add("forge_template.mobstoolforging.gem_cutters_blade", "Gem Cutter's Blade");
-        add("forge_template.mobstoolforging.helmet_skull", "Helmet Skull");
+        add("forge_template.mobstoolforging.helmet_skull", "Helmet");
         add("forge_template.mobstoolforging.helmet_comb", "Helmet Comb");
         add("forge_template.mobstoolforging.helmet_visor", "Helmet Visor");
         add("forge_template.mobstoolforging.chestplate_body", "Body Armour Piece");
@@ -162,12 +162,13 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.material_not_allowed", "That material does not fit this pattern.");
         add("message.mobstoolforging.need_materials", "Place the required matching materials before working.");
         add("message.mobstoolforging.armor_attachment_target_placed", "Armour placed.");
-        add("message.mobstoolforging.armor_attachment_needs_target", "Place compatible armour on the forge first.");
+        add("message.mobstoolforging.armor_attachment_needs_target", "Place compatible armour on this station first.");
         add("message.mobstoolforging.armor_attachment_wrong_target", "That armour does not fit this pattern.");
         add("message.mobstoolforging.armor_attachment_needs_material", "Add material for %s.");
         add("message.mobstoolforging.armor_attachment_forging", "Forging %s %s onto %s (%s/%s)");
+        add("message.mobstoolforging.armor_attachment_setting", "Setting %s %s into %s (%s/%s)");
         add("message.mobstoolforging.armor_attachment_replacing", "Replacing %s %s with %s %s (%s/%s)");
-        add("message.mobstoolforging.armor_attachment_complete", "Armour attachment forged.");
+        add("message.mobstoolforging.armor_attachment_complete", "Armour attachment installed.");
         add("message.mobstoolforging.hammer_too_weak", "This work needs at least a %s.");
         add("message.mobstoolforging.hammer_level.stone", "Smithing Hammer");
         add("message.mobstoolforging.hammer_level.iron", "Iron Smithing Hammer");
@@ -259,7 +260,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.armor_part.knees", "Knees: %s");
         add("tooltip.mobstoolforging.armor_part.tassets", "Tassets: %s");
         add("tooltip.mobstoolforging.armor_part.feet", "Feet: %s");
-        add("tooltip.mobstoolforging.armor_part.skull", "Skull: %s");
+        add("tooltip.mobstoolforging.armor_part.skull", "Helmet: %s");
         add("tooltip.mobstoolforging.armor_part.comb", "Comb: %s");
         add("tooltip.mobstoolforging.armor_part.visor", "Visor: %s");
         add("tooltip.mobstoolforging.stat_profile", "Stat Profile");

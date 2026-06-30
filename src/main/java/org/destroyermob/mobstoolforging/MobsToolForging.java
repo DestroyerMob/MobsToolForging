@@ -175,10 +175,6 @@ public class MobsToolForging {
             event.accept(ModItems.SMITHING_HAMMER_HEAD);
             event.accept(ModItems.SCREWDRIVER_HEAD);
             event.accept(ModItems.GEM_CUTTERS_BLADE);
-            event.accept(ModItems.HELMET_SKULL);
-            event.accept(ModItems.CHESTPLATE_BODY);
-            event.accept(ModItems.LEGGINGS_LEGS);
-            event.accept(ModItems.BOOTS_FEET);
             event.accept(ModItems.DIAMOND_POWDER);
         }
     }

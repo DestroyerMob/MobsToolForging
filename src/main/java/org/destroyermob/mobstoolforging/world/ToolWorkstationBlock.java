@@ -102,7 +102,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (stack.getItem() instanceof ToolTemplateItem templateItem) {
             return applyTemplateItem(stack, templateItem, forge, level, pos, player);
         }
-        if (kind == WorkstationKind.TOOL_FORGE && ArmorForgeAttachment.isAttachmentTemplate(forge.templateId())) {
+        if (ArmorForgeAttachment.isAttachmentStation(kind) && ArmorForgeAttachment.isAttachmentTemplate(forge.templateId())) {
             if (forge.canPlaceArmorAttachmentTarget(stack)) {
                 return placeArmorAttachmentTarget(stack, forge, level, pos, player);
             }
@@ -157,7 +157,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                 }
                 return InteractionResult.CONSUME;
             }
-            if (kind == WorkstationKind.TOOL_FORGE && forge.hasArmorAttachmentTarget()) {
+            if (ArmorForgeAttachment.isAttachmentStation(kind) && forge.hasArmorAttachmentTarget()) {
                 if (!level.isClientSide) {
                     player.displayClientMessage(ArmorForgeAttachment.statusMessage(forge), true);
                 }
@@ -205,7 +205,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (kind == WorkstationKind.TOOL_FORGE && (forge.canPlaceRepairTool(stack) || forge.canPlaceRepairMaterial(stack))) {
             return true;
         }
-        if (kind == WorkstationKind.TOOL_FORGE
+        if (ArmorForgeAttachment.isAttachmentStation(kind)
                 && ArmorForgeAttachment.isAttachmentTemplate(forge.templateId())
                 && (forge.canPlaceArmorAttachmentTarget(stack) || ArmorForgeAttachment.isArmorStack(stack))) {
             return true;

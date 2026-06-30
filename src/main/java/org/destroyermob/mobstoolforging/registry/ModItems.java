@@ -140,35 +140,35 @@ public final class ModItems {
     );
     public static final DeferredItem<ToolTemplateItem> HELMET_SKULL_PATTERN = ITEMS.register(
             "helmet_skull_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_SKULL_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_SKULL_TEMPLATE, new Item.Properties())
     );
     public static final DeferredItem<ToolTemplateItem> HELMET_COMB_PATTERN = ITEMS.register(
             "helmet_comb_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_COMB_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_COMB_TEMPLATE, new Item.Properties())
     );
     public static final DeferredItem<ToolTemplateItem> HELMET_VISOR_PATTERN = ITEMS.register(
             "helmet_visor_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_VISOR_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_VISOR_TEMPLATE, new Item.Properties())
     );
     public static final DeferredItem<ToolTemplateItem> CHESTPLATE_BODY_PATTERN = ITEMS.register(
             "chestplate_body_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+            () -> new ToolTemplateItem(ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE, new Item.Properties())
     );
     public static final DeferredItem<ToolTemplateItem> LEGGINGS_LEGS_PATTERN = ITEMS.register(
             "leggings_legs_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_LEGS_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_LEGS_TEMPLATE, new Item.Properties())
     );
     public static final DeferredItem<ToolTemplateItem> LEGGINGS_KNEES_PATTERN = ITEMS.register(
             "leggings_knees_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE, new Item.Properties())
     );
     public static final DeferredItem<ToolTemplateItem> LEGGINGS_TASSETS_PATTERN = ITEMS.register(
             "leggings_tassets_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE, new Item.Properties())
     );
     public static final DeferredItem<ToolTemplateItem> BOOTS_FEET_PATTERN = ITEMS.register(
             "boots_feet_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.BOOTS_FEET_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+            () -> new ToolTemplateItem(ToolTypeRegistry.BOOTS_FEET_TEMPLATE, new Item.Properties())
     );
     public static final DeferredItem<ToolTemplateItem> TEMPLATE_PATTERN = ITEMS.register(
             "template_pattern",

@@ -23,6 +23,17 @@ public final class ArmorForgeAttachment {
                 || ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE.equals(templateId);
     }
 
+    public static boolean isBaseArmorTemplate(@Nullable ResourceLocation templateId) {
+        return ToolTypeRegistry.HELMET_SKULL_TEMPLATE.equals(templateId)
+                || ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)
+                || ToolTypeRegistry.LEGGINGS_LEGS_TEMPLATE.equals(templateId)
+                || ToolTypeRegistry.BOOTS_FEET_TEMPLATE.equals(templateId);
+    }
+
+    public static boolean isAttachmentStation(WorkstationKind workstationKind) {
+        return workstationKind == WorkstationKind.TOOL_FORGE || workstationKind == WorkstationKind.LAPIDARY_TABLE;
+    }
+
     public static boolean isArmorStack(ItemStack stack) {
         return stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get()) != null;
     }
@@ -55,6 +66,22 @@ public final class ArmorForgeAttachment {
         return output;
     }
 
+    public static ItemStack baseOutputStack(ResourceLocation templateId, ResourceLocation materialId) {
+        if (ToolTypeRegistry.HELMET_SKULL_TEMPLATE.equals(templateId)) {
+            return ModItems.MODULAR_HELMET.get().create(materialId, Optional.empty(), Optional.empty());
+        }
+        if (ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)) {
+            return ModItems.MODULAR_CHESTPLATE.get().create(materialId);
+        }
+        if (ToolTypeRegistry.LEGGINGS_LEGS_TEMPLATE.equals(templateId)) {
+            return ModItems.MODULAR_LEGGINGS.get().create(materialId);
+        }
+        if (ToolTypeRegistry.BOOTS_FEET_TEMPLATE.equals(templateId)) {
+            return ModItems.MODULAR_BOOTS.get().create(materialId);
+        }
+        return ItemStack.EMPTY;
+    }
+
     public static ItemStack previewTargetStack(ResourceLocation templateId) {
         if (ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId) || ToolTypeRegistry.HELMET_VISOR_TEMPLATE.equals(templateId)) {
             return ModItems.MODULAR_HELMET.get().create(MaterialCatalog.IRON, Optional.empty(), Optional.empty());
@@ -78,6 +105,9 @@ public final class ArmorForgeAttachment {
         ItemStack target = forge.armorAttachmentTarget();
         ResourceLocation materialId = forge.materialId();
         if (materialId == null) {
+            if (forge.workstationKind() == WorkstationKind.LAPIDARY_TABLE && !forge.hasAbrasive()) {
+                return Component.translatable("message.mobstoolforging.lapidary_needs_abrasive");
+            }
             return Component.translatable("message.mobstoolforging.armor_attachment_needs_material", template.displayName());
         }
         ArmorConstructionData construction = target.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
@@ -89,6 +119,16 @@ public final class ArmorForgeAttachment {
                     template.displayName(),
                     MaterialCatalog.displayName(materialId),
                     template.displayName(),
+                    forge.hitCount(),
+                    template.requiredHits()
+            );
+        }
+        if (forge.workstationKind() == WorkstationKind.LAPIDARY_TABLE) {
+            return Component.translatable(
+                    "message.mobstoolforging.armor_attachment_setting",
+                    MaterialCatalog.displayName(materialId),
+                    template.displayName(),
+                    target.getHoverName(),
                     forge.hitCount(),
                     template.requiredHits()
             );

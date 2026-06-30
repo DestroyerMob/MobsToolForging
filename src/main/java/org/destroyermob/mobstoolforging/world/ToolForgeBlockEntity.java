@@ -353,11 +353,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     public boolean canPlaceArmorAttachmentTarget(ItemStack stack) {
         ForgeTemplateDefinition template = template();
-        return workstationKind() == WorkstationKind.TOOL_FORGE
+        return ArmorForgeAttachment.isAttachmentStation(workstationKind())
                 && ArmorForgeAttachment.isAttachmentTemplate(template)
                 && ArmorForgeAttachment.isCompatibleTarget(template, stack)
                 && directOutputStack.isEmpty()
-                && abrasiveStack.isEmpty()
+                && (workstationKind() == WorkstationKind.LAPIDARY_TABLE || abrasiveStack.isEmpty())
                 && benchStacks.isEmpty()
                 && materialId == null
                 && materialItemId == null
@@ -379,7 +379,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     public boolean hasArmorAttachmentTarget() {
         ForgeTemplateDefinition template = template();
-        return workstationKind() == WorkstationKind.TOOL_FORGE
+        return ArmorForgeAttachment.isAttachmentStation(workstationKind())
                 && ArmorForgeAttachment.isAttachmentTemplate(template)
                 && benchStacks.size() == 1
                 && directOutputStack.isEmpty()

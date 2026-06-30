@@ -20,6 +20,15 @@ Pattern items define the physical shape to make. They are intentionally not stat
 
 That means a Sword Blade Pattern can be used on either station, but the material placed afterward determines whether the work is forged metal or lapidary-cut gem.
 
+Armour uses the same physical pattern idea, but base armour patterns produce the finished wearable armour piece directly. The Helmet Pattern makes a modular helmet rather than a loose skull part. Chestplate, leggings, and boots base patterns follow the same rule.
+
+Add-on armour patterns are installed onto an existing compatible armour piece:
+
+- Metal add-ons are forged on the Tool Forge.
+- Gem add-ons are set on the Lapidary Table with Diamond Powder and a Gem Cutter's Knife.
+
+The add-on material can be replaced later by running the same compatible pattern and armour piece through the right station again.
+
 ## Forming A Part
 
 After a pattern is placed:
