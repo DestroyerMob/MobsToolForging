@@ -53,6 +53,11 @@ public class ForgeShapingCategory implements IRecipeCategory<ForgeShapingJeiReci
         builder.addInputSlot(52, 12)
                 .setStandardSlotBackground()
                 .addItemStack(recipe.material());
+        if (!recipe.target().isEmpty()) {
+            builder.addInputSlot(28, 36)
+                    .setStandardSlotBackground()
+                    .addItemStack(recipe.target());
+        }
         if (!recipe.catalyst().isEmpty()) {
             builder.addSlot(RecipeIngredientRole.CATALYST, 52, 36)
                     .setStandardSlotBackground()

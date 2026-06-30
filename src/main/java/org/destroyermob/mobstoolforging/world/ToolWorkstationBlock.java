@@ -102,6 +102,17 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (stack.getItem() instanceof ToolTemplateItem templateItem) {
             return applyTemplateItem(stack, templateItem, forge, level, pos, player);
         }
+        if (kind == WorkstationKind.TOOL_FORGE && ArmorForgeAttachment.isAttachmentTemplate(forge.templateId())) {
+            if (forge.canPlaceArmorAttachmentTarget(stack)) {
+                return placeArmorAttachmentTarget(stack, forge, level, pos, player);
+            }
+            if (ArmorForgeAttachment.isArmorStack(stack)) {
+                if (!level.isClientSide) {
+                    player.displayClientMessage(Component.translatable(forge.hasPlacedWork() ? "message.mobstoolforging.forge_busy" : "message.mobstoolforging.armor_attachment_wrong_target"), true);
+                }
+                return ItemInteractionResult.CONSUME;
+            }
+        }
         if (kind == WorkstationKind.LAPIDARY_TABLE && stack.is(ModTags.Items.LAPIDARY_ABRASIVES)) {
             return placeAbrasive(stack, forge, level, pos, player);
         }
@@ -143,6 +154,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                     } else {
                         player.displayClientMessage(Component.translatable("message.mobstoolforging.use_toolmakers_bench"), true);
                     }
+                }
+                return InteractionResult.CONSUME;
+            }
+            if (kind == WorkstationKind.TOOL_FORGE && forge.hasArmorAttachmentTarget()) {
+                if (!level.isClientSide) {
+                    player.displayClientMessage(ArmorForgeAttachment.statusMessage(forge), true);
                 }
                 return InteractionResult.CONSUME;
             }
@@ -188,6 +205,11 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (kind == WorkstationKind.TOOL_FORGE && (forge.canPlaceRepairTool(stack) || forge.canPlaceRepairMaterial(stack))) {
             return true;
         }
+        if (kind == WorkstationKind.TOOL_FORGE
+                && ArmorForgeAttachment.isAttachmentTemplate(forge.templateId())
+                && (forge.canPlaceArmorAttachmentTarget(stack) || ArmorForgeAttachment.isArmorStack(stack))) {
+            return true;
+        }
         if (stack.getItem() instanceof ToolTemplateItem templateItem) {
             return canApplyTemplate(stack, templateItem, forge);
         }
@@ -221,6 +243,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
     private boolean canPlaceMaterial(ItemStack stack, ToolForgeBlockEntity forge, Level level) {
         ForgeTemplateDefinition template = forge.template();
         if (template == null || forge.remainingMaterials() <= 0) {
+            return false;
+        }
+        if (ArmorForgeAttachment.isAttachmentTemplate(template) && !forge.hasArmorAttachmentTarget()) {
             return false;
         }
         ToolMaterialDefinition material = MaterialCatalog.resolve(stack).orElse(null);
@@ -274,6 +299,10 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.select_template"), true);
             return ItemInteractionResult.CONSUME;
         }
+        if (ArmorForgeAttachment.isAttachmentTemplate(template) && !forge.hasArmorAttachmentTarget()) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.armor_attachment_needs_target"), true);
+            return ItemInteractionResult.CONSUME;
+        }
         ToolMaterialDefinition material = MaterialCatalog.resolve(stack).orElse(null);
         if (material == null) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -305,6 +334,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (taken > 0) {
             level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.8F, 0.9F + level.random.nextFloat() * 0.15F);
             player.awardStat(Stats.ITEM_USED.get(material.displayItem()));
+            if (ArmorForgeAttachment.isAttachmentTemplate(template) && forge.hasArmorAttachmentTarget()) {
+                player.displayClientMessage(ArmorForgeAttachment.statusMessage(forge), true);
+            }
             return ItemInteractionResult.CONSUME;
         }
         player.displayClientMessage(Component.translatable("message.mobstoolforging.materials_full"), true);
@@ -357,6 +389,21 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.65F, 1.35F);
         player.awardStat(Stats.ITEM_USED.get(item));
         player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_abrasive_placed"), true);
+        return ItemInteractionResult.CONSUME;
+    }
+
+    private ItemInteractionResult placeArmorAttachmentTarget(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        var item = stack.getItem();
+        if (!forge.placeArmorAttachmentTarget(stack)) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.armor_attachment_wrong_target"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75F, 1.05F);
+        player.awardStat(Stats.ITEM_USED.get(item));
+        player.displayClientMessage(Component.translatable("message.mobstoolforging.armor_attachment_target_placed"), true);
         return ItemInteractionResult.CONSUME;
     }
 
@@ -496,7 +543,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return workStationRecipe(stack, hammerLevel, forge, level, pos, player);
         }
         if (!forge.canHammer()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.need_materials"), true);
+            player.displayClientMessage(Component.translatable(ArmorForgeAttachment.isAttachmentTemplate(forge.templateId()) && !forge.hasArmorAttachmentTarget() ? "message.mobstoolforging.armor_attachment_needs_target" : "message.mobstoolforging.need_materials"), true);
             return ItemInteractionResult.CONSUME;
         }
         ForgeTemplateDefinition template = forge.template();
@@ -518,10 +565,11 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
             return ItemInteractionResult.CONSUME;
         }
+        boolean armorAttachment = forge.hasArmorAttachmentTarget();
         if (forge.hammer()) {
             playWorkEffects(stack, level, pos, player);
             if (forge.isComplete()) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.complete"), true);
+                player.displayClientMessage(Component.translatable(armorAttachment ? "message.mobstoolforging.armor_attachment_complete" : "message.mobstoolforging.complete"), true);
             }
         }
         return ItemInteractionResult.CONSUME;

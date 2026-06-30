@@ -57,8 +57,6 @@ public class ModularArmorRecipe extends CustomRecipe {
 
     private Parts findParts(CraftingInput input) {
         ItemStack base = ItemStack.EMPTY;
-        ItemStack firstOptional = ItemStack.EMPTY;
-        ItemStack secondOptional = ItemStack.EMPTY;
         for (int i = 0; i < input.size(); i++) {
             ItemStack stack = input.getItem(i);
             if (stack.isEmpty()) {
@@ -78,45 +76,31 @@ public class ModularArmorRecipe extends CustomRecipe {
                 base = stack;
                 continue;
             }
-            if (armorKind.matchesFirstOptional(stack, data)) {
-                if (!firstOptional.isEmpty()) {
-                    return Parts.invalid();
-                }
-                firstOptional = stack;
-                continue;
-            }
-            if (armorKind.matchesSecondOptional(stack, data)) {
-                if (!secondOptional.isEmpty()) {
-                    return Parts.invalid();
-                }
-                secondOptional = stack;
-                continue;
-            }
             return Parts.invalid();
         }
-        return new Parts(base, firstOptional, secondOptional);
+        return new Parts(base);
     }
 
     public enum ArmorKind {
-        HELMET(ArmorPartData.HELMET_SKULL, ModItems.HELMET_SKULL::get, ArmorPartData.HELMET_COMB, ModItems.HELMET_COMB::get, ArmorPartData.HELMET_VISOR, ModItems.HELMET_VISOR::get) {
+        HELMET(ArmorPartData.HELMET_SKULL, ModItems.HELMET_SKULL::get) {
             @Override
             ItemStack create(Parts parts) {
-                return ModItems.MODULAR_HELMET.get().create(material(parts.base()), optionalMaterial(parts.firstOptional()), optionalMaterial(parts.secondOptional()));
+                return ModItems.MODULAR_HELMET.get().create(material(parts.base()), Optional.empty(), Optional.empty());
             }
         },
-        CHESTPLATE(ArmorPartData.CHESTPLATE_BODY, ModItems.CHESTPLATE_BODY::get, null, null, null, null) {
+        CHESTPLATE(ArmorPartData.CHESTPLATE_BODY, ModItems.CHESTPLATE_BODY::get) {
             @Override
             ItemStack create(Parts parts) {
                 return ModItems.MODULAR_CHESTPLATE.get().create(material(parts.base()));
             }
         },
-        LEGGINGS(ArmorPartData.LEGGINGS_LEGS, ModItems.LEGGINGS_LEGS::get, ArmorPartData.LEGGINGS_KNEES, ModItems.LEGGINGS_KNEES::get, ArmorPartData.LEGGINGS_TASSETS, ModItems.LEGGINGS_TASSETS::get) {
+        LEGGINGS(ArmorPartData.LEGGINGS_LEGS, ModItems.LEGGINGS_LEGS::get) {
             @Override
             ItemStack create(Parts parts) {
-                return ModItems.MODULAR_LEGGINGS.get().create(material(parts.base()), optionalMaterial(parts.firstOptional()), optionalMaterial(parts.secondOptional()));
+                return ModItems.MODULAR_LEGGINGS.get().create(material(parts.base()));
             }
         },
-        BOOTS(ArmorPartData.BOOTS_FEET, ModItems.BOOTS_FEET::get, null, null, null, null) {
+        BOOTS(ArmorPartData.BOOTS_FEET, ModItems.BOOTS_FEET::get) {
             @Override
             ItemStack create(Parts parts) {
                 return ModItems.MODULAR_BOOTS.get().create(material(parts.base()));
@@ -125,30 +109,14 @@ public class ModularArmorRecipe extends CustomRecipe {
 
         private final String basePartType;
         private final Supplier<Item> baseItem;
-        private final String firstOptionalPartType;
-        private final Supplier<Item> firstOptionalItem;
-        private final String secondOptionalPartType;
-        private final Supplier<Item> secondOptionalItem;
 
-        ArmorKind(String basePartType, Supplier<Item> baseItem, String firstOptionalPartType, Supplier<Item> firstOptionalItem, String secondOptionalPartType, Supplier<Item> secondOptionalItem) {
+        ArmorKind(String basePartType, Supplier<Item> baseItem) {
             this.basePartType = basePartType;
             this.baseItem = baseItem;
-            this.firstOptionalPartType = firstOptionalPartType;
-            this.firstOptionalItem = firstOptionalItem;
-            this.secondOptionalPartType = secondOptionalPartType;
-            this.secondOptionalItem = secondOptionalItem;
         }
 
         boolean matchesBase(ItemStack stack, ArmorPartData data) {
             return matches(stack, data, basePartType, baseItem);
-        }
-
-        boolean matchesFirstOptional(ItemStack stack, ArmorPartData data) {
-            return matches(stack, data, firstOptionalPartType, firstOptionalItem);
-        }
-
-        boolean matchesSecondOptional(ItemStack stack, ArmorPartData data) {
-            return matches(stack, data, secondOptionalPartType, secondOptionalItem);
         }
 
         abstract ItemStack create(Parts parts);
@@ -161,15 +129,11 @@ public class ModularArmorRecipe extends CustomRecipe {
             ArmorPartData data = stack.get(ModDataComponents.ARMOR_PART.get());
             return data == null ? ResourceLocation.withDefaultNamespace("air") : data.materialId();
         }
-
-        private static Optional<ResourceLocation> optionalMaterial(ItemStack stack) {
-            return stack.isEmpty() ? Optional.empty() : Optional.of(material(stack));
-        }
     }
 
-    private record Parts(ItemStack base, ItemStack firstOptional, ItemStack secondOptional) {
+    private record Parts(ItemStack base) {
         private static Parts invalid() {
-            return new Parts(ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY);
+            return new Parts(ItemStack.EMPTY);
         }
 
         private boolean isValid() {

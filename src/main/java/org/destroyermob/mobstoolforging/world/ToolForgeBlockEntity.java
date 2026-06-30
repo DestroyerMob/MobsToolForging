@@ -180,7 +180,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public int acceptMaterials(ItemStack stack, ToolMaterialDefinition material) {
-        if (template() == null || isComplete()) {
+        ForgeTemplateDefinition template = template();
+        if (template == null || isComplete()) {
+            return 0;
+        }
+        if (ArmorForgeAttachment.isAttachmentTemplate(template) && !hasArmorAttachmentTarget()) {
             return 0;
         }
         if (materialId != null && !materialId.equals(material.id())) {
@@ -202,7 +206,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     public boolean canHammer() {
         ForgeTemplateDefinition template = template();
-        return template != null && materialCount >= template.requiredMaterials() && !isComplete();
+        return template != null
+                && materialCount >= template.requiredMaterials()
+                && !isComplete()
+                && (!ArmorForgeAttachment.isAttachmentTemplate(template) || hasArmorAttachmentTarget());
     }
 
     public boolean hammer() {
@@ -211,6 +218,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         }
         hitCount++;
         randomizeDisplayRotation();
+        completeArmorAttachmentIfReady();
         sync();
         return true;
     }
@@ -341,6 +349,45 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && !benchStacks.isEmpty()
                 && directOutputStack.isEmpty()
                 && templateId == null;
+    }
+
+    public boolean canPlaceArmorAttachmentTarget(ItemStack stack) {
+        ForgeTemplateDefinition template = template();
+        return workstationKind() == WorkstationKind.TOOL_FORGE
+                && ArmorForgeAttachment.isAttachmentTemplate(template)
+                && ArmorForgeAttachment.isCompatibleTarget(template, stack)
+                && directOutputStack.isEmpty()
+                && abrasiveStack.isEmpty()
+                && benchStacks.isEmpty()
+                && materialId == null
+                && materialItemId == null
+                && materialHeatData == null
+                && looseWorkRecipeId == null
+                && materialCount == 0
+                && hitCount == 0;
+    }
+
+    public boolean placeArmorAttachmentTarget(ItemStack stack) {
+        if (!canPlaceArmorAttachmentTarget(stack)) {
+            return false;
+        }
+        benchStacks.add(stack.copyWithCount(1));
+        stack.shrink(1);
+        sync();
+        return true;
+    }
+
+    public boolean hasArmorAttachmentTarget() {
+        ForgeTemplateDefinition template = template();
+        return workstationKind() == WorkstationKind.TOOL_FORGE
+                && ArmorForgeAttachment.isAttachmentTemplate(template)
+                && benchStacks.size() == 1
+                && directOutputStack.isEmpty()
+                && ArmorForgeAttachment.isCompatibleTarget(template, benchStacks.get(0));
+    }
+
+    public ItemStack armorAttachmentTarget() {
+        return hasArmorAttachmentTarget() ? benchStacks.get(0).copy() : ItemStack.EMPTY;
     }
 
     public ItemStack repairToolWithPlacedMaterial() {
@@ -503,6 +550,32 @@ public class ToolForgeBlockEntity extends BlockEntity {
         directOutputStack = recipe.outputCopy();
         sync();
         return true;
+    }
+
+    private void completeArmorAttachmentIfReady() {
+        ForgeTemplateDefinition template = template();
+        if (template == null
+                || !ArmorForgeAttachment.isAttachmentTemplate(template)
+                || materialId == null
+                || materialCount < template.requiredMaterials()
+                || hitCount < template.requiredHits()
+                || !hasArmorAttachmentTarget()) {
+            return;
+        }
+        ItemStack output = ArmorForgeAttachment.apply(benchStacks.get(0), template.id(), materialId);
+        if (output.isEmpty()) {
+            return;
+        }
+        templateId = null;
+        materialId = null;
+        materialItemId = null;
+        materialHeatData = null;
+        looseWorkRecipeId = null;
+        materialCount = 0;
+        hitCount = 0;
+        benchStacks.clear();
+        displayRotationDegrees = 0.0F;
+        directOutputStack = output;
     }
 
     public boolean materialIsForgeReady() {

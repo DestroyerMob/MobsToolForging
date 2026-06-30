@@ -202,14 +202,6 @@ public final class ModItems {
             ArmorPartData.HELMET_SKULL,
             () -> new ModularArmorPartItem(ArmorPartData.HELMET_SKULL, new Item.Properties())
     );
-    public static final DeferredItem<ModularArmorPartItem> HELMET_COMB = ITEMS.register(
-            ArmorPartData.HELMET_COMB,
-            () -> new ModularArmorPartItem(ArmorPartData.HELMET_COMB, new Item.Properties())
-    );
-    public static final DeferredItem<ModularArmorPartItem> HELMET_VISOR = ITEMS.register(
-            ArmorPartData.HELMET_VISOR,
-            () -> new ModularArmorPartItem(ArmorPartData.HELMET_VISOR, new Item.Properties())
-    );
     public static final DeferredItem<ModularArmorPartItem> CHESTPLATE_BODY = ITEMS.register(
             ArmorPartData.CHESTPLATE_BODY,
             () -> new ModularArmorPartItem(ArmorPartData.CHESTPLATE_BODY, new Item.Properties())
@@ -217,14 +209,6 @@ public final class ModItems {
     public static final DeferredItem<ModularArmorPartItem> LEGGINGS_LEGS = ITEMS.register(
             ArmorPartData.LEGGINGS_LEGS,
             () -> new ModularArmorPartItem(ArmorPartData.LEGGINGS_LEGS, new Item.Properties())
-    );
-    public static final DeferredItem<ModularArmorPartItem> LEGGINGS_KNEES = ITEMS.register(
-            ArmorPartData.LEGGINGS_KNEES,
-            () -> new ModularArmorPartItem(ArmorPartData.LEGGINGS_KNEES, new Item.Properties())
-    );
-    public static final DeferredItem<ModularArmorPartItem> LEGGINGS_TASSETS = ITEMS.register(
-            ArmorPartData.LEGGINGS_TASSETS,
-            () -> new ModularArmorPartItem(ArmorPartData.LEGGINGS_TASSETS, new Item.Properties())
     );
     public static final DeferredItem<ModularArmorPartItem> BOOTS_FEET = ITEMS.register(
             ArmorPartData.BOOTS_FEET,

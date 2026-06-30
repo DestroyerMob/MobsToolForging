@@ -47,12 +47,8 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .addTag(ModTags.Items.PART_GEM_CUTTERS_BLADES);
         tag(ModTags.Items.ARMOR_PARTS)
                 .addTag(ModTags.Items.PART_HELMET_SKULLS)
-                .addTag(ModTags.Items.PART_HELMET_COMBS)
-                .addTag(ModTags.Items.PART_HELMET_VISORS)
                 .addTag(ModTags.Items.PART_CHESTPLATE_BODIES)
                 .addTag(ModTags.Items.PART_LEGGINGS_LEGS)
-                .addTag(ModTags.Items.PART_LEGGINGS_KNEES)
-                .addTag(ModTags.Items.PART_LEGGINGS_TASSETS)
                 .addTag(ModTags.Items.PART_BOOTS_FEET);
         tag(ModTags.Items.PART_HANDLES)
                 .add(Items.STICK, Items.BLAZE_ROD, Items.BREEZE_ROD);
@@ -74,18 +70,10 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .add(ModItems.GEM_CUTTERS_BLADE.get());
         tag(ModTags.Items.PART_HELMET_SKULLS)
                 .add(ModItems.HELMET_SKULL.get());
-        tag(ModTags.Items.PART_HELMET_COMBS)
-                .add(ModItems.HELMET_COMB.get());
-        tag(ModTags.Items.PART_HELMET_VISORS)
-                .add(ModItems.HELMET_VISOR.get());
         tag(ModTags.Items.PART_CHESTPLATE_BODIES)
                 .add(ModItems.CHESTPLATE_BODY.get());
         tag(ModTags.Items.PART_LEGGINGS_LEGS)
                 .add(ModItems.LEGGINGS_LEGS.get());
-        tag(ModTags.Items.PART_LEGGINGS_KNEES)
-                .add(ModItems.LEGGINGS_KNEES.get());
-        tag(ModTags.Items.PART_LEGGINGS_TASSETS)
-                .add(ModItems.LEGGINGS_TASSETS.get());
         tag(ModTags.Items.PART_BOOTS_FEET)
                 .add(ModItems.BOOTS_FEET.get());
         tag(ModTags.Items.TOOL_HANDLES)

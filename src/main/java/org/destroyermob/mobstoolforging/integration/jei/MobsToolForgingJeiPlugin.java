@@ -22,6 +22,7 @@ import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
+import org.destroyermob.mobstoolforging.world.ArmorForgeAttachment;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCategory;
@@ -97,7 +98,9 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 if (pattern.isEmpty()) {
                     continue;
                 }
-                ItemStack output = template.outputStack(materialId);
+                boolean armorAttachment = ArmorForgeAttachment.isAttachmentTemplate(template);
+                ItemStack target = armorAttachment ? ArmorForgeAttachment.previewTargetStack(template.id()) : ItemStack.EMPTY;
+                ItemStack output = armorAttachment ? ArmorForgeAttachment.previewOutputStack(template.id(), materialId) : template.outputStack(materialId);
                 if (output.isEmpty()) {
                     continue;
                 }
@@ -110,6 +113,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                         stationFor(workstation),
                         pattern,
                         materialStack,
+                        target,
                         workstation == WorkstationKind.LAPIDARY_TABLE ? new ItemStack(ModItems.DIAMOND_POWDER.get()) : ItemStack.EMPTY,
                         workToolFor(workstation, template.minimumHammerLevel(materialId)),
                         output,

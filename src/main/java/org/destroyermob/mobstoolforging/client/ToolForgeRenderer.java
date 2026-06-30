@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
+import org.destroyermob.mobstoolforging.world.ArmorForgeAttachment;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
@@ -36,6 +37,10 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         }
         if (forge.hasRepairStacks() && !forge.isComplete()) {
             renderBenchStacks(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
+            return;
+        }
+        if (forge.hasArmorAttachmentTarget() && !forge.isComplete()) {
+            renderArmorAttachmentWork(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
             return;
         }
         if (forge.template() != null && !forge.isComplete()) {
@@ -63,6 +68,31 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             renderItem(forge, display, poseStack, bufferSource, packedLight, packedOverlay, layout, -spread, layout.materialScale());
             renderItem(forge, display, poseStack, bufferSource, packedLight, packedOverlay, layout, 0.0F, layout.centerMaterialScale());
             renderItem(forge, display, poseStack, bufferSource, packedLight, packedOverlay, layout, spread, layout.materialScale());
+        }
+    }
+
+    private void renderArmorAttachmentWork(ToolForgeBlockEntity forge, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
+        ItemStack target = forge.armorAttachmentTarget();
+        if (!target.isEmpty()) {
+            renderFlatItem(forge, target, poseStack, bufferSource, packedLight, packedOverlay, 0.0F, 0.0F, layout.outputScale(), layout.materialSurfaceY(), forge.displayRotationDegrees());
+        }
+
+        ItemStack material = forge.displayMaterialStack();
+        if (material.isEmpty()) {
+            return;
+        }
+
+        int count = forge.materialCount();
+        float spread = layout.spread();
+        if (count == 1) {
+            renderItem(forge, material, poseStack, bufferSource, packedLight, packedOverlay, layout, spread, layout.materialScale());
+        } else if (count == 2) {
+            renderItem(forge, material, poseStack, bufferSource, packedLight, packedOverlay, layout, -spread, layout.materialScale());
+            renderItem(forge, material, poseStack, bufferSource, packedLight, packedOverlay, layout, spread, layout.materialScale());
+        } else {
+            renderItem(forge, material, poseStack, bufferSource, packedLight, packedOverlay, layout, -spread, layout.materialScale());
+            renderItem(forge, material, poseStack, bufferSource, packedLight, packedOverlay, layout, 0.0F, layout.centerMaterialScale());
+            renderItem(forge, material, poseStack, bufferSource, packedLight, packedOverlay, layout, spread, layout.materialScale());
         }
     }
 
@@ -99,7 +129,10 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         if (template == null) {
             return;
         }
-        ItemStack preview = template.outputStack(previewMaterial(forge));
+        ResourceLocation material = previewMaterial(forge);
+        ItemStack preview = ArmorForgeAttachment.isAttachmentTemplate(template)
+                ? ArmorForgeAttachment.previewOutputStack(template.id(), material)
+                : template.outputStack(material);
         if (!preview.isEmpty()) {
             renderFlatItem(forge, preview, poseStack, bufferSource, packedLight, packedOverlay, 0.0F, 0.0F, layout.previewScale(), layout.previewSurfaceY(), 0.0F);
         }

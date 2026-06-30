@@ -81,12 +81,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
         patternModel(ModItems.BOOTS_FEET_PATTERN.getId().getPath());
         patternModel(ModItems.TEMPLATE_PATTERN.getId().getPath());
         armorPartModel(ModItems.HELMET_SKULL.getId().getPath(), mcLoc("item/iron_helmet"));
-        armorPartModel(ModItems.HELMET_COMB.getId().getPath(), mcLoc("item/iron_ingot"));
-        armorPartModel(ModItems.HELMET_VISOR.getId().getPath(), mcLoc("item/iron_ingot"));
         armorPartModel(ModItems.CHESTPLATE_BODY.getId().getPath(), mcLoc("item/iron_chestplate"));
         armorPartModel(ModItems.LEGGINGS_LEGS.getId().getPath(), mcLoc("item/iron_leggings"));
-        armorPartModel(ModItems.LEGGINGS_KNEES.getId().getPath(), mcLoc("item/iron_ingot"));
-        armorPartModel(ModItems.LEGGINGS_TASSETS.getId().getPath(), mcLoc("item/iron_ingot"));
         armorPartModel(ModItems.BOOTS_FEET.getId().getPath(), mcLoc("item/iron_boots"));
         for (ToolKind toolKind : ToolKind.values()) {
             partModel(toolKind);

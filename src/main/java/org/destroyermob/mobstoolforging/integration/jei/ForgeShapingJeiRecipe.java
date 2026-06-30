@@ -13,6 +13,7 @@ public record ForgeShapingJeiRecipe(
         ItemStack station,
         ItemStack pattern,
         ItemStack material,
+        ItemStack target,
         ItemStack catalyst,
         ItemStack hammer,
         ItemStack output,
