@@ -58,7 +58,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         itemModels().withExistingParent("plant_fiber", mcLoc("item/generated")).texture("layer0", modLoc("item/plant_fiber"));
         itemModels().withExistingParent("fire_stick", mcLoc("item/handheld")).texture("layer0", mcLoc("item/stick"));
         itemModels().withExistingParent("diamond_powder", mcLoc("item/generated")).texture("layer0", modLoc("item/diamond_powder"));
-        itemModels().withExistingParent("modular_helmet", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_helmet"));
+        modularHelmetModel();
         itemModels().withExistingParent("modular_chestplate", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_chestplate"));
         itemModels().withExistingParent("modular_leggings", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_leggings"));
         itemModels().withExistingParent("modular_boots", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_boots"));
@@ -140,6 +140,22 @@ public class ModBlockStateProvider extends BlockStateProvider {
         head.face(Direction.UP).uvs(1, 0, 9, 4).texture("#1");
         head.face(Direction.DOWN).uvs(1, 0, 9, 4).texture("#1");
         head.end();
+    }
+
+    private void modularHelmetModel() {
+        ItemModelBuilder builder = itemModels().withExistingParent("modular_helmet", mcLoc("item/generated"))
+                .texture("layer0", mcLoc("item/iron_helmet"));
+
+        builder.transforms()
+                .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND).translation(0, 3, 1).scale(0.55F).end()
+                .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND).translation(0, 3, 1).scale(0.55F).end()
+                .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND).rotation(0, -90, 25).translation(1.13F, 3.2F, 1.13F).scale(0.68F).end()
+                .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND).rotation(0, -90, 25).translation(1.13F, 3.2F, 1.13F).scale(0.68F).end()
+                .transform(ItemDisplayContext.GROUND).translation(0, 2, 0).scale(0.5F).end()
+                .transform(ItemDisplayContext.GUI).rotation(30, -135, 0).scale(0.625F).end()
+                .transform(ItemDisplayContext.HEAD).rotation(0, -180, 0).translation(0, 13, 7).end()
+                .transform(ItemDisplayContext.FIXED).scale(0.5F).end()
+                .end();
     }
 
     private void patternModel(String name) {
