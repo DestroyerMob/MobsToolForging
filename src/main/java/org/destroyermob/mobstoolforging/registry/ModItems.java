@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.item.FireStickItem;
+import org.destroyermob.mobstoolforging.item.ModularArmorPartItem;
 import org.destroyermob.mobstoolforging.item.ModularBootsItem;
 import org.destroyermob.mobstoolforging.item.ModularChestplateItem;
 import org.destroyermob.mobstoolforging.item.ModularHelmetItem;
@@ -19,6 +20,7 @@ import org.destroyermob.mobstoolforging.item.ModularShovelItem;
 import org.destroyermob.mobstoolforging.item.ModularSwordItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
+import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.ForgeTemplate;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolKind;
@@ -136,6 +138,38 @@ public final class ModItems {
             "gem_cutters_blade_pattern",
             () -> new ToolTemplateItem(ToolTypeRegistry.GEM_CUTTERS_BLADE_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
     );
+    public static final DeferredItem<ToolTemplateItem> HELMET_SKULL_PATTERN = ITEMS.register(
+            "helmet_skull_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_SKULL_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> HELMET_COMB_PATTERN = ITEMS.register(
+            "helmet_comb_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_COMB_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> HELMET_VISOR_PATTERN = ITEMS.register(
+            "helmet_visor_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_VISOR_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> CHESTPLATE_BODY_PATTERN = ITEMS.register(
+            "chestplate_body_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> LEGGINGS_LEGS_PATTERN = ITEMS.register(
+            "leggings_legs_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_LEGS_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> LEGGINGS_KNEES_PATTERN = ITEMS.register(
+            "leggings_knees_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> LEGGINGS_TASSETS_PATTERN = ITEMS.register(
+            "leggings_tassets_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> BOOTS_FEET_PATTERN = ITEMS.register(
+            "boots_feet_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.BOOTS_FEET_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
+    );
     public static final DeferredItem<ToolTemplateItem> TEMPLATE_PATTERN = ITEMS.register(
             "template_pattern",
             () -> new ToolTemplateItem(new Item.Properties())
@@ -163,6 +197,38 @@ public final class ModItems {
     public static final DeferredItem<ModularToolPartItem> HOE_HEAD = ITEMS.register(
             "hoe_head",
             () -> new ModularToolPartItem(ToolKind.HOE, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> HELMET_SKULL = ITEMS.register(
+            ArmorPartData.HELMET_SKULL,
+            () -> new ModularArmorPartItem(ArmorPartData.HELMET_SKULL, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> HELMET_COMB = ITEMS.register(
+            ArmorPartData.HELMET_COMB,
+            () -> new ModularArmorPartItem(ArmorPartData.HELMET_COMB, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> HELMET_VISOR = ITEMS.register(
+            ArmorPartData.HELMET_VISOR,
+            () -> new ModularArmorPartItem(ArmorPartData.HELMET_VISOR, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> CHESTPLATE_BODY = ITEMS.register(
+            ArmorPartData.CHESTPLATE_BODY,
+            () -> new ModularArmorPartItem(ArmorPartData.CHESTPLATE_BODY, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> LEGGINGS_LEGS = ITEMS.register(
+            ArmorPartData.LEGGINGS_LEGS,
+            () -> new ModularArmorPartItem(ArmorPartData.LEGGINGS_LEGS, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> LEGGINGS_KNEES = ITEMS.register(
+            ArmorPartData.LEGGINGS_KNEES,
+            () -> new ModularArmorPartItem(ArmorPartData.LEGGINGS_KNEES, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> LEGGINGS_TASSETS = ITEMS.register(
+            ArmorPartData.LEGGINGS_TASSETS,
+            () -> new ModularArmorPartItem(ArmorPartData.LEGGINGS_TASSETS, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> BOOTS_FEET = ITEMS.register(
+            ArmorPartData.BOOTS_FEET,
+            () -> new ModularArmorPartItem(ArmorPartData.BOOTS_FEET, new Item.Properties())
     );
     public static final DeferredItem<ModularSwordItem> SWORD = ITEMS.register(
             "sword",

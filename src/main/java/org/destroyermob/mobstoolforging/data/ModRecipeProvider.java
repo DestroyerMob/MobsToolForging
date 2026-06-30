@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.recipe.ModularArmorRecipe;
 import org.destroyermob.mobstoolforging.recipe.ToolConversionRecipe;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModItems;
@@ -26,6 +27,14 @@ public class ModRecipeProvider extends RecipeProvider {
     protected void buildRecipes(RecipeOutput output) {
         SpecialRecipeBuilder.special(ToolConversionRecipe::new)
                 .save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "tool_conversion").toString());
+        SpecialRecipeBuilder.special(category -> new ModularArmorRecipe(category, ModularArmorRecipe.ArmorKind.HELMET))
+                .save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "modular_helmet_assembly").toString());
+        SpecialRecipeBuilder.special(category -> new ModularArmorRecipe(category, ModularArmorRecipe.ArmorKind.CHESTPLATE))
+                .save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "modular_chestplate_assembly").toString());
+        SpecialRecipeBuilder.special(category -> new ModularArmorRecipe(category, ModularArmorRecipe.ArmorKind.LEGGINGS))
+                .save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "modular_leggings_assembly").toString());
+        SpecialRecipeBuilder.special(category -> new ModularArmorRecipe(category, ModularArmorRecipe.ArmorKind.BOOTS))
+                .save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "modular_boots_assembly").toString());
 
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.TOOL_FORGE)
                 .define('B', Items.COPPER_BLOCK)

@@ -102,6 +102,30 @@ public class ToolTemplateItem extends Item {
         if (id.equals(ToolTypeRegistry.GEM_CUTTERS_BLADE_TEMPLATE)) {
             return new ItemStack(ModItems.GEM_CUTTERS_BLADE_PATTERN.get());
         }
+        if (id.equals(ToolTypeRegistry.HELMET_SKULL_TEMPLATE)) {
+            return new ItemStack(ModItems.HELMET_SKULL_PATTERN.get());
+        }
+        if (id.equals(ToolTypeRegistry.HELMET_COMB_TEMPLATE)) {
+            return new ItemStack(ModItems.HELMET_COMB_PATTERN.get());
+        }
+        if (id.equals(ToolTypeRegistry.HELMET_VISOR_TEMPLATE)) {
+            return new ItemStack(ModItems.HELMET_VISOR_PATTERN.get());
+        }
+        if (id.equals(ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE)) {
+            return new ItemStack(ModItems.CHESTPLATE_BODY_PATTERN.get());
+        }
+        if (id.equals(ToolTypeRegistry.LEGGINGS_LEGS_TEMPLATE)) {
+            return new ItemStack(ModItems.LEGGINGS_LEGS_PATTERN.get());
+        }
+        if (id.equals(ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE)) {
+            return new ItemStack(ModItems.LEGGINGS_KNEES_PATTERN.get());
+        }
+        if (id.equals(ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE)) {
+            return new ItemStack(ModItems.LEGGINGS_TASSETS_PATTERN.get());
+        }
+        if (id.equals(ToolTypeRegistry.BOOTS_FEET_TEMPLATE)) {
+            return new ItemStack(ModItems.BOOTS_FEET_PATTERN.get());
+        }
         ItemStack pattern = new ItemStack(ModItems.TEMPLATE_PATTERN.get());
         pattern.set(ModDataComponents.FORGE_TEMPLATE.get(), id);
         return pattern;

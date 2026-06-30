@@ -71,7 +71,23 @@ public class ModBlockStateProvider extends BlockStateProvider {
         patternModel(ModItems.SMITHING_HAMMER_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.SCREWDRIVER_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.GEM_CUTTERS_BLADE_PATTERN.getId().getPath());
+        patternModel(ModItems.HELMET_SKULL_PATTERN.getId().getPath());
+        patternModel(ModItems.HELMET_COMB_PATTERN.getId().getPath());
+        patternModel(ModItems.HELMET_VISOR_PATTERN.getId().getPath());
+        patternModel(ModItems.CHESTPLATE_BODY_PATTERN.getId().getPath());
+        patternModel(ModItems.LEGGINGS_LEGS_PATTERN.getId().getPath());
+        patternModel(ModItems.LEGGINGS_KNEES_PATTERN.getId().getPath());
+        patternModel(ModItems.LEGGINGS_TASSETS_PATTERN.getId().getPath());
+        patternModel(ModItems.BOOTS_FEET_PATTERN.getId().getPath());
         patternModel(ModItems.TEMPLATE_PATTERN.getId().getPath());
+        armorPartModel(ModItems.HELMET_SKULL.getId().getPath(), mcLoc("item/iron_helmet"));
+        armorPartModel(ModItems.HELMET_COMB.getId().getPath(), mcLoc("item/iron_ingot"));
+        armorPartModel(ModItems.HELMET_VISOR.getId().getPath(), mcLoc("item/iron_ingot"));
+        armorPartModel(ModItems.CHESTPLATE_BODY.getId().getPath(), mcLoc("item/iron_chestplate"));
+        armorPartModel(ModItems.LEGGINGS_LEGS.getId().getPath(), mcLoc("item/iron_leggings"));
+        armorPartModel(ModItems.LEGGINGS_KNEES.getId().getPath(), mcLoc("item/iron_ingot"));
+        armorPartModel(ModItems.LEGGINGS_TASSETS.getId().getPath(), mcLoc("item/iron_ingot"));
+        armorPartModel(ModItems.BOOTS_FEET.getId().getPath(), mcLoc("item/iron_boots"));
         for (ToolKind toolKind : ToolKind.values()) {
             partModel(toolKind);
             toolModel(toolKind);
@@ -133,6 +149,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
     private void patternModel(String name) {
         ResourceLocation texture = modLoc("item/" + name);
         itemModels().withExistingParent(name, mcLoc("item/generated")).texture("layer0", textureExists(texture) ? texture : mcLoc("item/paper"));
+    }
+
+    private void armorPartModel(String name, ResourceLocation texture) {
+        itemModels().withExistingParent(name, mcLoc("item/generated")).texture("layer0", texture);
     }
 
     private void partModel(ToolKind toolKind) {

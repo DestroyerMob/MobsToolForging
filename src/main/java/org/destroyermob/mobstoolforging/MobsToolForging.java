@@ -149,6 +149,14 @@ public class MobsToolForging {
             event.accept(ModItems.SMITHING_HAMMER_HEAD_PATTERN);
             event.accept(ModItems.SCREWDRIVER_HEAD_PATTERN);
             event.accept(ModItems.GEM_CUTTERS_BLADE_PATTERN);
+            event.accept(ModItems.HELMET_SKULL_PATTERN);
+            event.accept(ModItems.HELMET_COMB_PATTERN);
+            event.accept(ModItems.HELMET_VISOR_PATTERN);
+            event.accept(ModItems.CHESTPLATE_BODY_PATTERN);
+            event.accept(ModItems.LEGGINGS_LEGS_PATTERN);
+            event.accept(ModItems.LEGGINGS_KNEES_PATTERN);
+            event.accept(ModItems.LEGGINGS_TASSETS_PATTERN);
+            event.accept(ModItems.BOOTS_FEET_PATTERN);
             ToolTypeRegistry.templates().stream()
                     .filter(template -> !template.id().getNamespace().equals(MOD_ID))
                     .map(MobsToolForging::templatePattern)
@@ -167,6 +175,14 @@ public class MobsToolForging {
             event.accept(ModItems.SMITHING_HAMMER_HEAD);
             event.accept(ModItems.SCREWDRIVER_HEAD);
             event.accept(ModItems.GEM_CUTTERS_BLADE);
+            event.accept(ModItems.HELMET_SKULL);
+            event.accept(ModItems.HELMET_COMB);
+            event.accept(ModItems.HELMET_VISOR);
+            event.accept(ModItems.CHESTPLATE_BODY);
+            event.accept(ModItems.LEGGINGS_LEGS);
+            event.accept(ModItems.LEGGINGS_KNEES);
+            event.accept(ModItems.LEGGINGS_TASSETS);
+            event.accept(ModItems.BOOTS_FEET);
             event.accept(ModItems.DIAMOND_POWDER);
         }
     }

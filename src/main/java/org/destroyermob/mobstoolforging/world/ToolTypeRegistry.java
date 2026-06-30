@@ -21,6 +21,14 @@ public final class ToolTypeRegistry {
     public static final ResourceLocation SCREWDRIVER_HEAD_TEMPLATE = modLoc("screwdriver_head");
     public static final ResourceLocation GEM_CUTTERS_KNIFE_TOOL_TYPE = modLoc("gem_cutters_knife");
     public static final ResourceLocation GEM_CUTTERS_BLADE_TEMPLATE = modLoc("gem_cutters_blade");
+    public static final ResourceLocation HELMET_SKULL_TEMPLATE = modLoc(ArmorPartData.HELMET_SKULL);
+    public static final ResourceLocation HELMET_COMB_TEMPLATE = modLoc(ArmorPartData.HELMET_COMB);
+    public static final ResourceLocation HELMET_VISOR_TEMPLATE = modLoc(ArmorPartData.HELMET_VISOR);
+    public static final ResourceLocation CHESTPLATE_BODY_TEMPLATE = modLoc(ArmorPartData.CHESTPLATE_BODY);
+    public static final ResourceLocation LEGGINGS_LEGS_TEMPLATE = modLoc(ArmorPartData.LEGGINGS_LEGS);
+    public static final ResourceLocation LEGGINGS_KNEES_TEMPLATE = modLoc(ArmorPartData.LEGGINGS_KNEES);
+    public static final ResourceLocation LEGGINGS_TASSETS_TEMPLATE = modLoc(ArmorPartData.LEGGINGS_TASSETS);
+    public static final ResourceLocation BOOTS_FEET_TEMPLATE = modLoc(ArmorPartData.BOOTS_FEET);
     private static final Map<ResourceLocation, ToolTypeDefinition> TOOL_TYPES = new LinkedHashMap<>();
     private static final Map<ResourceLocation, ForgeTemplateDefinition> TEMPLATES = new LinkedHashMap<>();
     private static final List<ToolStatModifier> STAT_MODIFIERS = new ArrayList<>();
@@ -111,6 +119,45 @@ public final class ToolTypeRegistry {
                 true,
                 1
         ));
+        registerArmorTemplate(HELMET_SKULL_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_SKULL, 5, ModItems.HELMET_SKULL.getId());
+        registerArmorTemplate(HELMET_COMB_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_COMB, 1, ModItems.HELMET_COMB.getId());
+        registerArmorTemplate(HELMET_VISOR_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_VISOR, 1, ModItems.HELMET_VISOR.getId());
+        registerArmorTemplate(CHESTPLATE_BODY_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, ArmorPartData.CHESTPLATE_BODY, 8, ModItems.CHESTPLATE_BODY.getId());
+        registerArmorTemplate(LEGGINGS_LEGS_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_LEGS, 7, ModItems.LEGGINGS_LEGS.getId());
+        registerArmorTemplate(LEGGINGS_KNEES_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_KNEES, 2, ModItems.LEGGINGS_KNEES.getId());
+        registerArmorTemplate(LEGGINGS_TASSETS_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_TASSETS, 2, ModItems.LEGGINGS_TASSETS.getId());
+        registerArmorTemplate(BOOTS_FEET_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, ArmorPartData.BOOTS_FEET, 4, ModItems.BOOTS_FEET.getId());
+    }
+
+    private static void registerArmorTemplate(ResourceLocation templateId, ResourceLocation armorType, String partType, int requiredMaterials, ResourceLocation outputItem) {
+        registerTemplate(new ForgeTemplateDefinition(
+                templateId,
+                armorType,
+                partType,
+                requiredMaterials,
+                5,
+                "forge_template.mobstoolforging." + partType,
+                Float.NaN,
+                armorForgeMaterials(),
+                Set.of(),
+                SmithingHammerLevel.STONE.level(),
+                Map.of(),
+                outputItem,
+                Map.of(),
+                Set.of(armorType),
+                true,
+                1
+        ));
+    }
+
+    private static Set<ResourceLocation> armorForgeMaterials() {
+        return Set.of(
+                MaterialCatalog.COPPER,
+                MaterialCatalog.IRON,
+                MaterialCatalog.GOLD,
+                MaterialCatalog.DIAMOND,
+                MaterialCatalog.EMERALD
+        );
     }
 
     public static synchronized void registerToolType(ToolTypeDefinition definition) {
