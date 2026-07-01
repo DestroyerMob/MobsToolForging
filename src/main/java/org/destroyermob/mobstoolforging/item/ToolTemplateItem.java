@@ -111,6 +111,9 @@ public class ToolTemplateItem extends Item {
         if (id.equals(ToolTypeRegistry.HELMET_VISOR_TEMPLATE)) {
             return new ItemStack(ModItems.HELMET_VISOR_PATTERN.get());
         }
+        if (id.equals(ToolTypeRegistry.CHESTPLATE_CHAINMAIL_TEMPLATE)) {
+            return new ItemStack(ModItems.CHESTPLATE_CHAINMAIL_PATTERN.get());
+        }
         if (id.equals(ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE)) {
             return new ItemStack(ModItems.CHESTPLATE_BODY_PATTERN.get());
         }

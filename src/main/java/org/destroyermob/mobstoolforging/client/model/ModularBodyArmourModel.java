@@ -16,6 +16,18 @@ public final class ModularBodyArmourModel {
     public ModularBodyArmourModel(ModelPart root) {
     }
 
+    public void renderChainmailBody(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
+        ModularBodyArmourGeometry.renderCuboids(ModularBodyArmourGeometry.CHAINMAIL_BODY, poseStack, consumer, sprite, packedLight, packedOverlay);
+    }
+
+    public void renderChainmailRightArm(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
+        ModularBodyArmourGeometry.renderCuboids(ModularBodyArmourGeometry.CHAINMAIL_RIGHT_ARM, poseStack, consumer, sprite, packedLight, packedOverlay);
+    }
+
+    public void renderChainmailLeftArm(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
+        ModularBodyArmourGeometry.renderCuboids(ModularBodyArmourGeometry.CHAINMAIL_LEFT_ARM, poseStack, consumer, sprite, packedLight, packedOverlay);
+    }
+
     public void renderBody(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
         ModularBodyArmourGeometry.renderCuboids(ModularBodyArmourGeometry.BODY, poseStack, consumer, sprite, packedLight, packedOverlay);
     }

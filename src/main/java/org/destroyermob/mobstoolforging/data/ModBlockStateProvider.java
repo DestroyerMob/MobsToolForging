@@ -64,7 +64,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         itemModels().withExistingParent("fire_stick", mcLoc("item/handheld")).texture("layer0", mcLoc("item/stick"));
         itemModels().withExistingParent("diamond_powder", mcLoc("item/generated")).texture("layer0", modLoc("item/diamond_powder"));
         modularHelmetModel();
-        itemModels().withExistingParent("modular_chestplate", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_chestplate"));
+        modularChestplateModel();
         itemModels().withExistingParent("modular_leggings", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_leggings"));
         itemModels().withExistingParent("modular_boots", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_boots"));
         patternModel(ModItems.PICKAXE_HEAD_PATTERN.getId().getPath());
@@ -79,6 +79,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         patternModel(ModItems.HELMET_SKULL_PATTERN.getId().getPath());
         patternModel(ModItems.HELMET_COMB_PATTERN.getId().getPath());
         patternModel(ModItems.HELMET_VISOR_PATTERN.getId().getPath());
+        patternModel(ModItems.CHESTPLATE_CHAINMAIL_PATTERN.getId().getPath());
         patternModel(ModItems.CHESTPLATE_BODY_PATTERN.getId().getPath());
         patternModel(ModItems.LEGGINGS_LEGS_PATTERN.getId().getPath());
         patternModel(ModItems.LEGGINGS_KNEES_PATTERN.getId().getPath());
@@ -86,6 +87,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         patternModel(ModItems.BOOTS_FEET_PATTERN.getId().getPath());
         patternModel(ModItems.TEMPLATE_PATTERN.getId().getPath());
         armorPartModel(ModItems.HELMET_SKULL.getId().getPath(), mcLoc("item/iron_helmet"));
+        armorPartModel(ModItems.CHESTPLATE_CHAINMAIL.getId().getPath(), mcLoc("item/chainmail_chestplate"));
         armorPartModel(ModItems.CHESTPLATE_BODY.getId().getPath(), mcLoc("item/iron_chestplate"));
         armorPartModel(ModItems.LEGGINGS_LEGS.getId().getPath(), mcLoc("item/iron_leggings"));
         armorPartModel(ModItems.BOOTS_FEET.getId().getPath(), mcLoc("item/iron_boots"));
@@ -151,6 +153,17 @@ public class ModBlockStateProvider extends BlockStateProvider {
         ItemModelBuilder builder = itemModels().withExistingParent("modular_helmet", mcLoc("item/generated"))
                 .texture("layer0", mcLoc("item/iron_helmet"));
 
+        armorDisplayTransforms(builder);
+    }
+
+    private void modularChestplateModel() {
+        ItemModelBuilder builder = itemModels().withExistingParent("modular_chestplate", mcLoc("item/generated"))
+                .texture("layer0", mcLoc("item/chainmail_chestplate"));
+
+        armorDisplayTransforms(builder);
+    }
+
+    private void armorDisplayTransforms(ItemModelBuilder builder) {
         builder.transforms()
                 .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND).translation(0, 3, 1).scale(0.55F).end()
                 .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND).translation(0, 3, 1).scale(0.55F).end()

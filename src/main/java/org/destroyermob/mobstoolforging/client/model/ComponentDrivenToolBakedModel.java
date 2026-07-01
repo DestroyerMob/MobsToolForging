@@ -185,7 +185,7 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
 
     private BakedModel composePart(ToolTypeDefinition definition, ToolPartData partData) {
         ToolVisualDefinition visual = ToolVisualManager.resolve(definition.visualId(), definition);
-        ToolVisualLayer layer = visual.layerForSlot(partData.partType());
+        ToolVisualLayer layer = visual.layerForSlot(partVisualSlot(partData.partType()));
         ResolvedToolLayerSprite resolvedLayer = resolvePartLayer(definition, layer, partData.partType(), partData.materialId());
         if (isMissing(resolvedLayer.sprite())) {
             warnMissingLayer("part layer missing sprite", visual, layer, Optional.of(partData.materialId()), resolvedLayer.texture());
@@ -193,12 +193,16 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         return new ResolvedPartedItemModel(quadFactory.bakeLayer(0, resolvedLayer.sprite(), resolvedLayer.color()), resolvedLayer.sprite(), fallback.getTransforms());
     }
 
+    private static String partVisualSlot(String partType) {
+        return ToolPartData.SWORD_GUARD.equals(partType) ? "guard" : partType;
+    }
+
     private BakedModel composeArmor(ArmorVisualKey key) {
         if (ArmorConstructionData.HELMET_TYPE.equals(key.armorType())) {
             return ModularHelmetItemModel.compose(key, fallback.getTransforms());
         }
         if (ArmorConstructionData.CHESTPLATE_TYPE.equals(key.armorType())) {
-            return ModularBodyArmourItemModel.compose(key, fallback.getTransforms());
+            return ModularBodyArmourItemModel.compose(key, fallback);
         }
         if (ArmorConstructionData.LEGGINGS_TYPE.equals(key.armorType())) {
             return ModularLowerArmourItemModel.composeLeggings(key, fallback.getTransforms());

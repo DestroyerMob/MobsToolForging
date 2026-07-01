@@ -46,6 +46,10 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "minecraft:item/chainmail_chestplate"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "minecraft:item/netherite_ingot"
     }
   ]

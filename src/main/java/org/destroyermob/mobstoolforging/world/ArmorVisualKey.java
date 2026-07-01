@@ -30,6 +30,24 @@ public record ArmorVisualKey(
         ));
     }
 
+    public boolean isChestplate() {
+        return ArmorConstructionData.CHESTPLATE_TYPE.equals(armorType);
+    }
+
+    public ResourceLocation chestplateChainmailMaterial() {
+        return MaterialCatalog.IRON;
+    }
+
+    public Optional<ResourceLocation> chestplatePlateMaterial() {
+        if (!isChestplate()) {
+            return Optional.empty();
+        }
+        if (combMaterial.isPresent()) {
+            return combMaterial;
+        }
+        return visorMaterial.isPresent() ? Optional.empty() : Optional.of(skullMaterial);
+    }
+
     private static int damageBucket(ItemStack stack) {
         if (!stack.isDamageableItem() || stack.getMaxDamage() <= 0) {
             return 0;

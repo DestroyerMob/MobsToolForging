@@ -5,10 +5,11 @@ import java.util.List;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.client.renderer.block.model.FaceBakery;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import org.destroyermob.mobstoolforging.world.ArmorVisualKey;
 
 public final class ModularBodyArmourItemModel {
@@ -17,15 +18,23 @@ public final class ModularBodyArmourItemModel {
     private ModularBodyArmourItemModel() {
     }
 
-    public static ResolvedArmorItemModel compose(ArmorVisualKey key, ItemTransforms transforms) {
-        TextureAtlasSprite bodySprite = ArmorMaterialTextureManager.INSTANCE.sprite(key.skullMaterial());
-        List<BakedQuad> quads = new ArrayList<>();
-        for (ModularBodyArmourGeometry.ItemCuboid cuboid : ModularBodyArmourGeometry.ITEM) {
-            for (Direction direction : Direction.values()) {
-                quads.add(bakeFace(cuboid, direction, bodySprite));
+    public static BakedModel compose(ArmorVisualKey key, BakedModel fallback) {
+        if (key.chestplatePlateMaterial().isEmpty()) {
+            return fallback;
+        }
+
+        List<BakedQuad> quads = new ArrayList<>(fallback.getQuads(null, null, RandomSource.create(42L)));
+        TextureAtlasSprite particle = fallback.getParticleIcon();
+        if (key.chestplatePlateMaterial().isPresent()) {
+            TextureAtlasSprite bodySprite = ArmorMaterialTextureManager.INSTANCE.sprite(key.chestplatePlateMaterial().orElseThrow());
+            particle = bodySprite;
+            for (ModularBodyArmourGeometry.ItemCuboid cuboid : ModularBodyArmourGeometry.ITEM) {
+                for (Direction direction : Direction.values()) {
+                    quads.add(bakeFace(cuboid, direction, bodySprite));
+                }
             }
         }
-        return new ResolvedArmorItemModel(List.copyOf(quads), bodySprite, transforms);
+        return new ResolvedArmorItemModel(List.copyOf(quads), particle, fallback.getTransforms());
     }
 
     private static BakedQuad bakeFace(ModularBodyArmourGeometry.ItemCuboid cuboid, Direction direction, TextureAtlasSprite sprite) {

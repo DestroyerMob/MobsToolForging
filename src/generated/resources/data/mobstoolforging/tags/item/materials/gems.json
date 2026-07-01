@@ -1,6 +1,22 @@
 {
   "values": [
     "#c:gems/diamond",
-    "#c:gems/emerald"
+    "#c:gems/emerald",
+    {
+      "id": "#c:gems/ruby",
+      "required": false
+    },
+    {
+      "id": "#c:gems/sapphire",
+      "required": false
+    },
+    {
+      "id": "#forge:gems/ruby",
+      "required": false
+    },
+    {
+      "id": "#forge:gems/sapphire",
+      "required": false
+    }
   ]
 }

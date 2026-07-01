@@ -43,7 +43,29 @@ public record ArmorConstructionData(
     }
 
     public static ArmorConstructionData chestplate(ResourceLocation bodyMaterial) {
-        return new ArmorConstructionData(CHESTPLATE_TYPE, bodyMaterial, Optional.empty(), Optional.empty(), DEFAULT_QUALITY);
+        return new ArmorConstructionData(CHESTPLATE_TYPE, MaterialCatalog.IRON, Optional.of(bodyMaterial), Optional.of(MaterialCatalog.IRON), DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData chainmailChestplate() {
+        return new ArmorConstructionData(CHESTPLATE_TYPE, MaterialCatalog.IRON, Optional.empty(), Optional.of(MaterialCatalog.IRON), DEFAULT_QUALITY);
+    }
+
+    public boolean isChestplate() {
+        return CHESTPLATE_TYPE.equals(armorType);
+    }
+
+    public ResourceLocation chestplateChainmailMaterial() {
+        return MaterialCatalog.IRON;
+    }
+
+    public Optional<ResourceLocation> chestplatePlateMaterial() {
+        if (!isChestplate()) {
+            return Optional.empty();
+        }
+        if (combMaterial.isPresent()) {
+            return combMaterial;
+        }
+        return visorMaterial.isPresent() ? Optional.empty() : Optional.of(skullMaterial);
     }
 
     public static ArmorConstructionData leggings(ResourceLocation legMaterial) {

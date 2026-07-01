@@ -19,13 +19,14 @@ public final class ArmorForgeAttachment {
     public static boolean isAttachmentTemplate(@Nullable ResourceLocation templateId) {
         return ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId)
                 || ToolTypeRegistry.HELMET_VISOR_TEMPLATE.equals(templateId)
+                || ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)
                 || ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE.equals(templateId)
                 || ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE.equals(templateId);
     }
 
     public static boolean isBaseArmorTemplate(@Nullable ResourceLocation templateId) {
         return ToolTypeRegistry.HELMET_SKULL_TEMPLATE.equals(templateId)
-                || ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)
+                || ToolTypeRegistry.CHESTPLATE_CHAINMAIL_TEMPLATE.equals(templateId)
                 || ToolTypeRegistry.LEGGINGS_LEGS_TEMPLATE.equals(templateId)
                 || ToolTypeRegistry.BOOTS_FEET_TEMPLATE.equals(templateId);
     }
@@ -50,6 +51,9 @@ public final class ArmorForgeAttachment {
         if (ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId) || ToolTypeRegistry.HELMET_VISOR_TEMPLATE.equals(templateId)) {
             return stack.is(ModItems.MODULAR_HELMET.get()) && ArmorConstructionData.HELMET_TYPE.equals(construction.armorType());
         }
+        if (ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)) {
+            return stack.is(ModItems.MODULAR_CHESTPLATE.get()) && construction.isChestplate();
+        }
         if (ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE.equals(templateId)) {
             return stack.is(ModItems.MODULAR_LEGGINGS.get()) && ArmorConstructionData.LEGGINGS_TYPE.equals(construction.armorType());
         }
@@ -70,8 +74,8 @@ public final class ArmorForgeAttachment {
         if (ToolTypeRegistry.HELMET_SKULL_TEMPLATE.equals(templateId)) {
             return ModItems.MODULAR_HELMET.get().create(materialId, Optional.empty(), Optional.empty());
         }
-        if (ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)) {
-            return ModItems.MODULAR_CHESTPLATE.get().create(materialId);
+        if (ToolTypeRegistry.CHESTPLATE_CHAINMAIL_TEMPLATE.equals(templateId)) {
+            return ModItems.MODULAR_CHESTPLATE.get().createChainmail();
         }
         if (ToolTypeRegistry.LEGGINGS_LEGS_TEMPLATE.equals(templateId)) {
             return ModItems.MODULAR_LEGGINGS.get().create(materialId);
@@ -85,6 +89,9 @@ public final class ArmorForgeAttachment {
     public static ItemStack previewTargetStack(ResourceLocation templateId) {
         if (ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId) || ToolTypeRegistry.HELMET_VISOR_TEMPLATE.equals(templateId)) {
             return ModItems.MODULAR_HELMET.get().create(MaterialCatalog.IRON, Optional.empty(), Optional.empty());
+        }
+        if (ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)) {
+            return ModItems.MODULAR_CHESTPLATE.get().createChainmail();
         }
         if (ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE.equals(templateId)) {
             return ModItems.MODULAR_LEGGINGS.get().create(MaterialCatalog.IRON);
@@ -144,6 +151,9 @@ public final class ArmorForgeAttachment {
     }
 
     private static Optional<ResourceLocation> existingMaterial(ArmorConstructionData construction, ResourceLocation templateId) {
+        if (ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)) {
+            return construction.chestplatePlateMaterial();
+        }
         if (ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE.equals(templateId)) {
             return construction.combMaterial();
         }
@@ -156,7 +166,15 @@ public final class ArmorForgeAttachment {
     private static ArmorConstructionData updatedConstruction(ArmorConstructionData construction, ResourceLocation templateId, ResourceLocation attachmentMaterial) {
         Optional<ResourceLocation> firstOptional = construction.combMaterial();
         Optional<ResourceLocation> secondOptional = construction.visorMaterial();
-        if (ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE.equals(templateId)) {
+        if (ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)) {
+            return new ArmorConstructionData(
+                    construction.armorType(),
+                    MaterialCatalog.IRON,
+                    Optional.of(attachmentMaterial),
+                    Optional.of(MaterialCatalog.IRON),
+                    construction.quality()
+            );
+        } else if (ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE.equals(templateId)) {
             firstOptional = Optional.of(attachmentMaterial);
         } else if (ToolTypeRegistry.HELMET_VISOR_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE.equals(templateId)) {
             secondOptional = Optional.of(attachmentMaterial);

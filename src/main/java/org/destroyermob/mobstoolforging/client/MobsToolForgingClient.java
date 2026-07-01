@@ -3,6 +3,7 @@ package org.destroyermob.mobstoolforging.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
@@ -102,7 +103,10 @@ public final class MobsToolForgingClient {
         if (renderer instanceof net.minecraft.client.renderer.entity.LivingEntityRenderer livingRenderer
                 && livingRenderer.getModel() instanceof HumanoidModel) {
             livingRenderer.addLayer(new ModularHelmetLayer(livingRenderer, new ModularHelmetModel(modelSet.bakeLayer(ModularHelmetModel.LAYER_LOCATION))));
-            livingRenderer.addLayer(new ModularBodyArmourLayer(livingRenderer, new ModularBodyArmourModel(modelSet.bakeLayer(ModularBodyArmourModel.LAYER_LOCATION))));
+            livingRenderer.addLayer(new ModularBodyArmourLayer(
+                    livingRenderer,
+                    new ModularBodyArmourModel(modelSet.bakeLayer(ModularBodyArmourModel.LAYER_LOCATION)),
+                    new HumanoidModel<>(modelSet.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR))));
             livingRenderer.addLayer(new ModularLowerArmourLayer(livingRenderer));
         }
     }

@@ -16,6 +16,7 @@ import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.ArmorStatsCatalog;
+import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 public class ModularArmorRecipe extends CustomRecipe {
@@ -88,10 +89,15 @@ public class ModularArmorRecipe extends CustomRecipe {
                 return ModItems.MODULAR_HELMET.get().create(material(parts.base()), Optional.empty(), Optional.empty());
             }
         },
-        CHESTPLATE(ArmorPartData.CHESTPLATE_BODY, ModItems.CHESTPLATE_BODY::get) {
+        CHESTPLATE(ArmorPartData.CHESTPLATE_CHAINMAIL, ModItems.CHESTPLATE_CHAINMAIL::get) {
+            @Override
+            boolean matchesBase(ItemStack stack, ArmorPartData data) {
+                return super.matchesBase(stack, data) && MaterialCatalog.IRON.equals(data.materialId());
+            }
+
             @Override
             ItemStack create(Parts parts) {
-                return ModItems.MODULAR_CHESTPLATE.get().create(material(parts.base()));
+                return ModItems.MODULAR_CHESTPLATE.get().createChainmail();
             }
         },
         LEGGINGS(ArmorPartData.LEGGINGS_LEGS, ModItems.LEGGINGS_LEGS::get) {

@@ -24,6 +24,7 @@ public final class ToolTypeRegistry {
     public static final ResourceLocation HELMET_SKULL_TEMPLATE = modLoc(ArmorPartData.HELMET_SKULL);
     public static final ResourceLocation HELMET_COMB_TEMPLATE = modLoc(ArmorPartData.HELMET_COMB);
     public static final ResourceLocation HELMET_VISOR_TEMPLATE = modLoc(ArmorPartData.HELMET_VISOR);
+    public static final ResourceLocation CHESTPLATE_CHAINMAIL_TEMPLATE = modLoc(ArmorPartData.CHESTPLATE_CHAINMAIL);
     public static final ResourceLocation CHESTPLATE_BODY_TEMPLATE = modLoc(ArmorPartData.CHESTPLATE_BODY);
     public static final ResourceLocation LEGGINGS_LEGS_TEMPLATE = modLoc(ArmorPartData.LEGGINGS_LEGS);
     public static final ResourceLocation LEGGINGS_KNEES_TEMPLATE = modLoc(ArmorPartData.LEGGINGS_KNEES);
@@ -122,6 +123,7 @@ public final class ToolTypeRegistry {
         registerArmorTemplate(HELMET_SKULL_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_SKULL, 5, ModItems.HELMET_SKULL.getId());
         registerArmorTemplate(HELMET_COMB_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_COMB, 1, null);
         registerArmorTemplate(HELMET_VISOR_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_VISOR, 1, null);
+        registerArmorTemplate(CHESTPLATE_CHAINMAIL_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, ArmorPartData.CHESTPLATE_CHAINMAIL, 8, ModItems.CHESTPLATE_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
         registerArmorTemplate(CHESTPLATE_BODY_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, ArmorPartData.CHESTPLATE_BODY, 8, ModItems.CHESTPLATE_BODY.getId());
         registerArmorTemplate(LEGGINGS_LEGS_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_LEGS, 7, ModItems.LEGGINGS_LEGS.getId());
         registerArmorTemplate(LEGGINGS_KNEES_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_KNEES, 2, null);
@@ -130,6 +132,10 @@ public final class ToolTypeRegistry {
     }
 
     private static void registerArmorTemplate(ResourceLocation templateId, ResourceLocation armorType, String partType, int requiredMaterials, ResourceLocation outputItem) {
+        registerArmorTemplate(templateId, armorType, partType, requiredMaterials, outputItem, armorForgeMaterials());
+    }
+
+    private static void registerArmorTemplate(ResourceLocation templateId, ResourceLocation armorType, String partType, int requiredMaterials, ResourceLocation outputItem, Set<ResourceLocation> allowedMaterials) {
         registerTemplate(new ForgeTemplateDefinition(
                 templateId,
                 armorType,
@@ -138,7 +144,7 @@ public final class ToolTypeRegistry {
                 5,
                 "forge_template.mobstoolforging." + partType,
                 Float.NaN,
-                armorForgeMaterials(),
+                allowedMaterials,
                 Set.of(),
                 SmithingHammerLevel.STONE.level(),
                 Map.of(),
@@ -156,7 +162,9 @@ public final class ToolTypeRegistry {
                 MaterialCatalog.IRON,
                 MaterialCatalog.GOLD,
                 MaterialCatalog.DIAMOND,
-                MaterialCatalog.EMERALD
+                MaterialCatalog.EMERALD,
+                MaterialCatalog.RUBY,
+                MaterialCatalog.SAPPHIRE
         );
     }
 

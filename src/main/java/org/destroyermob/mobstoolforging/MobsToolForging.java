@@ -154,6 +154,7 @@ public class MobsToolForging {
             event.accept(ModItems.HELMET_SKULL_PATTERN);
             event.accept(ModItems.HELMET_COMB_PATTERN);
             event.accept(ModItems.HELMET_VISOR_PATTERN);
+            event.accept(ModItems.CHESTPLATE_CHAINMAIL_PATTERN);
             event.accept(ModItems.CHESTPLATE_BODY_PATTERN);
             event.accept(ModItems.LEGGINGS_LEGS_PATTERN);
             event.accept(ModItems.LEGGINGS_KNEES_PATTERN);
@@ -167,7 +168,7 @@ public class MobsToolForging {
         }
         if (event.getTabKey() == CreativeModeTabs.COMBAT) {
             event.accept(ModItems.MODULAR_HELMET.get().create(MaterialCatalog.IRON, Optional.empty(), Optional.empty()));
-            event.accept(ModItems.MODULAR_CHESTPLATE.get().create(MaterialCatalog.IRON));
+            event.accept(ModItems.MODULAR_CHESTPLATE.get().createChainmail());
             event.accept(ModItems.MODULAR_LEGGINGS.get().create(MaterialCatalog.IRON));
             event.accept(ModItems.MODULAR_BOOTS.get().create(MaterialCatalog.IRON));
         }

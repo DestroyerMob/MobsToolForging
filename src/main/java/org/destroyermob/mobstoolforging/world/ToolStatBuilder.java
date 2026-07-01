@@ -209,6 +209,16 @@ public final class ToolStatBuilder {
             stats.durabilityMultiplier *= 1.20F;
             note = "+Stability";
             stats.addTrait(ToolTrait.STABILIZED);
+        } else if (MaterialCatalog.RUBY.equals(value)) {
+            stats.attackDamageBonus += 0.10F;
+            stats.addAffinities(AFFINITY_LUCK, AFFINITY_TRADE);
+            note = "+Value, +Edge";
+            stats.addTrait(ToolTrait.FORTUNATE);
+        } else if (MaterialCatalog.SAPPHIRE.equals(value)) {
+            stats.durabilityMultiplier *= 1.03F;
+            stats.addAffinities(AFFINITY_RESONANCE, AFFINITY_ENCHANTING);
+            note = "+Enchanting";
+            stats.addTrait(ToolTrait.RESONANT);
         } else if (MaterialCatalog.NETHERITE.equals(value)) {
             stats.durabilityMultiplier *= 1.25F;
             stats.attackSpeedBonus -= 0.05F;
@@ -398,7 +408,7 @@ public final class ToolStatBuilder {
             case SWORD -> 3.0F;
             case SHOVEL -> 1.5F;
             case PICKAXE -> 1.0F;
-            case AXE -> (MaterialCatalog.DIAMOND.equals(materialId) || MaterialCatalog.NETHERITE.equals(materialId) || MaterialCatalog.EMERALD.equals(materialId)) ? 5.0F : 6.0F;
+            case AXE -> isGemLikeToolMaterial(materialId) || MaterialCatalog.NETHERITE.equals(materialId) ? 5.0F : 6.0F;
             case HOE -> hoeAttackDamage(materialId);
         };
     }
@@ -420,7 +430,7 @@ public final class ToolStatBuilder {
         if (MaterialCatalog.IRON.equals(materialId)) {
             return -2.0F;
         }
-        if (MaterialCatalog.DIAMOND.equals(materialId) || MaterialCatalog.EMERALD.equals(materialId)) {
+        if (isGemLikeToolMaterial(materialId)) {
             return -3.0F;
         }
         if (MaterialCatalog.NETHERITE.equals(materialId)) {
@@ -436,10 +446,17 @@ public final class ToolStatBuilder {
         if (MaterialCatalog.IRON.equals(materialId)) {
             return -1.0F;
         }
-        if (MaterialCatalog.DIAMOND.equals(materialId) || MaterialCatalog.EMERALD.equals(materialId) || MaterialCatalog.NETHERITE.equals(materialId)) {
+        if (isGemLikeToolMaterial(materialId) || MaterialCatalog.NETHERITE.equals(materialId)) {
             return 0.0F;
         }
         return -2.0F;
+    }
+
+    private static boolean isGemLikeToolMaterial(ResourceLocation materialId) {
+        return MaterialCatalog.DIAMOND.equals(materialId)
+                || MaterialCatalog.EMERALD.equals(materialId)
+                || MaterialCatalog.RUBY.equals(materialId)
+                || MaterialCatalog.SAPPHIRE.equals(materialId);
     }
 
     private static String line(String label, ResourceLocation material, String note) {

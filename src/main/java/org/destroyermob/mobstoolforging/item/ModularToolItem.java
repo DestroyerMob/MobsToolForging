@@ -30,7 +30,7 @@ public interface ModularToolItem extends IItemExtension {
     ToolKind toolKind();
 
     default boolean allowsFinishedToolEnchanting(ItemStack stack, boolean fallback) {
-        if (stack.get(ModDataComponents.TOOL_CONSTRUCTION.get()) != null && !MobsToolForgingConfig.ALLOW_FINISHED_TOOL_ENCHANTING.get()) {
+        if (stack.get(ModDataComponents.TOOL_CONSTRUCTION.get()) != null && MobsToolForgingConfig.REQUIRE_TOOL_PART_ENCHANTING.get()) {
             return false;
         }
         return fallback;

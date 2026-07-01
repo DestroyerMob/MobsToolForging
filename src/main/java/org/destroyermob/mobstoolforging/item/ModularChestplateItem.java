@@ -19,7 +19,7 @@ import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorStatsCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 
-public class ModularChestplateItem extends ArmorItem {
+public class ModularChestplateItem extends ArmorItem implements ModularArmorItem {
     public ModularChestplateItem(Holder<ArmorMaterial> material, Properties properties) {
         super(material, Type.CHESTPLATE, properties);
     }
@@ -32,19 +32,34 @@ public class ModularChestplateItem extends ArmorItem {
         return stack;
     }
 
+    public ItemStack createChainmail() {
+        ArmorConstructionData construction = ArmorConstructionData.chainmailChestplate();
+        ItemStack stack = new ItemStack(this);
+        stack.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction);
+        ArmorStatsCatalog.apply(stack, construction);
+        return stack;
+    }
+
     @Override
     public Component getName(ItemStack stack) {
         ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
         if (construction == null || !ArmorConstructionData.CHESTPLATE_TYPE.equals(construction.armorType())) {
             return super.getName(stack);
         }
-        return Component.translatable("item.mobstoolforging.material_modular_chestplate", MaterialCatalog.displayName(construction.skullMaterial()));
+        return construction.chestplatePlateMaterial()
+                .map(material -> Component.translatable("item.mobstoolforging.material_modular_chestplate", MaterialCatalog.displayName(material)))
+                .orElseGet(() -> Component.translatable("item.mobstoolforging.modular_chainmail_chestplate"));
+    }
+
+    @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return allowsFinishedArmorEnchanting(stack, super.isEnchantable(stack));
     }
 
     @Override
     public int getEnchantmentValue(ItemStack stack) {
         ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
-        return construction == null ? super.getEnchantmentValue(stack) : ArmorStatsCatalog.stats(construction).enchantmentValue();
+        return finishedArmorEnchantmentValue(stack, construction == null ? super.getEnchantmentValue(stack) : ArmorStatsCatalog.stats(construction).enchantmentValue());
     }
 
     @Override
@@ -71,7 +86,9 @@ public class ModularChestplateItem extends ArmorItem {
             return;
         }
         tooltip.add(Component.translatable("tooltip.mobstoolforging.construction").withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.body", MaterialCatalog.displayName(construction.skullMaterial())).withStyle(ChatFormatting.DARK_GRAY));
+        tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.chainmail", MaterialCatalog.displayName(construction.chestplateChainmailMaterial())).withStyle(ChatFormatting.DARK_GRAY));
+        construction.chestplatePlateMaterial()
+                .ifPresent(material -> tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.body", MaterialCatalog.displayName(material)).withStyle(ChatFormatting.DARK_GRAY)));
     }
 
     @Override

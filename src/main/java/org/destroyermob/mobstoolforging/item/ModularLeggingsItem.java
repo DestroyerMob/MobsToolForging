@@ -20,7 +20,7 @@ import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorStatsCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 
-public class ModularLeggingsItem extends ArmorItem {
+public class ModularLeggingsItem extends ArmorItem implements ModularArmorItem {
     public ModularLeggingsItem(Holder<ArmorMaterial> material, Properties properties) {
         super(material, Type.LEGGINGS, properties);
     }
@@ -47,9 +47,14 @@ public class ModularLeggingsItem extends ArmorItem {
     }
 
     @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return allowsFinishedArmorEnchanting(stack, super.isEnchantable(stack));
+    }
+
+    @Override
     public int getEnchantmentValue(ItemStack stack) {
         ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
-        return construction == null ? super.getEnchantmentValue(stack) : ArmorStatsCatalog.stats(construction).enchantmentValue();
+        return finishedArmorEnchantmentValue(stack, construction == null ? super.getEnchantmentValue(stack) : ArmorStatsCatalog.stats(construction).enchantmentValue());
     }
 
     @Override

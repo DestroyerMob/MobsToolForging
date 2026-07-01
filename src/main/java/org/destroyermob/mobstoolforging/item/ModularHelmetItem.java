@@ -20,7 +20,7 @@ import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorStatsCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 
-public class ModularHelmetItem extends ArmorItem {
+public class ModularHelmetItem extends ArmorItem implements ModularArmorItem {
     public ModularHelmetItem(Holder<ArmorMaterial> material, Properties properties) {
         super(material, Type.HELMET, properties);
     }
@@ -43,9 +43,14 @@ public class ModularHelmetItem extends ArmorItem {
     }
 
     @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return allowsFinishedArmorEnchanting(stack, super.isEnchantable(stack));
+    }
+
+    @Override
     public int getEnchantmentValue(ItemStack stack) {
         ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
-        return construction == null ? super.getEnchantmentValue(stack) : ArmorStatsCatalog.helmetStats(construction.skullMaterial()).enchantmentValue();
+        return finishedArmorEnchantmentValue(stack, construction == null ? super.getEnchantmentValue(stack) : ArmorStatsCatalog.helmetStats(construction.skullMaterial()).enchantmentValue());
     }
 
     @Override

@@ -19,7 +19,7 @@ import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorStatsCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 
-public class ModularBootsItem extends ArmorItem {
+public class ModularBootsItem extends ArmorItem implements ModularArmorItem {
     public ModularBootsItem(Holder<ArmorMaterial> material, Properties properties) {
         super(material, Type.BOOTS, properties);
     }
@@ -42,9 +42,14 @@ public class ModularBootsItem extends ArmorItem {
     }
 
     @Override
+    public boolean isEnchantable(ItemStack stack) {
+        return allowsFinishedArmorEnchanting(stack, super.isEnchantable(stack));
+    }
+
+    @Override
     public int getEnchantmentValue(ItemStack stack) {
         ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
-        return construction == null ? super.getEnchantmentValue(stack) : ArmorStatsCatalog.stats(construction).enchantmentValue();
+        return finishedArmorEnchantmentValue(stack, construction == null ? super.getEnchantmentValue(stack) : ArmorStatsCatalog.stats(construction).enchantmentValue());
     }
 
     @Override

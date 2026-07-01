@@ -194,7 +194,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (taken > 0) {
             if (materialId == null) {
                 materialId = material.id();
-                materialItemId = BuiltInRegistries.ITEM.getKey(material.displayItem());
+                materialItemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
             }
             captureMaterialHeat(stack);
             stack.shrink(taken);

@@ -22,11 +22,14 @@ import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 
 public final class ModularBodyArmourLayer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
+    private static final ResourceLocation VANILLA_CHAINMAIL_ARMOR_TEXTURE = ResourceLocation.withDefaultNamespace("textures/models/armor/chainmail_layer_1.png");
     private final ModularBodyArmourModel bodyArmourModel;
+    private final HumanoidModel<?> chainmailModel;
 
-    public ModularBodyArmourLayer(RenderLayerParent<T, M> renderer, ModularBodyArmourModel bodyArmourModel) {
+    public ModularBodyArmourLayer(RenderLayerParent<T, M> renderer, ModularBodyArmourModel bodyArmourModel, HumanoidModel<?> chainmailModel) {
         super(renderer);
         this.bodyArmourModel = bodyArmourModel;
+        this.chainmailModel = chainmailModel;
     }
 
     @Override
@@ -40,17 +43,31 @@ public final class ModularBodyArmourLayer<T extends LivingEntity, M extends Enti
             return;
         }
 
+        renderVanillaChainmail(poseStack, bufferSource.getBuffer(RenderType.armorCutoutNoCull(VANILLA_CHAINMAIL_ARMOR_TEXTURE)), packedLight, humanoidModel);
         renderLayer(poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), packedLight, humanoidModel, construction);
         if (stack.hasFoil()) {
+            renderVanillaChainmail(poseStack, bufferSource.getBuffer(RenderType.armorEntityGlint()), packedLight, humanoidModel);
             renderLayer(poseStack, bufferSource.getBuffer(RenderType.armorEntityGlint()), packedLight, humanoidModel, construction);
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void renderVanillaChainmail(PoseStack poseStack, VertexConsumer consumer, int packedLight, HumanoidModel<?> humanoidModel) {
+        ((HumanoidModel) humanoidModel).copyPropertiesTo((HumanoidModel) chainmailModel);
+        chainmailModel.setAllVisible(false);
+        chainmailModel.body.visible = true;
+        chainmailModel.rightArm.visible = true;
+        chainmailModel.leftArm.visible = true;
+        chainmailModel.renderToBuffer(poseStack, consumer, packedLight, OverlayTexture.NO_OVERLAY);
+    }
+
     private void renderLayer(PoseStack poseStack, VertexConsumer consumer, int packedLight, HumanoidModel<?> humanoidModel, ArmorConstructionData construction) {
-        TextureAtlasSprite bodySprite = sprite(construction.skullMaterial());
-        renderBodyPart(poseStack, humanoidModel.body, consumer, bodySprite, packedLight);
-        renderRightArmPart(poseStack, humanoidModel.rightArm, consumer, bodySprite, packedLight);
-        renderLeftArmPart(poseStack, humanoidModel.leftArm, consumer, bodySprite, packedLight);
+        construction.chestplatePlateMaterial().ifPresent(material -> {
+            TextureAtlasSprite bodySprite = sprite(material);
+            renderBodyPart(poseStack, humanoidModel.body, consumer, bodySprite, packedLight);
+            renderRightArmPart(poseStack, humanoidModel.rightArm, consumer, bodySprite, packedLight);
+            renderLeftArmPart(poseStack, humanoidModel.leftArm, consumer, bodySprite, packedLight);
+        });
     }
 
     private void renderBodyPart(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight) {

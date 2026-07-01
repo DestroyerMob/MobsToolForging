@@ -33,7 +33,11 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .addTag(Tags.Items.INGOTS_COPPER);
         tag(ModTags.Items.MATERIALS_GEMS)
                 .addTag(Tags.Items.GEMS_DIAMOND)
-                .addTag(Tags.Items.GEMS_EMERALD);
+                .addTag(Tags.Items.GEMS_EMERALD)
+                .addOptionalTag(ModTags.Items.GEMS_RUBY.location())
+                .addOptionalTag(ModTags.Items.GEMS_SAPPHIRE.location())
+                .addOptionalTag(ModTags.Items.LEGACY_FORGE_GEMS_RUBY.location())
+                .addOptionalTag(ModTags.Items.LEGACY_FORGE_GEMS_SAPPHIRE.location());
         tag(ModTags.Items.PARTS)
                 .addTag(ModTags.Items.ARMOR_PARTS)
                 .addTag(ModTags.Items.PART_HANDLES)
@@ -47,6 +51,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .addTag(ModTags.Items.PART_GEM_CUTTERS_BLADES);
         tag(ModTags.Items.ARMOR_PARTS)
                 .addTag(ModTags.Items.PART_HELMET_SKULLS)
+                .addTag(ModTags.Items.PART_CHESTPLATE_CHAINMAILS)
                 .addTag(ModTags.Items.PART_CHESTPLATE_BODIES)
                 .addTag(ModTags.Items.PART_LEGGINGS_LEGS)
                 .addTag(ModTags.Items.PART_BOOTS_FEET);
@@ -70,6 +75,8 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .add(ModItems.GEM_CUTTERS_BLADE.get());
         tag(ModTags.Items.PART_HELMET_SKULLS)
                 .add(ModItems.HELMET_SKULL.get());
+        tag(ModTags.Items.PART_CHESTPLATE_CHAINMAILS)
+                .add(ModItems.CHESTPLATE_CHAINMAIL.get());
         tag(ModTags.Items.PART_CHESTPLATE_BODIES)
                 .add(ModItems.CHESTPLATE_BODY.get());
         tag(ModTags.Items.PART_LEGGINGS_LEGS)

@@ -22,6 +22,7 @@ import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = new Gson();
     private static final ResourceLocation FALLBACK_TEXTURE = ResourceLocation.withDefaultNamespace("block/iron_block");
+    private static final ResourceLocation VANILLA_CHAINMAIL_TEXTURE = ResourceLocation.withDefaultNamespace("item/chainmail_chestplate");
     private final Set<ResourceLocation> warnedMissingTextures = ConcurrentHashMap.newKeySet();
     private volatile Map<ResourceLocation, ResourceLocation> textures = defaults();
 
@@ -32,7 +33,14 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
     }
 
     public TextureAtlasSprite sprite(ResourceLocation materialId) {
-        ResourceLocation texture = texture(materialId);
+        return sprite(texture(materialId), materialId);
+    }
+
+    public TextureAtlasSprite chainmailSprite() {
+        return sprite(VANILLA_CHAINMAIL_TEXTURE, MaterialCatalog.IRON);
+    }
+
+    private TextureAtlasSprite sprite(ResourceLocation texture, ResourceLocation materialId) {
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(texture);
         if (MissingTextureAtlasSprite.getLocation().equals(sprite.contents().name()) && warnedMissingTextures.add(texture)) {
             MobsToolForging.LOGGER.warn("Missing modular armor material texture {} for material {}.", texture, materialId);
@@ -69,6 +77,8 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
         defaults.put(MaterialCatalog.NETHERITE, ResourceLocation.withDefaultNamespace("block/netherite_block"));
         defaults.put(MaterialCatalog.DIAMOND, ResourceLocation.withDefaultNamespace("block/diamond_block"));
         defaults.put(MaterialCatalog.EMERALD, ResourceLocation.withDefaultNamespace("block/emerald_block"));
+        defaults.put(MaterialCatalog.RUBY, ResourceLocation.withDefaultNamespace("block/redstone_block"));
+        defaults.put(MaterialCatalog.SAPPHIRE, ResourceLocation.withDefaultNamespace("block/lapis_block"));
         return defaults;
     }
 }

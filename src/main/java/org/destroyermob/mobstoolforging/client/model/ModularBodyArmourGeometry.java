@@ -13,6 +13,24 @@ public final class ModularBodyArmourGeometry {
     private static final float ITEM_X_SCALE = 16.0F / 18.0F;
     private static final int WHITE = 0xFFFFFFFF;
 
+    public static final List<Cuboid> CHAINMAIL_BODY = List.of(
+            cuboid(-4.15F, 0, -2.35F, 4.15F, 12, -2.1F, 0, 0),
+            cuboid(-4.15F, 0, 2.1F, 4.15F, 12, 2.35F, 0, 0),
+            cuboid(4.1F, 0, -2.25F, 4.35F, 12, 2.25F, 0, 0),
+            cuboid(-4.35F, 0, -2.25F, -4.1F, 12, 2.25F, 0, 0)
+    );
+    public static final List<Cuboid> CHAINMAIL_RIGHT_ARM = List.of(
+            cuboid(-3.35F, -2, -2.35F, 1.1F, 4, -2.1F, 0, 0),
+            cuboid(-3.35F, -2, 2.1F, 1.1F, 4, 2.35F, 0, 0),
+            cuboid(-3.6F, -2, -2.25F, -3.35F, 4, 2.25F, 0, 0),
+            cuboid(1.1F, -2, -2.25F, 1.35F, 4, 2.25F, 0, 0)
+    );
+    public static final List<Cuboid> CHAINMAIL_LEFT_ARM = List.of(
+            cuboid(-1.1F, -2, -2.35F, 3.35F, 4, -2.1F, 0, 0),
+            cuboid(-1.1F, -2, 2.1F, 3.35F, 4, 2.35F, 0, 0),
+            cuboid(-1.35F, -2, -2.25F, -1.1F, 4, 2.25F, 0, 0),
+            cuboid(3.35F, -2, -2.25F, 3.6F, 4, 2.25F, 0, 0)
+    );
     public static final List<Cuboid> BODY = List.of(
             cuboid(-4, 0, -3, 4, 12, -2, -5, 1),
             cuboid(-4, 0, 2, 4, 12, 3, -5, 1),
@@ -44,6 +62,20 @@ public final class ModularBodyArmourGeometry {
             itemCuboid(4, 12, 2, 8, 16, 3, -1, 1),
             itemCuboid(8, 12, -3, 9, 16, 3, -3, -4),
             itemCuboid(4, 11, -3, 9, 12, 3, -4, -4)
+    );
+    public static final List<ItemCuboid> CHAINMAIL_ITEM = List.of(
+            itemCuboid(-4.15F, 12, -2.35F, 4.15F, 24, -2.1F, 0, 0),
+            itemCuboid(-4.15F, 12, 2.1F, 4.15F, 24, 2.35F, 0, 0),
+            itemCuboid(4.1F, 12, -2.25F, 4.35F, 24, 2.25F, 0, 0),
+            itemCuboid(-4.35F, 12, -2.25F, -4.1F, 24, 2.25F, 0, 0),
+            itemCuboid(-3.35F, 12, -2.35F, -1.1F, 18, -2.1F, 0, 0),
+            itemCuboid(-3.35F, 12, 2.1F, -1.1F, 18, 2.35F, 0, 0),
+            itemCuboid(-3.6F, 12, -2.25F, -3.35F, 18, 2.25F, 0, 0),
+            itemCuboid(-1.1F, 12, -2.25F, -0.85F, 18, 2.25F, 0, 0),
+            itemCuboid(1.1F, 12, -2.35F, 3.35F, 18, -2.1F, 0, 0),
+            itemCuboid(1.1F, 12, 2.1F, 3.35F, 18, 2.35F, 0, 0),
+            itemCuboid(0.85F, 12, -2.25F, 1.1F, 18, 2.25F, 0, 0),
+            itemCuboid(3.35F, 12, -2.25F, 3.6F, 18, 2.25F, 0, 0)
     );
 
     private ModularBodyArmourGeometry() {

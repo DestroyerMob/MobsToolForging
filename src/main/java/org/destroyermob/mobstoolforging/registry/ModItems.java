@@ -150,6 +150,10 @@ public final class ModItems {
             "helmet_visor_pattern",
             () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_VISOR_TEMPLATE, new Item.Properties())
     );
+    public static final DeferredItem<ToolTemplateItem> CHESTPLATE_CHAINMAIL_PATTERN = ITEMS.register(
+            "chestplate_chainmail_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.CHESTPLATE_CHAINMAIL_TEMPLATE, new Item.Properties())
+    );
     public static final DeferredItem<ToolTemplateItem> CHESTPLATE_BODY_PATTERN = ITEMS.register(
             "chestplate_body_pattern",
             () -> new ToolTemplateItem(ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE, new Item.Properties())
@@ -201,6 +205,10 @@ public final class ModItems {
     public static final DeferredItem<ModularArmorPartItem> HELMET_SKULL = ITEMS.register(
             ArmorPartData.HELMET_SKULL,
             () -> new ModularArmorPartItem(ArmorPartData.HELMET_SKULL, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> CHESTPLATE_CHAINMAIL = ITEMS.register(
+            ArmorPartData.CHESTPLATE_CHAINMAIL,
+            () -> new ModularArmorPartItem(ArmorPartData.CHESTPLATE_CHAINMAIL, new Item.Properties())
     );
     public static final DeferredItem<ModularArmorPartItem> CHESTPLATE_BODY = ITEMS.register(
             ArmorPartData.CHESTPLATE_BODY,

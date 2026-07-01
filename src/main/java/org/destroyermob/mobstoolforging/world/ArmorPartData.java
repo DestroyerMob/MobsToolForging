@@ -12,6 +12,7 @@ public record ArmorPartData(String partType, ResourceLocation materialId, int qu
     public static final String HELMET_SKULL = "helmet_skull";
     public static final String HELMET_COMB = "helmet_comb";
     public static final String HELMET_VISOR = "helmet_visor";
+    public static final String CHESTPLATE_CHAINMAIL = "chestplate_chainmail";
     public static final String CHESTPLATE_BODY = "chestplate_body";
     public static final String LEGGINGS_LEGS = "leggings_legs";
     public static final String LEGGINGS_KNEES = "leggings_knees";
