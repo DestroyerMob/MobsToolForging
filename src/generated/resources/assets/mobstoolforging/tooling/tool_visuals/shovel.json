@@ -10,7 +10,7 @@
       "handle_template": "mobstoolforging:tool_templates/shovel/handle",
       "large_template": "mobstoolforging:tool_templates/shovel/large_handle",
       "material_from": "handleMaterial",
-      "optional": false,
+      "optional": true,
       "slot": "handle",
       "template": "mobstoolforging:tool_templates/shovel/handle",
       "z": 1
@@ -29,7 +29,7 @@
       "emissive_allowed": false,
       "large_template": "mobstoolforging:tool_templates/shovel/large_shovel_head",
       "material_from": "headMaterial",
-      "optional": false,
+      "optional": true,
       "part_template": "mobstoolforging:tool_templates/shovel/shovel_head_part",
       "slot": "shovel_head",
       "template": "mobstoolforging:tool_templates/shovel/shovel_head",

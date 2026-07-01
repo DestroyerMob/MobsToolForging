@@ -98,4 +98,8 @@ public final class MobsToolForgingConfig {
 
     private MobsToolForgingConfig() {
     }
+
+    public static boolean crudeFlintToolsEnabled() {
+        return COMMON_SPEC.isLoaded() && ENABLE_CRUDE_FLINT_TOOLS.get();
+    }
 }

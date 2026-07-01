@@ -9,8 +9,8 @@ import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.LapidaryTableBlock;
-import org.destroyermob.mobstoolforging.world.ToolForgeBlock;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
+import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
@@ -29,8 +29,7 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
     public void registerClient(IWailaClientRegistration registration) {
         registration.addConfig(WorkstationProvider.UID, true);
         registration.addConfig(HeatingForgeProvider.UID, true);
-        registration.registerBlockComponent(WORKSTATION_PROVIDER, ToolForgeBlock.class);
-        registration.registerBlockComponent(WORKSTATION_PROVIDER, LapidaryTableBlock.class);
+        registration.registerBlockComponent(WORKSTATION_PROVIDER, ToolWorkstationBlock.class);
         registration.registerBlockComponent(HEATING_FORGE_PROVIDER, HeatingForgeBlock.class);
     }
 

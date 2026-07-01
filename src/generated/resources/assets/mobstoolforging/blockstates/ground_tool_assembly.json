@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "mobstoolforging:block/invisible_ground",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "mobstoolforging:block/invisible_ground"
+    },
+    "facing=south": {
+      "model": "mobstoolforging:block/invisible_ground",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mobstoolforging:block/invisible_ground",
+      "y": 270
+    }
+  }
+}

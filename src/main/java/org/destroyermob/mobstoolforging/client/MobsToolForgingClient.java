@@ -187,7 +187,7 @@ public final class MobsToolForgingClient {
     }
 
     private static KnappingLookTarget knappingLookTarget(boolean requireSneaking) {
-        if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
+        if (!MobsToolForgingConfig.crudeFlintToolsEnabled()) {
             return null;
         }
         Minecraft minecraft = Minecraft.getInstance();

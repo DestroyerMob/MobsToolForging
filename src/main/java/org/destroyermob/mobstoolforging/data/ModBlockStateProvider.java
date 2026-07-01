@@ -53,6 +53,11 @@ public class ModBlockStateProvider extends BlockStateProvider {
         heatingForgeBlock(heatingForge, heatingForgeModel);
         simpleBlockItem(heatingForge, heatingForgeModel);
 
+        ModelFile invisibleGroundModel = models().getBuilder("block/invisible_ground")
+                .texture("particle", mcLoc("block/gravel"));
+        horizontalBlock(ModBlocks.KNAPPING_FLINT.get(), invisibleGroundModel);
+        horizontalBlock(ModBlocks.GROUND_TOOL_ASSEMBLY.get(), invisibleGroundModel);
+
         smithingHammerModel();
         itemModels().withExistingParent("flint_shard", mcLoc("item/generated")).texture("layer0", modLoc("item/flint_shard"));
         itemModels().withExistingParent("plant_fiber", mcLoc("item/generated")).texture("layer0", modLoc("item/plant_fiber"));

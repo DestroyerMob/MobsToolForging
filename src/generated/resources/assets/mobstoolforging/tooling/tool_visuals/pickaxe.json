@@ -10,7 +10,7 @@
       "handle_template": "mobstoolforging:tool_templates/pickaxe/handle",
       "large_template": "mobstoolforging:tool_templates/pickaxe/large_handle",
       "material_from": "handleMaterial",
-      "optional": false,
+      "optional": true,
       "slot": "handle",
       "template": "mobstoolforging:tool_templates/pickaxe/handle",
       "z": 1
@@ -29,7 +29,7 @@
       "emissive_allowed": false,
       "large_template": "mobstoolforging:tool_templates/pickaxe/large_pickaxe_head",
       "material_from": "headMaterial",
-      "optional": false,
+      "optional": true,
       "part_template": "mobstoolforging:tool_templates/pickaxe/pickaxe_head_part",
       "slot": "pickaxe_head",
       "template": "mobstoolforging:tool_templates/pickaxe/pickaxe_head",
