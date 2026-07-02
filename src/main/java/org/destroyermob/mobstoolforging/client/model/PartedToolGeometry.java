@@ -23,7 +23,7 @@ public record PartedToolGeometry(ToolTypeDefinition definition, ResourceLocation
         }
 
         ToolVisualDefinition visual = ToolVisualManager.resolve(visualId, definition);
-        PartedToolSpriteSet sprites = PartedToolSpriteSet.from(context, spriteGetter, visual, textureOverrides);
+        PartedToolSpriteSet sprites = PartedToolSpriteSet.from(context, spriteGetter, visual, textureOverrides, partModel);
         PartedToolQuadFactory quadFactory = new PartedToolQuadFactory(modelState);
         if (partModel) {
             return new PartedToolPartBakedModel(visual, partType, partSlot, sprites, quadFactory, context.getTransforms());

@@ -72,19 +72,42 @@ public class KnappingFlintBlock extends BaseEntityBlock {
         boolean complete = knapping.hit();
         playChipEffects(level, pos);
         if (complete) {
-            ItemStack output = knapping.outputStack();
-            level.setBlock(pos, ModBlocks.GROUND_TOOL_ASSEMBLY.get().defaultBlockState().setValue(GroundToolAssemblyBlock.FACING, state.getValue(FACING)), Block.UPDATE_ALL);
-            if (level.getBlockEntity(pos) instanceof GroundToolAssemblyBlockEntity assembly) {
-                assembly.seed(output);
-            } else if (!output.isEmpty()) {
-                Block.popResource(level, pos, output);
-            }
-            level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.6F, 1.15F);
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.knapping_complete", output.getHoverName()), true);
+            finishKnapping(state, level, pos, player, knapping);
         } else {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.knapping_status", knapping.target().displayName(), knapping.hitCount(), KnappingFlintBlockEntity.REQUIRED_HITS), true);
         }
         return ItemInteractionResult.CONSUME;
+    }
+
+    private static void finishKnapping(BlockState state, Level level, BlockPos pos, Player player, KnappingFlintBlockEntity knapping) {
+        ItemStack output = knapping.outputStack();
+        if (output.isEmpty()) {
+            knapping.resetProgress();
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.knapping_failed", knapping.target().displayName()), true);
+            return;
+        }
+
+        knapping.markCompleted();
+        if (knapping.target().primaryPart()) {
+            level.setBlock(pos, ModBlocks.GROUND_TOOL_ASSEMBLY.get().defaultBlockState().setValue(GroundToolAssemblyBlock.FACING, state.getValue(FACING)), Block.UPDATE_ALL);
+            if (level.getBlockEntity(pos) instanceof GroundToolAssemblyBlockEntity assembly && assembly.seed(output)) {
+                player.displayClientMessage(Component.translatable("message.mobstoolforging.knapping_complete", output.getHoverName()), true);
+            } else {
+                level.removeBlock(pos, false);
+                Block.popResource(level, pos, output);
+                player.displayClientMessage(Component.translatable("message.mobstoolforging.knapping_complete_drop", output.getHoverName()), true);
+            }
+        } else {
+            clearCompletedKnapping(state, level, pos);
+            Block.popResource(level, pos, output);
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.knapping_complete_drop", output.getHoverName()), true);
+        }
+        level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.6F, 1.15F);
+    }
+
+    private static void clearCompletedKnapping(BlockState state, Level level, BlockPos pos) {
+        level.setBlock(pos, ModBlocks.GROUND_TOOL_ASSEMBLY.get().defaultBlockState().setValue(GroundToolAssemblyBlock.FACING, state.getValue(FACING)), Block.UPDATE_ALL);
+        level.removeBlock(pos, false);
     }
 
     @Override
@@ -108,7 +131,8 @@ public class KnappingFlintBlock extends BaseEntityBlock {
 
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!level.isClientSide && !state.is(newState.getBlock()) && !newState.is(ModBlocks.GROUND_TOOL_ASSEMBLY.get())) {
+        boolean completed = level.getBlockEntity(pos) instanceof KnappingFlintBlockEntity knapping && knapping.completed();
+        if (!level.isClientSide && !completed && !state.is(newState.getBlock()) && !newState.is(ModBlocks.GROUND_TOOL_ASSEMBLY.get())) {
             Block.popResource(level, pos, new ItemStack(Items.FLINT));
         }
         super.onRemove(state, level, pos, newState, movedByPiston);

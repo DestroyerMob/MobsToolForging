@@ -205,6 +205,12 @@ public final class VanillaToolConverter {
     }
 
     private static MaterialSelection materialSelection(String path) {
+        if (path.startsWith("wooden_")) {
+            return new MaterialSelection("wooden_", MaterialCatalog.FLINT, Optional.empty());
+        }
+        if (path.startsWith("stone_")) {
+            return new MaterialSelection("stone_", MaterialCatalog.FLINT, Optional.empty());
+        }
         if (path.startsWith("iron_")) {
             return new MaterialSelection("iron_", MaterialCatalog.IRON, Optional.empty());
         }

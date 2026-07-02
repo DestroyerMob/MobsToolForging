@@ -239,13 +239,11 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         }
 
         Optional<ResolvedToolLayerSprite> template = resolveHandleBody(definition, layer, material);
-        ResourceLocation exactTexture = textureForToolLayer(definition, layer, material);
-        TextureAtlasSprite exactSprite = sprite(exactTexture);
-        if (!isMissing(exactSprite)) {
-            ResolvedToolLayerSprite exact = ResolvedToolLayerSprite.exact(exactSprite, exactTexture);
+        ResolvedToolLayerSprite exact = resolveExactToolLayer(definition, layer, material);
+        if (!isMissing(exact.sprite())) {
             return template.map(resolvedTemplate -> List.of(resolvedTemplate, exact)).orElseGet(() -> List.of(exact));
         }
-        return template.map(List::of).orElseGet(() -> List.of(ResolvedToolLayerSprite.exact(exactSprite, exactTexture)));
+        return template.map(List::of).orElseGet(() -> List.of(exact));
     }
 
     private ResolvedToolLayerSprite resolveToolLayer(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
@@ -258,12 +256,11 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         if (!layer.canUseExactTexture()) {
             return resolveTemplateFallback(layer, material, false).orElseGet(this::missingLayer);
         }
-        ResourceLocation exactTexture = textureForToolLayer(definition, layer, material);
-        TextureAtlasSprite exactSprite = sprite(exactTexture);
-        if (!isMissing(exactSprite)) {
-            return ResolvedToolLayerSprite.exact(exactSprite, exactTexture);
+        ResolvedToolLayerSprite exact = resolveExactToolLayer(definition, layer, material);
+        if (!isMissing(exact.sprite())) {
+            return exact;
         }
-        return resolveTemplateFallback(layer, material, false).orElseGet(() -> ResolvedToolLayerSprite.exact(exactSprite, exactTexture));
+        return resolveTemplateFallback(layer, material, false).orElse(exact);
     }
 
     private ResolvedToolLayerSprite resolvePartLayer(ToolTypeDefinition definition, ToolVisualLayer layer, String partType, ResourceLocation material) {
@@ -276,12 +273,11 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         if (!layer.canUseExactTexture()) {
             return resolveTemplateFallback(layer, material, true).orElseGet(this::missingLayer);
         }
-        ResourceLocation exactTexture = textureForPart(definition, layer, partType, material);
-        TextureAtlasSprite exactSprite = sprite(exactTexture);
-        if (!isMissing(exactSprite)) {
-            return ResolvedToolLayerSprite.exact(exactSprite, exactTexture);
+        ResolvedToolLayerSprite exact = resolveExactPart(definition, layer, partType, material);
+        if (!isMissing(exact.sprite())) {
+            return exact;
         }
-        return resolveTemplateFallback(layer, material, true).orElseGet(() -> ResolvedToolLayerSprite.exact(exactSprite, exactTexture));
+        return resolveTemplateFallback(layer, material, true).orElse(exact);
     }
 
     private Optional<ResolvedToolLayerSprite> resolveHandleBody(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
@@ -317,27 +313,80 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
                 });
     }
 
-    private ResourceLocation textureForToolLayer(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
-        Optional<ResourceLocation> patternTexture = layer.textureFromPattern(material, "tool");
-        if (patternTexture.isPresent()) {
-            return patternTexture.get();
-        }
-        if (layer.materialFrom().filter("handleMaterial"::equals).isPresent()) {
-            return handleTexture(definition, material);
-        }
-        return definition.partItem(layer.slot(), material)
-                .map(item -> itemTexture(item, "tool"))
-                .orElseGet(() -> conventionalToolTexture(layer.slot(), material, "tool"));
+    private ResolvedToolLayerSprite resolveExactToolLayer(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
+        return resolveExactTexture(textureCandidatesForToolLayer(definition, layer, material));
     }
 
-    private ResourceLocation textureForPart(ToolTypeDefinition definition, ToolVisualLayer layer, String partType, ResourceLocation material) {
-        Optional<ResourceLocation> patternTexture = layer.textureFromPattern(material, "part");
-        if (patternTexture.isPresent()) {
-            return patternTexture.get();
+    private ResolvedToolLayerSprite resolveExactPart(ToolTypeDefinition definition, ToolVisualLayer layer, String partType, ResourceLocation material) {
+        return resolveExactTexture(textureCandidatesForPart(definition, layer, partType, material));
+    }
+
+    private ResolvedToolLayerSprite resolveExactTexture(List<ResourceLocation> textures) {
+        TextureAtlasSprite firstSprite = null;
+        ResourceLocation firstTexture = null;
+        for (ResourceLocation texture : textures) {
+            TextureAtlasSprite candidate = sprite(texture);
+            if (firstSprite == null) {
+                firstSprite = candidate;
+                firstTexture = texture;
+            }
+            if (!isMissing(candidate)) {
+                return ResolvedToolLayerSprite.exact(candidate, texture);
+            }
         }
-        return definition.partItem(partType, material)
+        return firstSprite == null ? missingLayer() : ResolvedToolLayerSprite.exact(firstSprite, firstTexture);
+    }
+
+    private List<ResourceLocation> textureCandidatesForToolLayer(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
+        List<ResourceLocation> candidates = new ArrayList<>();
+        addCandidate(candidates, layer.textureFromPattern(material, "tool"));
+        if (layer.materialFrom().filter("handleMaterial"::equals).isPresent()) {
+            addCandidate(candidates, handleTexture(definition, material));
+            return candidates;
+        }
+
+        String textureSlot = texturePartTypeForLayer(definition, layer);
+        if (definition.builtInKind().isPresent()) {
+            addCandidate(candidates, conventionalToolTexture(textureSlot, material, "tool"));
+        }
+        definition.partItem(textureSlot, material)
+                .map(item -> itemTexture(item, "tool"))
+                .ifPresent(texture -> addCandidate(candidates, texture));
+        addCandidate(candidates, conventionalToolTexture(textureSlot, material, "tool"));
+        return candidates;
+    }
+
+    private List<ResourceLocation> textureCandidatesForPart(ToolTypeDefinition definition, ToolVisualLayer layer, String partType, ResourceLocation material) {
+        List<ResourceLocation> candidates = new ArrayList<>();
+        addCandidate(candidates, layer.textureFromPattern(material, "part"));
+        if (definition.builtInKind().isPresent()) {
+            addCandidate(candidates, conventionalToolTexture(partType, material, "part"));
+        }
+        definition.partItem(partType, material)
                 .map(item -> itemTexture(item, "part"))
-                .orElseGet(() -> conventionalToolTexture(partType, material, "part"));
+                .ifPresent(texture -> addCandidate(candidates, texture));
+        addCandidate(candidates, conventionalToolTexture(partType, material, "part"));
+        return candidates;
+    }
+
+    private void addCandidate(List<ResourceLocation> candidates, Optional<ResourceLocation> texture) {
+        texture.ifPresent(value -> addCandidate(candidates, value));
+    }
+
+    private void addCandidate(List<ResourceLocation> candidates, ResourceLocation texture) {
+        if (!candidates.contains(texture)) {
+            candidates.add(texture);
+        }
+    }
+
+    private String texturePartTypeForLayer(ToolTypeDefinition definition, ToolVisualLayer layer) {
+        if (layer.materialFrom().filter("headMaterial"::equals).isPresent()) {
+            return definition.primaryPartType();
+        }
+        return definition.requiredAssemblyParts().stream()
+                .filter(partType -> partVisualSlot(partType).equals(layer.slot()))
+                .findFirst()
+                .orElse(layer.slot());
     }
 
     private ResourceLocation itemTexture(Item item, String suffix) {
@@ -391,6 +440,10 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
 
     private String handleShape(ToolTypeDefinition definition) {
         String path = definition.visualId().getPath();
+        if (!MobsToolForging.MOD_ID.equals(definition.visualId().getNamespace())) {
+            int slash = path.lastIndexOf('/');
+            return slash >= 0 ? path.substring(slash + 1) : path;
+        }
         if (path.contains("pickaxe")) {
             return "pickaxe";
         }

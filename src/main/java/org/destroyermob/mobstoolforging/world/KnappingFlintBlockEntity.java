@@ -21,6 +21,7 @@ public class KnappingFlintBlockEntity extends BlockEntity {
 
     private KnappingTarget target = KnappingTarget.SWORD_BLADE;
     private int hitCount;
+    private boolean completed;
 
     public KnappingFlintBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.KNAPPING_FLINT.get(), pos, blockState);
@@ -37,6 +38,7 @@ public class KnappingFlintBlockEntity extends BlockEntity {
     public void cycleTarget(int delta) {
         target = target.cycle(delta);
         hitCount = 0;
+        completed = false;
         sync();
     }
 
@@ -48,8 +50,22 @@ public class KnappingFlintBlockEntity extends BlockEntity {
         return hitCount >= REQUIRED_HITS;
     }
 
+    public void resetProgress() {
+        hitCount = 0;
+        completed = false;
+        sync();
+    }
+
     public ItemStack outputStack() {
         return target.createOutput();
+    }
+
+    public void markCompleted() {
+        completed = true;
+    }
+
+    public boolean completed() {
+        return completed;
     }
 
     public void sync() {

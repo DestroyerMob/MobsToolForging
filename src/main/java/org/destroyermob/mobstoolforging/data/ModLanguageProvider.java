@@ -203,8 +203,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.toolmaker_broken_tool", "Repair this tool before separating it.");
         add("message.mobstoolforging.toolmaker_no_tool", "Place one assembled tool before separating it.");
         add("message.mobstoolforging.toolmaker_status", "%s item(s) placed.");
-        add("message.mobstoolforging.knapping_status", "Knapping: %s (%s/%s)");
-        add("message.mobstoolforging.knapping_complete", "Knapped %s.");
+        add("message.mobstoolforging.knapping_status", "Knapping %s - %s/%s hits");
+        add("message.mobstoolforging.knapping_complete", "%s is ready for ground assembly.");
+        add("message.mobstoolforging.knapping_complete_drop", "Knapped %s.");
+        add("message.mobstoolforging.knapping_failed", "Could not knap %s.");
         add("message.mobstoolforging.ground_assembly_part_placed", "Part placed.");
         add("message.mobstoolforging.ground_assembly_needs_parts", "Add the required handle or guard first.");
         add("message.mobstoolforging.complete", "The tool part is ready.");
