@@ -2,7 +2,9 @@ package org.destroyermob.mobstoolforging;
 
 import com.mojang.logging.LogUtils;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
@@ -17,7 +19,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -41,7 +42,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.destroyermob.mobstoolforging.client.MobsToolForgingClient;
@@ -106,7 +106,6 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(this::lowerCopperHarvestTier);
         NeoForge.EVENT_BUS.addListener(this::quenchInWaterCauldron);
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
-        NeoForge.EVENT_BUS.addListener(this::removeDisabledEarlyToolRecipes);
         NeoForge.EVENT_BUS.addListener(this::coolPlayerWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::coolDroppedWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::blockHeatedCrafting);
@@ -218,7 +217,31 @@ public class MobsToolForging {
         event.setDroppedExperience(boostExperience(experience));
     }
 
-    private void removeDisabledEarlyToolRecipes(ServerStartedEvent event) {
+    public static <T> Map<ResourceLocation, T> filterDisabledProgressionRecipes(Map<ResourceLocation, T> recipes) {
+        Set<ResourceLocation> disabledRecipes = disabledProgressionRecipeIds();
+        if (disabledRecipes.isEmpty()) {
+            return recipes;
+        }
+
+        Map<ResourceLocation, T> filteredRecipes = null;
+        int removed = 0;
+        for (ResourceLocation recipeId : disabledRecipes) {
+            if (recipes.containsKey(recipeId)) {
+                if (filteredRecipes == null) {
+                    filteredRecipes = new LinkedHashMap<>(recipes);
+                }
+                filteredRecipes.remove(recipeId);
+                removed++;
+            }
+        }
+        if (removed == 0) {
+            return recipes;
+        }
+        LOGGER.info("Filtered {} recipe(s) for MTF progression during recipe reload.", removed);
+        return filteredRecipes;
+    }
+
+    private static Set<ResourceLocation> disabledProgressionRecipeIds() {
         Set<ResourceLocation> disabledRecipes = new HashSet<>();
         disabledRecipes.add(ResourceLocation.withDefaultNamespace("repair_item"));
         if (!MobsToolForgingConfig.ENABLE_VANILLA_TOOL_RECIPES.get()) {
@@ -234,17 +257,7 @@ public class MobsToolForging {
         if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
             disabledRecipes.addAll(flintToolRecipeIds());
         }
-        if (disabledRecipes.isEmpty()) {
-            return;
-        }
-        List<RecipeHolder<?>> keptRecipes = event.getServer().getRecipeManager().getRecipes().stream()
-                .filter(recipe -> !disabledRecipes.contains(recipe.id()))
-                .toList();
-        int removed = event.getServer().getRecipeManager().getRecipes().size() - keptRecipes.size();
-        if (removed > 0) {
-            event.getServer().getRecipeManager().replaceRecipes(keptRecipes);
-            LOGGER.info("Removed {} recipe(s) for MTF progression.", removed);
-        }
+        return disabledRecipes;
     }
 
     private void addReloadListeners(AddReloadListenerEvent event) {
