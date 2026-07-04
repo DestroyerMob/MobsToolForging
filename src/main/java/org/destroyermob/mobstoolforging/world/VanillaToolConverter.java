@@ -136,9 +136,11 @@ public final class VanillaToolConverter {
     }
 
     private static ResourceLocation headMaterial(Item item) {
-        if (isAny(item, Items.WOODEN_SWORD, Items.WOODEN_SHOVEL, Items.WOODEN_PICKAXE, Items.WOODEN_AXE, Items.WOODEN_HOE)
-                || isAny(item, Items.STONE_SWORD, Items.STONE_SHOVEL, Items.STONE_PICKAXE, Items.STONE_AXE, Items.STONE_HOE)) {
+        if (isAny(item, Items.WOODEN_SWORD, Items.WOODEN_SHOVEL, Items.WOODEN_PICKAXE, Items.WOODEN_AXE, Items.WOODEN_HOE)) {
             return MaterialCatalog.FLINT;
+        }
+        if (isAny(item, Items.STONE_SWORD, Items.STONE_SHOVEL, Items.STONE_PICKAXE, Items.STONE_AXE, Items.STONE_HOE)) {
+            return MaterialCatalog.COPPER;
         }
         if (isAny(item, Items.IRON_SWORD, Items.IRON_SHOVEL, Items.IRON_PICKAXE, Items.IRON_AXE, Items.IRON_HOE)) {
             return MaterialCatalog.IRON;
@@ -209,7 +211,7 @@ public final class VanillaToolConverter {
             return new MaterialSelection("wooden_", MaterialCatalog.FLINT, Optional.empty());
         }
         if (path.startsWith("stone_")) {
-            return new MaterialSelection("stone_", MaterialCatalog.FLINT, Optional.empty());
+            return new MaterialSelection("stone_", MaterialCatalog.COPPER, Optional.empty());
         }
         if (path.startsWith("iron_")) {
             return new MaterialSelection("iron_", MaterialCatalog.IRON, Optional.empty());

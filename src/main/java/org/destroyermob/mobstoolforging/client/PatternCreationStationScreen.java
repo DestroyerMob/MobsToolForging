@@ -83,7 +83,7 @@ public class PatternCreationStationScreen extends AbstractContainerScreen<Patter
             int buttonLeft = recipesLeft + relativeIndex % RECIPES_COLUMNS * RECIPE_WIDTH;
             int buttonTop = recipesTop + relativeIndex / RECIPES_COLUMNS * RECIPE_HEIGHT + 2;
             if (x >= buttonLeft && x < buttonLeft + RECIPE_WIDTH && y >= buttonTop && y < buttonTop + RECIPE_HEIGHT) {
-                ItemStack stack = menu.getPatternStack(index);
+                ItemStack stack = menu.getPatternDisplayStack(index);
                 if (!stack.isEmpty()) {
                     graphics.renderTooltip(font, stack, x, y);
                 }
@@ -115,7 +115,7 @@ public class PatternCreationStationScreen extends AbstractContainerScreen<Patter
             int buttonLeft = x + relativeIndex % RECIPES_COLUMNS * RECIPE_WIDTH;
             int row = relativeIndex / RECIPES_COLUMNS;
             int buttonTop = y + row * RECIPE_HEIGHT + 2;
-            graphics.renderItem(menu.getPatternStack(index), buttonLeft, buttonTop);
+            graphics.renderItem(menu.getPatternDisplayStack(index), buttonLeft, buttonTop);
         }
     }
 

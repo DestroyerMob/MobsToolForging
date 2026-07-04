@@ -1,18 +1,18 @@
 {
   "variants": {
     "facing=east": {
-      "model": "mobstoolforging:block/tool_forge",
+      "model": "mobstoolforging:block/crude_anvil",
       "y": 90
     },
     "facing=north": {
-      "model": "mobstoolforging:block/tool_forge"
+      "model": "mobstoolforging:block/crude_anvil"
     },
     "facing=south": {
-      "model": "mobstoolforging:block/tool_forge",
+      "model": "mobstoolforging:block/crude_anvil",
       "y": 180
     },
     "facing=west": {
-      "model": "mobstoolforging:block/tool_forge",
+      "model": "mobstoolforging:block/crude_anvil",
       "y": 270
     }
   }

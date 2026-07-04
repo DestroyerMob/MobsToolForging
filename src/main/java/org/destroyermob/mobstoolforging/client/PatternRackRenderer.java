@@ -8,14 +8,12 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import org.destroyermob.mobstoolforging.world.ArmorForgeAttachment;
+import org.destroyermob.mobstoolforging.world.ForgeTemplatePreview;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
-import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.PatternRackBlock;
 import org.destroyermob.mobstoolforging.world.PatternRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
@@ -38,7 +36,7 @@ public class PatternRackRenderer implements BlockEntityRenderer<PatternRackBlock
         if (!state.hasProperty(PatternRackBlock.FACING)) {
             return;
         }
-        float rackRotation = modelRotation(state.getValue(PatternRackBlock.FACING));
+        Direction facing = state.getValue(PatternRackBlock.FACING);
         Level level = rack.getLevel();
         for (int slot = 0; slot < PatternRackBlockEntity.SLOT_COUNT; slot++) {
             ItemStack pattern = rack.patternStack(slot);
@@ -48,7 +46,7 @@ public class PatternRackRenderer implements BlockEntityRenderer<PatternRackBlock
             int row = slot / 3;
             int column = slot % 3;
             RackPreview preview = previewStack(pattern);
-            renderPattern(preview.stack(), poseStack, bufferSource, packedLight, packedOverlay, level, rackRotation, SLOT_X[column] + preview.offsetX(), SLOT_Y[row] + preview.offsetY(), preview.scale());
+            renderPattern(preview.stack(), poseStack, bufferSource, packedLight, packedOverlay, level, facing, SLOT_X[column] + preview.offsetX(), SLOT_Y[row] + preview.offsetY(), preview.scale());
         }
     }
 
@@ -57,45 +55,42 @@ public class PatternRackRenderer implements BlockEntityRenderer<PatternRackBlock
         if (template == null) {
             return new RackPreview(pattern, 0.0F, 0.0F, ITEM_SCALE);
         }
-        ResourceLocation material = previewMaterial(template);
-        ItemStack preview = ArmorForgeAttachment.isAttachmentTemplate(template)
-                ? ArmorForgeAttachment.previewOutputStack(template.id(), material)
-                : template.outputStack(material);
+        ItemStack preview = ForgeTemplatePreview.stack(template);
         RackAlignment alignment = alignment(template.partType());
         return new RackPreview(preview.isEmpty() ? pattern : preview, alignment.offsetX(), alignment.offsetY(), ITEM_SCALE * alignment.scale());
     }
 
-    private static ResourceLocation previewMaterial(ForgeTemplateDefinition template) {
-        if (isUsablePreviewMaterial(template, MaterialCatalog.IRON)) {
-            return MaterialCatalog.IRON;
-        }
-        for (ResourceLocation material : MaterialCatalog.starterMaterialIds()) {
-            if (isUsablePreviewMaterial(template, material)) {
-                return material;
-            }
-        }
-        return MaterialCatalog.IRON;
-    }
+    private void renderPattern(ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, Level level, Direction facing, float x, float y, float scale) {
+        float modelX = 0.5F + x;
+        float modelZ = 0.5F + ITEM_SURFACE_Z;
+        float worldX = worldX(facing, modelX, modelZ);
+        float worldZ = worldZ(facing, modelX, modelZ);
 
-    private static boolean isUsablePreviewMaterial(ForgeTemplateDefinition template, ResourceLocation material) {
-        if (!template.allowsMaterial(material)) {
-            return false;
-        }
-        ItemStack preview = ArmorForgeAttachment.isAttachmentTemplate(template)
-                ? ArmorForgeAttachment.previewOutputStack(template.id(), material)
-                : template.outputStack(material);
-        return !preview.isEmpty();
-    }
-
-    private void renderPattern(ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, Level level, float rackRotation, float x, float y, float scale) {
         poseStack.pushPose();
-        poseStack.translate(0.5F, y, 0.5F);
-        poseStack.mulPose(Axis.YP.rotationDegrees(rackRotation));
-        poseStack.translate(x, 0.0F, ITEM_SURFACE_Z);
+        poseStack.translate(worldX, y, worldZ);
+        poseStack.mulPose(Axis.YP.rotationDegrees(modelRotation(facing)));
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
         poseStack.scale(scale, scale, scale);
         itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
         poseStack.popPose();
+    }
+
+    private static float worldX(Direction facing, float modelX, float modelZ) {
+        return switch (facing) {
+            case EAST -> 1.0F - modelZ;
+            case SOUTH -> 1.0F - modelX;
+            case WEST -> modelZ;
+            case NORTH, UP, DOWN -> modelX;
+        };
+    }
+
+    private static float worldZ(Direction facing, float modelX, float modelZ) {
+        return switch (facing) {
+            case EAST -> modelX;
+            case SOUTH -> 1.0F - modelZ;
+            case WEST -> 1.0F - modelX;
+            case NORTH, UP, DOWN -> modelZ;
+        };
     }
 
     private static RackAlignment alignment(String partType) {

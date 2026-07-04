@@ -12,6 +12,7 @@ public final class MobsToolForgingConfig {
     public static final ModConfigSpec.BooleanValue DISABLE_STONE_TOOLS;
     public static final ModConfigSpec.BooleanValue DISABLE_WOODEN_TOOLS;
     public static final ModConfigSpec.BooleanValue COPPER_REQUIRES_WOODEN_TOOL;
+    public static final ModConfigSpec.BooleanValue ENABLE_ANVIL_CRAFTING_RECIPES;
     public static final ModConfigSpec.BooleanValue ENABLE_CRUDE_ANVIL;
     public static final ModConfigSpec.BooleanValue BASIC_PATTERNS_REQUIRE_PAPER;
     public static final ModConfigSpec.BooleanValue ENABLE_PATTERN_RACK;
@@ -72,6 +73,9 @@ public final class MobsToolForgingConfig {
                 .comment("When true, vanilla copper ore, copper blocks, and raw copper blocks can be harvested with wooden-tier pickaxes. Flint uses wooden-tier mining rules.")
                 .define("copperRequiresWoodenTool", true);
         builder.push("progression");
+        ENABLE_ANVIL_CRAFTING_RECIPES = builder
+                .comment("When true, anvil crafting recipes are enabled and the sneak-right-click hammer recipes for crude, copper, and iron anvils are disabled.")
+                .define("enableAnvilCraftingRecipes", false);
         ENABLE_CRUDE_ANVIL = builder
                 .comment("When true, the cheap Crude Anvil is available as an early, lower-quality shaping station.")
                 .define("enableCrudeAnvil", true);

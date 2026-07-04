@@ -71,6 +71,7 @@ public final class ToolmakerBenchAssembly {
         ToolAssemblyParts storedParts = stack.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
         if (storedParts != null && !storedParts.stacks().isEmpty()) {
             List<ItemStack> parts = ToolPartWear.copyWithWearFromTool(definition, stack, storedParts.copyStacks());
+            parts = ToolAssemblyEnchantments.copyToolEnchantmentsToViableParts(stack, parts);
             return Optional.of(ToolExternalComponents.copyToolComponentsToPrimaryHead(definition, stack, parts));
         }
 
@@ -106,6 +107,7 @@ public final class ToolmakerBenchAssembly {
                 .ifPresent(parts::add);
         List<ItemStack> result = parts.stream().filter(item -> !item.isEmpty()).map(ItemStack::copy).toList();
         List<ItemStack> wornParts = ToolPartWear.copyWithWearFromTool(definition, stack, result);
+        wornParts = ToolAssemblyEnchantments.copyToolEnchantmentsToViableParts(stack, wornParts);
         return Optional.of(ToolExternalComponents.copyToolComponentsToPrimaryHead(definition, stack, wornParts));
     }
 

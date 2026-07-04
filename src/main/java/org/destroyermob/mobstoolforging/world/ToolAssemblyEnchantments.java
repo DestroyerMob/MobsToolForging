@@ -7,6 +7,8 @@ import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -47,6 +49,74 @@ public final class ToolAssemblyEnchantments {
         }
         BetterEnchantingBridge.clampEnchantments(output);
         return BetterEnchantingBridge.fitsCapacity(output);
+    }
+
+    public static List<ItemStack> copyToolEnchantmentsToViableParts(ItemStack tool, List<ItemStack> parts) {
+        if (tool.isEmpty() || parts.isEmpty()) {
+            return List.copyOf(parts);
+        }
+
+        ItemEnchantments toolEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(tool);
+        if (toolEnchantments.isEmpty()) {
+            return List.copyOf(parts);
+        }
+
+        List<ItemStack> result = new ArrayList<>(parts.size());
+        for (ItemStack part : parts) {
+            result.add(part.copy());
+        }
+
+        boolean changed = false;
+        for (Object2IntMap.Entry<Holder<Enchantment>> entry : toolEnchantments.entrySet()) {
+            changed |= copyToBestPart(result, entry.getKey(), entry.getIntValue());
+        }
+        return changed ? List.copyOf(result) : List.copyOf(parts);
+    }
+
+    private static boolean copyToBestPart(List<ItemStack> parts, Holder<Enchantment> enchantment, int level) {
+        if (level <= 0) {
+            return false;
+        }
+
+        ItemStack target = ItemStack.EMPTY;
+        int existingLevel = 0;
+        for (ItemStack part : parts) {
+            int partLevel = EnchantmentHelper.getEnchantmentsForCrafting(part).getLevel(enchantment);
+            if (partLevel > 0) {
+                target = part;
+                existingLevel = partLevel;
+                break;
+            }
+        }
+
+        if (target.isEmpty()) {
+            for (ItemStack part : parts) {
+                if (canCarryEnchantment(part, enchantment)) {
+                    target = part;
+                    break;
+                }
+            }
+        }
+
+        if (target.isEmpty()) {
+            return false;
+        }
+
+        int newLevel = Math.max(existingLevel, BetterEnchantingBridge.clampLevel(enchantment, level));
+        if (existingLevel >= newLevel) {
+            return false;
+        }
+
+        ItemEnchantments.Mutable enchantments = new ItemEnchantments.Mutable(EnchantmentHelper.getEnchantmentsForCrafting(target));
+        enchantments.set(enchantment, newLevel);
+        EnchantmentHelper.setEnchantments(target, enchantments.toImmutable());
+        BetterEnchantingBridge.clampEnchantments(target);
+        return true;
+    }
+
+    private static boolean canCarryEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
+        return !stack.isEmpty()
+                && (BetterEnchantingBridge.matchesTarget(stack, enchantment) || stack.supportsEnchantment(enchantment));
     }
 
     private static boolean merge(RegistryAccess registryAccess, ItemEnchantments.Mutable merged, Holder<Enchantment> enchantment, int level) {
@@ -103,6 +173,9 @@ public final class ToolAssemblyEnchantments {
         private static final String LEVEL_RULES = "com.betterenchanting.data.EnchantmentLevelRules";
         private static final String FUSION_RECIPES = "com.betterenchanting.data.EnchantmentFusionRecipes";
         private static final String LIMIT_RULES = "com.betterenchanting.data.EnchantmentLimitRules";
+        private static final String TARGET_TAGS = "com.betterenchanting.world.EnchantmentTargetTags";
+        private static final String BETTER_ENCHANTING_NAMESPACE = "betterenchanting";
+        private static final String TARGET_TAG_PREFIX = "targets/";
 
         private static Boolean additiveMerge;
         private static Method clampLevel;
@@ -111,6 +184,7 @@ public final class ToolAssemblyEnchantments {
         private static Method areRecipeIngredients;
         private static Method currentEnchantmentCount;
         private static Method maxEnchantments;
+        private static Method resolveTargetTags;
 
         private BetterEnchantingBridge() {
         }
@@ -180,6 +254,25 @@ public final class ToolAssemblyEnchantments {
             }
         }
 
+        private static boolean matchesTarget(ItemStack stack, Holder<Enchantment> enchantment) {
+            List<ResourceLocation> enchantmentTargets = betterEnchantingTargetTags(enchantment);
+            if (enchantmentTargets.isEmpty()) {
+                return false;
+            }
+
+            List<ResourceLocation> itemTargets = resolveTargetTags(stack);
+            if (itemTargets.isEmpty()) {
+                return false;
+            }
+
+            for (ResourceLocation target : enchantmentTargets) {
+                if (itemTargets.contains(target)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private static boolean fitsCapacity(ItemStack stack) {
             Method countMethod = currentEnchantmentCountMethod();
             Method maxMethod = maxEnchantmentsMethod();
@@ -193,6 +286,39 @@ public final class ToolAssemblyEnchantments {
             } catch (ReflectiveOperationException | LinkageError | RuntimeException exception) {
                 return true;
             }
+        }
+
+        private static List<ResourceLocation> betterEnchantingTargetTags(Holder<Enchantment> enchantment) {
+            return enchantment.tags()
+                    .map(TagKey::location)
+                    .filter(BetterEnchantingBridge::isBetterEnchantingTargetTag)
+                    .toList();
+        }
+
+        private static boolean isBetterEnchantingTargetTag(ResourceLocation tagId) {
+            return BETTER_ENCHANTING_NAMESPACE.equals(tagId.getNamespace())
+                    && tagId.getPath().startsWith(TARGET_TAG_PREFIX);
+        }
+
+        private static List<ResourceLocation> resolveTargetTags(ItemStack stack) {
+            Method method = resolveTargetTagsMethod();
+            if (method == null) {
+                return List.of();
+            }
+            try {
+                Object value = method.invoke(null, stack);
+                if (value instanceof List<?> list) {
+                    List<ResourceLocation> tags = new ArrayList<>(list.size());
+                    for (Object entry : list) {
+                        if (entry instanceof ResourceLocation tag) {
+                            tags.add(tag);
+                        }
+                    }
+                    return List.copyOf(tags);
+                }
+            } catch (ReflectiveOperationException | LinkageError | RuntimeException ignored) {
+            }
+            return List.of();
         }
 
         private static Method clampLevelMethod() {
@@ -235,6 +361,13 @@ public final class ToolAssemblyEnchantments {
                 maxEnchantments = method(LIMIT_RULES, "maxEnchantments", ItemStack.class);
             }
             return maxEnchantments;
+        }
+
+        private static Method resolveTargetTagsMethod() {
+            if (resolveTargetTags == null) {
+                resolveTargetTags = method(TARGET_TAGS, "resolve", ItemStack.class);
+            }
+            return resolveTargetTags;
         }
 
         private static Method method(String className, String name, Class<?>... parameters) {

@@ -56,6 +56,7 @@ import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.registry.ModLootModifiers;
+import org.destroyermob.mobstoolforging.world.AnvilForgingEvents;
 import org.destroyermob.mobstoolforging.world.ArmorStandSwapEvents;
 import org.destroyermob.mobstoolforging.world.CampfireWorkpieceHeating;
 import org.destroyermob.mobstoolforging.world.CrucibleContents;
@@ -108,6 +109,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::placeKnappingFlint);
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::placeGroundAssembly);
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::dropPlantFiber);
+        NeoForge.EVENT_BUS.addListener(AnvilForgingEvents::forgeAnvilInWorld);
         NeoForge.EVENT_BUS.addListener(ArmorStandSwapEvents::swapPlayerArmorWithStand);
         NeoForge.EVENT_BUS.addListener(this::lowerCopperHarvestTier);
         NeoForge.EVENT_BUS.addListener(CampfireWorkpieceHeating::placeWorkpiece);
@@ -269,7 +271,11 @@ public class MobsToolForging {
         if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
             disabledRecipes.addAll(flintToolRecipeIds());
         }
-        if (!MobsToolForgingConfig.ENABLE_CRUDE_ANVIL.get()) {
+        if (!MobsToolForgingConfig.ENABLE_ANVIL_CRAFTING_RECIPES.get()) {
+            disabledRecipes.add(modRecipe("tool_forge"));
+            disabledRecipes.add(ResourceLocation.withDefaultNamespace("anvil"));
+        }
+        if (!MobsToolForgingConfig.ENABLE_ANVIL_CRAFTING_RECIPES.get() || !MobsToolForgingConfig.ENABLE_CRUDE_ANVIL.get()) {
             disabledRecipes.add(modRecipe("crude_anvil"));
         }
         if (!MobsToolForgingConfig.ENABLE_PATTERN_RACK.get()) {

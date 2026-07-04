@@ -154,6 +154,13 @@ public class PatternCreationStationMenu extends AbstractContainerMenu {
         return ToolTemplateItem.createPatternStack(patternIds.get(index));
     }
 
+    public ItemStack getPatternDisplayStack(int index) {
+        ItemStack preview = pattern(index)
+                .map(ForgeTemplatePreview::stack)
+                .orElse(ItemStack.EMPTY);
+        return preview.isEmpty() ? getPatternStack(index) : preview;
+    }
+
     public int getPatternPaperCost(int index) {
         return getPatternInputCost(index);
     }

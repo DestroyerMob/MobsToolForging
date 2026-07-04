@@ -9,7 +9,7 @@ import org.destroyermob.mobstoolforging.registry.ModItems;
 public final class CrudeFlintTiers {
     public static final Tier FLINT = new SimpleTier(
             BlockTags.INCORRECT_FOR_WOODEN_TOOL,
-            48,
+            131,
             2.7F,
             0.5F,
             2,

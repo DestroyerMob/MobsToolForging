@@ -17,6 +17,7 @@ import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModItems;
+import org.destroyermob.mobstoolforging.registry.ModTags;
 
 public final class FlintKnappingEvents {
     private static final float PLANT_FIBER_DROP_CHANCE = 0.5F;
@@ -82,7 +83,10 @@ public final class FlintKnappingEvents {
     }
 
     public static void dropPlantFiber(BlockDropsEvent event) {
-        if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get() || event.getBreaker() == null || !isFiberPlant(event.getState())) {
+        if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()
+                || event.getBreaker() == null
+                || !event.getTool().is(ModTags.Items.KNAPPING_TOOLS)
+                || !isFiberPlant(event.getState())) {
             return;
         }
         if (event.getLevel().random.nextFloat() > PLANT_FIBER_DROP_CHANCE) {

@@ -171,7 +171,9 @@ public final class MobsToolForgingClient {
         if (scrollDelta == 0.0D) {
             return;
         }
-        PacketDistributor.sendToServer(new CycleKnappingTargetPayload(target.pos(), scrollDelta > 0.0D ? 1 : -1));
+        int delta = scrollDelta > 0.0D ? 1 : -1;
+        target.knapping().cycleTarget(delta);
+        PacketDistributor.sendToServer(new CycleKnappingTargetPayload(target.pos(), delta));
         event.setCanceled(true);
     }
 

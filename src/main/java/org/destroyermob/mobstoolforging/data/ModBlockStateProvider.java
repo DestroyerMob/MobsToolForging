@@ -34,8 +34,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockItem(forge, forgeModel);
 
         Block crudeAnvil = ModBlocks.CRUDE_ANVIL.get();
-        horizontalBlock(crudeAnvil, forgeModel);
-        simpleBlockItem(crudeAnvil, forgeModel);
+        ModelFile crudeAnvilModel = new ModelFile.UncheckedModelFile(modLoc("block/crude_anvil"));
+        horizontalBlock(crudeAnvil, crudeAnvilModel);
+        simpleBlockItem(crudeAnvil, crudeAnvilModel);
 
         Block lapidaryTable = ModBlocks.LAPIDARY_TABLE.get();
         ModelFile lapidaryModel = new ModelFile.UncheckedModelFile(modLoc("block/lapidary_table"));

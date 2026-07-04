@@ -1,6 +1,8 @@
 package org.destroyermob.mobstoolforging.world;
 
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 
 public final class ToolRepairing {
@@ -25,6 +27,10 @@ public final class ToolRepairing {
         ToolConstructionData construction = tool.get(ModDataComponents.TOOL_CONSTRUCTION.get());
         if (construction == null) {
             return false;
+        }
+        if (MaterialCatalog.FLINT.equals(construction.headMaterial())
+                && (candidate.is(Items.FLINT) || candidate.is(ModItems.FLINT_SHARD.get()))) {
+            return true;
         }
         return MaterialCatalog.definition(construction.headMaterial())
                 .map(ToolMaterialDefinition::tier)

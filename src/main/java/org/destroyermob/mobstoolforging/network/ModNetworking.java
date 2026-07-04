@@ -76,7 +76,6 @@ public final class ModNetworking {
         }
         if (player.level().getBlockEntity(payload.pos()) instanceof KnappingFlintBlockEntity knapping) {
             knapping.cycleTarget(payload.delta());
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.knapping_status", knapping.target().displayName(), knapping.hitCount(), KnappingFlintBlockEntity.REQUIRED_HITS), true);
         }
     }
 }
