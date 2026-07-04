@@ -33,6 +33,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
         horizontalBlock(forge, forgeModel);
         simpleBlockItem(forge, forgeModel);
 
+        Block crudeAnvil = ModBlocks.CRUDE_ANVIL.get();
+        horizontalBlock(crudeAnvil, forgeModel);
+        simpleBlockItem(crudeAnvil, forgeModel);
+
         Block lapidaryTable = ModBlocks.LAPIDARY_TABLE.get();
         ModelFile lapidaryModel = new ModelFile.UncheckedModelFile(modLoc("block/lapidary_table"));
         horizontalBlock(lapidaryTable, lapidaryModel);
@@ -42,6 +46,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
         ModelFile patternCreationStationModel = new ModelFile.UncheckedModelFile(modLoc("block/pattern_creation_station"));
         horizontalBlock(patternCreationStation, patternCreationStationModel);
         simpleBlockItem(patternCreationStation, patternCreationStationModel);
+
+        for (ModBlocks.PatternRackVariant variant : ModBlocks.PATTERN_RACK_VARIANTS) {
+            Block patternRack = variant.block().get();
+            ModelFile patternRackModel = patternRackModel(variant);
+            horizontalBlock(patternRack, patternRackModel);
+            simpleBlockItem(patternRack, patternRackModel);
+        }
 
         Block toolmakersBench = ModBlocks.TOOLMAKERS_BENCH.get();
         ModelFile toolmakersBenchModel = new ModelFile.UncheckedModelFile(modLoc("block/toolmakers_bench"));
@@ -59,6 +70,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         horizontalBlock(ModBlocks.GROUND_TOOL_ASSEMBLY.get(), invisibleGroundModel);
 
         smithingHammerModel();
+        itemModels().withExistingParent("pattern_board", mcLoc("item/generated")).texture("layer0", textureExists(modLoc("item/pattern_board")) ? modLoc("item/pattern_board") : mcLoc("block/oak_planks"));
         itemModels().withExistingParent("flint_shard", mcLoc("item/generated")).texture("layer0", modLoc("item/flint_shard"));
         itemModels().withExistingParent("plant_fiber", mcLoc("item/generated")).texture("layer0", modLoc("item/plant_fiber"));
         itemModels().withExistingParent("fire_stick", mcLoc("item/handheld")).texture("layer0", mcLoc("item/stick"));
@@ -113,6 +125,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
             case WEST -> 0;
             default -> 90;
         };
+    }
+
+    private ModelFile patternRackModel(ModBlocks.PatternRackVariant variant) {
+        return models().withExistingParent("block/" + variant.id(), modLoc("block/template_pattern_rack"))
+                .texture("log", variant.logTexture())
+                .texture("planks", variant.planksTexture())
+                .texture("particle", variant.logTexture());
     }
 
     private void smithingHammerModel() {

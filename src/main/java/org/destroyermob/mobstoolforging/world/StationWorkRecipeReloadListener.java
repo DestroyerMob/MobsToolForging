@@ -54,6 +54,9 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
         if (normalized.equals("smithing_anvil") || normalized.equals("tool_forge")) {
             return WorkstationKind.TOOL_FORGE;
         }
+        if (normalized.equals("crude_anvil") || normalized.equals("stone_anvil") || normalized.equals("stone_work_anvil")) {
+            return WorkstationKind.CRUDE_ANVIL;
+        }
         if (normalized.equals("lapidary_table")) {
             return WorkstationKind.LAPIDARY_TABLE;
         }

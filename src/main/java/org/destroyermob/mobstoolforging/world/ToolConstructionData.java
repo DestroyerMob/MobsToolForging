@@ -34,7 +34,7 @@ public record ToolConstructionData(
             guardMaterial = bindingMaterial;
             bindingMaterial = Optional.empty();
         }
-        quality = DEFAULT_QUALITY;
+        quality = ForgingQuality.clampScore(quality);
     }
 
     public ToolConstructionData(
@@ -80,5 +80,9 @@ public record ToolConstructionData(
 
     public static ResourceLocation toolType(ToolKind toolKind) {
         return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, toolKind.id());
+    }
+
+    public ForgingQuality qualityLevel() {
+        return ForgingQuality.fromScore(quality);
     }
 }

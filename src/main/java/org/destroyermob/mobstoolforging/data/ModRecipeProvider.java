@@ -36,12 +36,20 @@ public class ModRecipeProvider extends RecipeProvider {
         SpecialRecipeBuilder.special(category -> new ModularArmorRecipe(category, ModularArmorRecipe.ArmorKind.BOOTS))
                 .save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "modular_boots_assembly").toString());
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.CRUDE_ANVIL)
+                .define('S', Items.COBBLESTONE)
+                .pattern("SSS")
+                .pattern(" S ")
+                .pattern("S S")
+                .unlockedBy("has_cobblestone", has(Items.COBBLESTONE))
+                .save(output);
+
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.TOOL_FORGE)
                 .define('B', Items.COPPER_BLOCK)
                 .define('I', Items.COPPER_INGOT)
-                .pattern("BBB")
                 .pattern(" I ")
-                .pattern("III")
+                .pattern("IBI")
+                .pattern(" I ")
                 .unlockedBy("has_copper_ingot", has(Items.COPPER_INGOT))
                 .save(output);
 
@@ -74,13 +82,30 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_lava_bucket", has(Items.LAVA_BUCKET))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.PATTERN_CREATION_STATION)
-                .define('X', Items.PAPER)
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.PATTERN_BOARD, 4)
                 .define('P', ItemTags.PLANKS)
-                .pattern("XX")
-                .pattern("PP")
-                .unlockedBy("has_paper", has(Items.PAPER))
+                .pattern("P")
+                .unlockedBy("has_planks", has(ItemTags.PLANKS))
                 .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.PATTERN_CREATION_STATION)
+                .define('P', ItemTags.PLANKS)
+                .define('S', Items.COBBLESTONE)
+                .pattern("P P")
+                .pattern(" S ")
+                .unlockedBy("has_planks", has(ItemTags.PLANKS))
+                .save(output);
+
+        for (ModBlocks.PatternRackVariant variant : ModBlocks.PATTERN_RACK_VARIANTS) {
+            ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, variant.block())
+                    .define('P', variant.recipePlanks())
+                    .define('S', Items.STICK)
+                    .pattern("PPP")
+                    .pattern("S S")
+                    .pattern("PPP")
+                    .unlockedBy("has_" + variant.id(), has(variant.recipePlanks()))
+                    .save(output);
+        }
 
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.TOOLMAKERS_BENCH)
                 .define('S', Items.CHISELED_STONE_BRICKS)
@@ -106,14 +131,6 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("H")
                 .pattern("S")
                 .unlockedBy("has_smithing_hammer_head", has(ModItems.SMITHING_HAMMER_HEAD.get()))
-                .save(output);
-
-        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.SCREWDRIVER)
-                .define('H', ModItems.SCREWDRIVER_HEAD.get())
-                .define('S', Items.STICK)
-                .pattern("H")
-                .pattern("S")
-                .unlockedBy("has_screwdriver_head", has(ModItems.SCREWDRIVER_HEAD.get()))
                 .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.GEM_CUTTERS_KNIFE)

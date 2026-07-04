@@ -1,20 +1,21 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "equipment",
+  "category": "misc",
   "key": {
-    "H": {
-      "item": "mobstoolforging:screwdriver_head"
+    "P": {
+      "item": "minecraft:spruce_planks"
     },
     "S": {
       "item": "minecraft:stick"
     }
   },
   "pattern": [
-    "H",
-    "S"
+    "PPP",
+    "S S",
+    "PPP"
   ],
   "result": {
     "count": 1,
-    "id": "mobstoolforging:screwdriver"
+    "id": "mobstoolforging:spruce_pattern_rack"
   }
 }

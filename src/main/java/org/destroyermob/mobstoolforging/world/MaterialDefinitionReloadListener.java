@@ -53,12 +53,13 @@ public class MaterialDefinitionReloadListener extends SimpleJsonResourceReloadLi
         Item displayItem = parseItem(GsonHelper.getAsString(json, "display_item", id.toString()), "display_item");
         String translationKey = GsonHelper.getAsString(json, "translation_key", null);
         Tier tier = parseTier(json, category, displayItem);
+        HeatLevel minimumForgeHeat = parseMinimumForgeHeat(json, category);
         List<Item> sourceItems = items(json, "items");
         List<TagKey<Item>> sourceTags = itemTags(json, "tags");
         List<String> visualSlots = strings(json, "visual_slots");
         List<Item> handleItems = items(json, "handle_items");
         return new MaterialEntry(
-                new ToolMaterialDefinition(id, category, displayItem, tier, translationKey),
+                new ToolMaterialDefinition(id, category, displayItem, tier, minimumForgeHeat, translationKey),
                 sourceItems,
                 sourceTags,
                 visualSlots,
@@ -72,6 +73,24 @@ public class MaterialDefinitionReloadListener extends SimpleJsonResourceReloadLi
             case "metal", "metals" -> MaterialCategory.METAL;
             default -> throw new IllegalArgumentException("Unknown material category: " + value);
         };
+    }
+
+    private static HeatLevel parseMinimumForgeHeat(JsonObject json, MaterialCategory category) {
+        HeatLevel fallback = ToolMaterialDefinition.defaultMinimumForgeHeat(category);
+        String value = null;
+        if (json.has("minimum_forge_heat")) {
+            value = GsonHelper.getAsString(json, "minimum_forge_heat");
+        } else if (json.has("minimum_heat_level")) {
+            value = GsonHelper.getAsString(json, "minimum_heat_level");
+        }
+        if (value == null) {
+            return fallback;
+        }
+        HeatLevel parsed = HeatLevel.parse(value, null);
+        if (parsed == null) {
+            throw new IllegalArgumentException("Unknown minimum forge heat: " + value);
+        }
+        return parsed;
     }
 
     private static Tier parseTier(JsonObject json, MaterialCategory category, Item displayItem) {

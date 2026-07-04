@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.data;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.flag.FeatureFlags;
@@ -15,9 +16,11 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
+        dropSelf(ModBlocks.CRUDE_ANVIL.get());
         dropSelf(ModBlocks.TOOL_FORGE.get());
         dropSelf(ModBlocks.LAPIDARY_TABLE.get());
         dropSelf(ModBlocks.PATTERN_CREATION_STATION.get());
+        ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> dropSelf(variant.block().get()));
         dropSelf(ModBlocks.TOOLMAKERS_BENCH.get());
         dropSelf(ModBlocks.HEATING_FORGE.get());
         add(ModBlocks.CRUCIBLE.get(), noDrop());
@@ -28,7 +31,8 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
 
     @Override
     protected Iterable<Block> getKnownBlocks() {
-        return Set.of(
+        Set<Block> blocks = new LinkedHashSet<>(Set.of(
+                ModBlocks.CRUDE_ANVIL.get(),
                 ModBlocks.TOOL_FORGE.get(),
                 ModBlocks.LAPIDARY_TABLE.get(),
                 ModBlocks.PATTERN_CREATION_STATION.get(),
@@ -38,6 +42,8 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
                 ModBlocks.FOUNDRY_FORGE.get(),
                 ModBlocks.KNAPPING_FLINT.get(),
                 ModBlocks.GROUND_TOOL_ASSEMBLY.get()
-        );
+        ));
+        ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
+        return blocks;
     }
 }

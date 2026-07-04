@@ -31,6 +31,7 @@ public final class ToolTooltipBuilder {
         }
         ToolStatProfile profile = ToolStatBuilder.profileForTooltip(stack, definition, construction);
         List<Component> lines = new ArrayList<>();
+        lines.add(qualityLine(construction.qualityLevel()));
 
         if (flag.hasShiftDown()) {
             addShiftTooltip(lines, definition, construction, profile);
@@ -44,6 +45,13 @@ public final class ToolTooltipBuilder {
         }
 
         return lines;
+    }
+
+    private static Component qualityLine(ForgingQuality quality) {
+        return Component.translatable("tooltip.mobstoolforging.quality")
+                .withStyle(ChatFormatting.DARK_GRAY)
+                .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(quality.displayName());
     }
 
     private static void addNormalTooltip(List<Component> lines, ToolStatProfile profile) {
@@ -177,7 +185,8 @@ public final class ToolTooltipBuilder {
                 + ", binding=" + construction.bindingMaterial().map(ResourceLocation::toString).orElse("-")
                 + ", wrap=" + construction.wrapMaterial().map(ResourceLocation::toString).orElse("-")
                 + ", focus=" + construction.focusMaterial().map(ResourceLocation::toString).orElse("-")
-                + ", treatment=" + construction.treatment().map(ResourceLocation::toString).orElse("-");
+                + ", treatment=" + construction.treatment().map(ResourceLocation::toString).orElse("-")
+                + ", quality=" + construction.quality();
     }
 
     private static void addBlankIfNeeded(List<Component> lines) {

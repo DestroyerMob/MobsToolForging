@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.registry;
 
+import java.util.List;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
@@ -19,6 +20,7 @@ import org.destroyermob.mobstoolforging.item.ModularPickaxeItem;
 import org.destroyermob.mobstoolforging.item.ModularShovelItem;
 import org.destroyermob.mobstoolforging.item.ModularSwordItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
+import org.destroyermob.mobstoolforging.item.StationToolItem;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.ForgeTemplate;
@@ -34,6 +36,10 @@ public final class ModItems {
             "tool_forge",
             () -> new BlockItem(ModBlocks.TOOL_FORGE.get(), new Item.Properties())
     );
+    public static final DeferredItem<BlockItem> CRUDE_ANVIL = ITEMS.register(
+            "crude_anvil",
+            () -> new BlockItem(ModBlocks.CRUDE_ANVIL.get(), new Item.Properties())
+    );
     public static final DeferredItem<BlockItem> LAPIDARY_TABLE = ITEMS.register(
             "lapidary_table",
             () -> new BlockItem(ModBlocks.LAPIDARY_TABLE.get(), new Item.Properties())
@@ -41,6 +47,30 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> PATTERN_CREATION_STATION = ITEMS.register(
             "pattern_creation_station",
             () -> new BlockItem(ModBlocks.PATTERN_CREATION_STATION.get(), new Item.Properties())
+    );
+    public static final DeferredItem<BlockItem> PATTERN_RACK = blockItem("pattern_rack", ModBlocks.PATTERN_RACK);
+    public static final DeferredItem<BlockItem> SPRUCE_PATTERN_RACK = blockItem("spruce_pattern_rack", ModBlocks.SPRUCE_PATTERN_RACK);
+    public static final DeferredItem<BlockItem> BIRCH_PATTERN_RACK = blockItem("birch_pattern_rack", ModBlocks.BIRCH_PATTERN_RACK);
+    public static final DeferredItem<BlockItem> JUNGLE_PATTERN_RACK = blockItem("jungle_pattern_rack", ModBlocks.JUNGLE_PATTERN_RACK);
+    public static final DeferredItem<BlockItem> ACACIA_PATTERN_RACK = blockItem("acacia_pattern_rack", ModBlocks.ACACIA_PATTERN_RACK);
+    public static final DeferredItem<BlockItem> DARK_OAK_PATTERN_RACK = blockItem("dark_oak_pattern_rack", ModBlocks.DARK_OAK_PATTERN_RACK);
+    public static final DeferredItem<BlockItem> MANGROVE_PATTERN_RACK = blockItem("mangrove_pattern_rack", ModBlocks.MANGROVE_PATTERN_RACK);
+    public static final DeferredItem<BlockItem> CHERRY_PATTERN_RACK = blockItem("cherry_pattern_rack", ModBlocks.CHERRY_PATTERN_RACK);
+    public static final DeferredItem<BlockItem> BAMBOO_PATTERN_RACK = blockItem("bamboo_pattern_rack", ModBlocks.BAMBOO_PATTERN_RACK);
+    public static final DeferredItem<BlockItem> CRIMSON_PATTERN_RACK = blockItem("crimson_pattern_rack", ModBlocks.CRIMSON_PATTERN_RACK);
+    public static final DeferredItem<BlockItem> WARPED_PATTERN_RACK = blockItem("warped_pattern_rack", ModBlocks.WARPED_PATTERN_RACK);
+    public static final List<DeferredItem<BlockItem>> PATTERN_RACK_ITEMS = List.of(
+            PATTERN_RACK,
+            SPRUCE_PATTERN_RACK,
+            BIRCH_PATTERN_RACK,
+            JUNGLE_PATTERN_RACK,
+            ACACIA_PATTERN_RACK,
+            DARK_OAK_PATTERN_RACK,
+            MANGROVE_PATTERN_RACK,
+            CHERRY_PATTERN_RACK,
+            BAMBOO_PATTERN_RACK,
+            CRIMSON_PATTERN_RACK,
+            WARPED_PATTERN_RACK
     );
     public static final DeferredItem<BlockItem> TOOLMAKERS_BENCH = ITEMS.register(
             "toolmakers_bench",
@@ -60,11 +90,11 @@ public final class ModItems {
     );
     public static final DeferredItem<Item> SMITHING_HAMMER = ITEMS.register(
             "smithing_hammer",
-            () -> new Item(new Item.Properties().durability(128))
+            () -> new StationToolItem(new Item.Properties().durability(128))
     );
     public static final DeferredItem<Item> IRON_SMITHING_HAMMER = ITEMS.register(
             "iron_smithing_hammer",
-            () -> new Item(new Item.Properties().durability(384))
+            () -> new StationToolItem(new Item.Properties().durability(384))
     );
     public static final DeferredItem<Item> SMITHING_HAMMER_HEAD = ITEMS.register(
             "smithing_hammer_head",
@@ -72,7 +102,7 @@ public final class ModItems {
     );
     public static final DeferredItem<Item> SCREWDRIVER = ITEMS.register(
             "screwdriver",
-            () -> new Item(new Item.Properties().durability(128))
+            () -> new StationToolItem(new Item.Properties().durability(128))
     );
     public static final DeferredItem<Item> SCREWDRIVER_HEAD = ITEMS.register(
             "screwdriver_head",
@@ -80,7 +110,7 @@ public final class ModItems {
     );
     public static final DeferredItem<Item> GEM_CUTTERS_KNIFE = ITEMS.register(
             "gem_cutters_knife",
-            () -> new Item(new Item.Properties().durability(128))
+            () -> new StationToolItem(new Item.Properties().durability(128))
     );
     public static final DeferredItem<Item> GEM_CUTTERS_BLADE = ITEMS.register(
             "gem_cutters_blade",
@@ -88,6 +118,10 @@ public final class ModItems {
     );
     public static final DeferredItem<Item> DIAMOND_POWDER = ITEMS.register(
             "diamond_powder",
+            () -> new Item(new Item.Properties())
+    );
+    public static final DeferredItem<Item> PATTERN_BOARD = ITEMS.register(
+            "pattern_board",
             () -> new Item(new Item.Properties())
     );
     public static final DeferredItem<Item> FLINT_SHARD = ITEMS.register(
@@ -260,6 +294,10 @@ public final class ModItems {
     );
 
     private ModItems() {
+    }
+
+    private static DeferredItem<BlockItem> blockItem(String id, net.neoforged.neoforge.registries.DeferredBlock<? extends net.minecraft.world.level.block.Block> block) {
+        return ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()));
     }
 
     public static void register(IEventBus eventBus) {

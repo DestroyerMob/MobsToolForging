@@ -31,7 +31,11 @@ public class ToolForgeBlock extends ToolWorkstationBlock {
     private static final VoxelShape WEST_SHAPE = rotateClockwise(SOUTH_SHAPE);
 
     public ToolForgeBlock(BlockBehaviour.Properties properties) {
-        super(properties, WorkstationKind.TOOL_FORGE);
+        this(properties, WorkstationKind.TOOL_FORGE);
+    }
+
+    protected ToolForgeBlock(BlockBehaviour.Properties properties, WorkstationKind kind) {
+        super(properties, kind);
     }
 
     @Override

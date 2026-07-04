@@ -14,7 +14,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
@@ -99,7 +98,7 @@ public class PatternCreationStationBlockEntity extends BlockEntity implements Co
         if (slot != 0) {
             return;
         }
-        paperStack = stack.isEmpty() || !stack.is(Items.PAPER) ? ItemStack.EMPTY : stack.copy();
+        paperStack = stack.isEmpty() || !PatternCreationStationMenu.isPatternInput(stack) ? ItemStack.EMPTY : stack.copy();
         if (!paperStack.isEmpty() && paperStack.getCount() > getMaxStackSize()) {
             paperStack.setCount(getMaxStackSize());
         }
@@ -108,7 +107,7 @@ public class PatternCreationStationBlockEntity extends BlockEntity implements Co
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot == 0 && stack.is(Items.PAPER);
+        return slot == 0 && PatternCreationStationMenu.isPatternInput(stack);
     }
 
     @Override

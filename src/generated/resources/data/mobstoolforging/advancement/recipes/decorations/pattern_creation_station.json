@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_paper": {
+    "has_planks": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:paper"
+            "items": "#minecraft:planks"
           }
         ]
       },
@@ -21,7 +21,7 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_paper"
+      "has_planks"
     ]
   ],
   "rewards": {

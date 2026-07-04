@@ -16,6 +16,7 @@ Datapacks can:
 - Add tool type definitions in `data/<namespace>/mobstoolforging/tool_types/<tool_type>.json`.
 - Add trait definitions in `data/<namespace>/mobstoolforging/traits/<trait>.json`.
 - Add additive stat rules in `data/<namespace>/mobstoolforging/stat_rules/<rule>.json`.
+- Add forge template definitions in `data/<namespace>/mobstoolforging/forge_templates/<template>.json`.
 - Add handles to `mobstoolforging:tool_handles`.
 - Add bindings, wraps, foci, and treatments through their existing tags.
 - Add a generic modular recipe for a registered external tool type:
@@ -34,6 +35,7 @@ Material definition JSON lets a compat datapack say what an item or tag means to
 {
   "category": "metal",
   "display_item": "mobs_more_weapons:steel_ingot",
+  "minimum_forge_heat": "hot",
   "items": ["mobs_more_weapons:steel_ingot"],
   "tags": ["c:ingots/steel"],
   "translation_key": "material.mobs_more_weapons.steel",
@@ -49,6 +51,8 @@ Material definition JSON lets a compat datapack say what an item or tag means to
   "handle_items": []
 }
 ```
+
+`minimum_forge_heat` controls which workshop heat tier can start metal work for this material. Valid values are `"none"`, `"low"`, `"hot"`, and `"high"`; `"minimum_heat_level"` is accepted as an alias. Built-in copper, gold, and iron use `"low"` so campfire-tier forging can start early work. Other datapack metals default to `"hot"` unless they opt into `"low"` explicitly. Gem materials default to `"none"` because they are cut on the Lapidary Table rather than forged.
 
 `tier` can also be a simple string such as `"iron"`, `"diamond"`, `"netherite"`, `"copper"`, or `"emerald"`. `items` and `tags` are accepted material sources. `visual_slots` controls which model layers should collect sprites for this material. `handle_items` maps specific handle items to this material id, but only use it when matching handle sprites exist.
 
@@ -102,6 +106,20 @@ External physical patterns can use the generic `mobstoolforging:template_pattern
 ```
 
 Use that result in a normal recipe to create a pattern item for any loaded forge template.
+
+Forge template JSON keeps the existing `pattern_station_paper_cost` field for compatibility. The field now means the generic Pattern Creation Station input cost: Pattern Boards by default, or paper when `basicPatternsRequirePaper=true`. Existing bridge JSON does not need to be renamed.
+
+Station-work JSON can target `"tool_forge"`, `"smithing_anvil"`, `"crude_anvil"`, `"stone_anvil"`, `"lapidary_table"`, or `"toolmakers_bench"` as the `workstation` value. Crude Anvil recipes should be treated as lower-tier physical anvil work, not a separate tool-family schema.
+
+## Quality Compatibility
+
+Tool parts and finished tools still store quality as an integer field on the existing `TOOL_PART` and `TOOL_CONSTRUCTION` components. The score maps to public display levels: Crude, Worked, Well Forged, Fine, and Masterwork. Missing quality data defaults to Well Forged, so existing saves and bridge-created stacks remain valid.
+
+Finished tool quality is derived during physical Toolmaker's Bench assembly from the primary part, required support parts, and a small assembly baseline. Datapacks and bridge mods can keep emitting the same components and let MTF compute quality naturally.
+
+Quality stat effects are intentionally modest and config-gated by `qualityAffectsStats`. Armour part quality fields remain compatible, but this pass does not add new armour quality effects or armour progression.
+
+The MoreWeapons bridge schema, Better Enchanting part tags, enchantment target tags, and existing data component names remain valid. Add optional fields where useful; do not rename existing bridge fields or part tags just to adopt the quality pass.
 
 Trait JSON controls display identity:
 

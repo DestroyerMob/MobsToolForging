@@ -13,9 +13,11 @@ public class ModLanguageProvider extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
+        addBlock(ModBlocks.CRUDE_ANVIL, "Crude Anvil");
         addBlock(ModBlocks.TOOL_FORGE, "Smithing Anvil");
         addBlock(ModBlocks.LAPIDARY_TABLE, "Lapidary Table");
         addBlock(ModBlocks.PATTERN_CREATION_STATION, "Pattern Creation Station");
+        ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> addBlock(variant.block(), variant.displayName()));
         addBlock(ModBlocks.TOOLMAKERS_BENCH, "Toolmaker's Bench");
         addBlock(ModBlocks.HEATING_FORGE, "Heating Forge");
         addBlock(ModBlocks.CRUCIBLE, "Crucible");
@@ -33,6 +35,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.GEM_CUTTERS_KNIFE, "Gem Cutter's Knife");
         addItem(ModItems.GEM_CUTTERS_BLADE, "Gem Cutter's Blade");
         addItem(ModItems.DIAMOND_POWDER, "Diamond Powder");
+        addItem(ModItems.PATTERN_BOARD, "Pattern Board");
         addItem(ModItems.FLINT_SHARD, "Flint Shard");
         addItem(ModItems.PLANT_FIBER, "Plant Fiber");
         addItem(ModItems.FIRE_STICK, "Fire Stick");
@@ -115,6 +118,13 @@ public class ModLanguageProvider extends LanguageProvider {
         add("material.mobstoolforging.amethyst", "Amethyst");
         add("material.mobstoolforging.nether", "Nether");
         add("material.mobstoolforging.sculk", "Sculk");
+        add("quality.mobstoolforging.crude", "Crude");
+        add("quality.mobstoolforging.worked", "Worked");
+        add("quality.mobstoolforging.well_forged", "Well Forged");
+        add("quality.mobstoolforging.fine", "Fine");
+        add("quality.mobstoolforging.masterwork", "Masterwork");
+        add("finish.mobstoolforging.unpolished", "Unpolished");
+        add("finish.mobstoolforging.polished", "Polished");
         add("screen.mobstoolforging.tool_forge_templates", "Tool Templates");
         add("screen.mobstoolforging.pattern_creation_station", "Pattern Creation");
         add("container.mobstoolforging.pattern_creation_station", "Pattern Creation");
@@ -125,6 +135,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("jei.mobstoolforging.catalyst", "Catalyst: %s");
         add("jade.mobstoolforging.abrasive", "Abrasive: %s");
         add("jade.mobstoolforging.pattern", "Pattern: %s");
+        add("jade.mobstoolforging.source", "Source: %s");
+        add("jade.mobstoolforging.source_pattern_rack", "Pattern Rack");
+        add("jade.mobstoolforging.patterns", "Patterns: %s/%s");
+        add("jade.mobstoolforging.linked_racks", "Linked Racks: %s/%s");
         add("jade.mobstoolforging.work", "Work: %s");
         add("jade.mobstoolforging.output", "Output: %s");
         add("jade.mobstoolforging.materials", "Materials: %s/%s");
@@ -163,6 +177,27 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.template_selected", "Selected %s.");
         add("message.mobstoolforging.template_cleared", "Template cleared.");
         add("message.mobstoolforging.invalid_template_pattern", "This pattern does not point to a known template.");
+        add("message.mobstoolforging.pattern_rack_select", "Select a pattern from a nearby rack.");
+        add("message.mobstoolforging.station_pattern_set", "%s set to: %s.");
+        add("message.mobstoolforging.pattern_wrong_station", "That pattern cannot be worked on this station.");
+        add("message.mobstoolforging.pattern_rack_too_far", "That rack is too far from the station.");
+        add("message.mobstoolforging.pattern_removed", "Pattern removed.");
+        add("message.mobstoolforging.pattern_rack_full", "Pattern Rack is full.");
+        add("message.mobstoolforging.no_pattern_selected", "No pattern selected.");
+        add("message.mobstoolforging.pattern_missing", "Pattern missing.");
+        add("message.mobstoolforging.pattern_installed", "Installed %s.");
+        add("message.mobstoolforging.pattern_rack_inspect", "%s - %s");
+        add("message.mobstoolforging.pattern_rack_no_compatible_station", "No compatible station");
+        add("message.mobstoolforging.pattern_rack_disabled", "Pattern Racks are disabled.");
+        add("message.mobstoolforging.pattern_rack_link_select_station", "Select a station to link this rack.");
+        add("message.mobstoolforging.pattern_rack_linked", "Linked Pattern Rack to %s (%s/%s).");
+        add("message.mobstoolforging.pattern_rack_already_linked", "That station is already linked to this rack.");
+        add("message.mobstoolforging.pattern_rack_link_station_full", "That station already has %s linked racks.");
+        add("message.mobstoolforging.pattern_rack_linked_set", "Set %s on %s linked station(s).");
+        add("message.mobstoolforging.pattern_rack_linked_set_some", "Set %s on %s linked station(s); %s busy.");
+        add("message.mobstoolforging.pattern_rack_linked_busy", "Linked stations are busy.");
+        add("message.mobstoolforging.pattern_rack_linked_wrong_station", "That pattern cannot be worked on linked stations.");
+        add("message.mobstoolforging.pattern_rack_linked_none", "No linked station accepted that pattern.");
         add("message.mobstoolforging.station_cleared", "Work cleared.");
         add("message.mobstoolforging.forge_busy", "Finish or clear the current work first.");
         add("message.mobstoolforging.materials_full", "The station already has enough material.");
@@ -184,8 +219,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.station_work_missing", "This work recipe is no longer available.");
         add("message.mobstoolforging.lapidary_abrasive_placed", "Abrasive placed.");
         add("message.mobstoolforging.lapidary_abrasive_present", "The Lapidary Table already has abrasive.");
-        add("message.mobstoolforging.lapidary_needs_abrasive", "Place Diamond Powder on the Lapidary Table first.");
-        add("message.mobstoolforging.lapidary_needs_knife", "Use a Gem Cutter's Knife at the Lapidary Table.");
+        add("message.mobstoolforging.lapidary_needs_abrasive", "Place Diamond Powder on the Lapidary Table for diamond work.");
+        add("message.mobstoolforging.lapidary_needs_knife", "A Gem Cutter's Knife can improve Lapidary Table quality.");
         add("message.mobstoolforging.mixed_materials", "Finish this part with the same material.");
         add("message.mobstoolforging.use_lapidary_table", "Gem heads are shaped on a Lapidary Table.");
         add("message.mobstoolforging.tool_repair_tool_placed", "Tool placed for repair.");
@@ -193,8 +228,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.tool_repair_needs_material", "Add a matching head repair material.");
         add("message.mobstoolforging.tool_repair_ready", "Strike the Smithing Anvil with a Smithing Hammer to repair.");
         add("message.mobstoolforging.tool_repaired", "Tool repaired.");
-        add("message.mobstoolforging.use_tool_forge", "Metal heads are forged on a Smithing Anvil.");
-        add("message.mobstoolforging.use_toolmakers_bench", "Place parts here, assemble them with a Screwdriver, or split a tool with a Smithing Hammer.");
+        add("message.mobstoolforging.use_tool_forge", "Metal heads are forged on a Crude Anvil or Smithing Anvil.");
+        add("message.mobstoolforging.use_toolmakers_bench", "Place parts here, then use an empty hand or Smithing Hammer to assemble.");
         add("message.mobstoolforging.toolmaker_part_placed", "Part placed.");
         add("message.mobstoolforging.toolmaker_needs_parts", "Place a compatible head and handle first.");
         add("message.mobstoolforging.toolmaker_invalid", "That does not fit this bench.");
@@ -203,6 +238,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.toolmaker_broken_tool", "Repair this tool before separating it.");
         add("message.mobstoolforging.toolmaker_no_tool", "Place one assembled tool before separating it.");
         add("message.mobstoolforging.toolmaker_status", "%s item(s) placed.");
+        add("message.mobstoolforging.part_polished", "Polished %s.");
         add("message.mobstoolforging.knapping_status", "Knapping %s - %s/%s hits");
         add("message.mobstoolforging.knapping_complete", "%s is ready for ground assembly.");
         add("message.mobstoolforging.knapping_complete_drop", "Knapped %s.");
@@ -216,12 +252,15 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.metal_needs_heat", "Heat this metal in a Heating Forge first.");
         add("message.mobstoolforging.metal_needs_heat_percent", "Heat this metal to at least %s%% first.");
         add("message.mobstoolforging.metal_needs_heat_current", "Heat is %s%%/%s%%: %s.");
+        add("message.mobstoolforging.metal_needs_workshop_heat", "Start this work beside a lit campfire or fueled Heating Forge.");
         add("message.mobstoolforging.heated_parts_cannot_craft", "Quench or cool heated parts before crafting.");
         add("message.mobstoolforging.heating_disabled", "Forge heating is disabled.");
         add("message.mobstoolforging.heating_fuel_added", "Fuel added.");
         add("message.mobstoolforging.heating_workpiece_added", "Workpiece placed.");
         add("message.mobstoolforging.heating_workpiece_busy", "Remove the current workpiece first.");
         add("message.mobstoolforging.heating_gems_rejected", "Gems are cut on a Lapidary Table.");
+        add("message.mobstoolforging.campfire_workpiece_placed", "Workpiece set on the campfire.");
+        add("message.mobstoolforging.campfire_workpiece_full", "The campfire is full.");
         add("message.mobstoolforging.heating_needs_fuel", "Add fuel before lighting the forge.");
         add("message.mobstoolforging.heating_ignited", "Heating forge lit.");
         add("message.mobstoolforging.heating_lit", "The forge is burning.");
@@ -246,6 +285,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.workpiece_status.workable", "Workable heat");
         add("tooltip.mobstoolforging.workpiece_status.white_hot", "White hot");
         add("tooltip.mobstoolforging.workpiece_status.cooling", "Cooling");
+        add("tooltip.mobstoolforging.quality", "Quality");
+        add("tooltip.mobstoolforging.quality_adjusted", "%s (unpolished: %s)");
+        add("tooltip.mobstoolforging.finish", "Finish");
+        add("tooltip.mobstoolforging.unpolished_hint", "Sneak-use a Grindstone to polish");
         add("tooltip.mobstoolforging.part_durability", "Durability: %s%%");
         add("tooltip.mobstoolforging.armor_part_material", "Material: %s");
         add("tooltip.mobstoolforging.broken_tool", "Broken - repair before use");
@@ -312,6 +355,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.trait.nether_treated.desc", "favours fire and Nether magic");
         add("tooltip.mobstoolforging.trait.echoing", "Echoing");
         add("tooltip.mobstoolforging.trait.echoing.desc", "favours silence, sculk, and echo magic");
+        add("tooltip.mobstoolforging.trait.workmanship_good", "Good Workmanship");
+        add("tooltip.mobstoolforging.trait.workmanship_good.desc", "reflects careful forging quality");
+        add("tooltip.mobstoolforging.trait.workmanship_rough", "Rough Workmanship");
+        add("tooltip.mobstoolforging.trait.workmanship_rough.desc", "reflects crude forging quality");
         add("commands.mobstoolforging.give_debug.invalid_armor_material", "%s is not supported for modular armour yet.");
         add("commands.mobstoolforging.give_debug.sword_needs_guard", "A modular sword needs a guard material.");
         add("commands.mobstoolforging.give_debug.unknown_tool", "Unknown modular tool type: %s.");

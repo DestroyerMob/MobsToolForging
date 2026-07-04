@@ -94,11 +94,20 @@ public record ForgeTemplateDefinition(
             }
             ItemStack stack = new ItemStack(item);
             stack.set(ModDataComponents.TOOL_PART.get(), new ToolPartData(partType, materialId, quality));
+            applyForgedFinish(stack, materialId);
             if (!(item instanceof ModularToolPartItem)) {
                 ToolStackNames.applyPartName(stack, partType, materialId);
             }
             return stack;
         }
-        return ToolTypeRegistry.createPart(this, materialId, quality);
+        return applyForgedFinish(ToolTypeRegistry.createPart(this, materialId, quality), materialId);
+    }
+
+    private ItemStack applyForgedFinish(ItemStack stack, ResourceLocation materialId) {
+        ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
+        if (data != null) {
+            stack.set(ModDataComponents.TOOL_PART.get(), data.withFinish(ToolPartData.initialForgedFinish(this, materialId)));
+        }
+        return stack;
     }
 }

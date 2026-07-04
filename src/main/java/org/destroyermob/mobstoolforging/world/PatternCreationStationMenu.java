@@ -21,8 +21,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
 
 public class PatternCreationStationMenu extends AbstractContainerMenu {
@@ -85,7 +87,7 @@ public class PatternCreationStationMenu extends AbstractContainerMenu {
         this.inputSlot = addSlot(new Slot(inputContainer, 0, 20, 33) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return stack.is(Items.PAPER);
+                return isPatternInput(stack);
             }
 
             @Override
@@ -105,7 +107,7 @@ public class PatternCreationStationMenu extends AbstractContainerMenu {
             @Override
             public void onTake(Player player, ItemStack stack) {
                 stack.onCraftedBy(player.level(), player, stack.getCount());
-                ItemStack consumed = PatternCreationStationMenu.this.inputSlot.remove(selectedPatternPaperCost());
+                ItemStack consumed = PatternCreationStationMenu.this.inputSlot.remove(selectedPatternInputCost());
                 if (!consumed.isEmpty()) {
                     PatternCreationStationMenu.this.setupResultSlot();
                 }
@@ -153,11 +155,15 @@ public class PatternCreationStationMenu extends AbstractContainerMenu {
     }
 
     public int getPatternPaperCost(int index) {
+        return getPatternInputCost(index);
+    }
+
+    public int getPatternInputCost(int index) {
         return pattern(index).map(ForgeTemplateDefinition::patternStationPaperCost).orElse(1);
     }
 
     public boolean hasInputItem() {
-        return inputSlot.hasItem() && inputSlot.getItem().is(Items.PAPER) && !patternIds.isEmpty();
+        return inputSlot.hasItem() && isPatternInput(inputSlot.getItem()) && !patternIds.isEmpty();
     }
 
     @Override
@@ -192,14 +198,14 @@ public class PatternCreationStationMenu extends AbstractContainerMenu {
     private void setupPatternList(ItemStack stack) {
         selectedPatternIndex.set(-1);
         resultSlot.set(ItemStack.EMPTY);
-        if (!stack.is(Items.PAPER)) {
+        if (!isPatternInput(stack)) {
             input = ItemStack.EMPTY;
         }
         broadcastChanges();
     }
 
     private void setupResultSlot() {
-        if (hasInputItem() && isValidPatternIndex(selectedPatternIndex.get()) && inputSlot.getItem().getCount() >= selectedPatternPaperCost()) {
+        if (hasInputItem() && isValidPatternIndex(selectedPatternIndex.get()) && inputSlot.getItem().getCount() >= selectedPatternInputCost()) {
             resultSlot.set(ToolTemplateItem.createPatternStack(patternIds.get(selectedPatternIndex.get())));
         } else {
             resultSlot.set(ItemStack.EMPTY);
@@ -215,8 +221,8 @@ public class PatternCreationStationMenu extends AbstractContainerMenu {
         return isValidPatternIndex(index) ? ToolTypeRegistry.template(patternIds.get(index)) : Optional.empty();
     }
 
-    private int selectedPatternPaperCost() {
-        return getPatternPaperCost(selectedPatternIndex.get());
+    private int selectedPatternInputCost() {
+        return getPatternInputCost(selectedPatternIndex.get());
     }
 
     public void registerUpdateListener(Runnable listener) {
@@ -246,7 +252,7 @@ public class PatternCreationStationMenu extends AbstractContainerMenu {
                 if (!moveItemStackTo(slotStack, INVENTORY_SLOT_START, HOTBAR_SLOT_END, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (slotStack.is(Items.PAPER)) {
+            } else if (isPatternInput(slotStack)) {
                 if (!moveItemStackTo(slotStack, INPUT_SLOT, RESULT_SLOT, false)) {
                     return ItemStack.EMPTY;
                 }
@@ -316,6 +322,11 @@ public class PatternCreationStationMenu extends AbstractContainerMenu {
                 .filter(template -> !ToolTemplateItem.createPatternStack(template).isEmpty())
                 .map(ForgeTemplateDefinition::id)
                 .toList();
+    }
+
+    public static boolean isPatternInput(ItemStack stack) {
+        return stack.is(Items.PAPER)
+                || !MobsToolForgingConfig.BASIC_PATTERNS_REQUIRE_PAPER.get() && stack.is(ModItems.PATTERN_BOARD.get());
     }
 
     private void inputContainerChanged() {

@@ -27,12 +27,14 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     private static final String BURN_DURATION_TAG = "BurnDuration";
     private static final String HEAT_PROGRESS_TAG = "HeatProgress";
     private static final String IGNITED_TAG = "Ignited";
+    private static final String LAST_HOT_GAME_TIME_TAG = "LastHotGameTime";
 
     private ItemStack fuelStack = ItemStack.EMPTY;
     private final ItemStack[] workpieceStacks = new ItemStack[WORKPIECE_SLOTS];
     private final int[] heatProgress = new int[WORKPIECE_SLOTS];
     private int burnTime;
     private int burnDuration;
+    private long lastHotGameTime;
     private boolean ignited;
 
     public HeatingForgeBlockEntity(BlockPos pos, BlockState blockState) {
@@ -48,6 +50,7 @@ public class HeatingForgeBlockEntity extends BlockEntity {
         int requiredTicks = MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get();
         if (forge.burnTime > 0) {
             forge.burnTime--;
+            forge.lastHotGameTime = level.getGameTime();
             changed = true;
         }
         if (forge.ignited && forge.burnTime <= 0) {
@@ -127,6 +130,10 @@ public class HeatingForgeBlockEntity extends BlockEntity {
 
     public boolean isLit() {
         return burnTime > 0;
+    }
+
+    public boolean isWorkshopHot(Level level) {
+        return burnTime > 0 || level.getGameTime() - lastHotGameTime <= MobsToolForgingConfig.FORGE_HEAT_BUFFER_TICKS.get();
     }
 
     public boolean hasFuel() {
@@ -364,6 +371,7 @@ public class HeatingForgeBlockEntity extends BlockEntity {
         tag.putInt(BURN_TIME_TAG, burnTime);
         tag.putInt(BURN_DURATION_TAG, burnDuration);
         tag.putBoolean(IGNITED_TAG, ignited);
+        tag.putLong(LAST_HOT_GAME_TIME_TAG, lastHotGameTime);
     }
 
     @Override
@@ -381,6 +389,7 @@ public class HeatingForgeBlockEntity extends BlockEntity {
         burnTime = tag.getInt(BURN_TIME_TAG);
         burnDuration = tag.getInt(BURN_DURATION_TAG);
         ignited = tag.getBoolean(IGNITED_TAG);
+        lastHotGameTime = tag.getLong(LAST_HOT_GAME_TIME_TAG);
         compactWorkpieces();
     }
 

@@ -9,6 +9,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModTags;
 
@@ -308,7 +309,29 @@ public final class ToolmakerBenchAssembly {
         }
 
         private int quality() {
-            return ToolConstructionData.DEFAULT_QUALITY;
+            if (!MobsToolForgingConfig.ENABLE_QUALITY.get()) {
+                return ToolConstructionData.DEFAULT_QUALITY;
+            }
+            ToolPartData primary = part.get(ModDataComponents.TOOL_PART.get());
+            int primaryScore = primary == null ? ToolConstructionData.DEFAULT_QUALITY : primary.effectiveQuality();
+            int supportScore = primaryScore;
+            if (!requiredParts.isEmpty()) {
+                int total = 0;
+                int count = 0;
+                for (ItemStack supportPart : requiredParts.values()) {
+                    ToolPartData supportData = supportPart.get(ModDataComponents.TOOL_PART.get());
+                    if (supportData != null) {
+                        total += supportData.effectiveQuality();
+                        count++;
+                    }
+                }
+                supportScore = count == 0 ? primaryScore : Math.round(total / (float) count);
+            }
+            return ForgingQuality.clampScore(Math.round(
+                    primaryScore * 0.7F
+                            + supportScore * 0.2F
+                            + ToolConstructionData.DEFAULT_QUALITY * 0.1F
+            ));
         }
 
         private List<ItemStack> enchantmentSources() {

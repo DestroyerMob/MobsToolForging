@@ -4,6 +4,8 @@
   "refmap": "mobstoolforging.refmap.json",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "CampfireBlockEntityAccessor",
+    "CampfireBlockEntityMixin",
     "RecipeManagerMixin"
   ],
   "client": [

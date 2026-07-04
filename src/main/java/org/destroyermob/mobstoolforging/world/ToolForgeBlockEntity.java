@@ -20,10 +20,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
-import org.destroyermob.mobstoolforging.registry.ModTags;
 
 public class ToolForgeBlockEntity extends BlockEntity {
     private static final String TEMPLATE_TAG = "Template";
+    private static final String SOURCE_RACK_POS_TAG = "SourceRackPos";
+    private static final String SOURCE_RACK_SLOT_TAG = "SourceRackSlot";
+    private static final String LINKED_RACKS_TAG = "LinkedRacks";
     private static final String MATERIAL_COUNT_TAG = "MaterialCount";
     private static final String HIT_COUNT_TAG = "HitCount";
     private static final String MATERIAL_ID_TAG = "MaterialId";
@@ -33,20 +35,32 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private static final String MATERIAL_HEAT_TEMPERATURE_TAG = "MaterialHeatTemperature";
     private static final String MATERIAL_HEAT_LAST_UPDATE_TAG = "MaterialHeatLastUpdate";
     private static final String MATERIAL_HEAT_WORKABLE_TAG = "MaterialHeatWorkable";
+    private static final String STARTING_HEAT_LEVEL_TAG = "StartingHeatLevel";
+    private static final String QUALITY_SCORE_TAG = "QualityScore";
+    private static final String NEXT_GOOD_HIT_GAME_TIME_TAG = "NextGoodHitGameTime";
     private static final String DIRECT_OUTPUT_TAG = "DirectOutput";
     private static final String LOOSE_WORK_RECIPE_TAG = "LooseWorkRecipe";
     private static final String ABRASIVE_STACK_TAG = "AbrasiveStack";
     private static final String BENCH_STACKS_TAG = "BenchStacks";
     private static final int MAX_BENCH_STACKS = 9;
+    private static final int MAX_LINKED_PATTERN_RACKS = 8;
+    private static final int TIMED_HIT_QUALITY_BONUS = 9;
+    private static final int PRECISION_TIMED_HIT_QUALITY_BONUS = 12;
+    private static final int MISSED_TIMING_QUALITY_PENALTY = 4;
 
     @Nullable
     private ResourceLocation templateId;
+    @Nullable
+    private BlockPos sourceRackPos;
+    private int sourceRackSlot = -1;
+    private final List<BlockPos> linkedPatternRacks = new ArrayList<>();
     @Nullable
     private ResourceLocation materialId;
     @Nullable
     private ResourceLocation materialItemId;
     @Nullable
     private HeatedWorkpieceData materialHeatData;
+    private HeatLevel startingHeatLevel = HeatLevel.NONE;
     @Nullable
     private ResourceLocation looseWorkRecipeId;
     private ItemStack directOutputStack = ItemStack.EMPTY;
@@ -54,6 +68,8 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private final List<ItemStack> benchStacks = new ArrayList<>();
     private int materialCount;
     private int hitCount;
+    private int qualityScore = ForgingQuality.DEFAULT_SCORE;
+    private long nextGoodHitGameTime = -1L;
     private float displayRotationDegrees;
 
     public ToolForgeBlockEntity(BlockPos pos, BlockState blockState) {
@@ -62,12 +78,75 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     @Nullable
     public ForgeTemplateDefinition template() {
+        if (selectedPatternMissing()) {
+            return null;
+        }
         return templateId == null ? null : ToolTypeRegistry.template(templateId).orElse(null);
     }
 
     @Nullable
     public ResourceLocation templateId() {
         return templateId;
+    }
+
+    @Nullable
+    public BlockPos sourceRackPos() {
+        return sourceRackPos;
+    }
+
+    public int sourceRackSlot() {
+        return sourceRackSlot;
+    }
+
+    public boolean hasPatternSource() {
+        return sourceRackPos != null && sourceRackSlot >= 0;
+    }
+
+    public static int maxLinkedPatternRacks() {
+        return MAX_LINKED_PATTERN_RACKS;
+    }
+
+    public int linkedRackCount() {
+        return linkedPatternRacks.size();
+    }
+
+    public List<BlockPos> linkedRackPositions() {
+        return linkedPatternRacks.stream().map(BlockPos::immutable).toList();
+    }
+
+    public boolean hasLinkedRack(BlockPos rackPos) {
+        return linkedPatternRacks.stream().anyMatch(pos -> pos.equals(rackPos));
+    }
+
+    public PatternRackLinkResult linkPatternRack(BlockPos rackPos) {
+        BlockPos linkedPos = rackPos.immutable();
+        if (hasLinkedRack(linkedPos)) {
+            return PatternRackLinkResult.ALREADY_LINKED;
+        }
+        if (linkedPatternRacks.size() >= MAX_LINKED_PATTERN_RACKS) {
+            return PatternRackLinkResult.FULL;
+        }
+        linkedPatternRacks.add(linkedPos);
+        sync();
+        return PatternRackLinkResult.LINKED;
+    }
+
+    public boolean selectedPatternMissing() {
+        return templateId != null
+                && hasPatternSource()
+                && directOutputStack.isEmpty()
+                && !hasPlacedWork()
+                && !sourcePatternMatches();
+    }
+
+    private boolean sourcePatternMatches() {
+        if (level == null || sourceRackPos == null || sourceRackSlot < 0) {
+            return true;
+        }
+        if (!(level.getBlockEntity(sourceRackPos) instanceof PatternRackBlockEntity rack)) {
+            return false;
+        }
+        return rack.templateId(sourceRackSlot).filter(templateId::equals).isPresent();
     }
 
     @Nullable
@@ -121,7 +200,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean isEmpty() {
-        return directOutputStack.isEmpty() && abrasiveStack.isEmpty() && benchStacks.isEmpty() && templateId == null && materialId == null && materialItemId == null && materialHeatData == null && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
+        return directOutputStack.isEmpty() && abrasiveStack.isEmpty() && benchStacks.isEmpty() && templateId == null && materialId == null && materialItemId == null && materialHeatData == null && startingHeatLevel == HeatLevel.NONE && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
     }
 
     public boolean isComplete() {
@@ -133,11 +212,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean canChangeTemplate() {
-        return directOutputStack.isEmpty() && benchStacks.isEmpty() && materialId == null && materialItemId == null && materialHeatData == null && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
+        return directOutputStack.isEmpty() && benchStacks.isEmpty() && materialId == null && materialItemId == null && materialHeatData == null && startingHeatLevel == HeatLevel.NONE && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
     }
 
     public boolean hasPlacedWork() {
-        return !abrasiveStack.isEmpty() || !benchStacks.isEmpty() || materialId != null || materialItemId != null || materialHeatData != null || looseWorkRecipeId != null || materialCount > 0 || hitCount > 0;
+        return !abrasiveStack.isEmpty() || !benchStacks.isEmpty() || materialId != null || materialItemId != null || materialHeatData != null || startingHeatLevel != HeatLevel.NONE || looseWorkRecipeId != null || materialCount > 0 || hitCount > 0;
     }
 
     public boolean selectTemplate(ForgeTemplateDefinition template) {
@@ -145,16 +224,32 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean setTemplateFromItem(ForgeTemplateDefinition template) {
+        return setTemplate(template, null, -1);
+    }
+
+    public boolean setTemplateFromRack(ForgeTemplateDefinition template, BlockPos rackPos, int rackSlot) {
+        return setTemplate(template, rackPos.immutable(), rackSlot);
+    }
+
+    private boolean setTemplate(ForgeTemplateDefinition template, @Nullable BlockPos rackPos, int rackSlot) {
         if (this.templateId != null && this.templateId.equals(template.id())) {
+            sourceRackPos = rackPos;
+            sourceRackSlot = rackSlot;
+            sync();
             return true;
         }
         if (!canChangeTemplate()) {
             return false;
         }
         this.templateId = template.id();
+        sourceRackPos = rackPos;
+        sourceRackSlot = rackSlot;
         materialId = null;
         materialItemId = null;
         materialHeatData = null;
+        startingHeatLevel = HeatLevel.NONE;
+        qualityScore = ForgingQuality.DEFAULT_SCORE;
+        nextGoodHitGameTime = -1L;
         looseWorkRecipeId = null;
         directOutputStack = ItemStack.EMPTY;
         materialCount = 0;
@@ -169,6 +264,8 @@ public class ToolForgeBlockEntity extends BlockEntity {
             return false;
         }
         templateId = null;
+        sourceRackPos = null;
+        sourceRackSlot = -1;
         displayRotationDegrees = 0.0F;
         sync();
         return true;
@@ -195,6 +292,8 @@ public class ToolForgeBlockEntity extends BlockEntity {
             if (materialId == null) {
                 materialId = material.id();
                 materialItemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                captureStartingHeat(stack, material);
+                initializeQuality(material);
             }
             captureMaterialHeat(stack);
             stack.shrink(taken);
@@ -212,11 +311,12 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && (!ArmorForgeAttachment.isAttachmentTemplate(template) || hasArmorAttachmentTarget());
     }
 
-    public boolean hammer() {
+    public boolean hammer(boolean precisionTool) {
         if (!canHammer()) {
             return false;
         }
         hitCount++;
+        applyTimingQuality(precisionTool);
         randomizeDisplayRotation();
         completeArmorAttachmentIfReady();
         sync();
@@ -228,7 +328,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
             return directOutputStack.copy();
         }
         ForgeTemplateDefinition template = template();
-        return isComplete() && template != null && materialId != null ? applyMaterialHeat(template.outputStack(materialId, ToolPartData.DEFAULT_QUALITY)) : ItemStack.EMPTY;
+        return isComplete() && template != null && materialId != null ? applyMaterialHeat(template.outputStack(materialId, completedQualityScore())) : ItemStack.EMPTY;
     }
 
     public ItemStack displayMaterialStack() {
@@ -254,7 +354,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public ItemStack removeOutput() {
         ItemStack output = outputStack();
         if (!output.isEmpty()) {
-            clearWorkState();
+            clearWorkState(false);
             consumeAbrasiveAfterLapidaryCraft();
             sync();
         }
@@ -280,7 +380,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
             }
         }
 
-        clearWorkState();
+        clearWorkState(false);
         abrasiveStack = ItemStack.EMPTY;
         sync();
         return removed;
@@ -288,7 +388,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     public boolean canPlaceAbrasive(ItemStack stack) {
         return workstationKind() == WorkstationKind.LAPIDARY_TABLE
-                && stack.is(ModTags.Items.LAPIDARY_ABRASIVES)
+                && LapidaryAbrasives.isAbrasive(stack)
                 && abrasiveStack.isEmpty()
                 && directOutputStack.isEmpty()
                 && looseWorkRecipeId == null;
@@ -362,6 +462,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && materialId == null
                 && materialItemId == null
                 && materialHeatData == null
+                && startingHeatLevel == HeatLevel.NONE
                 && looseWorkRecipeId == null
                 && materialCount == 0
                 && hitCount == 0;
@@ -417,6 +518,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && materialId == null
                 && materialItemId == null
                 && materialHeatData == null
+                && startingHeatLevel == HeatLevel.NONE
                 && looseWorkRecipeId == null
                 && materialCount == 0
                 && hitCount == 0;
@@ -434,6 +536,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && materialId == null
                 && materialItemId == null
                 && materialHeatData == null
+                && startingHeatLevel == HeatLevel.NONE
                 && looseWorkRecipeId == null
                 && materialCount == 0
                 && hitCount == 0
@@ -490,15 +593,26 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     private void clearWorkState() {
-        templateId = null;
+        clearWorkState(true);
+    }
+
+    private void clearWorkState(boolean clearTemplate) {
+        if (clearTemplate) {
+            templateId = null;
+            sourceRackPos = null;
+            sourceRackSlot = -1;
+        }
         materialId = null;
         materialItemId = null;
         materialHeatData = null;
+        startingHeatLevel = HeatLevel.NONE;
         looseWorkRecipeId = null;
         directOutputStack = ItemStack.EMPTY;
         benchStacks.clear();
         materialCount = 0;
         hitCount = 0;
+        qualityScore = ForgingQuality.DEFAULT_SCORE;
+        nextGoodHitGameTime = -1L;
         displayRotationDegrees = 0.0F;
     }
 
@@ -508,6 +622,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && materialId == null
                 && materialItemId == null
                 && materialHeatData == null
+                && startingHeatLevel == HeatLevel.NONE
                 && looseWorkRecipeId == null
                 && benchStacks.isEmpty()
                 && materialCount == 0
@@ -567,12 +682,17 @@ public class ToolForgeBlockEntity extends BlockEntity {
             return;
         }
         templateId = null;
+        sourceRackPos = null;
+        sourceRackSlot = -1;
         materialId = null;
         materialItemId = null;
         materialHeatData = null;
+        startingHeatLevel = HeatLevel.NONE;
         looseWorkRecipeId = null;
         materialCount = 0;
         hitCount = 0;
+        qualityScore = ForgingQuality.DEFAULT_SCORE;
+        nextGoodHitGameTime = -1L;
         benchStacks.clear();
         displayRotationDegrees = 0.0F;
         directOutputStack = output;
@@ -580,16 +700,22 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     public boolean materialIsForgeReady() {
         ForgeTemplateDefinition template = template();
+        if (MobsToolForgingConfig.REQUIRE_HEAT_AT_JOB_START_ONLY.get() && !MobsToolForgingConfig.WORKPIECE_COOLS_MID_CRAFT.get()) {
+            return startingHeatLevel != HeatLevel.NONE;
+        }
         return materialHeatData != null && level != null
                 && template != null
-                && materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get()) >= template.minimumTemperature();
+                && materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get()) >= materialMinimumForgeTemperature();
     }
 
     public boolean hasMaterialHeat() {
-        return materialHeatData != null && materialHeatTemperature() > 0.0F;
+        return startingHeatLevel != HeatLevel.NONE || materialHeatData != null && materialHeatTemperature() > 0.0F;
     }
 
     public float materialHeatTemperature() {
+        if (startingHeatLevel != HeatLevel.NONE && MobsToolForgingConfig.REQUIRE_HEAT_AT_JOB_START_ONLY.get() && !MobsToolForgingConfig.WORKPIECE_COOLS_MID_CRAFT.get()) {
+            return materialHeatData == null ? startingHeatLevel.temperature() : Math.max(0.0F, Math.min(1.0F, materialHeatData.temperature()));
+        }
         if (materialHeatData == null) {
             return 0.0F;
         }
@@ -599,13 +725,117 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean materialHeatWasWorkable() {
-        return materialHeatData != null && materialHeatData.workable();
+        return startingHeatLevel != HeatLevel.NONE || materialHeatData != null && materialHeatData.workable();
     }
 
     public String materialHeatStatusKey() {
+        return WorkpieceHeat.statusKey(materialHeatTemperature(), materialHeatWasWorkable(), materialMinimumForgeTemperature());
+    }
+
+    public boolean canStartMetalWork(ItemStack stack, ToolMaterialDefinition material) {
+        if (level == null || !workstationKind().isSmithingAnvilLike()) {
+            return false;
+        }
+        HeatLevel heat = WorkshopHeat.heatForJob(level, worldPosition, stack, workstationKind(), material);
+        return WorkshopHeat.canStartMetalWork(heat, WorkshopHeat.stackTemperature(level, stack), material, template());
+    }
+
+    public HeatLevel startingHeatLevel() {
+        return startingHeatLevel;
+    }
+
+    public int completedQualityScore() {
+        if (!MobsToolForgingConfig.ENABLE_QUALITY.get()) {
+            return ForgingQuality.DEFAULT_SCORE;
+        }
+        ForgingQuality cap = workstationKind().maxQuality();
+        if (workstationKind().isSmithingAnvilLike() && startingHeatLevel == HeatLevel.LOW && cap.ordinal() > ForgingQuality.WORKED.ordinal()) {
+            cap = ForgingQuality.WORKED;
+        }
+        return ForgingQuality.clampScore(Math.min(qualityScore, cap.score()));
+    }
+
+    public ForgingQuality completedQuality() {
+        return ForgingQuality.fromScore(completedQualityScore());
+    }
+
+    public boolean isTimingQualityWindow() {
+        if (level == null || !MobsToolForgingConfig.ENABLE_QUALITY.get() || !MobsToolForgingConfig.ENABLE_TIMING_QUALITY.get() || nextGoodHitGameTime < 0L || isComplete()) {
+            return false;
+        }
+        long delta = Math.abs(level.getGameTime() - nextGoodHitGameTime);
+        return delta <= MobsToolForgingConfig.TIMING_QUALITY_WINDOW_TICKS.get();
+    }
+
+    private void captureStartingHeat(ItemStack stack, ToolMaterialDefinition material) {
+        if (level == null || !workstationKind().isSmithingAnvilLike()) {
+            startingHeatLevel = HeatLevel.NONE;
+            return;
+        }
+        startingHeatLevel = WorkshopHeat.heatForJob(level, worldPosition, stack, workstationKind(), material);
+        if (startingHeatLevel.atLeast(HeatLevel.HOT) && WorkshopHeat.stackTemperature(level, stack) <= 0.0F) {
+            materialHeatData = refreshedHeatData(startingHeatLevel.temperature(), true);
+        }
+    }
+
+    public float materialMinimumForgeTemperature() {
         ForgeTemplateDefinition template = template();
-        float minimum = template == null ? MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue() : template.minimumTemperature();
-        return WorkpieceHeat.statusKey(materialHeatTemperature(), materialHeatWasWorkable(), minimum);
+        ToolMaterialDefinition material = materialId == null ? null : MaterialCatalog.definition(materialId).orElse(null);
+        if (material != null) {
+            return WorkshopHeat.minimumForgeTemperature(material, template);
+        }
+        return template == null ? MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue() : template.minimumTemperature();
+    }
+
+    private void initializeQuality(ToolMaterialDefinition material) {
+        if (!MobsToolForgingConfig.ENABLE_QUALITY.get()) {
+            qualityScore = ForgingQuality.DEFAULT_SCORE;
+            return;
+        }
+        int score = ForgingQuality.DEFAULT_SCORE + workstationKind().setupQualityBonus() + startingHeatLevel.qualityBonus() + materialDifficultyPenalty(material);
+        if (workstationKind() == WorkstationKind.LAPIDARY_TABLE && hasAbrasive()) {
+            score += 6;
+        }
+        qualityScore = ForgingQuality.clampScore(score);
+        scheduleNextGoodHit();
+    }
+
+    private int materialDifficultyPenalty(ToolMaterialDefinition material) {
+        if (MaterialCatalog.DIAMOND.equals(material.id())
+                || MaterialCatalog.EMERALD.equals(material.id())
+                || MaterialCatalog.RUBY.equals(material.id())
+                || MaterialCatalog.SAPPHIRE.equals(material.id())) {
+            return -8;
+        }
+        if (MaterialCatalog.IRON.equals(material.id())) {
+            return -4;
+        }
+        return 0;
+    }
+
+    private void applyTimingQuality(boolean precisionTool) {
+        if (level == null || !MobsToolForgingConfig.ENABLE_QUALITY.get() || !MobsToolForgingConfig.ENABLE_TIMING_QUALITY.get()) {
+            return;
+        }
+        if (nextGoodHitGameTime < 0L) {
+            scheduleNextGoodHit();
+        }
+        boolean goodTiming = Math.abs(level.getGameTime() - nextGoodHitGameTime) <= MobsToolForgingConfig.TIMING_QUALITY_WINDOW_TICKS.get();
+        if (goodTiming) {
+            qualityScore = ForgingQuality.clampScore(qualityScore + (precisionTool ? PRECISION_TIMED_HIT_QUALITY_BONUS : TIMED_HIT_QUALITY_BONUS));
+        } else {
+            qualityScore = ForgingQuality.clampScore(qualityScore - (precisionTool ? 0 : MISSED_TIMING_QUALITY_PENALTY));
+        }
+        scheduleNextGoodHit();
+    }
+
+    private void scheduleNextGoodHit() {
+        if (level == null || !MobsToolForgingConfig.ENABLE_TIMING_QUALITY.get()) {
+            nextGoodHitGameTime = -1L;
+            return;
+        }
+        int baseDelay = workstationKind() == WorkstationKind.CRUDE_ANVIL ? 18 : 14;
+        nextGoodHitGameTime = level.getGameTime() + baseDelay + level.random.nextInt(12);
     }
 
     private void captureMaterialHeat(ItemStack stack) {
@@ -628,16 +858,27 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     private ItemStack applyMaterialHeat(ItemStack stack) {
-        if (stack.isEmpty() || materialHeatData == null) {
+        if (stack.isEmpty()) {
+            return stack;
+        }
+        if (materialHeatData == null && startingHeatLevel == HeatLevel.NONE) {
             return stack;
         }
         if (level == null) {
-            stack.set(ModDataComponents.HEATED_WORKPIECE.get(), materialHeatData);
+            stack.set(ModDataComponents.HEATED_WORKPIECE.get(), materialHeatData == null ? refreshedHeatData(startingHeatLevel.temperature(), true) : materialHeatData);
             return stack;
         }
-        float temperature = materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
+        boolean freezeActiveWorkpieceHeat = MobsToolForgingConfig.REQUIRE_HEAT_AT_JOB_START_ONLY.get() && !MobsToolForgingConfig.WORKPIECE_COOLS_MID_CRAFT.get();
+        float temperature;
+        if (materialHeatData == null) {
+            temperature = startingHeatLevel.temperature();
+        } else if (freezeActiveWorkpieceHeat) {
+            temperature = Math.max(0.0F, Math.min(1.0F, materialHeatData.temperature()));
+        } else {
+            temperature = materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
+        }
         if (temperature > 0.0F) {
-            stack.set(ModDataComponents.HEATED_WORKPIECE.get(), refreshedHeatData(temperature, materialHeatData.workable()));
+            stack.set(ModDataComponents.HEATED_WORKPIECE.get(), refreshedHeatData(temperature, materialHeatData == null || materialHeatData.workable()));
         }
         return stack;
     }
@@ -690,6 +931,13 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (templateId != null) {
             tag.putString(TEMPLATE_TAG, templateId.toString());
         }
+        if (sourceRackPos != null && sourceRackSlot >= 0) {
+            tag.putLong(SOURCE_RACK_POS_TAG, sourceRackPos.asLong());
+            tag.putInt(SOURCE_RACK_SLOT_TAG, sourceRackSlot);
+        }
+        if (!linkedPatternRacks.isEmpty()) {
+            tag.putLongArray(LINKED_RACKS_TAG, linkedPatternRacks.stream().mapToLong(BlockPos::asLong).toArray());
+        }
         if (materialId != null) {
             tag.putString(MATERIAL_ID_TAG, materialId.toString());
         }
@@ -701,6 +949,15 @@ public class ToolForgeBlockEntity extends BlockEntity {
             tag.putFloat(MATERIAL_HEAT_TEMPERATURE_TAG, materialHeatData.temperature());
             tag.putLong(MATERIAL_HEAT_LAST_UPDATE_TAG, materialHeatData.lastUpdateGameTime());
             tag.putBoolean(MATERIAL_HEAT_WORKABLE_TAG, materialHeatData.workable());
+        }
+        if (startingHeatLevel != HeatLevel.NONE) {
+            tag.putString(STARTING_HEAT_LEVEL_TAG, startingHeatLevel.getSerializedName());
+        }
+        if (qualityScore != ForgingQuality.DEFAULT_SCORE) {
+            tag.putInt(QUALITY_SCORE_TAG, qualityScore);
+        }
+        if (nextGoodHitGameTime >= 0L) {
+            tag.putLong(NEXT_GOOD_HIT_GAME_TIME_TAG, nextGoodHitGameTime);
         }
         if (!directOutputStack.isEmpty()) {
             tag.put(DIRECT_OUTPUT_TAG, directOutputStack.saveOptional(registries));
@@ -729,6 +986,20 @@ public class ToolForgeBlockEntity extends BlockEntity {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         templateId = tag.contains(TEMPLATE_TAG) ? ResourceLocation.parse(tag.getString(TEMPLATE_TAG)) : null;
+        sourceRackPos = tag.contains(SOURCE_RACK_POS_TAG) ? BlockPos.of(tag.getLong(SOURCE_RACK_POS_TAG)) : null;
+        sourceRackSlot = tag.contains(SOURCE_RACK_SLOT_TAG) ? tag.getInt(SOURCE_RACK_SLOT_TAG) : -1;
+        linkedPatternRacks.clear();
+        if (tag.contains(LINKED_RACKS_TAG)) {
+            for (long rackPos : tag.getLongArray(LINKED_RACKS_TAG)) {
+                if (linkedPatternRacks.size() >= MAX_LINKED_PATTERN_RACKS) {
+                    break;
+                }
+                BlockPos linkedPos = BlockPos.of(rackPos).immutable();
+                if (!hasLinkedRack(linkedPos)) {
+                    linkedPatternRacks.add(linkedPos);
+                }
+            }
+        }
         materialId = tag.contains(MATERIAL_ID_TAG) ? ResourceLocation.parse(tag.getString(MATERIAL_ID_TAG)) : null;
         materialItemId = tag.contains(MATERIAL_ITEM_ID_TAG) ? ResourceLocation.parse(tag.getString(MATERIAL_ITEM_ID_TAG)) : null;
         materialHeatData = tag.contains(MATERIAL_HEAT_TEMPERATURE_TAG)
@@ -739,6 +1010,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 tag.getBoolean(MATERIAL_HEAT_WORKABLE_TAG)
         )
                 : null;
+        startingHeatLevel = tag.contains(STARTING_HEAT_LEVEL_TAG) ? HeatLevel.parse(tag.getString(STARTING_HEAT_LEVEL_TAG), HeatLevel.NONE) : HeatLevel.NONE;
+        qualityScore = tag.contains(QUALITY_SCORE_TAG) ? ForgingQuality.clampScore(tag.getInt(QUALITY_SCORE_TAG)) : ForgingQuality.DEFAULT_SCORE;
+        nextGoodHitGameTime = tag.contains(NEXT_GOOD_HIT_GAME_TIME_TAG) ? tag.getLong(NEXT_GOOD_HIT_GAME_TIME_TAG) : -1L;
         directOutputStack = tag.contains(DIRECT_OUTPUT_TAG) ? ItemStack.parseOptional(registries, tag.getCompound(DIRECT_OUTPUT_TAG)) : ItemStack.EMPTY;
         looseWorkRecipeId = tag.contains(LOOSE_WORK_RECIPE_TAG) ? ResourceLocation.parse(tag.getString(LOOSE_WORK_RECIPE_TAG)) : null;
         abrasiveStack = tag.contains(ABRASIVE_STACK_TAG) ? ItemStack.parseOptional(registries, tag.getCompound(ABRASIVE_STACK_TAG)) : ItemStack.EMPTY;
@@ -767,5 +1041,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         return saveWithoutMetadata(registries);
+    }
+
+    public enum PatternRackLinkResult {
+        LINKED,
+        ALREADY_LINKED,
+        FULL
     }
 }

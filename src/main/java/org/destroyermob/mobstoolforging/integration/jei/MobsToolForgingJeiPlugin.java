@@ -19,6 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
@@ -80,6 +81,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        registration.addRecipeCatalyst(ModItems.CRUDE_ANVIL.get(), FORGE_SHAPING);
         registration.addRecipeCatalyst(ModItems.TOOL_FORGE.get(), FORGE_SHAPING, STATION_WORK);
         registration.addRecipeCatalyst(ModItems.LAPIDARY_TABLE.get(), FORGE_SHAPING, STATION_WORK);
         registration.addRecipeCatalyst(ModItems.PATTERN_CREATION_STATION.get(), PATTERN_CREATION);
@@ -161,7 +163,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         return Optional.of(new PatternCreationJeiRecipe(
                 recipeId("pattern_creation/" + idPath(template.id())),
                 new ItemStack(ModItems.PATTERN_CREATION_STATION.get()),
-                new ItemStack(Items.PAPER, template.patternStationPaperCost()),
+                patternInput(template.patternStationPaperCost()),
                 pattern
         ));
     }
@@ -197,10 +199,19 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         if (workstation == WorkstationKind.LAPIDARY_TABLE) {
             return new ItemStack(ModItems.LAPIDARY_TABLE.get());
         }
+        if (workstation == WorkstationKind.CRUDE_ANVIL) {
+            return new ItemStack(ModItems.CRUDE_ANVIL.get());
+        }
         if (workstation == WorkstationKind.TOOLMAKERS_BENCH) {
             return new ItemStack(ModItems.TOOLMAKERS_BENCH.get());
         }
         return new ItemStack(ModItems.TOOL_FORGE.get());
+    }
+
+    private static ItemStack patternInput(int count) {
+        return MobsToolForgingConfig.BASIC_PATTERNS_REQUIRE_PAPER.get()
+                ? new ItemStack(Items.PAPER, count)
+                : new ItemStack(ModItems.PATTERN_BOARD.get(), count);
     }
 
     private static ItemStack workToolFor(WorkstationKind workstation, int level) {

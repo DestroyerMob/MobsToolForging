@@ -22,6 +22,8 @@ import org.destroyermob.mobstoolforging.world.WorkstationKind;
 import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEntity> {
+    private static final float CAMPFIRE_ITEM_SCALE = 0.375F;
+
     private final ItemRenderer itemRenderer;
 
     public ToolForgeRenderer(BlockEntityRendererProvider.Context context) {
@@ -141,7 +143,9 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
     private void renderItem(ToolForgeBlockEntity forge, ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout, float offset, float scale) {
         float localX = layout.spreadAxis() == SpreadAxis.X ? offset : 0.0F;
         float localZ = layout.spreadAxis() == SpreadAxis.Z ? offset : 0.0F;
-        renderFlatItem(forge, stack, poseStack, bufferSource, packedLight, packedOverlay, localX, localZ, scale, layout.materialSurfaceY(), forge.displayRotationDegrees());
+        boolean qualityWindow = forge.isTimingQualityWindow();
+        float surfaceY = qualityWindow ? layout.materialSurfaceY() + 0.018F : layout.materialSurfaceY();
+        renderFlatItem(forge, stack, poseStack, bufferSource, packedLight, packedOverlay, localX, localZ, scale, surfaceY, forge.displayRotationDegrees());
     }
 
     private void renderFlatItem(ToolForgeBlockEntity forge, ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float localX, float localZ, float scale, float surfaceY, float localRotation) {
@@ -153,14 +157,14 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         poseStack.translate(0.5F, surfaceY, 0.5F);
         poseStack.mulPose(Axis.YP.rotationDegrees(-facingRotation));
         poseStack.translate(localX, 0.0F, localZ);
-        poseStack.mulPose(Axis.YP.rotationDegrees(localRotation));
+        poseStack.mulPose(Axis.YP.rotationDegrees(localRotation + 180.0F));
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.scale(scale, scale, scale);
         float heat = level == null ? WorkpieceHeat.storedTemperature(stack) : WorkpieceHeat.temperature(stack, level);
         if (heat > 0.02F) {
-            HeatRenderUtil.renderHeatedItem(itemRenderer, stack, ItemDisplayContext.GROUND, packedOverlay, poseStack, bufferSource, level, heat);
+            HeatRenderUtil.renderHeatedItem(itemRenderer, stack, ItemDisplayContext.FIXED, packedOverlay, poseStack, bufferSource, level, heat);
         } else {
-            itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
+            itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
         }
         poseStack.popPose();
     }
@@ -213,10 +217,10 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         private static final DisplayLayout TOOL_FORGE = new DisplayLayout(
                 0.707F,
                 0.697F,
-                0.46F,
-                0.48F,
-                0.58F,
-                0.32F,
+                CAMPFIRE_ITEM_SCALE,
+                CAMPFIRE_ITEM_SCALE,
+                CAMPFIRE_ITEM_SCALE,
+                CAMPFIRE_ITEM_SCALE,
                 0.24F,
                 SpreadAxis.X,
                 0.0F,
@@ -227,24 +231,24 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         private static final DisplayLayout LAPIDARY = new DisplayLayout(
                 0.770F,
                 0.758F,
-                0.42F,
-                0.44F,
-                0.52F,
-                0.30F,
+                CAMPFIRE_ITEM_SCALE,
+                CAMPFIRE_ITEM_SCALE,
+                CAMPFIRE_ITEM_SCALE,
+                CAMPFIRE_ITEM_SCALE,
                 0.20F,
                 SpreadAxis.X,
                 0.775F,
-                0.24F,
+                CAMPFIRE_ITEM_SCALE,
                 0.0F,
                 -0.28F
         );
         private static final DisplayLayout TOOLMAKERS_BENCH = new DisplayLayout(
                 0.585F,
                 0.575F,
-                0.38F,
-                0.30F,
-                0.50F,
-                0.28F,
+                CAMPFIRE_ITEM_SCALE,
+                CAMPFIRE_ITEM_SCALE,
+                CAMPFIRE_ITEM_SCALE,
+                CAMPFIRE_ITEM_SCALE,
                 0.20F,
                 SpreadAxis.X,
                 0.0F,

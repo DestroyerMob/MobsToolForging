@@ -9,6 +9,8 @@ import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.LapidaryTableBlock;
+import org.destroyermob.mobstoolforging.world.PatternRackBlock;
+import org.destroyermob.mobstoolforging.world.PatternRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
@@ -24,13 +26,13 @@ import snownee.jade.api.config.IPluginConfig;
 public class MobsToolForgingJadePlugin implements IWailaPlugin {
     private static final WorkstationProvider WORKSTATION_PROVIDER = new WorkstationProvider();
     private static final HeatingForgeProvider HEATING_FORGE_PROVIDER = new HeatingForgeProvider();
+    private static final PatternRackProvider PATTERN_RACK_PROVIDER = new PatternRackProvider();
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        registration.addConfig(WorkstationProvider.UID, true);
-        registration.addConfig(HeatingForgeProvider.UID, true);
         registration.registerBlockComponent(WORKSTATION_PROVIDER, ToolWorkstationBlock.class);
         registration.registerBlockComponent(HEATING_FORGE_PROVIDER, HeatingForgeBlock.class);
+        registration.registerBlockComponent(PATTERN_RACK_PROVIDER, PatternRackBlock.class);
     }
 
     private static final class WorkstationProvider implements IBlockComponentProvider {
@@ -49,9 +51,19 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
             if (forge.hasAbrasive()) {
                 tooltip.add(line("jade.mobstoolforging.abrasive", forge.abrasiveStack().getHoverName()));
             }
+            if (forge.linkedRackCount() > 0) {
+                tooltip.add(Component.translatable("jade.mobstoolforging.linked_racks", forge.linkedRackCount(), ToolForgeBlockEntity.maxLinkedPatternRacks()).withStyle(ChatFormatting.GRAY));
+            }
+            if (forge.selectedPatternMissing()) {
+                tooltip.add(line("jade.mobstoolforging.pattern", Component.translatable("message.mobstoolforging.pattern_missing")));
+                return;
+            }
             ForgeTemplateDefinition template = forge.template();
             if (template != null) {
                 tooltip.add(line("jade.mobstoolforging.pattern", template.displayName()));
+                if (forge.hasPatternSource()) {
+                    tooltip.add(line("jade.mobstoolforging.source", Component.translatable("jade.mobstoolforging.source_pattern_rack")));
+                }
             }
             if (forge.looseWorkRecipe() != null) {
                 tooltip.add(line("jade.mobstoolforging.work", forge.looseWorkRecipe().outputCopy().getHoverName()));
@@ -74,6 +86,22 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
                 tooltip.add(progressLine(forge.hitCount(), template.requiredHits()));
             } else if (accessor.getBlock() instanceof LapidaryTableBlock && !forge.hasAbrasive()) {
                 tooltip.add(Component.translatable("message.mobstoolforging.lapidary_needs_abrasive").withStyle(ChatFormatting.DARK_GRAY));
+            }
+        }
+    }
+
+    private static final class PatternRackProvider implements IBlockComponentProvider {
+        private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "pattern_rack");
+
+        @Override
+        public ResourceLocation getUid() {
+            return UID;
+        }
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            if (accessor.getBlockEntity() instanceof PatternRackBlockEntity rack) {
+                tooltip.add(Component.translatable("jade.mobstoolforging.patterns", rack.occupiedSlots(), PatternRackBlockEntity.SLOT_COUNT).withStyle(ChatFormatting.GRAY));
             }
         }
     }

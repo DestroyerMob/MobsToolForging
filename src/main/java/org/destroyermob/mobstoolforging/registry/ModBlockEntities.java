@@ -12,6 +12,7 @@ import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlockEntity;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.KnappingFlintBlockEntity;
 import org.destroyermob.mobstoolforging.world.PatternCreationStationBlockEntity;
+import org.destroyermob.mobstoolforging.world.PatternRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
 
 public final class ModBlockEntities {
@@ -22,7 +23,7 @@ public final class ModBlockEntities {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ToolForgeBlockEntity>> TOOL_WORKSTATION = BLOCK_ENTITIES.register(
             "tool_workstation",
-            () -> BlockEntityType.Builder.of(ToolForgeBlockEntity::new, ModBlocks.TOOL_FORGE.get(), ModBlocks.LAPIDARY_TABLE.get(), ModBlocks.TOOLMAKERS_BENCH.get()).build(null)
+            () -> BlockEntityType.Builder.of(ToolForgeBlockEntity::new, ModBlocks.TOOL_FORGE.get(), ModBlocks.CRUDE_ANVIL.get(), ModBlocks.LAPIDARY_TABLE.get(), ModBlocks.TOOLMAKERS_BENCH.get()).build(null)
     );
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<HeatingForgeBlockEntity>> HEATING_FORGE = BLOCK_ENTITIES.register(
             "heating_forge",
@@ -39,6 +40,10 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PatternCreationStationBlockEntity>> PATTERN_CREATION_STATION = BLOCK_ENTITIES.register(
             "pattern_creation_station",
             () -> BlockEntityType.Builder.of(PatternCreationStationBlockEntity::new, ModBlocks.PATTERN_CREATION_STATION.get()).build(null)
+    );
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PatternRackBlockEntity>> PATTERN_RACK = BLOCK_ENTITIES.register(
+            "pattern_rack",
+            () -> BlockEntityType.Builder.of(PatternRackBlockEntity::new, ModBlocks.patternRackBlocks()).build(null)
     );
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<KnappingFlintBlockEntity>> KNAPPING_FLINT = BLOCK_ENTITIES.register(
             "knapping_flint",

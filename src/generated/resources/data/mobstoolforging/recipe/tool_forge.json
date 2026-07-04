@@ -10,9 +10,9 @@
     }
   },
   "pattern": [
-    "BBB",
     " I ",
-    "III"
+    "IBI",
+    " I "
   ],
   "result": {
     "count": 1,

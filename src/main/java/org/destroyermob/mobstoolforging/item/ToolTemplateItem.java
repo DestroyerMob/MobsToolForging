@@ -67,7 +67,9 @@ public class ToolTemplateItem extends Item {
     }
 
     public boolean canUseOn(WorkstationKind kind) {
-        return workstationKind == null || workstationKind == kind;
+        return workstationKind == null
+                || workstationKind == kind
+                || workstationKind == WorkstationKind.TOOL_FORGE && kind == WorkstationKind.CRUDE_ANVIL;
     }
 
     public static ItemStack createPatternStack(ForgeTemplateDefinition template) {

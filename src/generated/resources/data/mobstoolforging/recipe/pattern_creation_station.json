@@ -5,13 +5,13 @@
     "P": {
       "tag": "minecraft:planks"
     },
-    "X": {
-      "item": "minecraft:paper"
+    "S": {
+      "item": "minecraft:cobblestone"
     }
   },
   "pattern": [
-    "XX",
-    "PP"
+    "P P",
+    " S "
   ],
   "result": {
     "count": 1,

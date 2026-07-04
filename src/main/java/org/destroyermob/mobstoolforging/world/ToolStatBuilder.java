@@ -22,6 +22,7 @@ import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.SimpleTier;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 
 public final class ToolStatBuilder {
@@ -69,6 +70,7 @@ public final class ToolStatBuilder {
         applyFocus(stats, construction.focusMaterial());
         applyTreatment(stats, construction);
         ToolTypeRegistry.applyStatModifiers(definition, construction, stats);
+        applyQuality(stats, construction);
 
         int maxDamage = Math.max(1, Math.round(stats.baseMaxDamage * stats.durabilityMultiplier));
         return new ToolStatProfile(
@@ -292,6 +294,28 @@ public final class ToolStatBuilder {
             stats.addTrait(ToolTrait.ECHOING);
         }
         stats.addDebug(line("Treatment", treatment, note));
+    }
+
+    private static void applyQuality(MutableStats stats, ToolConstructionData construction) {
+        boolean configLoaded = MobsToolForgingConfig.COMMON_SPEC.isLoaded();
+        boolean qualityEnabled = !configLoaded || MobsToolForgingConfig.ENABLE_QUALITY.get();
+        if (!qualityEnabled) {
+            return;
+        }
+        ForgingQuality quality = construction.qualityLevel();
+        stats.addDebug("Quality: " + quality.getSerializedName());
+        boolean qualityAffectsStats = !configLoaded || MobsToolForgingConfig.QUALITY_AFFECTS_STATS.get();
+        if (!qualityAffectsStats) {
+            return;
+        }
+        stats.durabilityMultiplier *= quality.durabilityMultiplier();
+        stats.miningSpeedMultiplier *= quality.miningSpeedMultiplier();
+        stats.attackDamageBonus += quality.attackDamageBonus();
+        if (quality == ForgingQuality.CRUDE) {
+            stats.addTrait(ToolTrait.WORKMANSHIP_ROUGH);
+        } else if (quality == ForgingQuality.FINE || quality == ForgingQuality.MASTERWORK) {
+            stats.addTrait(ToolTrait.WORKMANSHIP_GOOD);
+        }
     }
 
     private static Tier adjustedTier(Tier headTier, ToolStatProfile profile, ToolConstructionData construction) {

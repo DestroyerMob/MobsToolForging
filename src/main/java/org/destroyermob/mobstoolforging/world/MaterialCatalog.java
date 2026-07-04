@@ -94,10 +94,10 @@ public final class MaterialCatalog {
     private static final List<ResourceLocation> TREATMENT_MATERIALS = List.of(NETHERITE, NETHER, SCULK);
 
     static {
-        register(IRON, MaterialCategory.METAL, Items.IRON_INGOT, Tiers.IRON);
-        register(GOLD, MaterialCategory.METAL, Items.GOLD_INGOT, Tiers.GOLD);
-        register(COPPER, MaterialCategory.METAL, Items.COPPER_INGOT, COPPER_TIER);
-        register(NETHERITE, MaterialCategory.METAL, Items.NETHERITE_INGOT, Tiers.NETHERITE);
+        register(IRON, MaterialCategory.METAL, Items.IRON_INGOT, Tiers.IRON, HeatLevel.LOW);
+        register(GOLD, MaterialCategory.METAL, Items.GOLD_INGOT, Tiers.GOLD, HeatLevel.LOW);
+        register(COPPER, MaterialCategory.METAL, Items.COPPER_INGOT, COPPER_TIER, HeatLevel.LOW);
+        register(NETHERITE, MaterialCategory.METAL, Items.NETHERITE_INGOT, Tiers.NETHERITE, HeatLevel.HIGH);
         register(DIAMOND, MaterialCategory.GEM, Items.DIAMOND, Tiers.DIAMOND);
         register(EMERALD, MaterialCategory.GEM, Items.EMERALD, EMERALD_TIER);
         registerTagged(
@@ -216,6 +216,10 @@ public final class MaterialCatalog {
 
     public static synchronized void registerMaterial(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier) {
         registerMaterial(new ToolMaterialDefinition(id, category, displayItem, tier));
+    }
+
+    public static synchronized void registerMaterial(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier, HeatLevel minimumForgeHeat) {
+        registerMaterial(new ToolMaterialDefinition(id, category, displayItem, tier, minimumForgeHeat, null));
     }
 
     public static synchronized void registerDatapackMaterial(ToolMaterialDefinition definition, List<Item> sourceItems, List<TagKey<Item>> sourceTags, List<String> visualSlots, List<Item> handleItems) {
@@ -391,6 +395,11 @@ public final class MaterialCatalog {
 
     private static void register(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier) {
         ToolMaterialDefinition definition = new ToolMaterialDefinition(id, category, displayItem, tier);
+        putDefinition(definition);
+    }
+
+    private static void register(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier, HeatLevel minimumForgeHeat) {
+        ToolMaterialDefinition definition = new ToolMaterialDefinition(id, category, displayItem, tier, minimumForgeHeat, null);
         putDefinition(definition);
     }
 

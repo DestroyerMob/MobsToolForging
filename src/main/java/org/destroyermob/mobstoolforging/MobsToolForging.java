@@ -57,6 +57,7 @@ import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.registry.ModLootModifiers;
 import org.destroyermob.mobstoolforging.world.ArmorStandSwapEvents;
+import org.destroyermob.mobstoolforging.world.CampfireWorkpieceHeating;
 import org.destroyermob.mobstoolforging.world.CrucibleContents;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
@@ -64,18 +65,23 @@ import org.destroyermob.mobstoolforging.world.FlintKnappingEvents;
 import org.destroyermob.mobstoolforging.world.FlintToolStacks;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialDefinitionReloadListener;
+import org.destroyermob.mobstoolforging.world.PatternRackSelection;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolStatRuleReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
 import org.destroyermob.mobstoolforging.world.ToolRepairing;
+import org.destroyermob.mobstoolforging.world.ToolMaterialDefinition;
+import org.destroyermob.mobstoolforging.world.ToolPartData;
+import org.destroyermob.mobstoolforging.world.ToolPartPolishing;
 import org.destroyermob.mobstoolforging.world.ToolTrait;
 import org.destroyermob.mobstoolforging.world.ToolTraitReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolTooltipBuilder;
 import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolTypeReloadListener;
+import org.destroyermob.mobstoolforging.world.WorkshopHeat;
 import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 import org.slf4j.Logger;
 
@@ -104,6 +110,12 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::dropPlantFiber);
         NeoForge.EVENT_BUS.addListener(ArmorStandSwapEvents::swapPlayerArmorWithStand);
         NeoForge.EVENT_BUS.addListener(this::lowerCopperHarvestTier);
+        NeoForge.EVENT_BUS.addListener(CampfireWorkpieceHeating::placeWorkpiece);
+        NeoForge.EVENT_BUS.addListener(ToolPartPolishing::polishOnGrindstone);
+        NeoForge.EVENT_BUS.addListener(PatternRackSelection::handleRackRightClick);
+        NeoForge.EVENT_BUS.addListener(PatternRackSelection::handleRackLeftClick);
+        NeoForge.EVENT_BUS.addListener(PatternRackSelection::playerLoggedOut);
+        NeoForge.EVENT_BUS.addListener(PatternRackSelection::playerChangedDimension);
         NeoForge.EVENT_BUS.addListener(this::quenchInWaterCauldron);
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
         NeoForge.EVENT_BUS.addListener(this::coolPlayerWorkpieces);
@@ -124,9 +136,11 @@ public class MobsToolForging {
 
     private void addCreativeTabContents(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
+            event.accept(ModBlocks.CRUDE_ANVIL);
             event.accept(ModBlocks.TOOL_FORGE);
             event.accept(ModBlocks.LAPIDARY_TABLE);
             event.accept(ModBlocks.PATTERN_CREATION_STATION);
+            ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> event.accept(variant.block()));
             event.accept(ModBlocks.TOOLMAKERS_BENCH);
             event.accept(ModBlocks.HEATING_FORGE);
             event.accept(ModBlocks.CRUCIBLE);
@@ -135,7 +149,6 @@ public class MobsToolForging {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.SMITHING_HAMMER);
             event.accept(ModItems.IRON_SMITHING_HAMMER);
-            event.accept(ModItems.SCREWDRIVER);
             event.accept(ModItems.GEM_CUTTERS_KNIFE);
             event.accept(ModItems.FIRE_STICK);
             if (MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
@@ -148,7 +161,6 @@ public class MobsToolForging {
             event.accept(ModItems.SWORD_BLADE_PATTERN);
             event.accept(ModItems.SWORD_GUARD_PATTERN);
             event.accept(ModItems.SMITHING_HAMMER_HEAD_PATTERN);
-            event.accept(ModItems.SCREWDRIVER_HEAD_PATTERN);
             event.accept(ModItems.GEM_CUTTERS_BLADE_PATTERN);
             event.accept(ModItems.HELMET_SKULL_PATTERN);
             event.accept(ModItems.HELMET_COMB_PATTERN);
@@ -172,10 +184,10 @@ public class MobsToolForging {
             event.accept(ModItems.MODULAR_BOOTS.get().create(MaterialCatalog.IRON));
         }
         if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
+            event.accept(ModItems.PATTERN_BOARD);
             event.accept(ModItems.FLINT_SHARD);
             event.accept(ModItems.PLANT_FIBER);
             event.accept(ModItems.SMITHING_HAMMER_HEAD);
-            event.accept(ModItems.SCREWDRIVER_HEAD);
             event.accept(ModItems.GEM_CUTTERS_BLADE);
             event.accept(ModItems.DIAMOND_POWDER);
         }
@@ -257,6 +269,12 @@ public class MobsToolForging {
         if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
             disabledRecipes.addAll(flintToolRecipeIds());
         }
+        if (!MobsToolForgingConfig.ENABLE_CRUDE_ANVIL.get()) {
+            disabledRecipes.add(modRecipe("crude_anvil"));
+        }
+        if (!MobsToolForgingConfig.ENABLE_PATTERN_RACK.get()) {
+            ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> disabledRecipes.add(modRecipe(variant.id())));
+        }
         return disabledRecipes;
     }
 
@@ -288,6 +306,9 @@ public class MobsToolForging {
                 itemEntity.setItem(stack);
                 playQuenchEffects(itemEntity.level(), itemEntity.blockPosition());
             }
+            return;
+        }
+        if (CampfireWorkpieceHeating.insertDroppedWorkpiece(itemEntity)) {
             return;
         }
         WorkpieceHeat.clearIfCooled(stack, itemEntity.level());
@@ -332,15 +353,22 @@ public class MobsToolForging {
         if (temperature <= 0.0F) {
             return;
         }
+        float minimumTemperature = heatTooltipMinimumTemperature(stack);
         boolean forgeReady = event.getEntity() == null
-                ? WorkpieceHeat.data(stack).map(data -> data.temperature() >= MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get()).orElse(false)
-                : WorkpieceHeat.isForgeReady(stack, event.getEntity().level(), MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
+                ? WorkpieceHeat.data(stack).map(data -> data.temperature() >= minimumTemperature).orElse(false)
+                : WorkpieceHeat.isForgeReady(stack, event.getEntity().level(), minimumTemperature);
         event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.workpiece_temperature", Math.round(temperature * 100.0F)).withStyle(forgeReady ? ChatFormatting.GOLD : ChatFormatting.RED));
-        String statusKey = event.getEntity() == null
-                ? WorkpieceHeat.statusKey(temperature, WorkpieceHeat.isWorkable(stack), MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue())
-                : WorkpieceHeat.statusKey(stack, event.getEntity().level(), MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
+        String statusKey = WorkpieceHeat.statusKey(temperature, WorkpieceHeat.isWorkable(stack), minimumTemperature);
         event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.workpiece_status." + statusKey).withStyle(forgeReady ? ChatFormatting.YELLOW : ChatFormatting.DARK_GRAY));
         event.getToolTip().add(Component.translatable(forgeReady ? "tooltip.mobstoolforging.workpiece_ready" : "tooltip.mobstoolforging.workpiece_not_ready").withStyle(ChatFormatting.DARK_GRAY));
+    }
+
+    private static float heatTooltipMinimumTemperature(ItemStack stack) {
+        ToolPartData part = stack.get(ModDataComponents.TOOL_PART.get());
+        Optional<ToolMaterialDefinition> material = part == null ? MaterialCatalog.resolve(stack) : MaterialCatalog.definition(part.materialId());
+        return material
+                .map(definition -> WorkshopHeat.minimumForgeTemperature(definition, null))
+                .orElse(MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
     }
 
     private void addExternalModularToolTooltip(ItemTooltipEvent event) {
