@@ -100,12 +100,19 @@ public class CrucibleBlock extends BaseEntityBlock {
             if (tipped.isEmpty()) {
                 return ItemInteractionResult.CONSUME;
             }
-            if (!player.getAbilities().instabuild) {
-                stack.shrink(1);
-                crucible.setContents(contents.consumeMoltenUnit());
+            boolean creative = player.getAbilities().instabuild;
+            if (creative || stack.getCount() <= 1) {
+                player.setItemInHand(hand, tipped);
+            } else {
+                ItemStack remainder = stack.copy();
+                remainder.setCount(stack.getCount() - 1);
+                player.setItemInHand(hand, tipped);
+                if (!player.getInventory().add(remainder)) {
+                    player.drop(remainder, false);
+                }
             }
-            if (!player.getInventory().add(tipped)) {
-                player.drop(tipped, false);
+            if (!creative) {
+                crucible.setContents(contents.consumeMoltenUnit());
             }
             level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 1.4F);
             player.displayClientMessage(Component.translatable("message.mobstoolforging.crucible_part_tipped"), true);

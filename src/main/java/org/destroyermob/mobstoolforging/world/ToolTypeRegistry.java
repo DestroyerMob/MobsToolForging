@@ -50,6 +50,7 @@ public final class ToolTypeRegistry {
         registerBuiltIn(ToolKind.PICKAXE);
         registerBuiltIn(ToolKind.AXE);
         registerBuiltIn(ToolKind.HOE);
+        registerBuiltIn(ToolKind.MATTOCK);
         registerBuiltInTemplates();
     }
 
@@ -276,6 +277,10 @@ public final class ToolTypeRegistry {
                 .partItem(toolKind.partType(), toolKind.partItem()::get);
         if (toolKind == ToolKind.SWORD) {
             builder.requiredAssemblyPart(ToolPartData.SWORD_GUARD, ModItems.SWORD_GUARD::get);
+        } else if (toolKind == ToolKind.MATTOCK) {
+            builder.requiredAssemblyPart(ToolPartData.HOE_HEAD, ModItems.HOE_HEAD::get)
+                    .averageRequiredPartQuality(true)
+                    .averageRequiredHeadDurability(true);
         }
         TOOL_TYPES.put(ToolConstructionData.toolType(toolKind), builder.build());
     }

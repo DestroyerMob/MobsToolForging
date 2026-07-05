@@ -29,8 +29,6 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
-import org.destroyermob.mobstoolforging.registry.ModItems;
 
 public class GroundToolAssemblyBlock extends BaseEntityBlock {
     public static final MapCodec<GroundToolAssemblyBlock> CODEC = simpleCodec(GroundToolAssemblyBlock::new);
@@ -55,22 +53,21 @@ public class GroundToolAssemblyBlock extends BaseEntityBlock {
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
         if (!(level.getBlockEntity(pos) instanceof GroundToolAssemblyBlockEntity assembly)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        if (stack.is(ModItems.PLANT_FIBER.get())) {
-            return assemble(stack, assembly, level, pos, player);
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
         }
         if (assembly.canAdd(stack)) {
-            if (level.isClientSide) {
-                return ItemInteractionResult.SUCCESS;
-            }
             if (assembly.addStack(stack)) {
-                level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.55F, 1.05F + level.random.nextFloat() * 0.1F);
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.ground_assembly_part_placed"), true);
+                ItemStack output = assembly.assemble(level.registryAccess());
+                if (!output.isEmpty()) {
+                    finishAssembly(output, assembly, level, pos, player);
+                } else {
+                    level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.55F, 1.05F + level.random.nextFloat() * 0.1F);
+                    player.displayClientMessage(Component.translatable("message.mobstoolforging.ground_assembly_part_placed"), true);
+                }
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -82,36 +79,29 @@ public class GroundToolAssemblyBlock extends BaseEntityBlock {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
+        if (level.getBlockEntity(pos) instanceof GroundToolAssemblyBlockEntity assembly) {
+            ItemStack output = assembly.assemble(level.registryAccess());
+            if (!output.isEmpty()) {
+                finishAssembly(output, assembly, level, pos, player);
+                return InteractionResult.CONSUME;
+            }
+        }
         level.removeBlock(pos, false);
         level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.55F, 1.0F);
         return InteractionResult.CONSUME;
     }
 
-    private ItemInteractionResult assemble(ItemStack fiber, GroundToolAssemblyBlockEntity assembly, Level level, BlockPos pos, Player player) {
-        if (level.isClientSide) {
-            return ItemInteractionResult.SUCCESS;
-        }
-        ItemStack output = assembly.assemble(level.registryAccess());
-        if (output.isEmpty()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.ground_assembly_needs_parts"), true);
-            return ItemInteractionResult.CONSUME;
-        }
-        if (!player.getAbilities().instabuild) {
-            fiber.shrink(1);
-        }
+    private static void finishAssembly(ItemStack output, GroundToolAssemblyBlockEntity assembly, Level level, BlockPos pos, Player player) {
         assembly.removeStacks();
         level.removeBlock(pos, false);
         if (!player.getInventory().add(output)) {
             player.drop(output, false);
         }
         level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.6F, 1.15F);
-        return ItemInteractionResult.CONSUME;
+        player.displayClientMessage(Component.translatable("message.mobstoolforging.ground_assembly_complete", output.getHoverName()), true);
     }
 
     private static ItemInteractionResult pickUpWork(Level level, BlockPos pos) {
-        if (level.isClientSide) {
-            return ItemInteractionResult.SUCCESS;
-        }
         level.removeBlock(pos, false);
         level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.55F, 1.0F);
         return ItemInteractionResult.CONSUME;

@@ -57,16 +57,12 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 MaterialCatalog.IRON,
                 MaterialCatalog.OAK,
                 null,
-                MaterialCatalog.LEATHER,
-                null,
                 null
         ), examples.json(modLoc("iron_pickaxe"))));
         futures.add(DataProvider.saveStable(output, example(
                 ToolKind.PICKAXE,
                 MaterialCatalog.DIAMOND,
                 MaterialCatalog.DARK_OAK,
-                MaterialCatalog.COPPER,
-                null,
                 null,
                 null
         ), examples.json(modLoc("diamond_pickaxe"))));
@@ -74,23 +70,15 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 ToolKind.SWORD,
                 MaterialCatalog.IRON,
                 MaterialCatalog.BLAZE,
-                null,
-                null,
-                null,
+                MaterialCatalog.IRON,
                 MaterialCatalog.NETHER
         ), examples.json(modLoc("nether_treated_iron_sword"))));
-        futures.add(DataProvider.saveStable(output, example(
-                ToolKind.PICKAXE,
-                MaterialCatalog.DIAMOND,
-                MaterialCatalog.OAK,
-                MaterialCatalog.COPPER,
-                null,
-                MaterialCatalog.AMETHYST,
-                null
-        ), examples.json(modLoc("amethyst_focused_diamond_pickaxe"))));
     }
 
     private JsonObject toolVisual(ToolKind toolKind) {
+        if (toolKind == ToolKind.MATTOCK) {
+            return mattockToolVisual();
+        }
         JsonObject json = new JsonObject();
         json.addProperty("type", modLoc("tool_visual").toString());
         json.addProperty("canvas", 16);
@@ -98,11 +86,26 @@ public class ModVisualDefinitionProvider implements DataProvider {
         json.addProperty("large_in_hand", true);
         JsonArray layers = new JsonArray();
         layers.add(layer(toolKind, "handle", "handleMaterial", 1, true, false));
-        layers.add(layer(toolKind, "wrap", "wrapMaterial", 2, true, false));
-        layers.add(layer(toolKind, toolKind.partType(), "headMaterial", 3, true, false));
-        layers.add(layer(toolKind, jointSlot(toolKind), jointMaterial(toolKind), 4, true, false));
-        layers.add(layer(toolKind, "focus", "focusMaterial", 5, true, true));
-        layers.add(layer(toolKind, "treatment_overlay", "treatment", 6, true, true));
+        layers.add(layer(toolKind, toolKind.partType(), "headMaterial", 2, true, false));
+        if (toolKind == ToolKind.SWORD) {
+            layers.add(layer(toolKind, "guard", "guardMaterial", 3, true, false));
+        }
+        layers.add(layer(toolKind, treatmentSlot(toolKind), "treatment", 4, true, true));
+        json.add("layers", layers);
+        return json;
+    }
+
+    private JsonObject mattockToolVisual() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", modLoc("tool_visual").toString());
+        json.addProperty("canvas", 16);
+        json.addProperty("large_canvas", 32);
+        json.addProperty("large_in_hand", true);
+        JsonArray layers = new JsonArray();
+        layers.add(layer(ToolKind.MATTOCK, "handle", "handleMaterial", 1, true, false));
+        layers.add(layer(ToolKind.MATTOCK, "mattock_tool_axe", "headMaterial", 2, false, false));
+        layers.add(layer(ToolKind.MATTOCK, "mattock_tool_hoe", "guardMaterial", 2, false, false));
+        layers.add(layer(ToolKind.MATTOCK, treatmentSlot(ToolKind.MATTOCK), "treatment", 4, true, true));
         json.add("layers", layers);
         return json;
     }
@@ -118,8 +121,11 @@ public class ModVisualDefinitionProvider implements DataProvider {
             json.addProperty("tool_template", modLoc("tool_templates/" + toolKind.id() + "/" + slot).toString());
         }
         json.addProperty("template", modLoc("tool_templates/" + toolKind.id() + "/" + slot).toString());
-        if ("headMaterial".equals(materialFrom) || "guardMaterial".equals(materialFrom) || "bindingMaterial".equals(materialFrom)) {
+        if ("headMaterial".equals(materialFrom) || "guardMaterial".equals(materialFrom)) {
             json.addProperty("part_template", modLoc("tool_templates/" + toolKind.id() + "/" + slot + "_part").toString());
+        }
+        if ("treatment".equals(materialFrom)) {
+            json.addProperty("texture_pattern", "source/tool_parts/{material}/{material}_" + slot + "_{usage}");
         }
         json.addProperty("large_template", modLoc("tool_templates/" + toolKind.id() + "/large_" + slot).toString());
         json.addProperty("z", z);
@@ -128,20 +134,18 @@ public class ModVisualDefinitionProvider implements DataProvider {
         return json;
     }
 
-    private JsonObject example(ToolKind toolKind, ResourceLocation head, ResourceLocation handle, ResourceLocation binding, ResourceLocation wrap, ResourceLocation focus, ResourceLocation treatment) {
+    private static String treatmentSlot(ToolKind toolKind) {
+        return toolKind.id() + "_treatment";
+    }
+
+    private JsonObject example(ToolKind toolKind, ResourceLocation head, ResourceLocation handle, ResourceLocation guard, ResourceLocation treatment) {
         JsonObject json = new JsonObject();
         json.addProperty("type", modLoc("tool_visual_example").toString());
         json.addProperty("tool_type", toolType(toolKind).toString());
         json.addProperty("head_material", head.toString());
         json.addProperty("handle_material", handle.toString());
-        if (binding != null) {
-            json.addProperty("binding_material", binding.toString());
-        }
-        if (wrap != null) {
-            json.addProperty("wrap_material", wrap.toString());
-        }
-        if (focus != null) {
-            json.addProperty("focus_material", focus.toString());
+        if (guard != null) {
+            json.addProperty("guard_material", guard.toString());
         }
         if (treatment != null) {
             json.addProperty("treatment", treatment.toString());
@@ -154,15 +158,16 @@ public class ModVisualDefinitionProvider implements DataProvider {
         JsonObject json = new JsonObject();
         json.addProperty("material", material.id().toString());
         json.addProperty("texture", material.texture().toString());
+        if (material.tintItemTextures()) {
+            json.addProperty("tint_item_textures", true);
+        }
+        JsonObject itemTextures = new JsonObject();
+        itemTextures.addProperty("helmet", material.helmetTexture().toString());
+        itemTextures.addProperty("chestplate", material.chestplateTexture().toString());
+        itemTextures.addProperty("leggings", material.leggingsTexture().toString());
+        itemTextures.addProperty("boots", material.bootsTexture().toString());
+        json.add("item_textures", itemTextures);
         return json;
-    }
-
-    private static String jointSlot(ToolKind toolKind) {
-        return toolKind == ToolKind.SWORD ? "guard" : "binding";
-    }
-
-    private static String jointMaterial(ToolKind toolKind) {
-        return toolKind == ToolKind.SWORD ? "guardMaterial" : "bindingMaterial";
     }
 
     private static ResourceLocation toolType(ToolKind toolKind) {
@@ -188,9 +193,6 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 new MaterialVisualSpec(MaterialCatalog.DARK_OAK, "wood", "wood_grain", false, 0, palette(0xFF17100B, 0xFF24180F, 0xFF3A2818, 0xFF5A3D22, 0xFF7D5732, 0xFFA77A4A)),
                 new MaterialVisualSpec(MaterialCatalog.BLAZE, "nether", "heat_cracks", true, 7, palette(0xFF4A1604, 0xFF7C2705, 0xFFB84307, 0xFFF07412, 0xFFFFB12E, 0xFFFFF0A4)),
                 new MaterialVisualSpec(MaterialCatalog.BREEZE, "crystal", "facets", false, 0, palette(0xFF5B6170, 0xFF7D879A, 0xFFA3B2C7, 0xFFC3D7E8, 0xFFE4F5FF, 0xFFFFFFFF)),
-                new MaterialVisualSpec(MaterialCatalog.LEATHER, "leather", "rough_wrap", false, 0, palette(0xFF2A170E, 0xFF4A2817, 0xFF704024, 0xFF9C6139, 0xFFC68555, 0xFFE4AF7C)),
-                new MaterialVisualSpec(MaterialCatalog.PLANT_FIBER, "plant", "fibrous", false, 0, palette(0xFF2B2A12, 0xFF4A4A22, 0xFF6D7133, 0xFF969D4B, 0xFFC0C876, 0xFFE7E3A8)),
-                new MaterialVisualSpec(MaterialCatalog.AMETHYST, "crystal", "facets", false, 0, palette(0xFF28164A, 0xFF422478, 0xFF6636A8, 0xFF905CE0, 0xFFC8A4FF, 0xFFF5E9FF)),
                 new MaterialVisualSpec(MaterialCatalog.NETHER, "nether", "heat_cracks", true, 8, palette(0xFF160503, 0xFF2A0904, 0xFF4D1309, 0xFF8A260D, 0xFFFF6A1A, 0xFFFFD06A)),
                 new MaterialVisualSpec(MaterialCatalog.SCULK, "sculk", "veins", true, 8, palette(0xFF05090A, 0xFF071417, 0xFF0A2428, 0xFF0E3D45, 0xFF0C8395, 0xFF4AF5FF))
         );
@@ -198,14 +200,38 @@ public class ModVisualDefinitionProvider implements DataProvider {
 
     private static List<ArmorMaterialTextureSpec> armorMaterialTextureSpecs() {
         return List.of(
-                new ArmorMaterialTextureSpec(MaterialCatalog.IRON, ResourceLocation.withDefaultNamespace("block/iron_block")),
-                new ArmorMaterialTextureSpec(MaterialCatalog.GOLD, ResourceLocation.withDefaultNamespace("block/gold_block")),
-                new ArmorMaterialTextureSpec(MaterialCatalog.COPPER, ResourceLocation.withDefaultNamespace("block/copper_block")),
-                new ArmorMaterialTextureSpec(MaterialCatalog.NETHERITE, ResourceLocation.withDefaultNamespace("block/netherite_block")),
-                new ArmorMaterialTextureSpec(MaterialCatalog.DIAMOND, ResourceLocation.withDefaultNamespace("block/diamond_block")),
-                new ArmorMaterialTextureSpec(MaterialCatalog.EMERALD, ResourceLocation.withDefaultNamespace("block/emerald_block")),
-                new ArmorMaterialTextureSpec(MaterialCatalog.RUBY, ResourceLocation.withDefaultNamespace("block/redstone_block")),
-                new ArmorMaterialTextureSpec(MaterialCatalog.SAPPHIRE, ResourceLocation.withDefaultNamespace("block/lapis_block"))
+                vanillaArmor(MaterialCatalog.IRON, ResourceLocation.withDefaultNamespace("block/iron_block"), "iron"),
+                vanillaArmor(MaterialCatalog.GOLD, ResourceLocation.withDefaultNamespace("block/gold_block"), "golden"),
+                tintedLeatherArmor(MaterialCatalog.COPPER, ResourceLocation.withDefaultNamespace("block/copper_block")),
+                vanillaArmor(MaterialCatalog.NETHERITE, ResourceLocation.withDefaultNamespace("block/netherite_block"), "netherite"),
+                vanillaArmor(MaterialCatalog.DIAMOND, ResourceLocation.withDefaultNamespace("block/diamond_block"), "diamond"),
+                tintedLeatherArmor(MaterialCatalog.EMERALD, ResourceLocation.withDefaultNamespace("block/emerald_block")),
+                tintedLeatherArmor(MaterialCatalog.RUBY, ResourceLocation.withDefaultNamespace("block/redstone_block")),
+                tintedLeatherArmor(MaterialCatalog.SAPPHIRE, ResourceLocation.withDefaultNamespace("block/lapis_block"))
+        );
+    }
+
+    private static ArmorMaterialTextureSpec vanillaArmor(ResourceLocation material, ResourceLocation texture, String vanillaPrefix) {
+        return new ArmorMaterialTextureSpec(
+                material,
+                texture,
+                ResourceLocation.withDefaultNamespace("item/" + vanillaPrefix + "_helmet"),
+                ResourceLocation.withDefaultNamespace("item/" + vanillaPrefix + "_chestplate"),
+                ResourceLocation.withDefaultNamespace("item/" + vanillaPrefix + "_leggings"),
+                ResourceLocation.withDefaultNamespace("item/" + vanillaPrefix + "_boots"),
+                false
+        );
+    }
+
+    private static ArmorMaterialTextureSpec tintedLeatherArmor(ResourceLocation material, ResourceLocation texture) {
+        return new ArmorMaterialTextureSpec(
+                material,
+                texture,
+                ResourceLocation.withDefaultNamespace("item/leather_helmet"),
+                ResourceLocation.withDefaultNamespace("item/leather_chestplate"),
+                ResourceLocation.withDefaultNamespace("item/leather_leggings"),
+                ResourceLocation.withDefaultNamespace("item/leather_boots"),
+                true
         );
     }
 
@@ -235,6 +261,14 @@ public class ModVisualDefinitionProvider implements DataProvider {
         }
     }
 
-    private record ArmorMaterialTextureSpec(ResourceLocation id, ResourceLocation texture) {
+    private record ArmorMaterialTextureSpec(
+            ResourceLocation id,
+            ResourceLocation texture,
+            ResourceLocation helmetTexture,
+            ResourceLocation chestplateTexture,
+            ResourceLocation leggingsTexture,
+            ResourceLocation bootsTexture,
+            boolean tintItemTextures
+    ) {
     }
 }

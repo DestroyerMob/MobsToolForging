@@ -48,7 +48,7 @@ public final class ToolAssemblyEnchantments {
             BetterEnchantingBridge.applyFusion(registryAccess, output);
         }
         BetterEnchantingBridge.clampEnchantments(output);
-        return BetterEnchantingBridge.fitsCapacity(output);
+        return true;
     }
 
     public static List<ItemStack> copyToolEnchantmentsToViableParts(ItemStack tool, List<ItemStack> parts) {
@@ -71,6 +71,22 @@ public final class ToolAssemblyEnchantments {
             changed |= copyToBestPart(result, entry.getKey(), entry.getIntValue());
         }
         return changed ? List.copyOf(result) : List.copyOf(parts);
+    }
+
+    public static boolean hasEnchantments(Iterable<ItemStack> parts) {
+        for (ItemStack part : parts) {
+            if (!part.isEmpty() && !EnchantmentHelper.getEnchantmentsForCrafting(part).isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void syncRoutedToolEnchantments(ItemStack tool, HolderLookup.Provider registries) {
+        if (tool.isEmpty() || !(registries instanceof RegistryAccess registryAccess)) {
+            return;
+        }
+        BetterEnchantingBridge.syncRoutedToolEnchantments(registryAccess, tool);
     }
 
     private static boolean copyToBestPart(List<ItemStack> parts, Holder<Enchantment> enchantment, int level) {
@@ -185,6 +201,7 @@ public final class ToolAssemblyEnchantments {
         private static Method currentEnchantmentCount;
         private static Method maxEnchantments;
         private static Method resolveTargetTags;
+        private static Method syncRoutedToolEnchantments;
 
         private BetterEnchantingBridge() {
         }
@@ -368,6 +385,24 @@ public final class ToolAssemblyEnchantments {
                 resolveTargetTags = method(TARGET_TAGS, "resolve", ItemStack.class);
             }
             return resolveTargetTags;
+        }
+
+        private static void syncRoutedToolEnchantments(RegistryAccess registryAccess, ItemStack stack) {
+            Method method = syncRoutedToolEnchantmentsMethod();
+            if (method == null) {
+                return;
+            }
+            try {
+                method.invoke(null, registryAccess, stack);
+            } catch (ReflectiveOperationException | LinkageError | RuntimeException ignored) {
+            }
+        }
+
+        private static Method syncRoutedToolEnchantmentsMethod() {
+            if (syncRoutedToolEnchantments == null) {
+                syncRoutedToolEnchantments = method("com.betterenchanting.compat.MobsToolForgingCompat", "syncRoutedToolEnchantments", RegistryAccess.class, ItemStack.class);
+            }
+            return syncRoutedToolEnchantments;
         }
 
         private static Method method(String className, String name, Class<?>... parameters) {

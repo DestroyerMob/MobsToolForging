@@ -16,7 +16,8 @@ public enum ToolKind {
     SHOVEL("shovel", "shovel_head", 1),
     PICKAXE("pickaxe", "pickaxe_head", 2),
     AXE("axe", "axe_head", 2),
-    HOE("hoe", "hoe_head", 1);
+    HOE("hoe", "hoe_head", 1),
+    MATTOCK("mattock", "axe_head", 3);
 
     private final String id;
     private final String partType;
@@ -73,7 +74,7 @@ public enum ToolKind {
             case SWORD -> ModItems.SWORD_BLADE;
             case SHOVEL -> ModItems.SHOVEL_HEAD;
             case PICKAXE -> ModItems.PICKAXE_HEAD;
-            case AXE -> ModItems.AXE_HEAD;
+            case AXE, MATTOCK -> ModItems.AXE_HEAD;
             case HOE -> ModItems.HOE_HEAD;
         };
     }
@@ -85,6 +86,7 @@ public enum ToolKind {
             case PICKAXE -> ModItems.PICKAXE;
             case AXE -> ModItems.AXE;
             case HOE -> ModItems.HOE;
+            case MATTOCK -> ModItems.MATTOCK;
         };
     }
 }

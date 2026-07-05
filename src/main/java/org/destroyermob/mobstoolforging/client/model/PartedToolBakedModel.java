@@ -51,9 +51,6 @@ public final class PartedToolBakedModel implements BakedModel {
                 MaterialCatalog.OAK,
                 definition.requiredAssemblyParts().isEmpty() ? Optional.empty() : Optional.of(MaterialCatalog.IRON),
                 Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
                 ToolConstructionData.DEFAULT_QUALITY,
                 0
         )).orElseGet(this::particleFallback);
@@ -168,9 +165,6 @@ public final class PartedToolBakedModel implements BakedModel {
             case "headMaterial" -> Optional.of(key.headMaterial());
             case "handleMaterial" -> Optional.of(key.handleMaterial());
             case "guardMaterial" -> key.guardMaterial();
-            case "bindingMaterial" -> key.bindingMaterial();
-            case "wrapMaterial" -> key.wrapMaterial();
-            case "focusMaterial" -> key.focusMaterial();
             case "treatment" -> key.treatment();
             default -> Optional.empty();
         });

@@ -27,6 +27,8 @@ public final class ToolTypeDefinition {
     private final Map<String, Supplier<? extends Item>> partItems;
     private final Map<String, Map<ResourceLocation, Supplier<? extends Item>>> materialPartItems;
     private final List<String> requiredAssemblyParts;
+    private final boolean averageRequiredPartQuality;
+    private final boolean averageRequiredHeadDurability;
     private final float baseAttackDamageBonus;
     private final float baseAttackSpeedBonus;
     private final double entityInteractionRangeBonus;
@@ -49,6 +51,8 @@ public final class ToolTypeDefinition {
         builder.materialPartItems.forEach((partType, items) -> materialParts.put(partType, Map.copyOf(items)));
         this.materialPartItems = Map.copyOf(materialParts);
         this.requiredAssemblyParts = List.copyOf(builder.requiredAssemblyParts);
+        this.averageRequiredPartQuality = builder.averageRequiredPartQuality;
+        this.averageRequiredHeadDurability = builder.averageRequiredHeadDurability;
         this.baseAttackDamageBonus = builder.baseAttackDamageBonus;
         this.baseAttackSpeedBonus = builder.baseAttackSpeedBonus;
         this.entityInteractionRangeBonus = builder.entityInteractionRangeBonus;
@@ -99,6 +103,11 @@ public final class ToolTypeDefinition {
         return supplier == null ? partItem(partType) : Optional.of(supplier.get());
     }
 
+    public Optional<Item> materialPartItem(String partType, ResourceLocation materialId) {
+        Supplier<? extends Item> supplier = materialPartItems.getOrDefault(partType, Map.of()).get(materialId);
+        return supplier == null ? Optional.empty() : Optional.of(supplier.get());
+    }
+
     public boolean matchesPartItem(String partType, ResourceLocation materialId, ItemStack stack) {
         Optional<Item> item = partItem(partType, materialId);
         if (item.isPresent()) {
@@ -117,6 +126,37 @@ public final class ToolTypeDefinition {
 
     public List<String> requiredAssemblyParts() {
         return requiredAssemblyParts;
+    }
+
+    public boolean averageRequiredPartQuality() {
+        return averageRequiredPartQuality;
+    }
+
+    public boolean averageRequiredHeadDurability() {
+        return averageRequiredHeadDurability;
+    }
+
+    public int assembledQuality(ToolPartData primary, Iterable<ToolPartData> requiredParts) {
+        int primaryScore = primary == null ? ToolConstructionData.DEFAULT_QUALITY : primary.effectiveQuality();
+        int requiredTotal = 0;
+        int requiredCount = 0;
+        for (ToolPartData requiredPart : requiredParts) {
+            if (requiredPart == null) {
+                continue;
+            }
+            requiredTotal += requiredPart.effectiveQuality();
+            requiredCount++;
+        }
+        if (averageRequiredPartQuality && requiredCount > 0) {
+            return ForgingQuality.clampScore(Math.round((primaryScore + requiredTotal) / (float) (requiredCount + 1)));
+        }
+
+        int supportScore = requiredCount == 0 ? primaryScore : Math.round(requiredTotal / (float) requiredCount);
+        return ForgingQuality.clampScore(Math.round(
+                primaryScore * 0.7F
+                        + supportScore * 0.2F
+                        + ToolConstructionData.DEFAULT_QUALITY * 0.1F
+        ));
     }
 
     public float baseAttackDamageBonus(ResourceLocation materialId) {
@@ -164,8 +204,7 @@ public final class ToolTypeDefinition {
             return false;
         }
         if (!MaterialCatalog.isNormalForgingMaterial(construction.headMaterial())
-                || construction.guardMaterial().filter(material -> !MaterialCatalog.isNormalForgingMaterial(material)).isPresent()
-                || construction.bindingMaterial().filter(material -> !MaterialCatalog.isNormalForgingMaterial(material)).isPresent()) {
+                || construction.guardMaterial().filter(material -> !MaterialCatalog.isNormalForgingMaterial(material)).isPresent()) {
             return false;
         }
         if (!customToolFactory && toolItem(construction.headMaterial()).isEmpty()) {
@@ -232,6 +271,8 @@ public final class ToolTypeDefinition {
         private final Map<String, Supplier<? extends Item>> partItems = new LinkedHashMap<>();
         private final Map<String, Map<ResourceLocation, Supplier<? extends Item>>> materialPartItems = new LinkedHashMap<>();
         private final java.util.ArrayList<String> requiredAssemblyParts = new java.util.ArrayList<>();
+        private boolean averageRequiredPartQuality;
+        private boolean averageRequiredHeadDurability;
         private float baseAttackDamageBonus = 1.0F;
         private float baseAttackSpeedBonus = -2.8F;
         private double entityInteractionRangeBonus;
@@ -260,6 +301,7 @@ public final class ToolTypeDefinition {
                 case PICKAXE -> BlockTags.MINEABLE_WITH_PICKAXE;
                 case AXE -> BlockTags.MINEABLE_WITH_AXE;
                 case HOE -> BlockTags.MINEABLE_WITH_HOE;
+                case MATTOCK -> BlockTags.MINEABLE_WITH_AXE;
             };
             return this;
         }
@@ -291,6 +333,16 @@ public final class ToolTypeDefinition {
 
         public Builder requiredAssemblyPart(String partType) {
             this.requiredAssemblyParts.add(partType);
+            return this;
+        }
+
+        public Builder averageRequiredPartQuality(boolean averageRequiredPartQuality) {
+            this.averageRequiredPartQuality = averageRequiredPartQuality;
+            return this;
+        }
+
+        public Builder averageRequiredHeadDurability(boolean averageRequiredHeadDurability) {
+            this.averageRequiredHeadDurability = averageRequiredHeadDurability;
             return this;
         }
 

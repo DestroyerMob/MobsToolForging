@@ -57,7 +57,7 @@ public record ToolPartData(String partType, ResourceLocation materialId, int qua
     }
 
     public ToolPartData polished() {
-        return new ToolPartData(partType, materialId, effectiveQuality(), treatment, ToolPartFinish.POLISHED);
+        return new ToolPartData(partType, materialId, quality, treatment, ToolPartFinish.POLISHED);
     }
 
     public ForgingQuality qualityLevel() {

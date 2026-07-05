@@ -17,16 +17,6 @@
     },
     {
       "emissive_allowed": false,
-      "large_template": "mobstoolforging:tool_templates/shovel/large_wrap",
-      "material_from": "wrapMaterial",
-      "optional": true,
-      "slot": "wrap",
-      "template": "mobstoolforging:tool_templates/shovel/wrap",
-      "tool_template": "mobstoolforging:tool_templates/shovel/wrap",
-      "z": 2
-    },
-    {
-      "emissive_allowed": false,
       "large_template": "mobstoolforging:tool_templates/shovel/large_shovel_head",
       "material_from": "headMaterial",
       "optional": true,
@@ -34,38 +24,18 @@
       "slot": "shovel_head",
       "template": "mobstoolforging:tool_templates/shovel/shovel_head",
       "tool_template": "mobstoolforging:tool_templates/shovel/shovel_head",
-      "z": 3
-    },
-    {
-      "emissive_allowed": false,
-      "large_template": "mobstoolforging:tool_templates/shovel/large_binding",
-      "material_from": "bindingMaterial",
-      "optional": true,
-      "part_template": "mobstoolforging:tool_templates/shovel/binding_part",
-      "slot": "binding",
-      "template": "mobstoolforging:tool_templates/shovel/binding",
-      "tool_template": "mobstoolforging:tool_templates/shovel/binding",
-      "z": 4
+      "z": 2
     },
     {
       "emissive_allowed": true,
-      "large_template": "mobstoolforging:tool_templates/shovel/large_focus",
-      "material_from": "focusMaterial",
-      "optional": true,
-      "slot": "focus",
-      "template": "mobstoolforging:tool_templates/shovel/focus",
-      "tool_template": "mobstoolforging:tool_templates/shovel/focus",
-      "z": 5
-    },
-    {
-      "emissive_allowed": true,
-      "large_template": "mobstoolforging:tool_templates/shovel/large_treatment_overlay",
+      "large_template": "mobstoolforging:tool_templates/shovel/large_shovel_treatment",
       "material_from": "treatment",
       "optional": true,
-      "slot": "treatment_overlay",
-      "template": "mobstoolforging:tool_templates/shovel/treatment_overlay",
-      "tool_template": "mobstoolforging:tool_templates/shovel/treatment_overlay",
-      "z": 6
+      "slot": "shovel_treatment",
+      "template": "mobstoolforging:tool_templates/shovel/shovel_treatment",
+      "texture_pattern": "source/tool_parts/{material}/{material}_shovel_treatment_{usage}",
+      "tool_template": "mobstoolforging:tool_templates/shovel/shovel_treatment",
+      "z": 4
     }
   ]
 }

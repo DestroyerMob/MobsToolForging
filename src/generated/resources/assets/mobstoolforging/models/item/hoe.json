@@ -10,6 +10,7 @@
     "layer_hoe_head_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_hoe_head_tool",
     "layer_hoe_head_gold": "mobstoolforging:source/tool_parts/gold/gold_hoe_head_tool",
     "layer_hoe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_hoe_head_tool",
+    "layer_hoe_treatment_netherite": "mobstoolforging:source/tool_parts/netherite/netherite_hoe_treatment_tool",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_hoe_head_tool"
   },
   "tool": "hoe",

@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.registry;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -68,6 +69,29 @@ public final class ModBlocks {
             "toolmakers_bench",
             () -> new ToolmakersBenchBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CRAFTING_TABLE).noOcclusion())
     );
+    public static final DeferredBlock<ToolmakersBenchBlock> SPRUCE_TOOLMAKERS_BENCH = registerToolmakersBench("spruce_toolmakers_bench");
+    public static final DeferredBlock<ToolmakersBenchBlock> BIRCH_TOOLMAKERS_BENCH = registerToolmakersBench("birch_toolmakers_bench");
+    public static final DeferredBlock<ToolmakersBenchBlock> JUNGLE_TOOLMAKERS_BENCH = registerToolmakersBench("jungle_toolmakers_bench");
+    public static final DeferredBlock<ToolmakersBenchBlock> ACACIA_TOOLMAKERS_BENCH = registerToolmakersBench("acacia_toolmakers_bench");
+    public static final DeferredBlock<ToolmakersBenchBlock> DARK_OAK_TOOLMAKERS_BENCH = registerToolmakersBench("dark_oak_toolmakers_bench");
+    public static final DeferredBlock<ToolmakersBenchBlock> MANGROVE_TOOLMAKERS_BENCH = registerToolmakersBench("mangrove_toolmakers_bench");
+    public static final DeferredBlock<ToolmakersBenchBlock> CHERRY_TOOLMAKERS_BENCH = registerToolmakersBench("cherry_toolmakers_bench");
+    public static final DeferredBlock<ToolmakersBenchBlock> BAMBOO_TOOLMAKERS_BENCH = registerToolmakersBench("bamboo_toolmakers_bench");
+    public static final DeferredBlock<ToolmakersBenchBlock> CRIMSON_TOOLMAKERS_BENCH = registerToolmakersBench("crimson_toolmakers_bench");
+    public static final DeferredBlock<ToolmakersBenchBlock> WARPED_TOOLMAKERS_BENCH = registerToolmakersBench("warped_toolmakers_bench");
+    public static final List<ToolmakerStationVariant> TOOLMAKER_STATION_VARIANTS = List.of(
+            toolmakerStationVariant("toolmakers_bench", "Oak Toolmaker's Station", TOOLMAKERS_BENCH, Blocks.OAK_PLANKS, "stripped_oak_log", "stripped_oak_log_top"),
+            toolmakerStationVariant("spruce_toolmakers_bench", "Spruce Toolmaker's Station", SPRUCE_TOOLMAKERS_BENCH, Blocks.SPRUCE_PLANKS, "stripped_spruce_log", "stripped_spruce_log_top"),
+            toolmakerStationVariant("birch_toolmakers_bench", "Birch Toolmaker's Station", BIRCH_TOOLMAKERS_BENCH, Blocks.BIRCH_PLANKS, "stripped_birch_log", "stripped_birch_log_top"),
+            toolmakerStationVariant("jungle_toolmakers_bench", "Jungle Toolmaker's Station", JUNGLE_TOOLMAKERS_BENCH, Blocks.JUNGLE_PLANKS, "stripped_jungle_log", "stripped_jungle_log_top"),
+            toolmakerStationVariant("acacia_toolmakers_bench", "Acacia Toolmaker's Station", ACACIA_TOOLMAKERS_BENCH, Blocks.ACACIA_PLANKS, "stripped_acacia_log", "stripped_acacia_log_top"),
+            toolmakerStationVariant("dark_oak_toolmakers_bench", "Dark Oak Toolmaker's Station", DARK_OAK_TOOLMAKERS_BENCH, Blocks.DARK_OAK_PLANKS, "stripped_dark_oak_log", "stripped_dark_oak_log_top"),
+            toolmakerStationVariant("mangrove_toolmakers_bench", "Mangrove Toolmaker's Station", MANGROVE_TOOLMAKERS_BENCH, Blocks.MANGROVE_PLANKS, "stripped_mangrove_log", "stripped_mangrove_log_top"),
+            toolmakerStationVariant("cherry_toolmakers_bench", "Cherry Toolmaker's Station", CHERRY_TOOLMAKERS_BENCH, Blocks.CHERRY_PLANKS, "stripped_cherry_log", "stripped_cherry_log_top"),
+            toolmakerStationVariant("bamboo_toolmakers_bench", "Bamboo Toolmaker's Station", BAMBOO_TOOLMAKERS_BENCH, Blocks.BAMBOO_PLANKS, "stripped_bamboo_block", "stripped_bamboo_block_top"),
+            toolmakerStationVariant("crimson_toolmakers_bench", "Crimson Toolmaker's Station", CRIMSON_TOOLMAKERS_BENCH, Blocks.CRIMSON_PLANKS, "stripped_crimson_stem", "stripped_crimson_stem_top"),
+            toolmakerStationVariant("warped_toolmakers_bench", "Warped Toolmaker's Station", WARPED_TOOLMAKERS_BENCH, Blocks.WARPED_PLANKS, "stripped_warped_stem", "stripped_warped_stem_top")
+    );
     public static final DeferredBlock<HeatingForgeBlock> HEATING_FORGE = BLOCKS.register(
             "heating_forge",
             () -> new HeatingForgeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).noOcclusion())
@@ -92,6 +116,13 @@ public final class ModBlocks {
     private ModBlocks() {
     }
 
+    private static DeferredBlock<ToolmakersBenchBlock> registerToolmakersBench(String id) {
+        return BLOCKS.register(
+                id,
+                () -> new ToolmakersBenchBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CRAFTING_TABLE).noOcclusion())
+        );
+    }
+
     private static DeferredBlock<PatternRackBlock> registerPatternRack(String id, Block baseBlock) {
         return BLOCKS.register(
                 id,
@@ -110,10 +141,36 @@ public final class ModBlocks {
         );
     }
 
+    private static ToolmakerStationVariant toolmakerStationVariant(String id, String displayName, DeferredBlock<ToolmakersBenchBlock> block, Block recipePlanks, String sideTexture, String topTexture) {
+        return new ToolmakerStationVariant(
+                id,
+                displayName,
+                block,
+                recipePlanks,
+                ResourceLocation.withDefaultNamespace("block/" + sideTexture),
+                ResourceLocation.withDefaultNamespace("block/" + topTexture)
+        );
+    }
+
     public static Block[] patternRackBlocks() {
         return PATTERN_RACK_VARIANTS.stream()
                 .map(variant -> variant.block().get())
                 .toArray(Block[]::new);
+    }
+
+    public static Block[] toolmakersBenchBlocks() {
+        return TOOLMAKER_STATION_VARIANTS.stream()
+                .map(variant -> variant.block().get())
+                .toArray(Block[]::new);
+    }
+
+    public static Block[] toolWorkstationBlocks() {
+        List<Block> blocks = new ArrayList<>();
+        blocks.add(TOOL_FORGE.get());
+        blocks.add(CRUDE_ANVIL.get());
+        blocks.add(LAPIDARY_TABLE.get());
+        TOOLMAKER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
+        return blocks.toArray(Block[]::new);
     }
 
     public static void register(IEventBus eventBus) {
@@ -127,6 +184,16 @@ public final class ModBlocks {
             Block recipePlanks,
             ResourceLocation logTexture,
             ResourceLocation planksTexture
+    ) {
+    }
+
+    public record ToolmakerStationVariant(
+            String id,
+            String displayName,
+            DeferredBlock<ToolmakersBenchBlock> block,
+            Block recipePlanks,
+            ResourceLocation sideTexture,
+            ResourceLocation topTexture
     ) {
     }
 }

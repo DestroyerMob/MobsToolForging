@@ -10,6 +10,7 @@
     "layer_pickaxe_head_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_pickaxe_head_tool",
     "layer_pickaxe_head_gold": "mobstoolforging:source/tool_parts/gold/gold_pickaxe_head_tool",
     "layer_pickaxe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_pickaxe_head_tool",
+    "layer_pickaxe_treatment_netherite": "mobstoolforging:source/tool_parts/netherite/netherite_pickaxe_treatment_tool",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_pickaxe_head_tool"
   },
   "tool": "pickaxe",

@@ -45,12 +45,9 @@ public class ModRecipeProvider extends RecipeProvider {
                 .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.TOOL_FORGE)
-                .define('B', Items.COPPER_BLOCK)
-                .define('I', Items.COPPER_INGOT)
-                .pattern(" I ")
-                .pattern("IBI")
-                .pattern(" I ")
-                .unlockedBy("has_copper_ingot", has(Items.COPPER_INGOT))
+                .define('B', Items.IRON_BLOCK)
+                .pattern("B")
+                .unlockedBy("has_iron_block", has(Items.IRON_BLOCK))
                 .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.HEATING_FORGE)
@@ -107,14 +104,16 @@ public class ModRecipeProvider extends RecipeProvider {
                     .save(output);
         }
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.TOOLMAKERS_BENCH)
-                .define('S', Items.CHISELED_STONE_BRICKS)
-                .define('P', ItemTags.PLANKS)
-                .pattern("SSS")
-                .pattern("P P")
-                .pattern("P P")
-                .unlockedBy("has_chiseled_stone_bricks", has(Items.CHISELED_STONE_BRICKS))
-                .save(output);
+        for (ModBlocks.ToolmakerStationVariant variant : ModBlocks.TOOLMAKER_STATION_VARIANTS) {
+            ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, variant.block())
+                    .define('S', Items.STICK)
+                    .define('P', variant.recipePlanks())
+                    .pattern("PPP")
+                    .pattern("S S")
+                    .pattern("PPP")
+                    .unlockedBy("has_" + variant.id(), has(variant.recipePlanks()))
+                    .save(output);
+        }
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.SMITHING_HAMMER)
                 .define('S', Items.STICK)

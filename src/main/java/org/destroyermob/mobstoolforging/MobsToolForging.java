@@ -48,9 +48,11 @@ import org.destroyermob.mobstoolforging.client.MobsToolForgingClient;
 import org.destroyermob.mobstoolforging.command.ModCommands;
 import org.destroyermob.mobstoolforging.data.ModDataGenerators;
 import org.destroyermob.mobstoolforging.item.ModularToolItem;
+import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.network.ModNetworking;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
+import org.destroyermob.mobstoolforging.registry.ModCreativeTabs;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
@@ -64,6 +66,7 @@ import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
 import org.destroyermob.mobstoolforging.world.FlintKnappingEvents;
 import org.destroyermob.mobstoolforging.world.FlintToolStacks;
+import org.destroyermob.mobstoolforging.world.GroundAssemblyRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialDefinitionReloadListener;
 import org.destroyermob.mobstoolforging.world.PatternRackSelection;
@@ -76,6 +79,7 @@ import org.destroyermob.mobstoolforging.world.ToolRepairing;
 import org.destroyermob.mobstoolforging.world.ToolMaterialDefinition;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
 import org.destroyermob.mobstoolforging.world.ToolPartPolishing;
+import org.destroyermob.mobstoolforging.world.ToolPartWear;
 import org.destroyermob.mobstoolforging.world.ToolTrait;
 import org.destroyermob.mobstoolforging.world.ToolTraitReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolTooltipBuilder;
@@ -95,6 +99,7 @@ public class MobsToolForging {
         ModDataComponents.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
+        ModCreativeTabs.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModRecipeSerializers.register(modEventBus);
         ModMenuTypes.register(modEventBus);
@@ -143,7 +148,7 @@ public class MobsToolForging {
             event.accept(ModBlocks.LAPIDARY_TABLE);
             event.accept(ModBlocks.PATTERN_CREATION_STATION);
             ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> event.accept(variant.block()));
-            event.accept(ModBlocks.TOOLMAKERS_BENCH);
+            ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> event.accept(variant.block()));
             event.accept(ModBlocks.HEATING_FORGE);
             event.accept(ModBlocks.CRUCIBLE);
             event.accept(ModBlocks.FOUNDRY_FORGE);
@@ -291,6 +296,7 @@ public class MobsToolForging {
         event.addListener(new ForgeTemplateReloadListener());
         event.addListener(new ToolStatRuleReloadListener());
         event.addListener(new StationWorkRecipeReloadListener());
+        event.addListener(new GroundAssemblyRecipeReloadListener());
     }
 
     private void coolPlayerWorkpieces(PlayerTickEvent.Post event) {
@@ -380,15 +386,37 @@ public class MobsToolForging {
     private void addExternalModularToolTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
         ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
-        if (construction == null || stack.getItem() instanceof ModularToolItem) {
+        if (construction != null && !(stack.getItem() instanceof ModularToolItem)) {
+            ToolTypeRegistry.toolType(construction.toolType()).ifPresent(definition -> {
+                if (Boolean.TRUE.equals(stack.get(ModDataComponents.TOOL_BROKEN.get()))) {
+                    event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.broken_tool").withStyle(ChatFormatting.RED));
+                }
+                event.getToolTip().addAll(ToolTooltipBuilder.tooltip(stack, definition, event.getFlags()));
+            });
+        }
+
+        ToolPartData part = stack.get(ModDataComponents.TOOL_PART.get());
+        if (part == null || stack.getItem() instanceof ModularToolPartItem) {
             return;
         }
-        ToolTypeRegistry.toolType(construction.toolType()).ifPresent(definition -> {
-            if (Boolean.TRUE.equals(stack.get(ModDataComponents.TOOL_BROKEN.get()))) {
-                event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.broken_tool").withStyle(ChatFormatting.RED));
+        event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.quality")
+                .withStyle(ChatFormatting.DARK_GRAY)
+                .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(part.effectiveQualityLevel().displayName()));
+        if (part.isPolishable()) {
+            event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.finish")
+                    .withStyle(ChatFormatting.DARK_GRAY)
+                    .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
+                    .append(part.finish().displayName()));
+            if (part.needsPolishing()) {
+                event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.unpolished_hint").withStyle(ChatFormatting.GRAY));
             }
-            event.getToolTip().addAll(ToolTooltipBuilder.tooltip(stack, definition, event.getFlags()));
-        });
+        }
+        part.treatment().ifPresent(treatment -> event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.part_treatment", MaterialCatalog.displayName(treatment)).withStyle(ChatFormatting.DARK_GRAY)));
+        int remainingDurability = ToolPartWear.remainingDurabilityPercent(stack);
+        if (remainingDurability < 100) {
+            event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.part_durability", remainingDurability).withStyle(ChatFormatting.DARK_GRAY));
+        }
     }
 
     private void addCrucibleTooltip(ItemTooltipEvent event) {

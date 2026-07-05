@@ -19,7 +19,7 @@ import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 
 public class GroundToolAssemblyBlockEntity extends BlockEntity {
     private static final String STACKS_TAG = "Stacks";
-    private static final int MAX_STACKS = 4;
+    private static final int MAX_STACKS = 9;
 
     private final List<ItemStack> stacks = new ArrayList<>();
 
@@ -32,7 +32,7 @@ public class GroundToolAssemblyBlockEntity extends BlockEntity {
     }
 
     public boolean seed(ItemStack stack) {
-        if (!stacks.isEmpty() || stack.isEmpty() || !StarterFlintAssembly.isStarterPrimaryPart(stack)) {
+        if (!stacks.isEmpty() || stack.isEmpty() || !GroundAssemblyRecipeRegistry.canStart(stack)) {
             return false;
         }
         stacks.add(stack.copyWithCount(1));
@@ -41,7 +41,7 @@ public class GroundToolAssemblyBlockEntity extends BlockEntity {
     }
 
     public boolean canAdd(ItemStack stack) {
-        return stacks.size() < MAX_STACKS && StarterFlintAssembly.canAdd(stacks, stack);
+        return stacks.size() < MAX_STACKS && GroundAssemblyRecipeRegistry.canAccept(stacks, stack);
     }
 
     public boolean addStack(ItemStack stack) {
@@ -54,12 +54,8 @@ public class GroundToolAssemblyBlockEntity extends BlockEntity {
         return true;
     }
 
-    public boolean canAssemble() {
-        return StarterFlintAssembly.isComplete(stacks);
-    }
-
     public ItemStack assemble(HolderLookup.Provider registries) {
-        return StarterFlintAssembly.assemble(stacks, registries);
+        return GroundAssemblyRecipeRegistry.assemble(stacks, registries);
     }
 
     public List<ItemStack> removeStacks() {

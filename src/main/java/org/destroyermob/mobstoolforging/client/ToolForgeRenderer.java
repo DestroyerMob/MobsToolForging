@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ArmorForgeAttachment;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.ToolmakerBenchAssembly;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
@@ -23,6 +24,8 @@ import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEntity> {
     private static final float CAMPFIRE_ITEM_SCALE = 0.375F;
+    private static final float TOOLMAKER_RESULT_FLOAT_Y = 1.18F;
+    private static final float TOOLMAKER_RESULT_SCALE = 0.56F;
 
     private final ItemRenderer itemRenderer;
 
@@ -35,6 +38,7 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         DisplayLayout layout = layout(forge);
         if (isToolmakersBench(forge) && !forge.isComplete()) {
             renderBenchStacks(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
+            renderToolmakerResultPreview(forge, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
             return;
         }
         if (forge.hasRepairStacks() && !forge.isComplete()) {
@@ -124,6 +128,35 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             float localZ = (float) Math.sin(angle) * radius;
             renderFlatItem(forge, stacks.get(index), poseStack, bufferSource, packedLight, packedOverlay, localX, localZ, scale, layout.materialSurfaceY(), forge.displayRotationDegrees() + index * 23.0F);
         }
+    }
+
+    private void renderToolmakerResultPreview(ToolForgeBlockEntity forge, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+        Level level = forge.getLevel();
+        if (level == null) {
+            return;
+        }
+
+        List<ItemStack> stacks = forge.benchStacks();
+        if (stacks.size() <= 1 || stacks.stream().anyMatch(ToolmakerBenchAssembly::isFinishedTool)) {
+            return;
+        }
+
+        ItemStack preview = ToolmakerBenchAssembly.assemble(stacks, level.registryAccess());
+        if (preview.isEmpty()) {
+            return;
+        }
+
+        BlockState state = forge.getBlockState();
+        float facingRotation = state.hasProperty(ToolWorkstationBlock.FACING) ? state.getValue(ToolWorkstationBlock.FACING).toYRot() : 0.0F;
+        float time = level.getGameTime() + partialTick;
+        float bob = (float) Math.sin(time * 0.16F) * 0.035F;
+
+        poseStack.pushPose();
+        poseStack.translate(0.5F, TOOLMAKER_RESULT_FLOAT_Y + bob, 0.5F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(time * 2.25F - facingRotation));
+        poseStack.scale(TOOLMAKER_RESULT_SCALE, TOOLMAKER_RESULT_SCALE, TOOLMAKER_RESULT_SCALE);
+        itemRenderer.renderStatic(preview, ItemDisplayContext.FIXED, packedLight, packedOverlay, poseStack, bufferSource, level, 13);
+        poseStack.popPose();
     }
 
     private void renderTemplatePreview(ToolForgeBlockEntity forge, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
@@ -243,8 +276,8 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
                 -0.28F
         );
         private static final DisplayLayout TOOLMAKERS_BENCH = new DisplayLayout(
-                0.585F,
-                0.575F,
+                0.770F,
+                0.770F,
                 CAMPFIRE_ITEM_SCALE,
                 CAMPFIRE_ITEM_SCALE,
                 CAMPFIRE_ITEM_SCALE,

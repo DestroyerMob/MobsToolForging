@@ -10,9 +10,6 @@ public record ToolVisualKey(
         ResourceLocation headMaterial,
         ResourceLocation handleMaterial,
         Optional<ResourceLocation> guardMaterial,
-        Optional<ResourceLocation> bindingMaterial,
-        Optional<ResourceLocation> wrapMaterial,
-        Optional<ResourceLocation> focusMaterial,
         Optional<ResourceLocation> treatment,
         int quality,
         int damageBucket
@@ -29,9 +26,6 @@ public record ToolVisualKey(
                 construction.headMaterial(),
                 construction.handleMaterial(),
                 construction.guardMaterial(),
-                construction.bindingMaterial(),
-                construction.wrapMaterial(),
-                construction.focusMaterial(),
                 construction.treatment(),
                 construction.quality(),
                 damageBucket(stack)

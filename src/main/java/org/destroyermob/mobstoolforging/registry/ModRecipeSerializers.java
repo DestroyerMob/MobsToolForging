@@ -43,6 +43,11 @@ public final class ModRecipeSerializers {
                     "crafting_special_modular_hoe",
                     () -> new SimpleCraftingRecipeSerializer<>(category -> new ModularToolRecipe(category, ToolKind.HOE))
             );
+    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<ModularToolRecipe>> MODULAR_MATTOCK =
+            RECIPE_SERIALIZERS.register(
+                    "crafting_special_modular_mattock",
+                    () -> new SimpleCraftingRecipeSerializer<>(category -> new ModularToolRecipe(category, ToolKind.MATTOCK))
+            );
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ModularToolRecipe>> MODULAR_TOOL =
             RECIPE_SERIALIZERS.register(
                     "crafting_special_modular_tool",
@@ -88,6 +93,7 @@ public final class ModRecipeSerializers {
             case PICKAXE -> MODULAR_PICKAXE;
             case AXE -> MODULAR_AXE;
             case HOE -> MODULAR_HOE;
+            case MATTOCK -> MODULAR_MATTOCK;
         };
     }
 }

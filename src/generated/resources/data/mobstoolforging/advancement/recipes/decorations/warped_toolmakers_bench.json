@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "mobstoolforging:warped_toolmakers_bench"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_warped_toolmakers_bench": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:warped_planks"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_warped_toolmakers_bench"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "mobstoolforging:warped_toolmakers_bench"
+    ]
+  }
+}

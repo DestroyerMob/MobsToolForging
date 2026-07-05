@@ -29,8 +29,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
+import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.ArmorVisualKey;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
 import org.destroyermob.mobstoolforging.world.ToolPartSpriteKey;
@@ -45,6 +47,7 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
     private final PartedToolQuadFactory quadFactory = new PartedToolQuadFactory(BlockModelRotation.X0_Y0);
     private final Map<ToolVisualKey, BakedModel> toolCache = new ConcurrentHashMap<>();
     private final Map<PartKey, BakedModel> partCache = new ConcurrentHashMap<>();
+    private final Map<ArmorPartKey, BakedModel> armorPartCache = new ConcurrentHashMap<>();
     private final Map<ArmorVisualKey, BakedModel> armorCache = new ConcurrentHashMap<>();
     private final ItemOverrides overrides;
 
@@ -66,9 +69,14 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
                 if (partData != null) {
                     ToolTypeDefinition definition = findPartDefinition(stack, partData).orElse(null);
                     if (definition != null) {
-                        return partCache.computeIfAbsent(new PartKey(definition.id(), partData.partType(), partData.materialId()), key -> composePart(definition, partData));
+                        return partCache.computeIfAbsent(new PartKey(definition.id(), partData.partType(), partData.materialId(), partData.treatment()), key -> composePart(definition, partData));
                     }
                     warnOnce("missing_part_type|" + partData.partType() + "|" + BuiltInRegistries.ITEM.getKey(stack.getItem()), "Cannot render MTF part stack because no tool type owns part {} for item {}.", partData.partType(), BuiltInRegistries.ITEM.getKey(stack.getItem()));
+                }
+
+                ArmorPartData armorPartData = stack.get(ModDataComponents.ARMOR_PART.get());
+                if (armorPartData != null) {
+                    return armorPartCache.computeIfAbsent(new ArmorPartKey(armorPartData.partType(), armorPartData.materialId()), ComponentDrivenToolBakedModel.this::composeArmorPart);
                 }
 
                 Optional<ArmorVisualKey> armorKey = ArmorVisualKey.from(stack);
@@ -190,7 +198,30 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         if (isMissing(resolvedLayer.sprite())) {
             warnMissingLayer("part layer missing sprite", visual, layer, Optional.of(partData.materialId()), resolvedLayer.texture());
         }
-        return new ResolvedPartedItemModel(quadFactory.bakeLayer(0, resolvedLayer.sprite(), resolvedLayer.color()), resolvedLayer.sprite(), fallback.getTransforms());
+        Map<Integer, List<BakedQuad>> layers = new LinkedHashMap<>();
+        addLayer(layers, 0, quadFactory.bakeLayer(0, resolvedLayer.sprite(), resolvedLayer.color()));
+        partData.treatment().ifPresent(treatment -> treatmentLayer(visual).ifPresent(treatmentLayer -> {
+            ResolvedToolLayerSprite resolvedTreatment = resolveToolLayer(definition, treatmentLayer, treatment);
+            if (!isMissing(resolvedTreatment.sprite())) {
+                addLayer(layers, treatmentLayer.z(), quadFactory.bakeLayer(treatmentLayer.z(), resolvedTreatment.sprite(), resolvedTreatment.color()));
+            }
+        }));
+        return ResolvedPartedItemModel.compose(layers, resolvedLayer.sprite(), fallback.getTransforms());
+    }
+
+    private BakedModel composeArmorPart(ArmorPartKey key) {
+        ArmorMaterialTextureManager.ResolvedArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.itemTexture(key.material(), key.partType());
+        return new ResolvedPartedItemModel(
+                quadFactory.bakeLayer(0, texture.sprite(), texture.color()),
+                texture.sprite(),
+                fallback.getTransforms()
+        );
+    }
+
+    private static Optional<ToolVisualLayer> treatmentLayer(ToolVisualDefinition visual) {
+        return visual.layers().stream()
+                .filter(layer -> layer.materialFrom().filter("treatment"::equals).isPresent())
+                .findFirst();
     }
 
     private static String partVisualSlot(String partType) {
@@ -225,9 +256,6 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
             case "headMaterial" -> Optional.of(key.headMaterial());
             case "handleMaterial" -> Optional.of(key.handleMaterial());
             case "guardMaterial" -> key.guardMaterial();
-            case "bindingMaterial" -> key.bindingMaterial();
-            case "wrapMaterial" -> key.wrapMaterial();
-            case "focusMaterial" -> key.focusMaterial();
             case "treatment" -> key.treatment();
             default -> Optional.empty();
         });
@@ -238,12 +266,13 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
             return List.of(resolveToolLayer(definition, layer, material));
         }
 
-        Optional<ResolvedToolLayerSprite> template = resolveHandleBody(definition, layer, material);
         ResolvedToolLayerSprite exact = resolveExactToolLayer(definition, layer, material);
         if (!isMissing(exact.sprite())) {
-            return template.map(resolvedTemplate -> List.of(resolvedTemplate, exact)).orElseGet(() -> List.of(exact));
+            return resolveExactHandleBody(definition, material)
+                    .map(resolvedBody -> List.of(resolvedBody, exact))
+                    .orElseGet(() -> List.of(exact));
         }
-        return template.map(List::of).orElseGet(() -> List.of(exact));
+        return resolveHandleTemplate(definition, layer, material).map(List::of).orElseGet(() -> List.of(exact));
     }
 
     private ResolvedToolLayerSprite resolveToolLayer(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
@@ -280,14 +309,14 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         return resolveTemplateFallback(layer, material, true).orElse(exact);
     }
 
-    private Optional<ResolvedToolLayerSprite> resolveHandleBody(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
+    private Optional<ResolvedToolLayerSprite> resolveExactHandleBody(ToolTypeDefinition definition, ResourceLocation material) {
         ResourceLocation bodyTexture = handleBodyTexture(definition, material);
         TextureAtlasSprite bodySprite = sprite(bodyTexture);
         if (!isMissing(bodySprite)) {
             return Optional.of(ResolvedToolLayerSprite.exact(bodySprite, bodyTexture));
         }
 
-        return resolveHandleTemplate(definition, layer, material);
+        return Optional.empty();
     }
 
     private Optional<ResolvedToolLayerSprite> resolveHandleTemplate(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material) {
@@ -345,13 +374,10 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
             return candidates;
         }
 
-        String textureSlot = texturePartTypeForLayer(definition, layer);
+        String textureSlot = toolTextureSlotForLayer(definition, layer);
         if (definition.builtInKind().isPresent()) {
             addCandidate(candidates, conventionalToolTexture(textureSlot, material, "tool"));
         }
-        definition.partItem(textureSlot, material)
-                .map(item -> itemTexture(item, "tool"))
-                .ifPresent(texture -> addCandidate(candidates, texture));
         addCandidate(candidates, conventionalToolTexture(textureSlot, material, "tool"));
         return candidates;
     }
@@ -362,7 +388,7 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         if (definition.builtInKind().isPresent()) {
             addCandidate(candidates, conventionalToolTexture(partType, material, "part"));
         }
-        definition.partItem(partType, material)
+        definition.materialPartItem(partType, material)
                 .map(item -> itemTexture(item, "part"))
                 .ifPresent(texture -> addCandidate(candidates, texture));
         addCandidate(candidates, conventionalToolTexture(partType, material, "part"));
@@ -379,14 +405,17 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         }
     }
 
-    private String texturePartTypeForLayer(ToolTypeDefinition definition, ToolVisualLayer layer) {
-        if (layer.materialFrom().filter("headMaterial"::equals).isPresent()) {
-            return definition.primaryPartType();
-        }
-        return definition.requiredAssemblyParts().stream()
-                .filter(partType -> partVisualSlot(partType).equals(layer.slot()))
-                .findFirst()
+    private String toolTextureSlotForLayer(ToolTypeDefinition definition, ToolVisualLayer layer) {
+        return definition.builtInKind()
+                .map(kind -> toolTextureSlot(kind, layer.slot()))
                 .orElse(layer.slot());
+    }
+
+    private static String toolTextureSlot(ToolKind toolKind, String slot) {
+        if (toolKind == ToolKind.SWORD && "guard".equals(slot)) {
+            return ToolPartData.SWORD_GUARD;
+        }
+        return slot;
     }
 
     private ResourceLocation itemTexture(Item item, String suffix) {
@@ -444,6 +473,9 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
             int slash = path.lastIndexOf('/');
             return slash >= 0 ? path.substring(slash + 1) : path;
         }
+        if (path.contains("mattock")) {
+            return "mattock";
+        }
         if (path.contains("pickaxe")) {
             return "pickaxe";
         }
@@ -493,6 +525,9 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         }
     }
 
-    private record PartKey(ResourceLocation toolType, String partType, ResourceLocation material) {
+    private record PartKey(ResourceLocation toolType, String partType, ResourceLocation material, Optional<ResourceLocation> treatment) {
+    }
+
+    private record ArmorPartKey(String partType, ResourceLocation material) {
     }
 }

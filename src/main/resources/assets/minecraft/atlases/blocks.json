@@ -50,6 +50,86 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "minecraft:item/iron_helmet"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/iron_chestplate"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/iron_leggings"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/iron_boots"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/golden_helmet"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/golden_chestplate"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/golden_leggings"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/golden_boots"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/diamond_helmet"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/diamond_chestplate"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/diamond_leggings"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/diamond_boots"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/netherite_helmet"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/netherite_chestplate"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/netherite_leggings"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/netherite_boots"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/leather_helmet"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/leather_chestplate"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/leather_leggings"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/leather_boots"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "minecraft:item/netherite_ingot"
     }
   ]

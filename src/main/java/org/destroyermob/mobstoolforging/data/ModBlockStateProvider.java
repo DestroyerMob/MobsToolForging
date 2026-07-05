@@ -55,10 +55,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
             simpleBlockItem(patternRack, patternRackModel);
         }
 
-        Block toolmakersBench = ModBlocks.TOOLMAKERS_BENCH.get();
-        ModelFile toolmakersBenchModel = new ModelFile.UncheckedModelFile(modLoc("block/toolmakers_bench"));
-        horizontalBlock(toolmakersBench, toolmakersBenchModel);
-        simpleBlockItem(toolmakersBench, toolmakersBenchModel);
+        for (ModBlocks.ToolmakerStationVariant variant : ModBlocks.TOOLMAKER_STATION_VARIANTS) {
+            Block station = variant.block().get();
+            ModelFile stationModel = toolmakerStationModel(variant);
+            horizontalBlock(station, stationModel);
+            simpleBlockItem(station, stationModel);
+        }
 
         Block heatingForge = ModBlocks.HEATING_FORGE.get();
         ModelFile heatingForgeModel = new ModelFile.UncheckedModelFile(modLoc("block/heating_forge"));
@@ -105,7 +107,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
         armorPartModel(ModItems.LEGGINGS_LEGS.getId().getPath(), mcLoc("item/iron_leggings"));
         armorPartModel(ModItems.BOOTS_FEET.getId().getPath(), mcLoc("item/iron_boots"));
         for (ToolKind toolKind : ToolKind.values()) {
-            partModel(toolKind);
+            if (toolKind != ToolKind.MATTOCK) {
+                partModel(toolKind);
+            }
             toolModel(toolKind);
         }
         swordGuardPartModel();
@@ -133,6 +137,16 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .texture("log", variant.logTexture())
                 .texture("planks", variant.planksTexture())
                 .texture("particle", variant.logTexture());
+    }
+
+    private ModelFile toolmakerStationModel(ModBlocks.ToolmakerStationVariant variant) {
+        if (variant.block() == ModBlocks.TOOLMAKERS_BENCH) {
+            return new ModelFile.UncheckedModelFile(modLoc("block/toolmakers_bench"));
+        }
+        return models().withExistingParent("block/" + variant.id(), modLoc("block/template_toolmakers_bench"))
+                .texture("top", variant.topTexture())
+                .texture("side", variant.sideTexture())
+                .texture("particle", variant.topTexture());
     }
 
     private void smithingHammerModel() {
@@ -197,8 +211,11 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void patternModel(String name) {
-        ResourceLocation texture = modLoc("item/" + name);
-        itemModels().withExistingParent(name, mcLoc("item/generated")).texture("layer0", textureExists(texture) ? texture : mcLoc("item/paper"));
+        ResourceLocation texture = textureExists(modLoc("item/pattern_board")) ? modLoc("item/pattern_board") : mcLoc("block/oak_planks");
+        ItemModelBuilder builder = itemModels().withExistingParent(name, mcLoc("item/generated"))
+                .texture("layer0", texture)
+                .texture("board", texture);
+        builder.customLoader(PatternCutoutModelBuilder::new).end();
     }
 
     private void armorPartModel(String name, ResourceLocation texture) {
@@ -232,11 +249,15 @@ public class ModBlockStateProvider extends BlockStateProvider {
     private void toolModel(ToolKind toolKind) {
         ItemModelBuilder builder = itemModels().withExistingParent(toolKind.id(), mcLoc("item/handheld"));
         addVisualTextures(builder, toolKind);
+        if (toolKind == ToolKind.MATTOCK) {
+            builder.texture("template_mattock_tool_axe", modLoc("tool_templates/mattock/mattock_tool_axe"));
+            builder.texture("template_mattock_tool_hoe", modLoc("tool_templates/mattock/mattock_tool_hoe"));
+        }
         builder.customLoader((modelBuilder, helper) -> new PartedItemModelBuilder(modelBuilder, helper, toolKind, false, toolKind.partType(), toolKind.partType())).end();
     }
 
     private void addVisualTextures(ItemModelBuilder builder, ToolKind toolKind) {
-        builder.texture("particle", sourceTexture(MaterialCatalog.IRON, toolTextureName(toolKind, toolKind.partType(), MaterialCatalog.IRON)));
+        builder.texture("particle", particleTexture(toolKind));
         for (VisualLayerSpec layer : visualLayers(toolKind)) {
             for (ResourceLocation material : MaterialCatalog.visualMaterialIds(layer.materialFrom())) {
                 ResourceLocation texture = sourceTexture(material, toolTextureName(toolKind, layer.slot(), material));
@@ -255,6 +276,27 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 }
             }
         }
+    }
+
+    private ResourceLocation particleTexture(ToolKind toolKind) {
+        for (VisualLayerSpec layer : visualLayers(toolKind)) {
+            if (!"headMaterial".equals(layer.materialFrom())) {
+                continue;
+            }
+            ResourceLocation exactTexture = sourceTexture(MaterialCatalog.IRON, toolTextureName(toolKind, layer.slot(), MaterialCatalog.IRON));
+            if (sourceTextureExists(exactTexture)) {
+                return exactTexture;
+            }
+            ResourceLocation templateTexture = toolTemplateTexture(toolKind, layer.slot());
+            if (textureExists(templateTexture)) {
+                return templateTexture;
+            }
+        }
+        return sourceTexture(MaterialCatalog.IRON, toolTextureName(toolKind, toolKind.partType(), MaterialCatalog.IRON));
+    }
+
+    private ResourceLocation toolTemplateTexture(ToolKind toolKind, String slot) {
+        return modLoc("tool_templates/" + toolKind.id() + "/" + slot);
     }
 
     private static ResourceLocation sourceTexture(ResourceLocation material, String spriteName) {
@@ -305,10 +347,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         if (toolKind == ToolKind.SWORD && slot.equals("guard")) {
             return ToolPartData.SWORD_GUARD;
         }
-        if (slot.equals(toolKind.partType())) {
-            return toolKind.partType();
-        }
-        return toolKind.id() + "_" + slot;
+        return slot;
     }
 
     private static String sourceMaterialPath(ResourceLocation material) {
@@ -328,23 +367,32 @@ public class ModBlockStateProvider extends BlockStateProvider {
         return sourceMaterialPath(material).replace('/', '_').replace('-', '_');
     }
 
-    private static String jointSlot(ToolKind toolKind) {
-        return toolKind == ToolKind.SWORD ? "guard" : "binding";
-    }
-
     private static List<VisualLayerSpec> visualLayers(ToolKind toolKind) {
+        if (toolKind == ToolKind.SWORD) {
+            return List.of(
+                    new VisualLayerSpec("handle", "handleMaterial"),
+                    new VisualLayerSpec(toolKind.partType(), "headMaterial"),
+                    new VisualLayerSpec("guard", "guardMaterial"),
+                    new VisualLayerSpec(treatmentSlot(toolKind), "treatment")
+            );
+        }
+        if (toolKind == ToolKind.MATTOCK) {
+            return List.of(
+                    new VisualLayerSpec("handle", "handleMaterial"),
+                    new VisualLayerSpec("mattock_tool_axe", "headMaterial"),
+                    new VisualLayerSpec("mattock_tool_hoe", "guardMaterial"),
+                    new VisualLayerSpec(treatmentSlot(toolKind), "treatment")
+            );
+        }
         return List.of(
                 new VisualLayerSpec("handle", "handleMaterial"),
-                new VisualLayerSpec("wrap", "wrapMaterial"),
                 new VisualLayerSpec(toolKind.partType(), "headMaterial"),
-                new VisualLayerSpec(jointSlot(toolKind), jointMaterial(toolKind)),
-                new VisualLayerSpec("focus", "focusMaterial"),
-                new VisualLayerSpec("treatment_overlay", "treatment")
+                new VisualLayerSpec(treatmentSlot(toolKind), "treatment")
         );
     }
 
-    private static String jointMaterial(ToolKind toolKind) {
-        return toolKind == ToolKind.SWORD ? "guardMaterial" : "bindingMaterial";
+    private static String treatmentSlot(ToolKind toolKind) {
+        return toolKind.id() + "_treatment";
     }
 
     private record VisualLayerSpec(String slot, String materialFrom) {
@@ -380,6 +428,17 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 json.addProperty("part_slot", partSlot);
             }
             return json;
+        }
+    }
+
+    private static class PatternCutoutModelBuilder extends CustomLoaderBuilder<ItemModelBuilder> {
+        private PatternCutoutModelBuilder(ItemModelBuilder parent, ExistingFileHelper existingFileHelper) {
+            super(
+                    ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "pattern_cutout"),
+                    parent,
+                    existingFileHelper,
+                    false
+            );
         }
     }
 }

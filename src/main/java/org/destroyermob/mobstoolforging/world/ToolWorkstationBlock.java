@@ -95,7 +95,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (tryCollectOutput(forge, player)) {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
-        if (!(stack.getItem() instanceof ToolTemplateItem) && handleMissingPattern(forge, level, player)) {
+        if (!(stack.getItem() instanceof ToolTemplateItem) && !isRepairStack(stack, forge, kind) && handleMissingPattern(forge, level, player)) {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
         if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand) && !canUseItem(stack, forge, level)) {
@@ -104,7 +104,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (kind == WorkstationKind.TOOLMAKERS_BENCH) {
             return useToolmakersBench(stack, forge, level, pos, player);
         }
-        if (kind == WorkstationKind.TOOL_FORGE) {
+        if (isRepairStation(kind)) {
             ItemInteractionResult repairResult = useSmithingAnvilRepair(stack, forge, level, pos, player);
             if (repairResult != ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION) {
                 return repairResult;
@@ -171,6 +171,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                 return InteractionResult.sidedSuccess(level.isClientSide);
             }
             if (kind == WorkstationKind.TOOLMAKERS_BENCH) {
+                if (tryCollectToolmakerBenchTool(forge, player, level, pos)) {
+                    return InteractionResult.sidedSuccess(level.isClientSide);
+                }
                 if (forge.hasBenchStacks() && forge.benchStacks().stream().noneMatch(ToolmakerBenchAssembly::isFinishedTool)) {
                     assembleTool(ItemStack.EMPTY, forge, level, pos, player);
                     return InteractionResult.sidedSuccess(level.isClientSide);
@@ -200,7 +203,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                 }
                 return InteractionResult.CONSUME;
             }
-            if (kind == WorkstationKind.TOOL_FORGE && forge.hasBenchStacks()) {
+            if (isRepairStation(kind) && forge.hasBenchStacks()) {
                 if (!level.isClientSide) {
                     player.displayClientMessage(Component.translatable(forge.hasRepairWork() ? "message.mobstoolforging.tool_repair_ready" : "message.mobstoolforging.tool_repair_needs_material"), true);
                 }
@@ -244,7 +247,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return SmithingHammerLevel.isHammer(stack)
                     || forge.canPlaceToolmakerStack(stack);
         }
-        if (kind == WorkstationKind.TOOL_FORGE && (forge.canPlaceRepairTool(stack) || forge.canPlaceRepairMaterial(stack))) {
+        if (isRepairStack(stack, forge, kind)) {
             return true;
         }
         if (ArmorForgeAttachment.isAttachmentStation(kind)
@@ -294,6 +297,15 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_missing"), true);
         }
         return true;
+    }
+
+    private static boolean isRepairStation(WorkstationKind kind) {
+        return kind.isSmithingAnvilLike();
+    }
+
+    private static boolean isRepairStack(ItemStack stack, ToolForgeBlockEntity forge, WorkstationKind kind) {
+        return isRepairStation(kind)
+                && (forge.canPlaceRepairTool(stack) || forge.canPlaceRepairMaterial(stack));
     }
 
     private static boolean isPatternRackSelectable(WorkstationKind kind) {
@@ -526,6 +538,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
 
     private ItemInteractionResult useToolmakersBench(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
         if (stack.isEmpty()) {
+            if (tryCollectToolmakerBenchTool(forge, player, level, pos)) {
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            }
             if (forge.hasBenchStacks() && forge.benchStacks().stream().noneMatch(ToolmakerBenchAssembly::isFinishedTool)) {
                 return assembleTool(ItemStack.EMPTY, forge, level, pos, player);
             }
@@ -575,10 +590,14 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         ItemStack output = ToolmakerBenchAssembly.assemble(forge.benchStacks(), level.registryAccess());
         if (output.isEmpty()) {
-            player.displayClientMessage(Component.translatable(forge.hasBenchStacks() ? "message.mobstoolforging.toolmaker_invalid" : "message.mobstoolforging.toolmaker_needs_parts"), true);
+            if (ToolmakerBenchAssembly.needsPlantFiber(forge.benchStacks())) {
+                player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_needs_fiber"), true);
+            } else {
+                player.displayClientMessage(Component.translatable(forge.hasBenchStacks() ? "message.mobstoolforging.toolmaker_invalid" : "message.mobstoolforging.toolmaker_needs_parts"), true);
+            }
             return ItemInteractionResult.CONSUME;
         }
-        forge.setDirectOutput(output);
+        forge.setToolmakerStacks(List.of(output));
         playWorkEffects(tool, level, pos, player);
         player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_assembled"), true);
         return ItemInteractionResult.CONSUME;
@@ -603,15 +622,35 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_invalid"), true);
             return ItemInteractionResult.CONSUME;
         }
-        forge.clearToolmakerStacks();
-        for (ItemStack part : parts) {
-            if (!part.isEmpty() && !player.getInventory().add(part)) {
-                player.drop(part, false);
+        forge.setToolmakerStacks(parts);
+        for (int index = ToolForgeBlockEntity.maxBenchStacks(); index < parts.size(); index++) {
+            ItemStack overflow = parts.get(index);
+            if (!overflow.isEmpty() && !player.getInventory().add(overflow)) {
+                player.drop(overflow, false);
             }
         }
         playWorkEffects(tool, level, pos, player);
         player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_disassembled"), true);
         return ItemInteractionResult.CONSUME;
+    }
+
+    private static boolean tryCollectToolmakerBenchTool(ToolForgeBlockEntity forge, Player player, Level level, BlockPos pos) {
+        List<ItemStack> benchStacks = forge.benchStacks();
+        if (benchStacks.size() != 1 || !ToolmakerBenchAssembly.isFinishedTool(benchStacks.get(0))) {
+            return false;
+        }
+        if (level.isClientSide) {
+            return true;
+        }
+
+        ItemStack tool = benchStacks.get(0).copyWithCount(1);
+        if (player.getInventory().add(tool)) {
+            forge.clearToolmakerStacks();
+            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.0F);
+        } else {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.inventory_full"), true);
+        }
+        return true;
     }
 
     private ItemInteractionResult work(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
@@ -621,7 +660,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         int hammerLevel = (stack.isEmpty() || stack.is(ModItems.GEM_CUTTERS_KNIFE.get())) && kind == WorkstationKind.LAPIDARY_TABLE
                 ? SmithingHammerLevel.IRON.level()
                 : SmithingHammerLevel.levelOf(stack);
-        if (kind == WorkstationKind.TOOL_FORGE && forge.hasRepairWork()) {
+        if (isRepairStation(kind) && forge.hasRepairWork()) {
             return repairTool(stack, forge, level, pos, player);
         }
         if (forge.hasLooseWork()) {

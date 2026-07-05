@@ -16,7 +16,7 @@ import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlockEntity;
 
 public class GroundToolAssemblyRenderer implements BlockEntityRenderer<GroundToolAssemblyBlockEntity> {
     private static final float SURFACE_Y = 0.08F;
-    private static final float CAMPFIRE_ITEM_SCALE = 0.375F;
+    private static final float ITEM_SCALE = 0.375F;
 
     private final ItemRenderer itemRenderer;
 
@@ -33,7 +33,7 @@ public class GroundToolAssemblyRenderer implements BlockEntityRenderer<GroundToo
         }
         float facingRotation = assembly.getBlockState().getValue(GroundToolAssemblyBlock.FACING).toYRot();
         if (count == 1) {
-            renderFlatItem(assembly.getLevel(), stacks.getFirst(), poseStack, bufferSource, packedLight, packedOverlay, facingRotation, 0.0F, 0.0F, CAMPFIRE_ITEM_SCALE, 0);
+            renderFlatItem(assembly.getLevel(), stacks.getFirst(), poseStack, bufferSource, packedLight, packedOverlay, facingRotation, 0.0F, 0.0F, 0);
             return;
         }
         float radius = count == 2 ? 0.23F : 0.27F;
@@ -41,11 +41,11 @@ public class GroundToolAssemblyRenderer implements BlockEntityRenderer<GroundToo
             float angle = (float) (Math.PI * 2.0D * index / count);
             float localX = (float) Math.cos(angle) * radius;
             float localZ = (float) Math.sin(angle) * radius;
-            renderFlatItem(assembly.getLevel(), stacks.get(index), poseStack, bufferSource, packedLight, packedOverlay, facingRotation, localX, localZ, CAMPFIRE_ITEM_SCALE, index);
+            renderFlatItem(assembly.getLevel(), stacks.get(index), poseStack, bufferSource, packedLight, packedOverlay, facingRotation, localX, localZ, index);
         }
     }
 
-    private void renderFlatItem(Level level, ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float facingRotation, float localX, float localZ, float scale, int seed) {
+    private void renderFlatItem(Level level, ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float facingRotation, float localX, float localZ, int seed) {
         if (stack.isEmpty()) {
             return;
         }
@@ -54,7 +54,7 @@ public class GroundToolAssemblyRenderer implements BlockEntityRenderer<GroundToo
         poseStack.mulPose(Axis.YP.rotationDegrees(-facingRotation));
         poseStack.translate(localX, 0.0F, localZ);
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-        poseStack.scale(scale, scale, scale);
+        poseStack.scale(ITEM_SCALE, ITEM_SCALE, ITEM_SCALE);
         itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, packedLight, packedOverlay, poseStack, bufferSource, level, seed);
         poseStack.popPose();
     }

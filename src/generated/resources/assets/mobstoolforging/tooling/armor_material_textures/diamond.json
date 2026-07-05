@@ -1,4 +1,10 @@
 {
+  "item_textures": {
+    "boots": "minecraft:item/diamond_boots",
+    "chestplate": "minecraft:item/diamond_chestplate",
+    "helmet": "minecraft:item/diamond_helmet",
+    "leggings": "minecraft:item/diamond_leggings"
+  },
   "material": "mobstoolforging:diamond",
   "texture": "minecraft:block/diamond_block"
 }

@@ -1,14 +1,7 @@
 {
   "values": [
-    "#mobstoolforging:parts/armor",
+    "#mobstoolforging:parts/heads",
     "#mobstoolforging:parts/handle",
-    "#mobstoolforging:parts/sword_blade",
-    "#mobstoolforging:parts/sword_guard",
-    "#mobstoolforging:parts/shovel_head",
-    "#mobstoolforging:parts/pickaxe_head",
-    "#mobstoolforging:parts/axe_head",
-    "#mobstoolforging:parts/hoe_head",
-    "#mobstoolforging:parts/screwdriver_head",
-    "#mobstoolforging:parts/gem_cutters_blade"
+    "#mobstoolforging:parts/guards"
   ]
 }

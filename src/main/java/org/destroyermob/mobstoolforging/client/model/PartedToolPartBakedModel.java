@@ -1,7 +1,9 @@
 package org.destroyermob.mobstoolforging.client.model;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
@@ -34,7 +36,7 @@ public final class PartedToolPartBakedModel implements BakedModel {
     private final ItemTransforms transforms;
     private final ResolvedPartedItemModel fallback;
     private final ItemOverrides overrides;
-    private final Map<ResourceLocation, ResolvedPartedItemModel> cache = new ConcurrentHashMap<>();
+    private final Map<PartKey, ResolvedPartedItemModel> cache = new ConcurrentHashMap<>();
 
     public PartedToolPartBakedModel(ToolVisualDefinition visual, String partType, String partSlot, PartedToolSpriteSet sprites, PartedToolQuadFactory quadFactory, ItemTransforms transforms) {
         this.visual = visual;
@@ -43,7 +45,7 @@ public final class PartedToolPartBakedModel implements BakedModel {
         this.sprites = sprites;
         this.quadFactory = quadFactory;
         this.transforms = transforms;
-        this.fallback = compose(MaterialCatalog.IRON);
+        this.fallback = compose(new PartKey(MaterialCatalog.IRON, Optional.empty()));
         this.overrides = new ItemOverrides() {
             @Override
             public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
@@ -51,7 +53,7 @@ public final class PartedToolPartBakedModel implements BakedModel {
                 if (data == null || !PartedToolPartBakedModel.this.partType.equals(data.partType())) {
                     return fallback;
                 }
-                return cache.computeIfAbsent(data.materialId(), PartedToolPartBakedModel.this::compose);
+                return cache.computeIfAbsent(new PartKey(data.materialId(), data.treatment()), PartedToolPartBakedModel.this::compose);
             }
         };
     }
@@ -96,14 +98,28 @@ public final class PartedToolPartBakedModel implements BakedModel {
         return overrides;
     }
 
-    private ResolvedPartedItemModel compose(ResourceLocation material) {
-        ResolvedToolLayerSprite resolved = sprites.resolvePartLayer(visual.id(), partLayer, material)
+    private ResolvedPartedItemModel compose(PartKey key) {
+        ResolvedToolLayerSprite resolved = sprites.resolvePartLayer(visual.id(), partLayer, key.material())
                 .orElseGet(() -> {
-                    warnMissingPartSprite(material);
+                    warnMissingPartSprite(key.material());
                     return ResolvedToolLayerSprite.exact(sprites.missing(), net.minecraft.client.renderer.texture.MissingTextureAtlasSprite.getLocation());
                 });
-        List<BakedQuad> quads = quadFactory.bakeLayer(0, resolved.sprite(), resolved.color());
-        return new ResolvedPartedItemModel(quads, resolved.sprite(), transforms);
+        Map<Integer, List<BakedQuad>> layers = new LinkedHashMap<>();
+        layers.put(0, quadFactory.bakeLayer(0, resolved.sprite(), resolved.color()));
+        key.treatment().ifPresent(treatment -> treatmentLayer().ifPresent(treatmentLayer ->
+                sprites.resolveLayer(visual.id(), treatmentLayer, treatment)
+                        .ifPresent(resolvedTreatment -> layers.put(
+                                treatmentLayer.z(),
+                                quadFactory.bakeLayer(treatmentLayer.z(), resolvedTreatment.sprite(), resolvedTreatment.color())
+                        ))
+        ));
+        return ResolvedPartedItemModel.compose(layers, resolved.sprite(), transforms);
+    }
+
+    private Optional<ToolVisualLayer> treatmentLayer() {
+        return visual.layers().stream()
+                .filter(layer -> layer.materialFrom().filter("treatment"::equals).isPresent())
+                .findFirst();
     }
 
     private void warnMissingPartSprite(ResourceLocation material) {
@@ -119,5 +135,8 @@ public final class PartedToolPartBakedModel implements BakedModel {
                     textureKey
             );
         }
+    }
+
+    private record PartKey(ResourceLocation material, Optional<ResourceLocation> treatment) {
     }
 }

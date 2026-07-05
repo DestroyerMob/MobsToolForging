@@ -1,5 +1,6 @@
 {
   "type": "mobstoolforging:tool_visual_example",
+  "guard_material": "mobstoolforging:iron",
   "handle_material": "mobstoolforging:blaze",
   "head_material": "mobstoolforging:iron",
   "quality": 100,

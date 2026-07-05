@@ -17,11 +17,13 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.registry.ModTags;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolAssemblyEnchantments;
+import org.destroyermob.mobstoolforging.world.ToolAssemblyParts;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolExternalComponents;
 import org.destroyermob.mobstoolforging.world.ToolKind;
@@ -67,6 +69,8 @@ public class ModularToolRecipe extends CustomRecipe {
             return ItemStack.EMPTY;
         }
         ToolExternalComponents.copyPrimaryHeadComponentsToTool(parts.part(), output);
+        output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts.assemblyStacks()));
+        ToolAssemblyEnchantments.syncRoutedToolEnchantments(output, registries);
         return output;
     }
 
@@ -91,10 +95,6 @@ public class ModularToolRecipe extends CustomRecipe {
     private Parts findParts(CraftingInput input, ToolTypeDefinition definition) {
         ItemStack part = ItemStack.EMPTY;
         ItemStack handle = ItemStack.EMPTY;
-        ItemStack binding = ItemStack.EMPTY;
-        ItemStack wrap = ItemStack.EMPTY;
-        ItemStack focus = ItemStack.EMPTY;
-        ItemStack treatment = ItemStack.EMPTY;
         Map<String, ItemStack> requiredParts = new LinkedHashMap<>();
         for (int i = 0; i < input.size(); i++) {
             ItemStack stack = input.getItem(i);
@@ -133,41 +133,9 @@ public class ModularToolRecipe extends CustomRecipe {
                 handle = stack;
                 continue;
             }
-            if (stack.is(ModTags.Items.TOOL_BINDINGS)) {
-                if (!binding.isEmpty()) {
-                    return Parts.invalid();
-                }
-                binding = stack;
-                continue;
-            }
-            if (stack.is(ModTags.Items.TOOL_WRAPS)) {
-                if (!wrap.isEmpty()) {
-                    return Parts.invalid();
-                }
-                wrap = stack;
-                continue;
-            }
-            if (stack.is(ModTags.Items.TOOL_FOCI)) {
-                if (!focus.isEmpty()) {
-                    return Parts.invalid();
-                }
-                focus = stack;
-                continue;
-            }
-            if (stack.is(ModTags.Items.TREATMENT_CATALYSTS)) {
-                if (!treatment.isEmpty()) {
-                    return Parts.invalid();
-                }
-                treatment = stack;
-                continue;
-            }
             return Parts.invalid();
         }
-        return new Parts(part, handle, binding, requiredParts, wrap, focus, treatment);
-    }
-
-    private static Optional<ResourceLocation> material(ItemStack stack, MaterialResolver resolver) {
-        return stack.isEmpty() ? Optional.empty() : Optional.of(resolver.resolve(stack));
+        return new Parts(part, handle, requiredParts);
     }
 
     private static boolean matchesPart(ToolTypeDefinition definition, ItemStack stack, ToolPartData partData, String partType) {
@@ -183,14 +151,9 @@ public class ModularToolRecipe extends CustomRecipe {
                 .findFirst();
     }
 
-    @FunctionalInterface
-    private interface MaterialResolver {
-        ResourceLocation resolve(ItemStack stack);
-    }
-
-    private record Parts(ItemStack part, ItemStack handle, ItemStack binding, Map<String, ItemStack> requiredParts, ItemStack wrap, ItemStack focus, ItemStack treatment) {
+    private record Parts(ItemStack part, ItemStack handle, Map<String, ItemStack> requiredParts) {
         private static Parts invalid() {
-            return new Parts(ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, Map.of(), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY);
+            return new Parts(ItemStack.EMPTY, ItemStack.EMPTY, Map.of());
         }
 
         private boolean isValid(ToolTypeDefinition definition) {
@@ -208,11 +171,11 @@ public class ModularToolRecipe extends CustomRecipe {
                     partData.materialId(),
                     MaterialCatalog.handleMaterial(handle),
                     guardMaterial(),
-                    bindingMaterial(),
-                    material(wrap, MaterialCatalog::wrapMaterial),
-                    material(focus, MaterialCatalog::focusMaterial),
-                    material(treatment, MaterialCatalog::treatmentMaterial),
-                    quality()
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    partData.treatment(),
+                    quality(definition)
             ));
         }
 
@@ -235,12 +198,16 @@ public class ModularToolRecipe extends CustomRecipe {
             return requiredParts.values().stream().findFirst().map(MaterialCatalog::bindingMaterial);
         }
 
-        private Optional<ResourceLocation> bindingMaterial() {
-            return binding.isEmpty() ? Optional.empty() : Optional.of(MaterialCatalog.bindingMaterial(binding));
-        }
-
-        private int quality() {
-            return ToolConstructionData.DEFAULT_QUALITY;
+        private int quality(ToolTypeDefinition definition) {
+            if (!MobsToolForgingConfig.ENABLE_QUALITY.get()) {
+                return ToolConstructionData.DEFAULT_QUALITY;
+            }
+            ToolPartData primary = part.get(ModDataComponents.TOOL_PART.get());
+            List<ToolPartData> requiredData = requiredParts.values().stream()
+                    .map(stack -> stack.get(ModDataComponents.TOOL_PART.get()))
+                    .filter(java.util.Objects::nonNull)
+                    .toList();
+            return definition.assembledQuality(primary, requiredData);
         }
 
         private List<ItemStack> enchantmentSources() {
@@ -249,6 +216,10 @@ public class ModularToolRecipe extends CustomRecipe {
                 sources.add(handle);
             }
             return List.copyOf(sources);
+        }
+
+        private List<ItemStack> assemblyStacks() {
+            return enchantmentSources();
         }
     }
 

@@ -23,7 +23,7 @@ public final class ModBlockEntities {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ToolForgeBlockEntity>> TOOL_WORKSTATION = BLOCK_ENTITIES.register(
             "tool_workstation",
-            () -> BlockEntityType.Builder.of(ToolForgeBlockEntity::new, ModBlocks.TOOL_FORGE.get(), ModBlocks.CRUDE_ANVIL.get(), ModBlocks.LAPIDARY_TABLE.get(), ModBlocks.TOOLMAKERS_BENCH.get()).build(null)
+            () -> BlockEntityType.Builder.of(ToolForgeBlockEntity::new, ModBlocks.toolWorkstationBlocks()).build(null)
     );
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<HeatingForgeBlockEntity>> HEATING_FORGE = BLOCK_ENTITIES.register(
             "heating_forge",

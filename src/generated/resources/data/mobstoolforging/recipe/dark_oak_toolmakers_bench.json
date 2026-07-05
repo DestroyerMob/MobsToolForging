@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "minecraft:dark_oak_planks"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "S S",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "mobstoolforging:dark_oak_toolmakers_bench"
+  }
+}

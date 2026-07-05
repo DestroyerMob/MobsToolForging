@@ -9,6 +9,7 @@ public final class MobsToolForgingConfig {
     public static final ModConfigSpec.BooleanValue DEBUG_TEMPLATE_SELECTOR;
     public static final ModConfigSpec.BooleanValue ENABLE_VANILLA_TOOL_RECIPES;
     public static final ModConfigSpec.BooleanValue ENABLE_CRUDE_FLINT_TOOLS;
+    public static final ModConfigSpec.BooleanValue ENABLE_PLANT_FIBER_DROPS;
     public static final ModConfigSpec.BooleanValue DISABLE_STONE_TOOLS;
     public static final ModConfigSpec.BooleanValue DISABLE_WOODEN_TOOLS;
     public static final ModConfigSpec.BooleanValue COPPER_REQUIRES_WOODEN_TOOL;
@@ -61,8 +62,11 @@ public final class MobsToolForgingConfig {
                 .comment("When true, vanilla sword, shovel, pickaxe, axe, and hoe recipes remain enabled. When false, vanilla material tool recipes are removed so Mobs Tool Forging owns tool progression.")
                 .define("enableVanillaToolRecipes", false);
         ENABLE_CRUDE_FLINT_TOOLS = builder
-                .comment("When true, starter flint tool progression is enabled: Plant Fiber drops, placed flint knapping, and ground assembly.")
+                .comment("When true, starter flint tool progression is enabled: placed flint knapping and data-driven ground assembly.")
                 .define("enableCrudeFlintTools", true);
+        ENABLE_PLANT_FIBER_DROPS = builder
+                .comment("When true, grass and ferns can drop Plant Fiber when broken with a knapping tool. Default is false so Plant Fiber can remain recipe/config driven without extra world drops.")
+                .define("enablePlantFiberDrops", false);
         DISABLE_STONE_TOOLS = builder
                 .comment("When true, vanilla stone tool recipes are removed at server start.")
                 .define("disableStoneTools", true);
@@ -93,8 +97,8 @@ public final class MobsToolForgingConfig {
                 .define("allowDirectPatternStationSelection", true);
         builder.pop();
         REQUIRE_TOOL_PART_ENCHANTING = builder
-                .comment("When true, finished Mobs Tool Forging modular tools and weapons cannot be enchanted directly. Enchant tool parts before assembly instead.")
-                .define("requireToolPartEnchanting", true);
+                .comment("Legacy compatibility toggle. When true, finished modular tools cannot be enchanted directly. The default finished-tool flow stores routed enchantments on assembled parts instead.")
+                .define("requireToolPartEnchanting", false);
         REQUIRE_ARMOR_PART_ENCHANTING = builder
                 .comment("When true, finished Mobs Tool Forging modular armor cannot be enchanted directly. Enchant armor parts before assembly instead.")
                 .define("requireArmorPartEnchanting", true);

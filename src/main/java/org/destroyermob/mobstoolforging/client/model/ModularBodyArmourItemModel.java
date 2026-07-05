@@ -10,6 +10,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.ArmorVisualKey;
 
 public final class ModularBodyArmourItemModel {
@@ -26,7 +27,7 @@ public final class ModularBodyArmourItemModel {
         List<BakedQuad> quads = new ArrayList<>(fallback.getQuads(null, null, RandomSource.create(42L)));
         TextureAtlasSprite particle = fallback.getParticleIcon();
         if (key.chestplatePlateMaterial().isPresent()) {
-            TextureAtlasSprite bodySprite = ArmorMaterialTextureManager.INSTANCE.sprite(key.chestplatePlateMaterial().orElseThrow());
+            TextureAtlasSprite bodySprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(key.chestplatePlateMaterial().orElseThrow(), ArmorPartData.CHESTPLATE_BODY);
             particle = bodySprite;
             for (ModularBodyArmourGeometry.ItemCuboid cuboid : ModularBodyArmourGeometry.ITEM) {
                 for (Direction direction : Direction.values()) {

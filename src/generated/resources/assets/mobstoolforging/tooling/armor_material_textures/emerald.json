@@ -1,4 +1,11 @@
 {
+  "item_textures": {
+    "boots": "minecraft:item/leather_boots",
+    "chestplate": "minecraft:item/leather_chestplate",
+    "helmet": "minecraft:item/leather_helmet",
+    "leggings": "minecraft:item/leather_leggings"
+  },
   "material": "mobstoolforging:emerald",
-  "texture": "minecraft:block/emerald_block"
+  "texture": "minecraft:block/emerald_block",
+  "tint_item_textures": true
 }

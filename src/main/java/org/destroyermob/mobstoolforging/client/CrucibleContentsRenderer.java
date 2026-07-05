@@ -81,12 +81,15 @@ public final class CrucibleContentsRenderer {
             return;
         }
         float surfaceY = LIQUID_MIN_Y + (LIQUID_MAX_Y - LIQUID_MIN_Y) * clamp(fill);
-        int color = moltenColor(material.get(), contents.heat());
+        TextureAtlasSprite sprite = blockSprite(MOLTEN_TEXTURE);
+        int surfaceColor = moltenColor(material.get(), contents.heat());
+        int bodyColor = withAlpha(surfaceColor, contents.hasMoltenMaterial() ? 0.34F : 0.22F);
+        VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS));
         renderBox(
                 poseStack,
-                bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)),
-                blockSprite(MOLTEN_TEXTURE),
-                color,
+                consumer,
+                sprite,
+                bodyColor,
                 LightTexture.FULL_BRIGHT,
                 packedOverlay,
                 INNER_MIN,
@@ -94,6 +97,19 @@ public final class CrucibleContentsRenderer {
                 INNER_MIN,
                 INNER_MAX,
                 surfaceY,
+                INNER_MAX
+        );
+        renderHorizontalSurface(
+                poseStack,
+                consumer,
+                sprite,
+                surfaceColor,
+                LightTexture.FULL_BRIGHT,
+                packedOverlay,
+                INNER_MIN,
+                surfaceY + 0.001F,
+                INNER_MIN,
+                INNER_MAX,
                 INNER_MAX
         );
     }
@@ -201,6 +217,14 @@ public final class CrucibleContentsRenderer {
         quad(poseStack, consumer, Direction.SOUTH.step(), color, light, overlay, maxX, minY, maxZ, u0, v1, maxX, maxY, maxZ, u0, v0, minX, maxY, maxZ, u1, v0, minX, minY, maxZ, u1, v1);
         quad(poseStack, consumer, Direction.WEST.step(), color, light, overlay, minX, minY, maxZ, u0, v1, minX, maxY, maxZ, u0, v0, minX, maxY, minZ, u1, v0, minX, minY, minZ, u1, v1);
         quad(poseStack, consumer, Direction.EAST.step(), color, light, overlay, maxX, minY, minZ, u0, v1, maxX, maxY, minZ, u0, v0, maxX, maxY, maxZ, u1, v0, maxX, minY, maxZ, u1, v1);
+    }
+
+    private static void renderHorizontalSurface(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int color, int light, int overlay, float minX, float y, float minZ, float maxX, float maxZ) {
+        float u0 = sprite.getU(0.0F);
+        float v0 = sprite.getV(0.0F);
+        float u1 = sprite.getU(1.0F);
+        float v1 = sprite.getV(1.0F);
+        quad(poseStack, consumer, Direction.UP.step(), color, light, overlay, minX, y, minZ, u0, v1, minX, y, maxZ, u0, v0, maxX, y, maxZ, u1, v0, maxX, y, minZ, u1, v1);
     }
 
     private static void quad(PoseStack poseStack, VertexConsumer consumer, Vector3f normal, int color, int light, int overlay, float x0, float y0, float z0, float u0, float v0, float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3) {

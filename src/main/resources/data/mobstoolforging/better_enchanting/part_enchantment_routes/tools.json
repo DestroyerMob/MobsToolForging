@@ -1,0 +1,90 @@
+{
+  "routes": [
+    {
+      "item": "mobstoolforging:sword",
+      "parts": [
+        {
+          "part_type": "sword_blade",
+          "limit": 2
+        },
+        {
+          "part_type": "sword_guard",
+          "limit": 1
+        },
+        {
+          "item_tag": "mobstoolforging:parts/handle",
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "item": "mobstoolforging:shovel",
+      "parts": [
+        {
+          "part_type": "shovel_head",
+          "limit": 2
+        },
+        {
+          "item_tag": "mobstoolforging:parts/handle",
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "item": "mobstoolforging:pickaxe",
+      "parts": [
+        {
+          "part_type": "pickaxe_head",
+          "limit": 2
+        },
+        {
+          "item_tag": "mobstoolforging:parts/handle",
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "item": "mobstoolforging:axe",
+      "parts": [
+        {
+          "part_type": "axe_head",
+          "limit": 2
+        },
+        {
+          "item_tag": "mobstoolforging:parts/handle",
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "item": "mobstoolforging:hoe",
+      "parts": [
+        {
+          "part_type": "hoe_head",
+          "limit": 2
+        },
+        {
+          "item_tag": "mobstoolforging:parts/handle",
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "item": "mobstoolforging:mattock",
+      "parts": [
+        {
+          "part_type": "axe_head",
+          "limit": 1
+        },
+        {
+          "part_type": "hoe_head",
+          "limit": 1
+        },
+        {
+          "item_tag": "mobstoolforging:parts/handle",
+          "limit": 1
+        }
+      ]
+    }
+  ]
+}

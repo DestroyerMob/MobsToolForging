@@ -39,9 +39,6 @@ public final class MaterialCatalog {
     public static final ResourceLocation DARK_OAK = materialId("dark_oak");
     public static final ResourceLocation BLAZE = materialId("blaze");
     public static final ResourceLocation BREEZE = materialId("breeze");
-    public static final ResourceLocation LEATHER = materialId("leather");
-    public static final ResourceLocation PLANT_FIBER = materialId("plant_fiber");
-    public static final ResourceLocation AMETHYST = materialId("amethyst");
     public static final ResourceLocation NETHER = materialId("nether");
     public static final ResourceLocation SCULK = materialId("sculk");
 
@@ -88,9 +85,6 @@ public final class MaterialCatalog {
     private static final List<ResourceLocation> STARTER_MATERIALS = List.of(IRON, GOLD, COPPER, DIAMOND, EMERALD, RUBY, SAPPHIRE);
     private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(OAK, DARK_OAK, BLAZE, BREEZE);
     private static final List<ResourceLocation> GUARD_MATERIALS = STARTER_MATERIALS;
-    private static final List<ResourceLocation> BINDING_MATERIALS = List.of(IRON, GOLD, COPPER, DIAMOND, EMERALD, RUBY, SAPPHIRE, PLANT_FIBER);
-    private static final List<ResourceLocation> WRAP_MATERIALS = List.of(LEATHER);
-    private static final List<ResourceLocation> FOCUS_MATERIALS = List.of(AMETHYST);
     private static final List<ResourceLocation> TREATMENT_MATERIALS = List.of(NETHERITE, NETHER, SCULK);
 
     static {
@@ -196,9 +190,6 @@ public final class MaterialCatalog {
             case "headMaterial" -> STARTER_MATERIALS;
             case "handleMaterial" -> HANDLE_MATERIALS;
             case "guardMaterial" -> GUARD_MATERIALS;
-            case "bindingMaterial" -> BINDING_MATERIALS;
-            case "wrapMaterial" -> WRAP_MATERIALS;
-            case "focusMaterial" -> FOCUS_MATERIALS;
             case "treatment" -> TREATMENT_MATERIALS;
             default -> List.of();
         };
@@ -211,7 +202,6 @@ public final class MaterialCatalog {
         putDefinition(definition);
         registerVisualMaterial("headMaterial", definition.id());
         registerVisualMaterial("guardMaterial", definition.id());
-        registerVisualMaterial("bindingMaterial", definition.id());
     }
 
     public static synchronized void registerMaterial(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier) {
@@ -230,7 +220,6 @@ public final class MaterialCatalog {
         if (visualSlots.isEmpty()) {
             registerVisualMaterial("headMaterial", definition.id());
             registerVisualMaterial("guardMaterial", definition.id());
-            registerVisualMaterial("bindingMaterial", definition.id());
         } else {
             visualSlots.forEach(slot -> registerVisualMaterial(slot, definition.id()));
         }
@@ -259,9 +248,6 @@ public final class MaterialCatalog {
     }
 
     public static ItemStack displayStack(ResourceLocation materialId) {
-        if (PLANT_FIBER.equals(materialId)) {
-            return new ItemStack(ModItems.PLANT_FIBER.get());
-        }
         for (TagKey<Item> tag : MATERIAL_DISPLAY_TAGS.getOrDefault(materialId, new LinkedList<>())) {
             for (var holder : BuiltInRegistries.ITEM.getTagOrEmpty(tag)) {
                 Item item = holder.value();
@@ -296,36 +282,9 @@ public final class MaterialCatalog {
         if (partData != null) {
             return partData.materialId();
         }
-        if (stack.is(ModItems.PLANT_FIBER.get())) {
-            return PLANT_FIBER;
-        }
         return resolve(stack)
                 .map(ToolMaterialDefinition::id)
                 .orElseGet(() -> BuiltInRegistries.ITEM.getKey(stack.getItem()));
-    }
-
-    public static ResourceLocation wrapMaterial(ItemStack stack) {
-        if (stack.is(Items.LEATHER)) {
-            return LEATHER;
-        }
-        return BuiltInRegistries.ITEM.getKey(stack.getItem());
-    }
-
-    public static ResourceLocation focusMaterial(ItemStack stack) {
-        if (stack.is(Items.AMETHYST_SHARD)) {
-            return AMETHYST;
-        }
-        return BuiltInRegistries.ITEM.getKey(stack.getItem());
-    }
-
-    public static ResourceLocation treatmentMaterial(ItemStack stack) {
-        if (stack.is(Items.BLAZE_POWDER) || stack.is(Items.MAGMA_CREAM) || stack.is(Items.NETHERITE_SCRAP)) {
-            return NETHER;
-        }
-        if (stack.is(Items.ECHO_SHARD) || stack.is(Items.SCULK_CATALYST)) {
-            return SCULK;
-        }
-        return BuiltInRegistries.ITEM.getKey(stack.getItem());
     }
 
     private static Optional<MaterialCategory> categoryFor(ItemStack stack) {

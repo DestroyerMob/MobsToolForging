@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.block.model.FaceBakery;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BlockModelRotation;
+import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.ArmorVisualKey;
 
 public final class ModularHelmetItemModel {
@@ -17,11 +18,11 @@ public final class ModularHelmetItemModel {
     }
 
     public static ResolvedArmorItemModel compose(ArmorVisualKey key, ItemTransforms transforms) {
-        TextureAtlasSprite skullSprite = ArmorMaterialTextureManager.INSTANCE.sprite(key.skullMaterial());
+        TextureAtlasSprite skullSprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(key.skullMaterial(), ArmorPartData.HELMET_SKULL);
         List<BakedQuad> quads = new ArrayList<>();
         addElements(quads, ModularHelmetItemGeometry.SKULL, skullSprite);
-        key.combMaterial().ifPresent(material -> addElements(quads, ModularHelmetItemGeometry.COMB, ArmorMaterialTextureManager.INSTANCE.sprite(material)));
-        key.visorMaterial().ifPresent(material -> addElements(quads, ModularHelmetItemGeometry.VISOR, ArmorMaterialTextureManager.INSTANCE.sprite(material)));
+        key.combMaterial().ifPresent(material -> addElements(quads, ModularHelmetItemGeometry.COMB, ArmorMaterialTextureManager.INSTANCE.geometrySprite(material, ArmorPartData.HELMET_COMB)));
+        key.visorMaterial().ifPresent(material -> addElements(quads, ModularHelmetItemGeometry.VISOR, ArmorMaterialTextureManager.INSTANCE.geometrySprite(material, ArmorPartData.HELMET_VISOR)));
         return new ResolvedArmorItemModel(List.copyOf(quads), skullSprite, transforms);
     }
 

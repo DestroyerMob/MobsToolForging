@@ -1,0 +1,15 @@
+{
+  "parent": "minecraft:item/handheld",
+  "loader": "mobstoolforging:parted_tool",
+  "part_model": false,
+  "textures": {
+    "layer_handle_blaze": "mobstoolforging:source/tool_parts/blaze_rod/blaze_rod_mattock_handle_tool",
+    "layer_handle_breeze": "mobstoolforging:source/tool_parts/breeze_rod/breeze_rod_mattock_handle_tool",
+    "layer_handle_oak": "mobstoolforging:source/tool_parts/stick/stick_mattock_handle_tool",
+    "particle": "mobstoolforging:tool_templates/mattock/mattock_tool_axe",
+    "template_mattock_tool_axe": "mobstoolforging:tool_templates/mattock/mattock_tool_axe",
+    "template_mattock_tool_hoe": "mobstoolforging:tool_templates/mattock/mattock_tool_hoe"
+  },
+  "tool": "mattock",
+  "visual": "mobstoolforging:mattock"
+}

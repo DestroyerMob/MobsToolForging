@@ -1,4 +1,11 @@
 {
+  "item_textures": {
+    "boots": "minecraft:item/leather_boots",
+    "chestplate": "minecraft:item/leather_chestplate",
+    "helmet": "minecraft:item/leather_helmet",
+    "leggings": "minecraft:item/leather_leggings"
+  },
   "material": "mobstoolforging:copper",
-  "texture": "minecraft:block/copper_block"
+  "texture": "minecraft:block/copper_block",
+  "tint_item_textures": true
 }

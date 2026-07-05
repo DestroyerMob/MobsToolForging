@@ -19,7 +19,9 @@ public final class ModTags {
         public static final TagKey<Item> LEGACY_FORGE_GEMS_RUBY = forgeItemTag("gems/ruby");
         public static final TagKey<Item> LEGACY_FORGE_GEMS_SAPPHIRE = forgeItemTag("gems/sapphire");
         public static final TagKey<Item> PARTS = itemTag("parts");
+        public static final TagKey<Item> PART_HEADS = itemTag("parts/heads");
         public static final TagKey<Item> PART_HANDLES = itemTag("parts/handle");
+        public static final TagKey<Item> PART_GUARDS = itemTag("parts/guards");
         public static final TagKey<Item> PART_SWORD_BLADES = itemTag("parts/sword_blade");
         public static final TagKey<Item> PART_SWORD_GUARDS = itemTag("parts/sword_guard");
         public static final TagKey<Item> PART_SHOVEL_HEADS = itemTag("parts/shovel_head");
@@ -35,10 +37,6 @@ public final class ModTags {
         public static final TagKey<Item> PART_LEGGINGS_LEGS = itemTag("parts/leggings_legs");
         public static final TagKey<Item> PART_BOOTS_FEET = itemTag("parts/boots_feet");
         public static final TagKey<Item> TOOL_HANDLES = itemTag("tool_handles");
-        public static final TagKey<Item> TOOL_BINDINGS = itemTag("tool_bindings");
-        public static final TagKey<Item> TOOL_WRAPS = itemTag("tool_wraps");
-        public static final TagKey<Item> TOOL_FOCI = itemTag("tool_foci");
-        public static final TagKey<Item> TREATMENT_CATALYSTS = itemTag("treatment_catalysts");
         public static final TagKey<Item> LAPIDARY_ABRASIVES = itemTag("lapidary_abrasives");
         public static final TagKey<Item> KNAPPING_TOOLS = itemTag("knapping_tools");
 

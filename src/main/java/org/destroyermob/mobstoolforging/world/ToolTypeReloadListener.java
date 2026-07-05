@@ -52,7 +52,9 @@ public class ToolTypeReloadListener extends SimpleJsonResourceReloadListener {
                 .interactionRangeBonuses(
                         GsonHelper.getAsDouble(json, "entity_interaction_range_bonus", 0.0D),
                         GsonHelper.getAsDouble(json, "block_interaction_range_bonus", 0.0D)
-                );
+                )
+                .averageRequiredPartQuality(GsonHelper.getAsBoolean(json, "average_required_part_quality", false))
+                .averageRequiredHeadDurability(GsonHelper.getAsBoolean(json, "average_required_head_durability", false));
         if (json.has("tool_item")) {
             Item toolItem = parseItem(GsonHelper.getAsString(json, "tool_item"), "tool_item");
             builder.toolItem(() -> toolItem);

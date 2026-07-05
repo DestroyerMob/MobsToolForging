@@ -53,9 +53,9 @@ public final class FlintKnappingEvents {
 
     public static void placeGroundAssembly(PlayerInteractEvent.RightClickBlock event) {
         ItemStack held = event.getItemStack();
-        if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()
+        if (event.isCanceled()
                 || !event.getEntity().isShiftKeyDown()
-                || !StarterFlintAssembly.isStarterPrimaryPart(held)
+                || !GroundAssemblyRecipeRegistry.canStart(held)
                 || event.getFace() != Direction.UP) {
             return;
         }
@@ -82,8 +82,13 @@ public final class FlintKnappingEvents {
         }
     }
 
+    private static boolean canPlaceGroundWork(Level level, BlockPos supportPos, BlockPos placePos) {
+        return level.isEmptyBlock(placePos) && level.getBlockState(supportPos).isFaceSturdy(level, supportPos, Direction.UP);
+    }
+
     public static void dropPlantFiber(BlockDropsEvent event) {
         if (!MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()
+                || !MobsToolForgingConfig.ENABLE_PLANT_FIBER_DROPS.get()
                 || event.getBreaker() == null
                 || !event.getTool().is(ModTags.Items.KNAPPING_TOOLS)
                 || !isFiberPlant(event.getState())) {
@@ -100,10 +105,6 @@ public final class FlintKnappingEvents {
                 pos.getZ() + 0.5,
                 new ItemStack(ModItems.PLANT_FIBER.get())
         ));
-    }
-
-    private static boolean canPlaceGroundWork(Level level, BlockPos supportPos, BlockPos placePos) {
-        return level.isEmptyBlock(placePos) && level.getBlockState(supportPos).isFaceSturdy(level, supportPos, Direction.UP);
     }
 
     private static boolean isFiberPlant(BlockState state) {

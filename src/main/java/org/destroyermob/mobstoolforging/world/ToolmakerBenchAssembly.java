@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModTags;
 
 public final class ToolmakerBenchAssembly {
@@ -28,21 +29,39 @@ public final class ToolmakerBenchAssembly {
         if (partData != null && ToolTypeRegistry.toolTypes().stream().anyMatch(definition -> isKnownAssemblyPart(definition, stack, partData))) {
             return true;
         }
-        return stack.is(ModTags.Items.TOOL_HANDLES)
-                || stack.is(ModTags.Items.TOOL_BINDINGS)
-                || stack.is(ModTags.Items.TOOL_WRAPS)
-                || stack.is(ModTags.Items.TOOL_FOCI)
-                || stack.is(ModTags.Items.TREATMENT_CATALYSTS);
+        return stack.is(ModTags.Items.TOOL_HANDLES);
+    }
+
+    public static boolean canPlace(List<ItemStack> existingStacks, ItemStack stack) {
+        if (isFinishedTool(stack)) {
+            return existingStacks.isEmpty();
+        }
+        if (isPlantFiber(stack)) {
+            return needsPlantFiber(existingStacks);
+        }
+        return !hasPlantFiber(existingStacks) && isPlaceable(stack);
+    }
+
+    public static boolean needsPlantFiber(List<ItemStack> stacks) {
+        return plantFiberCount(stacks) == 0 && hasCompleteConstructionRequiringPlantFiber(stacks);
     }
 
     public static ItemStack assemble(List<ItemStack> stacks, HolderLookup.Provider registries) {
-        if (stacks.isEmpty() || stacks.stream().anyMatch(ToolmakerBenchAssembly::isFinishedTool)) {
+        int plantFiberCount = plantFiberCount(stacks);
+        if (plantFiberCount > 1) {
+            return ItemStack.EMPTY;
+        }
+        List<ItemStack> assemblyStacks = assemblyStacks(stacks);
+        if (assemblyStacks.isEmpty() || assemblyStacks.stream().anyMatch(ToolmakerBenchAssembly::isFinishedTool)) {
             return ItemStack.EMPTY;
         }
         for (ToolTypeDefinition definition : ToolTypeRegistry.toolTypes()) {
             Parts parts = findParts(stacks, definition);
             Optional<ToolConstructionData> construction = parts.validConstruction(definition);
             if (construction.isEmpty()) {
+                continue;
+            }
+            if ((plantFiberCount == 1) != requiresPlantFiber(construction.get())) {
                 continue;
             }
             ItemStack output = definition.createTool(construction.get());
@@ -52,7 +71,8 @@ public final class ToolmakerBenchAssembly {
             ToolPartWear.applyStoredWear(output, parts.part());
             if (ToolAssemblyEnchantments.mergeOnto(output, parts.enchantmentSources(), registries)) {
                 ToolExternalComponents.copyPrimaryHeadComponentsToTool(parts.part(), output);
-                output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(stacks));
+                output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(assemblyStacks));
+                ToolAssemblyEnchantments.syncRoutedToolEnchantments(output, registries);
                 return output;
             }
         }
@@ -71,7 +91,10 @@ public final class ToolmakerBenchAssembly {
         ToolAssemblyParts storedParts = stack.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
         if (storedParts != null && !storedParts.stacks().isEmpty()) {
             List<ItemStack> parts = ToolPartWear.copyWithWearFromTool(definition, stack, storedParts.copyStacks());
-            parts = ToolAssemblyEnchantments.copyToolEnchantmentsToViableParts(stack, parts);
+            if (!ToolAssemblyEnchantments.hasEnchantments(parts)) {
+                parts = ToolAssemblyEnchantments.copyToolEnchantmentsToViableParts(stack, parts);
+            }
+            parts = normalizedDisassemblyParts(definition, construction, parts);
             return Optional.of(ToolExternalComponents.copyToolComponentsToPrimaryHead(definition, stack, parts));
         }
 
@@ -80,12 +103,7 @@ public final class ToolmakerBenchAssembly {
         if (primary.isEmpty()) {
             return Optional.empty();
         }
-        if (construction.treatment().filter(MaterialCatalog.NETHERITE::equals).isPresent()) {
-            ToolPartData primaryData = primary.get(ModDataComponents.TOOL_PART.get());
-            if (primaryData != null) {
-                primary.set(ModDataComponents.TOOL_PART.get(), primaryData.withTreatment(MaterialCatalog.NETHERITE));
-            }
-        }
+        primary = copyWithConstructionTreatment(primary, construction);
         parts.add(primary);
 
         ResourceLocation requiredPartMaterial = construction.guardMaterial().orElse(construction.headMaterial());
@@ -98,13 +116,6 @@ public final class ToolmakerBenchAssembly {
         }
 
         parts.add(handleStack(construction.handleMaterial()));
-        construction.bindingMaterial().map(MaterialCatalog::displayStack).ifPresent(parts::add);
-        construction.wrapMaterial().map(ToolmakerBenchAssembly::wrapStack).ifPresent(parts::add);
-        construction.focusMaterial().map(ToolmakerBenchAssembly::focusStack).ifPresent(parts::add);
-        construction.treatment()
-                .filter(treatment -> !MaterialCatalog.NETHERITE.equals(treatment))
-                .map(ToolmakerBenchAssembly::treatmentStack)
-                .ifPresent(parts::add);
         List<ItemStack> result = parts.stream().filter(item -> !item.isEmpty()).map(ItemStack::copy).toList();
         List<ItemStack> wornParts = ToolPartWear.copyWithWearFromTool(definition, stack, result);
         wornParts = ToolAssemblyEnchantments.copyToolEnchantmentsToViableParts(stack, wornParts);
@@ -119,13 +130,12 @@ public final class ToolmakerBenchAssembly {
     private static Parts findParts(List<ItemStack> stacks, ToolTypeDefinition definition) {
         ItemStack part = ItemStack.EMPTY;
         ItemStack handle = ItemStack.EMPTY;
-        ItemStack binding = ItemStack.EMPTY;
-        ItemStack wrap = ItemStack.EMPTY;
-        ItemStack focus = ItemStack.EMPTY;
-        ItemStack treatment = ItemStack.EMPTY;
         Map<String, ItemStack> requiredParts = new LinkedHashMap<>();
         for (ItemStack stack : stacks) {
             if (stack.isEmpty()) {
+                continue;
+            }
+            if (isPlantFiber(stack)) {
                 continue;
             }
             if (WorkpieceHeat.hasHeat(stack)) {
@@ -154,37 +164,9 @@ public final class ToolmakerBenchAssembly {
                 handle = stack;
                 continue;
             }
-            if (stack.is(ModTags.Items.TOOL_BINDINGS)) {
-                if (!binding.isEmpty()) {
-                    return Parts.invalid();
-                }
-                binding = stack;
-                continue;
-            }
-            if (stack.is(ModTags.Items.TOOL_WRAPS)) {
-                if (!wrap.isEmpty()) {
-                    return Parts.invalid();
-                }
-                wrap = stack;
-                continue;
-            }
-            if (stack.is(ModTags.Items.TOOL_FOCI)) {
-                if (!focus.isEmpty()) {
-                    return Parts.invalid();
-                }
-                focus = stack;
-                continue;
-            }
-            if (stack.is(ModTags.Items.TREATMENT_CATALYSTS)) {
-                if (!treatment.isEmpty()) {
-                    return Parts.invalid();
-                }
-                treatment = stack;
-                continue;
-            }
             return Parts.invalid();
         }
-        return new Parts(false, part, handle, binding, requiredParts, wrap, focus, treatment);
+        return new Parts(false, part, handle, requiredParts);
     }
 
     private static boolean isKnownAssemblyPart(ToolTypeDefinition definition, ItemStack stack, ToolPartData partData) {
@@ -204,8 +186,46 @@ public final class ToolmakerBenchAssembly {
                 .findFirst();
     }
 
-    private static Optional<ResourceLocation> material(ItemStack stack, MaterialResolver resolver) {
-        return stack.isEmpty() ? Optional.empty() : Optional.of(resolver.resolve(stack));
+    private static boolean hasCompleteConstructionRequiringPlantFiber(List<ItemStack> stacks) {
+        if (stacks.isEmpty() || stacks.stream().anyMatch(ToolmakerBenchAssembly::isFinishedTool)) {
+            return false;
+        }
+        for (ToolTypeDefinition definition : ToolTypeRegistry.toolTypes()) {
+            Optional<ToolConstructionData> construction = findParts(stacks, definition).validConstruction(definition);
+            if (construction.filter(ToolmakerBenchAssembly::requiresPlantFiber).isPresent()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean requiresPlantFiber(ToolConstructionData construction) {
+        return MaterialCatalog.FLINT.equals(construction.headMaterial());
+    }
+
+    private static List<ItemStack> assemblyStacks(List<ItemStack> stacks) {
+        return stacks.stream()
+                .filter(stack -> !isPlantFiber(stack))
+                .map(ItemStack::copy)
+                .toList();
+    }
+
+    private static boolean hasPlantFiber(List<ItemStack> stacks) {
+        return stacks.stream().anyMatch(ToolmakerBenchAssembly::isPlantFiber);
+    }
+
+    private static int plantFiberCount(List<ItemStack> stacks) {
+        int count = 0;
+        for (ItemStack stack : stacks) {
+            if (isPlantFiber(stack)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static boolean isPlantFiber(ItemStack stack) {
+        return stack.is(ModItems.PLANT_FIBER.get());
     }
 
     private static ItemStack handleStack(ResourceLocation material) {
@@ -218,47 +238,57 @@ public final class ToolmakerBenchAssembly {
         return new ItemStack(Items.STICK);
     }
 
-    private static ItemStack wrapStack(ResourceLocation material) {
-        if (MaterialCatalog.LEATHER.equals(material)) {
-            return new ItemStack(Items.LEATHER);
+    private static List<ItemStack> normalizedDisassemblyParts(ToolTypeDefinition definition, ToolConstructionData construction, List<ItemStack> stacks) {
+        List<ItemStack> parts = new ArrayList<>();
+        boolean hasPrimary = false;
+        boolean hasHandle = false;
+        Map<String, Boolean> requiredSeen = new LinkedHashMap<>();
+        for (String partType : definition.requiredAssemblyParts()) {
+            requiredSeen.put(partType, false);
         }
-        return MaterialCatalog.displayStack(material);
+
+        for (ItemStack stack : stacks) {
+            if (stack.isEmpty()) {
+                continue;
+            }
+            ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
+            if (!hasPrimary && matchesPart(definition, stack, data, definition.primaryPartType())) {
+                parts.add(copyWithConstructionTreatment(stack, construction));
+                hasPrimary = true;
+                continue;
+            }
+            Optional<String> requiredPart = matchingRequiredPart(definition, stack, data)
+                    .filter(partType -> !requiredSeen.getOrDefault(partType, true));
+            if (requiredPart.isPresent()) {
+                requiredSeen.put(requiredPart.get(), true);
+                parts.add(stack.copyWithCount(1));
+                continue;
+            }
+            if (!hasHandle && stack.is(ModTags.Items.TOOL_HANDLES)) {
+                parts.add(stack.copyWithCount(1));
+                hasHandle = true;
+            }
+        }
+        return List.copyOf(parts);
     }
 
-    private static ItemStack focusStack(ResourceLocation material) {
-        if (MaterialCatalog.AMETHYST.equals(material)) {
-            return new ItemStack(Items.AMETHYST_SHARD);
+    private static ItemStack copyWithConstructionTreatment(ItemStack stack, ToolConstructionData construction) {
+        ItemStack copy = stack.copyWithCount(1);
+        ToolPartData data = copy.get(ModDataComponents.TOOL_PART.get());
+        if (data != null && data.treatment().isEmpty() && construction.treatment().isPresent()) {
+            copy.set(ModDataComponents.TOOL_PART.get(), data.withTreatment(construction.treatment().get()));
         }
-        return MaterialCatalog.displayStack(material);
-    }
-
-    private static ItemStack treatmentStack(ResourceLocation material) {
-        if (MaterialCatalog.NETHER.equals(material)) {
-            return new ItemStack(Items.NETHERITE_SCRAP);
-        }
-        if (MaterialCatalog.SCULK.equals(material)) {
-            return new ItemStack(Items.SCULK_CATALYST);
-        }
-        return MaterialCatalog.displayStack(material);
-    }
-
-    @FunctionalInterface
-    private interface MaterialResolver {
-        ResourceLocation resolve(ItemStack stack);
+        return copy;
     }
 
     private record Parts(
             boolean failed,
             ItemStack part,
             ItemStack handle,
-            ItemStack binding,
-            Map<String, ItemStack> requiredParts,
-            ItemStack wrap,
-            ItemStack focus,
-            ItemStack treatment
+            Map<String, ItemStack> requiredParts
     ) {
         private static Parts invalid() {
-            return new Parts(true, ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY, Map.of(), ItemStack.EMPTY, ItemStack.EMPTY, ItemStack.EMPTY);
+            return new Parts(true, ItemStack.EMPTY, ItemStack.EMPTY, Map.of());
         }
 
         private Optional<ToolConstructionData> validConstruction(ToolTypeDefinition definition) {
@@ -279,11 +309,11 @@ public final class ToolmakerBenchAssembly {
                     partData.materialId(),
                     MaterialCatalog.handleMaterial(handle),
                     guardMaterial(),
-                    bindingMaterial(),
-                    material(wrap, MaterialCatalog::wrapMaterial),
-                    material(focus, MaterialCatalog::focusMaterial),
-                    partData.treatment().or(() -> material(treatment, MaterialCatalog::treatmentMaterial)),
-                    quality()
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    partData.treatment(),
+                    quality(definition)
             ));
         }
 
@@ -306,34 +336,16 @@ public final class ToolmakerBenchAssembly {
             return requiredParts.values().stream().findFirst().map(MaterialCatalog::bindingMaterial);
         }
 
-        private Optional<ResourceLocation> bindingMaterial() {
-            return binding.isEmpty() ? Optional.empty() : Optional.of(MaterialCatalog.bindingMaterial(binding));
-        }
-
-        private int quality() {
+        private int quality(ToolTypeDefinition definition) {
             if (!MobsToolForgingConfig.ENABLE_QUALITY.get()) {
                 return ToolConstructionData.DEFAULT_QUALITY;
             }
             ToolPartData primary = part.get(ModDataComponents.TOOL_PART.get());
-            int primaryScore = primary == null ? ToolConstructionData.DEFAULT_QUALITY : primary.effectiveQuality();
-            int supportScore = primaryScore;
-            if (!requiredParts.isEmpty()) {
-                int total = 0;
-                int count = 0;
-                for (ItemStack supportPart : requiredParts.values()) {
-                    ToolPartData supportData = supportPart.get(ModDataComponents.TOOL_PART.get());
-                    if (supportData != null) {
-                        total += supportData.effectiveQuality();
-                        count++;
-                    }
-                }
-                supportScore = count == 0 ? primaryScore : Math.round(total / (float) count);
-            }
-            return ForgingQuality.clampScore(Math.round(
-                    primaryScore * 0.7F
-                            + supportScore * 0.2F
-                            + ToolConstructionData.DEFAULT_QUALITY * 0.1F
-            ));
+            List<ToolPartData> requiredData = requiredParts.values().stream()
+                    .map(stack -> stack.get(ModDataComponents.TOOL_PART.get()))
+                    .filter(java.util.Objects::nonNull)
+                    .toList();
+            return definition.assembledQuality(primary, requiredData);
         }
 
         private List<ItemStack> enchantmentSources() {

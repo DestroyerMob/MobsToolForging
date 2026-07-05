@@ -16,6 +16,7 @@ import org.destroyermob.mobstoolforging.item.ModularHelmetItem;
 import org.destroyermob.mobstoolforging.item.ModularLeggingsItem;
 import org.destroyermob.mobstoolforging.item.ModularAxeItem;
 import org.destroyermob.mobstoolforging.item.ModularHoeItem;
+import org.destroyermob.mobstoolforging.item.ModularMattockItem;
 import org.destroyermob.mobstoolforging.item.ModularPickaxeItem;
 import org.destroyermob.mobstoolforging.item.ModularShovelItem;
 import org.destroyermob.mobstoolforging.item.ModularSwordItem;
@@ -75,6 +76,29 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> TOOLMAKERS_BENCH = ITEMS.register(
             "toolmakers_bench",
             () -> new BlockItem(ModBlocks.TOOLMAKERS_BENCH.get(), new Item.Properties())
+    );
+    public static final DeferredItem<BlockItem> SPRUCE_TOOLMAKERS_BENCH = blockItem("spruce_toolmakers_bench", ModBlocks.SPRUCE_TOOLMAKERS_BENCH);
+    public static final DeferredItem<BlockItem> BIRCH_TOOLMAKERS_BENCH = blockItem("birch_toolmakers_bench", ModBlocks.BIRCH_TOOLMAKERS_BENCH);
+    public static final DeferredItem<BlockItem> JUNGLE_TOOLMAKERS_BENCH = blockItem("jungle_toolmakers_bench", ModBlocks.JUNGLE_TOOLMAKERS_BENCH);
+    public static final DeferredItem<BlockItem> ACACIA_TOOLMAKERS_BENCH = blockItem("acacia_toolmakers_bench", ModBlocks.ACACIA_TOOLMAKERS_BENCH);
+    public static final DeferredItem<BlockItem> DARK_OAK_TOOLMAKERS_BENCH = blockItem("dark_oak_toolmakers_bench", ModBlocks.DARK_OAK_TOOLMAKERS_BENCH);
+    public static final DeferredItem<BlockItem> MANGROVE_TOOLMAKERS_BENCH = blockItem("mangrove_toolmakers_bench", ModBlocks.MANGROVE_TOOLMAKERS_BENCH);
+    public static final DeferredItem<BlockItem> CHERRY_TOOLMAKERS_BENCH = blockItem("cherry_toolmakers_bench", ModBlocks.CHERRY_TOOLMAKERS_BENCH);
+    public static final DeferredItem<BlockItem> BAMBOO_TOOLMAKERS_BENCH = blockItem("bamboo_toolmakers_bench", ModBlocks.BAMBOO_TOOLMAKERS_BENCH);
+    public static final DeferredItem<BlockItem> CRIMSON_TOOLMAKERS_BENCH = blockItem("crimson_toolmakers_bench", ModBlocks.CRIMSON_TOOLMAKERS_BENCH);
+    public static final DeferredItem<BlockItem> WARPED_TOOLMAKERS_BENCH = blockItem("warped_toolmakers_bench", ModBlocks.WARPED_TOOLMAKERS_BENCH);
+    public static final List<DeferredItem<BlockItem>> TOOLMAKER_STATION_ITEMS = List.of(
+            TOOLMAKERS_BENCH,
+            SPRUCE_TOOLMAKERS_BENCH,
+            BIRCH_TOOLMAKERS_BENCH,
+            JUNGLE_TOOLMAKERS_BENCH,
+            ACACIA_TOOLMAKERS_BENCH,
+            DARK_OAK_TOOLMAKERS_BENCH,
+            MANGROVE_TOOLMAKERS_BENCH,
+            CHERRY_TOOLMAKERS_BENCH,
+            BAMBOO_TOOLMAKERS_BENCH,
+            CRIMSON_TOOLMAKERS_BENCH,
+            WARPED_TOOLMAKERS_BENCH
     );
     public static final DeferredItem<BlockItem> HEATING_FORGE = ITEMS.register(
             "heating_forge",
@@ -275,6 +299,10 @@ public final class ModItems {
     public static final DeferredItem<ModularHoeItem> HOE = ITEMS.register(
             "hoe",
             () -> new ModularHoeItem(new Item.Properties())
+    );
+    public static final DeferredItem<ModularMattockItem> MATTOCK = ITEMS.register(
+            "mattock",
+            () -> new ModularMattockItem(new Item.Properties())
     );
     public static final DeferredItem<ModularHelmetItem> MODULAR_HELMET = ITEMS.register(
             "modular_helmet",

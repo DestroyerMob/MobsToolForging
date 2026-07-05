@@ -2,7 +2,7 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "minecraft:block/copper_block",
+		"0": "minecraft:block/anvil",
 		"particle": "minecraft:block/anvil"
 	},
 	"elements": [

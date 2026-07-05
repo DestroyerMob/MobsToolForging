@@ -13,12 +13,13 @@ public class ModLanguageProvider extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
+        add("itemGroup.mobstoolforging", "Mobs Tool Forging");
         addBlock(ModBlocks.CRUDE_ANVIL, "Crude Anvil");
         addBlock(ModBlocks.TOOL_FORGE, "Smithing Anvil");
         addBlock(ModBlocks.LAPIDARY_TABLE, "Lapidary Table");
         addBlock(ModBlocks.PATTERN_CREATION_STATION, "Pattern Creation Station");
         ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> addBlock(variant.block(), variant.displayName()));
-        addBlock(ModBlocks.TOOLMAKERS_BENCH, "Toolmaker's Bench");
+        ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> addBlock(variant.block(), variant.displayName()));
         addBlock(ModBlocks.HEATING_FORGE, "Heating Forge");
         addBlock(ModBlocks.CRUCIBLE, "Crucible");
         addBlock(ModBlocks.FOUNDRY_FORGE, "Foundry Forge");
@@ -75,6 +76,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.PICKAXE, "Pickaxe");
         addItem(ModItems.AXE, "Axe");
         addItem(ModItems.HOE, "Hoe");
+        addItem(ModItems.MATTOCK, "Mattock");
         addItem(ModItems.MODULAR_HELMET, "Modular Helmet");
         addItem(ModItems.MODULAR_CHESTPLATE, "Modular Body Armour");
         addItem(ModItems.MODULAR_LEGGINGS, "Modular Leggings");
@@ -95,6 +97,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.mobstoolforging.material_pickaxe", "%s Pickaxe");
         add("item.mobstoolforging.material_axe", "%s Axe");
         add("item.mobstoolforging.material_hoe", "%s Hoe");
+        add("item.mobstoolforging.material_mattock", "%s Mattock");
         add("item.mobstoolforging.material_modular_helmet", "%s Helmet");
         add("item.mobstoolforging.material_modular_chestplate", "%s Body Armour");
         add("item.mobstoolforging.modular_chainmail_chestplate", "Iron Chainmail Body Armour");
@@ -113,9 +116,6 @@ public class ModLanguageProvider extends LanguageProvider {
         add("material.mobstoolforging.dark_oak", "Dark Oak");
         add("material.mobstoolforging.blaze", "Blaze");
         add("material.mobstoolforging.breeze", "Breeze");
-        add("material.mobstoolforging.leather", "Leather");
-        add("material.mobstoolforging.plant_fiber", "Plant Fiber");
-        add("material.mobstoolforging.amethyst", "Amethyst");
         add("material.mobstoolforging.nether", "Nether");
         add("material.mobstoolforging.sculk", "Sculk");
         add("quality.mobstoolforging.crude", "Crude");
@@ -226,13 +226,14 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.tool_repair_tool_placed", "Tool placed for repair.");
         add("message.mobstoolforging.tool_repair_material_placed", "Repair material placed.");
         add("message.mobstoolforging.tool_repair_needs_material", "Add a matching head repair material.");
-        add("message.mobstoolforging.tool_repair_ready", "Strike the Smithing Anvil with a Smithing Hammer to repair.");
+        add("message.mobstoolforging.tool_repair_ready", "Strike the anvil with a Smithing Hammer to repair.");
         add("message.mobstoolforging.tool_repaired", "Tool repaired.");
         add("message.mobstoolforging.use_tool_forge", "Metal heads are forged on a Crude Anvil or Smithing Anvil.");
         add("message.mobstoolforging.use_toolmakers_bench", "Place parts here, then use an empty hand or Smithing Hammer to assemble.");
         add("message.mobstoolforging.toolmaker_part_placed", "Part placed.");
         add("message.mobstoolforging.toolmaker_needs_parts", "Place a compatible head and handle first.");
         add("message.mobstoolforging.toolmaker_invalid", "That does not fit this bench.");
+        add("message.mobstoolforging.toolmaker_needs_fiber", "Crude flint tools need Plant Fiber to bind the parts.");
         add("message.mobstoolforging.toolmaker_assembled", "Tool assembled.");
         add("message.mobstoolforging.toolmaker_disassembled", "Tool separated.");
         add("message.mobstoolforging.toolmaker_broken_tool", "Repair this tool before separating it.");
@@ -244,7 +245,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.knapping_complete_drop", "Knapped %s.");
         add("message.mobstoolforging.knapping_failed", "Could not knap %s.");
         add("message.mobstoolforging.ground_assembly_part_placed", "Part placed.");
-        add("message.mobstoolforging.ground_assembly_needs_parts", "Add the required handle or guard first.");
+        add("message.mobstoolforging.ground_assembly_complete", "Assembled %s.");
         add("message.mobstoolforging.complete", "The tool part is ready.");
         add("message.mobstoolforging.inventory_full", "Make room before taking the finished part.");
         add("message.mobstoolforging.station_status", "Materials: %s/%s, Progress: %s/%s");
@@ -302,11 +303,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.none", "None");
         add("tooltip.mobstoolforging.part.head", "Head");
         add("tooltip.mobstoolforging.part.handle", "Handle");
-        add("tooltip.mobstoolforging.part.binding", "Binding");
         add("tooltip.mobstoolforging.part.guard", "Guard");
-        add("tooltip.mobstoolforging.part.wrap", "Wrap");
-        add("tooltip.mobstoolforging.part.focus", "Focus");
-        add("tooltip.mobstoolforging.part.treatment", "Treatment");
+        add("tooltip.mobstoolforging.part.second_head", "Second Head");
         add("tooltip.mobstoolforging.armor_part.chainmail", "Chainmail: %s");
         add("tooltip.mobstoolforging.armor_part.body", "Body Plate: %s");
         add("tooltip.mobstoolforging.armor_part.legs", "Legs: %s");

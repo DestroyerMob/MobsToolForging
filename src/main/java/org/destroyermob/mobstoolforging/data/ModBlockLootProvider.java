@@ -21,7 +21,7 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.LAPIDARY_TABLE.get());
         dropSelf(ModBlocks.PATTERN_CREATION_STATION.get());
         ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> dropSelf(variant.block().get()));
-        dropSelf(ModBlocks.TOOLMAKERS_BENCH.get());
+        ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> dropSelf(variant.block().get()));
         dropSelf(ModBlocks.HEATING_FORGE.get());
         add(ModBlocks.CRUCIBLE.get(), noDrop());
         dropSelf(ModBlocks.FOUNDRY_FORGE.get());
@@ -36,7 +36,6 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
                 ModBlocks.TOOL_FORGE.get(),
                 ModBlocks.LAPIDARY_TABLE.get(),
                 ModBlocks.PATTERN_CREATION_STATION.get(),
-                ModBlocks.TOOLMAKERS_BENCH.get(),
                 ModBlocks.HEATING_FORGE.get(),
                 ModBlocks.CRUCIBLE.get(),
                 ModBlocks.FOUNDRY_FORGE.get(),
@@ -44,6 +43,7 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
                 ModBlocks.GROUND_TOOL_ASSEMBLY.get()
         ));
         ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
+        ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         return blocks;
     }
 }

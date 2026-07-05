@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "minecraft:mangrove_planks"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "S S",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "mobstoolforging:mangrove_toolmakers_bench"
+  }
+}

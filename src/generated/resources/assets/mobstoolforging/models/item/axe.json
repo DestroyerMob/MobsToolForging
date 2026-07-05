@@ -7,6 +7,7 @@
     "layer_axe_head_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_axe_head_tool",
     "layer_axe_head_gold": "mobstoolforging:source/tool_parts/gold/gold_axe_head_tool",
     "layer_axe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_axe_head_tool",
+    "layer_axe_treatment_netherite": "mobstoolforging:source/tool_parts/netherite/netherite_axe_treatment_tool",
     "layer_handle_blaze": "mobstoolforging:source/tool_parts/blaze_rod/blaze_rod_axe_handle_tool",
     "layer_handle_breeze": "mobstoolforging:source/tool_parts/breeze_rod/breeze_rod_axe_handle_tool",
     "layer_handle_oak": "mobstoolforging:source/tool_parts/stick/stick_axe_handle_tool",

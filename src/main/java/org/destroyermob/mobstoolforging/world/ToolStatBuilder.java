@@ -49,25 +49,18 @@ public final class ToolStatBuilder {
     public static ToolStatProfile build(ToolTypeDefinition definition, ToolConstructionData construction) {
         Tier headTier = MaterialCatalog.definition(construction.headMaterial()).orElseThrow().tier();
         MutableStats stats = new MutableStats(
-                headTier.getUses(),
+                baseMaxDamage(definition, construction, headTier),
                 definition.baseAttackDamageBonus(construction.headMaterial()),
                 definition.baseAttackSpeedBonus(construction.headMaterial())
         );
 
-        stats.addDebug(line("Head", construction.headMaterial(), ""));
-        if (MaterialCatalog.NETHERITE.equals(construction.headMaterial())) {
-            stats.fireResistant = true;
-            stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
-        }
-        if (MaterialCatalog.GOLD.equals(construction.headMaterial())) {
-            stats.addTrait(ToolTrait.GILDED);
-            stats.addDebug("Head: Gilded experience");
+        applyHeadMaterial(stats, construction.headMaterial(), "Head");
+        if (definition.averageRequiredHeadDurability()) {
+            construction.guardMaterial().ifPresent(material -> applyHeadMaterial(stats, material, "Second Head"));
+        } else {
+            applyGuard(stats, construction.guardMaterial());
         }
         applyHandle(stats, construction.handleMaterial());
-        applyBindingOrGuard(stats, true, construction.guardMaterial());
-        applyBindingOrGuard(stats, false, construction.bindingMaterial());
-        applyWrap(stats, construction.wrapMaterial());
-        applyFocus(stats, construction.focusMaterial());
         applyTreatment(stats, construction);
         ToolTypeRegistry.applyStatModifiers(definition, construction, stats);
         applyQuality(stats, construction);
@@ -163,6 +156,29 @@ public final class ToolStatBuilder {
         }
     }
 
+    private static int baseMaxDamage(ToolTypeDefinition definition, ToolConstructionData construction, Tier headTier) {
+        int primaryUses = headTier.getUses();
+        if (!definition.averageRequiredHeadDurability() || construction.guardMaterial().isEmpty()) {
+            return primaryUses;
+        }
+        return construction.guardMaterial()
+                .flatMap(MaterialCatalog::definition)
+                .map(material -> Math.max(1, Math.round((primaryUses + material.tier().getUses()) / 2.0F)))
+                .orElse(primaryUses);
+    }
+
+    private static void applyHeadMaterial(MutableStats stats, ResourceLocation material, String label) {
+        stats.addDebug(line(label, material, ""));
+        if (MaterialCatalog.NETHERITE.equals(material)) {
+            stats.fireResistant = true;
+            stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
+        }
+        if (MaterialCatalog.GOLD.equals(material)) {
+            stats.addTrait(ToolTrait.GILDED);
+            stats.addDebug(label + ": Gilded experience");
+        }
+    }
+
     private static void applyHandle(MutableStats stats, ResourceLocation handle) {
         if (MaterialCatalog.DARK_OAK.equals(handle)) {
             stats.durabilityMultiplier *= 1.08F;
@@ -187,7 +203,7 @@ public final class ToolStatBuilder {
         }
     }
 
-    private static void applyBindingOrGuard(MutableStats stats, boolean guardLike, Optional<ResourceLocation> material) {
+    private static void applyGuard(MutableStats stats, Optional<ResourceLocation> material) {
         if (material.isEmpty()) {
             return;
         }
@@ -233,35 +249,7 @@ public final class ToolStatBuilder {
             note = "+Fortune";
             stats.addTrait(ToolTrait.FORTUNATE);
         }
-        stats.addDebug(line(guardLike ? "Guard" : "Binding", value, note));
-    }
-
-    private static void applyWrap(MutableStats stats, Optional<ResourceLocation> material) {
-        if (material.isEmpty()) {
-            return;
-        }
-        ResourceLocation value = material.get();
-        String note = "";
-        if (MaterialCatalog.LEATHER.equals(value)) {
-            stats.durabilityMultiplier *= 1.05F;
-            note = "+Grip";
-            stats.addTrait(ToolTrait.SURE_GRIP);
-        }
-        stats.addDebug(line("Wrap", value, note));
-    }
-
-    private static void applyFocus(MutableStats stats, Optional<ResourceLocation> material) {
-        if (material.isEmpty()) {
-            return;
-        }
-        ResourceLocation value = material.get();
-        String note = "";
-        if (MaterialCatalog.AMETHYST.equals(value)) {
-            stats.addAffinities(AFFINITY_RESONANCE, AFFINITY_ENCHANT_CONTROL);
-            note = "+Enchant Control";
-            stats.addTrait(ToolTrait.FOCUSED);
-        }
-        stats.addDebug(line("Focus", value, note));
+        stats.addDebug(line("Guard", value, note));
     }
 
     private static void applyTreatment(MutableStats stats, ToolConstructionData construction) {
@@ -274,8 +262,7 @@ public final class ToolStatBuilder {
             stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
             if (MaterialCatalog.BLAZE.equals(construction.handleMaterial())
                     || MaterialCatalog.NETHERITE.equals(construction.headMaterial())
-                    || construction.guardMaterial().filter(MaterialCatalog.NETHERITE::equals).isPresent()
-                    || construction.bindingMaterial().filter(MaterialCatalog.NETHERITE::equals).isPresent()) {
+                    || construction.guardMaterial().filter(MaterialCatalog.NETHERITE::equals).isPresent()) {
                 stats.fireResistant = true;
                 note = "+Nether, +Fireproof";
             } else {
@@ -284,10 +271,8 @@ public final class ToolStatBuilder {
             stats.addTrait(ToolTrait.NETHER_TREATED);
         } else if (MaterialCatalog.NETHERITE.equals(treatment)) {
             stats.durabilityMultiplier *= 1.15F;
-            stats.fireResistant = true;
-            stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
-            note = "+Netherite Tip, +Fireproof";
-            stats.addTrait(ToolTrait.NETHER_FORGED);
+            stats.attackDamageBonus += 1.0F;
+            note = "+Durability, +Damage, +Mining Level";
         } else if (MaterialCatalog.SCULK.equals(treatment)) {
             stats.addAffinities(AFFINITY_SCULK, AFFINITY_SILENCE, AFFINITY_ECHO);
             note = "+Echo";
@@ -319,7 +304,7 @@ public final class ToolStatBuilder {
     }
 
     private static Tier adjustedTier(Tier headTier, ToolStatProfile profile, ToolConstructionData construction) {
-        Tier harvestTier = construction.treatment().filter(MaterialCatalog.NETHERITE::equals).isPresent() ? Tiers.NETHERITE : headTier;
+        Tier harvestTier = harvestTier(headTier, construction);
         return new SimpleTier(
                 harvestTier.getIncorrectBlocksForDrops(),
                 profile.maxDamage(),
@@ -329,8 +314,15 @@ public final class ToolStatBuilder {
                 () -> {
                     Ingredient ingredient = headTier.getRepairIngredient();
                     return ingredient;
-                }
+            }
         );
+    }
+
+    private static Tier harvestTier(Tier headTier, ToolConstructionData construction) {
+        if (construction.treatment().filter(MaterialCatalog.NETHERITE::equals).isEmpty()) {
+            return headTier;
+        }
+        return MaterialCatalog.NETHERITE.equals(construction.headMaterial()) ? headTier : Tiers.DIAMOND;
     }
 
     private static Tool toolComponent(ToolKind toolKind, Tier tier) {
@@ -340,7 +332,21 @@ public final class ToolStatBuilder {
             case PICKAXE -> tier.createToolProperties(BlockTags.MINEABLE_WITH_PICKAXE);
             case AXE -> tier.createToolProperties(BlockTags.MINEABLE_WITH_AXE);
             case HOE -> tier.createToolProperties(BlockTags.MINEABLE_WITH_HOE);
+            case MATTOCK -> mattockToolProperties(tier);
         };
+    }
+
+    private static Tool mattockToolProperties(Tier tier) {
+        return new Tool(
+                List.of(
+                        Tool.Rule.deniesDrops(tier.getIncorrectBlocksForDrops()),
+                        Tool.Rule.minesAndDrops(BlockTags.MINEABLE_WITH_AXE, tier.getSpeed()),
+                        Tool.Rule.minesAndDrops(BlockTags.MINEABLE_WITH_SHOVEL, tier.getSpeed()),
+                        Tool.Rule.minesAndDrops(BlockTags.MINEABLE_WITH_HOE, tier.getSpeed())
+                ),
+                1.0F,
+                1
+        );
     }
 
     private static Tool toolComponent(ToolTypeDefinition definition, Tier tier) {
@@ -358,7 +364,7 @@ public final class ToolStatBuilder {
     private static ItemAttributeModifiers toolAttributes(ToolKind toolKind, Tier tier, ToolStatProfile profile) {
         return switch (toolKind) {
             case SWORD -> SwordItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
-            case SHOVEL, PICKAXE, AXE, HOE -> DiggerItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
+            case SHOVEL, PICKAXE, AXE, HOE, MATTOCK -> DiggerItem.createAttributes(tier, profile.attackDamageBonus(), profile.attackSpeedBonus());
         };
     }
 
@@ -434,6 +440,7 @@ public final class ToolStatBuilder {
             case PICKAXE -> 1.0F;
             case AXE -> isGemLikeToolMaterial(materialId) || MaterialCatalog.NETHERITE.equals(materialId) ? 5.0F : 6.0F;
             case HOE -> hoeAttackDamage(materialId);
+            case MATTOCK -> builtInBaseAttackDamageBonus(ToolKind.AXE, materialId);
         };
     }
 
@@ -444,6 +451,7 @@ public final class ToolStatBuilder {
             case PICKAXE -> -2.8F;
             case AXE -> (MaterialCatalog.IRON.equals(materialId) || MaterialCatalog.COPPER.equals(materialId)) ? -3.1F : -3.0F;
             case HOE -> hoeAttackSpeed(materialId);
+            case MATTOCK -> builtInBaseAttackSpeedBonus(ToolKind.AXE, materialId);
         };
     }
 

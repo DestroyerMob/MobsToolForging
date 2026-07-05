@@ -26,6 +26,9 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ItemTags.PICKAXES).add(ModItems.PICKAXE.get());
         tag(ItemTags.AXES).add(ModItems.AXE.get());
         tag(ItemTags.HOES).add(ModItems.HOE.get());
+        tag(ItemTags.SHOVELS).add(ModItems.MATTOCK.get());
+        tag(ItemTags.AXES).add(ModItems.MATTOCK.get());
+        tag(ItemTags.HOES).add(ModItems.MATTOCK.get());
         tag(ModTags.Items.MATERIALS).addTag(ModTags.Items.MATERIALS_METALS).addTag(ModTags.Items.MATERIALS_GEMS);
         tag(ModTags.Items.MATERIALS_METALS)
                 .addTag(Tags.Items.INGOTS_IRON)
@@ -39,16 +42,19 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .addOptionalTag(ModTags.Items.LEGACY_FORGE_GEMS_RUBY.location())
                 .addOptionalTag(ModTags.Items.LEGACY_FORGE_GEMS_SAPPHIRE.location());
         tag(ModTags.Items.PARTS)
-                .addTag(ModTags.Items.ARMOR_PARTS)
+                .addTag(ModTags.Items.PART_HEADS)
                 .addTag(ModTags.Items.PART_HANDLES)
+                .addTag(ModTags.Items.PART_GUARDS);
+        tag(ModTags.Items.PART_HEADS)
                 .addTag(ModTags.Items.PART_SWORD_BLADES)
-                .addTag(ModTags.Items.PART_SWORD_GUARDS)
                 .addTag(ModTags.Items.PART_SHOVEL_HEADS)
                 .addTag(ModTags.Items.PART_PICKAXE_HEADS)
                 .addTag(ModTags.Items.PART_AXE_HEADS)
                 .addTag(ModTags.Items.PART_HOE_HEADS)
                 .addTag(ModTags.Items.PART_SCREWDRIVER_HEADS)
                 .addTag(ModTags.Items.PART_GEM_CUTTERS_BLADES);
+        tag(ModTags.Items.PART_GUARDS)
+                .addTag(ModTags.Items.PART_SWORD_GUARDS);
         tag(ModTags.Items.ARMOR_PARTS)
                 .addTag(ModTags.Items.PART_HELMET_SKULLS)
                 .addTag(ModTags.Items.PART_CHESTPLATE_CHAINMAILS)
@@ -88,14 +94,6 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .addTag(Tags.Items.RODS_WOODEN)
                 .addTag(Tags.Items.RODS_BLAZE)
                 .addTag(Tags.Items.RODS_BREEZE);
-        tag(ModTags.Items.TOOL_BINDINGS)
-                .addTag(ModTags.Items.MATERIALS);
-        tag(ModTags.Items.TOOL_WRAPS)
-                .add(Items.LEATHER);
-        tag(ModTags.Items.TOOL_FOCI)
-                .add(Items.AMETHYST_SHARD);
-        tag(ModTags.Items.TREATMENT_CATALYSTS)
-                .add(Items.BLAZE_POWDER, Items.MAGMA_CREAM, Items.NETHERITE_SCRAP, Items.ECHO_SHARD, Items.SCULK_CATALYST);
         tag(ModTags.Items.LAPIDARY_ABRASIVES)
                 .add(ModItems.DIAMOND_POWDER.get());
         tag(ModTags.Items.KNAPPING_TOOLS)

@@ -65,14 +65,14 @@ public final class PartedToolSpriteSet {
             for (ResourceLocation material : materialIds) {
                 ToolPartSpriteKey key = new ToolPartSpriteKey(visual.id(), layer.slot(), material);
                 readSprite(context, spriteGetter, textureOverrides, key.modelTextureKey())
-                        .or(() -> readPatternSprite(spriteGetter, layer, material, partModel ? "part" : "tool"))
+                        .or(() -> readPatternSprite(spriteGetter, layer, material, spriteUsage(layer, partModel)))
                         .ifPresent(sprite -> sprites.put(key, ResolvedToolLayerSprite.exact(sprite.sprite(), sprite.texture())));
                 if (layer.compositesExactAndTemplate()) {
                     readSprite(context, spriteGetter, textureOverrides, ToolPartSpriteKey.handleBodyTextureKey(material))
                             .ifPresent(sprite -> handleBodySprites.put(key, sprite));
                 }
             }
-            warnMissingRequiredSprites(visual, layer, materialIds, sprites);
+            warnMissingRequiredSprites(visual, layer, materialIds, sprites, templateSprites, partModel);
         }
 
         TextureAtlasSprite particle = readSprite(context, spriteGetter, textureOverrides, "particle")
@@ -94,25 +94,26 @@ public final class PartedToolSpriteSet {
             return resolveLayer(toolType, layer, material).map(List::of).orElseGet(List::of);
         }
 
-        Optional<ResolvedToolLayerSprite> template = resolveHandleBody(toolType, layer, material);
         ResolvedToolLayerSprite exact = sprites.get(new ToolPartSpriteKey(toolType, layer.slot(), material));
         if (exact != null) {
-            return template.map(resolvedTemplate -> List.of(resolvedTemplate, exact)).orElseGet(() -> List.of(exact));
+            return resolveExactHandleBody(toolType, layer, material)
+                    .map(resolvedBody -> List.of(resolvedBody, exact))
+                    .orElseGet(() -> List.of(exact));
         }
-        return template.map(List::of).orElseGet(List::of);
+        return resolveTemplate(layer.slot(), material, false).map(List::of).orElseGet(List::of);
     }
 
     public Optional<ResolvedToolLayerSprite> resolvePartLayer(ResourceLocation toolType, ToolVisualLayer layer, ResourceLocation material) {
         return resolveLayer(toolType, layer, material, true);
     }
 
-    private Optional<ResolvedToolLayerSprite> resolveHandleBody(ResourceLocation toolType, ToolVisualLayer layer, ResourceLocation material) {
+    private Optional<ResolvedToolLayerSprite> resolveExactHandleBody(ResourceLocation toolType, ToolVisualLayer layer, ResourceLocation material) {
         ResolvedToolLayerSprite body = handleBodySprites.get(new ToolPartSpriteKey(toolType, layer.slot(), material));
         if (body != null) {
             return Optional.of(body);
         }
 
-        return resolveTemplate(layer.slot(), material, false);
+        return Optional.empty();
     }
 
     private Optional<ResolvedToolLayerSprite> resolveLayer(ResourceLocation toolType, ToolVisualLayer layer, ResourceLocation material, boolean partTemplate) {
@@ -222,11 +223,22 @@ public final class PartedToolSpriteSet {
         return Optional.of(ResourceLocation.fromNamespaceAndPath(visual.id().getNamespace(), "source/tool_parts/handle_masks/" + handleShape(visual.id()) + "_handle_mask"));
     }
 
+    private static String spriteUsage(ToolVisualLayer layer, boolean partModel) {
+        return partModel && !isTreatmentLayer(layer) ? "part" : "tool";
+    }
+
+    private static boolean isTreatmentLayer(ToolVisualLayer layer) {
+        return layer.materialFrom().filter("treatment"::equals).isPresent();
+    }
+
     private static String handleShape(ResourceLocation visualId) {
         String path = visualId.getPath();
         if (!MobsToolForging.MOD_ID.equals(visualId.getNamespace())) {
             int slash = path.lastIndexOf('/');
             return slash >= 0 ? path.substring(slash + 1) : path;
+        }
+        if (path.contains("mattock")) {
+            return "mattock";
         }
         if (path.contains("pickaxe")) {
             return "pickaxe";
@@ -290,8 +302,11 @@ public final class PartedToolSpriteSet {
         return missing;
     }
 
-    private static void warnMissingRequiredSprites(ToolVisualDefinition visual, ToolVisualLayer layer, Set<ResourceLocation> materialIds, Map<ToolPartSpriteKey, ResolvedToolLayerSprite> sprites) {
+    private static void warnMissingRequiredSprites(ToolVisualDefinition visual, ToolVisualLayer layer, Set<ResourceLocation> materialIds, Map<ToolPartSpriteKey, ResolvedToolLayerSprite> sprites, Map<TemplateKey, TextureAtlasSprite> templateSprites, boolean partModel) {
         if (layer.optional()) {
+            return;
+        }
+        if (layer.canUseTemplateFallback() && templateSprites.containsKey(new TemplateKey(layer.slot(), partModel))) {
             return;
         }
         for (ResourceLocation material : materialIds) {

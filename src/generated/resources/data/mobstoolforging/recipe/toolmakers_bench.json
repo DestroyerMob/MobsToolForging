@@ -3,16 +3,16 @@
   "category": "misc",
   "key": {
     "P": {
-      "tag": "minecraft:planks"
+      "item": "minecraft:oak_planks"
     },
     "S": {
-      "item": "minecraft:chiseled_stone_bricks"
+      "item": "minecraft:stick"
     }
   },
   "pattern": [
-    "SSS",
-    "P P",
-    "P P"
+    "PPP",
+    "S S",
+    "PPP"
   ],
   "result": {
     "count": 1,

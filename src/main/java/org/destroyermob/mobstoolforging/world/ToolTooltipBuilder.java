@@ -32,6 +32,7 @@ public final class ToolTooltipBuilder {
         ToolStatProfile profile = ToolStatBuilder.profileForTooltip(stack, definition, construction);
         List<Component> lines = new ArrayList<>();
         lines.add(qualityLine(construction.qualityLevel()));
+        construction.treatment().ifPresent(treatment -> lines.add(treatmentLine(treatment)));
 
         if (flag.hasShiftDown()) {
             addShiftTooltip(lines, definition, construction, profile);
@@ -52,6 +53,11 @@ public final class ToolTooltipBuilder {
                 .withStyle(ChatFormatting.DARK_GRAY)
                 .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
                 .append(quality.displayName());
+    }
+
+    private static Component treatmentLine(ResourceLocation treatment) {
+        return Component.translatable("tooltip.mobstoolforging.part_treatment", MaterialCatalog.displayName(treatment))
+                .withStyle(ChatFormatting.DARK_GRAY);
     }
 
     private static void addNormalTooltip(List<Component> lines, ToolStatProfile profile) {
@@ -82,12 +88,11 @@ public final class ToolTooltipBuilder {
         lines.add(partLine("tooltip.mobstoolforging.part.head", Optional.of(construction.headMaterial())));
         lines.add(partLine("tooltip.mobstoolforging.part.handle", Optional.of(construction.handleMaterial())));
         if (!definition.requiredAssemblyParts().isEmpty()) {
-            lines.add(partLine("tooltip.mobstoolforging.part.guard", construction.guardMaterial()));
+            String label = definition.averageRequiredHeadDurability()
+                    ? "tooltip.mobstoolforging.part.second_head"
+                    : "tooltip.mobstoolforging.part.guard";
+            lines.add(partLine(label, construction.guardMaterial()));
         }
-        lines.add(partLine("tooltip.mobstoolforging.part.binding", construction.bindingMaterial()));
-        lines.add(partLine("tooltip.mobstoolforging.part.wrap", construction.wrapMaterial()));
-        lines.add(partLine("tooltip.mobstoolforging.part.focus", construction.focusMaterial()));
-        lines.add(partLine("tooltip.mobstoolforging.part.treatment", construction.treatment()));
 
         List<ResourceLocation> displayTraits = displayTraits(profile);
         if (!displayTraits.isEmpty()) {
@@ -182,9 +187,6 @@ public final class ToolTooltipBuilder {
         return "head=" + construction.headMaterial()
                 + ", handle=" + construction.handleMaterial()
                 + ", guard=" + construction.guardMaterial().map(ResourceLocation::toString).orElse("-")
-                + ", binding=" + construction.bindingMaterial().map(ResourceLocation::toString).orElse("-")
-                + ", wrap=" + construction.wrapMaterial().map(ResourceLocation::toString).orElse("-")
-                + ", focus=" + construction.focusMaterial().map(ResourceLocation::toString).orElse("-")
                 + ", treatment=" + construction.treatment().map(ResourceLocation::toString).orElse("-")
                 + ", quality=" + construction.quality();
     }

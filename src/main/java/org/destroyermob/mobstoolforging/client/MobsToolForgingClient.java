@@ -31,6 +31,7 @@ import org.destroyermob.mobstoolforging.client.model.ArmorMaterialTextureManager
 import org.destroyermob.mobstoolforging.client.model.ComponentDrivenToolBakedModel;
 import org.destroyermob.mobstoolforging.client.model.ModularBodyArmourModel;
 import org.destroyermob.mobstoolforging.client.model.ModularHelmetModel;
+import org.destroyermob.mobstoolforging.client.model.PatternCutoutModelLoader;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
 import org.destroyermob.mobstoolforging.client.model.ToolMaterialVisualManager;
 import org.destroyermob.mobstoolforging.network.CycleKnappingTargetPayload;
@@ -128,6 +129,7 @@ public final class MobsToolForgingClient {
     private static void registerGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
         event.register(ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "parted_tool"), new PartedToolModelLoader(false));
         event.register(ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "parted_tool_part"), new PartedToolModelLoader(true));
+        event.register(ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "pattern_cutout"), new PatternCutoutModelLoader());
     }
 
     private static void wrapComponentDrivenItemModels(ModelEvent.ModifyBakingResult event) {

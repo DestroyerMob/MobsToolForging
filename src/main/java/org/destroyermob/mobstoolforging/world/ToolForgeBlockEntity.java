@@ -13,6 +13,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -20,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 
 public class ToolForgeBlockEntity extends BlockEntity {
     private static final String TEMPLATE_TAG = "Template";
@@ -182,6 +185,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return !benchStacks.isEmpty();
     }
 
+    public static int maxBenchStacks() {
+        return MAX_BENCH_STACKS;
+    }
+
     @Nullable
     public ResourceLocation materialId() {
         return materialId;
@@ -298,6 +305,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
             captureMaterialHeat(stack);
             stack.shrink(taken);
             materialCount += taken;
+            scheduleFirstGoodHitIfReady();
             sync();
         }
         return taken;
@@ -445,7 +453,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean hasRepairStacks() {
-        return workstationKind() == WorkstationKind.TOOL_FORGE
+        return workstationKind().isSmithingAnvilLike()
                 && !benchStacks.isEmpty()
                 && directOutputStack.isEmpty()
                 && templateId == null;
@@ -511,7 +519,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     private boolean canUseRepairStacks() {
-        return workstationKind() == WorkstationKind.TOOL_FORGE
+        return workstationKind().isSmithingAnvilLike()
                 && directOutputStack.isEmpty()
                 && templateId == null
                 && abrasiveStack.isEmpty()
@@ -540,7 +548,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && looseWorkRecipeId == null
                 && materialCount == 0
                 && hitCount == 0
-                && ToolmakerBenchAssembly.isPlaceable(stack);
+                && ToolmakerBenchAssembly.canPlace(benchStacks, stack);
     }
 
     public boolean placeToolmakerStack(ItemStack stack) {
@@ -559,6 +567,57 @@ public class ToolForgeBlockEntity extends BlockEntity {
         }
         benchStacks.clear();
         sync();
+    }
+
+    public void setToolmakerStacks(List<ItemStack> stacks) {
+        if (workstationKind() != WorkstationKind.TOOLMAKERS_BENCH) {
+            return;
+        }
+
+        benchStacks.clear();
+        for (ItemStack stack : stacks) {
+            if (stack.isEmpty()) {
+                continue;
+            }
+            if (benchStacks.size() >= MAX_BENCH_STACKS) {
+                break;
+            }
+            benchStacks.add(stack.copyWithCount(1));
+        }
+        sync();
+    }
+
+    public boolean replaceToolmakerAssemblyStack(int assemblyIndex, ItemStack replacement) {
+        if (workstationKind() != WorkstationKind.TOOLMAKERS_BENCH || assemblyIndex < 0 || replacement.isEmpty()) {
+            return false;
+        }
+
+        int currentAssemblyIndex = 0;
+        for (int stackIndex = 0; stackIndex < benchStacks.size(); stackIndex++) {
+            ItemStack existing = benchStacks.get(stackIndex);
+            if (existing.isEmpty() || existing.is(ModItems.PLANT_FIBER.get())) {
+                continue;
+            }
+            if (currentAssemblyIndex == assemblyIndex) {
+                benchStacks.set(stackIndex, replacement.copyWithCount(1));
+                sync();
+                return true;
+            }
+            currentAssemblyIndex++;
+        }
+        return false;
+    }
+
+    public boolean replaceToolmakerStack(int stackIndex, ItemStack replacement) {
+        if (workstationKind() != WorkstationKind.TOOLMAKERS_BENCH
+                || stackIndex < 0
+                || stackIndex >= benchStacks.size()
+                || replacement.isEmpty()) {
+            return false;
+        }
+        benchStacks.set(stackIndex, replacement.copyWithCount(1));
+        sync();
+        return true;
     }
 
     public void setDirectOutput(ItemStack output) {
@@ -797,7 +856,6 @@ public class ToolForgeBlockEntity extends BlockEntity {
             score += 6;
         }
         qualityScore = ForgingQuality.clampScore(score);
-        scheduleNextGoodHit();
     }
 
     private int materialDifficultyPenalty(ToolMaterialDefinition material) {
@@ -819,14 +877,33 @@ public class ToolForgeBlockEntity extends BlockEntity {
         }
         if (nextGoodHitGameTime < 0L) {
             scheduleNextGoodHit();
+            return;
         }
         boolean goodTiming = Math.abs(level.getGameTime() - nextGoodHitGameTime) <= MobsToolForgingConfig.TIMING_QUALITY_WINDOW_TICKS.get();
         if (goodTiming) {
             qualityScore = ForgingQuality.clampScore(qualityScore + (precisionTool ? PRECISION_TIMED_HIT_QUALITY_BONUS : TIMED_HIT_QUALITY_BONUS));
+            playTimingHitSound(precisionTool);
         } else {
             qualityScore = ForgingQuality.clampScore(qualityScore - (precisionTool ? 0 : MISSED_TIMING_QUALITY_PENALTY));
         }
         scheduleNextGoodHit();
+    }
+
+    private void scheduleFirstGoodHitIfReady() {
+        if (nextGoodHitGameTime >= 0L
+                || !MobsToolForgingConfig.ENABLE_QUALITY.get()
+                || !MobsToolForgingConfig.ENABLE_TIMING_QUALITY.get()
+                || !canHammer()) {
+            return;
+        }
+        scheduleNextGoodHit();
+    }
+
+    private void playTimingHitSound(boolean precisionTool) {
+        if (level == null) {
+            return;
+        }
+        level.playSound(null, worldPosition, SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.65F, precisionTool ? 1.45F : 1.2F);
     }
 
     private void scheduleNextGoodHit() {
