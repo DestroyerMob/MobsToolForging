@@ -43,7 +43,7 @@ final class SpriteUvVertexConsumer implements VertexConsumer {
 
     @Override
     public VertexConsumer setUv(float u, float v) {
-        delegate.setUv(sprite.getU(wrapUv(u)), sprite.getV(wrapUv(v)));
+        delegate.setUv(sprite.getU(wrapUv(u) * 16.0F), sprite.getV(wrapUv(v) * 16.0F));
         return this;
     }
 
