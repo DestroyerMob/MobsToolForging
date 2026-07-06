@@ -146,10 +146,10 @@ public final class ArmorStatsCatalog {
     }
 
     private static ArmorStats combinedStats(ArmorStats chainmail, ArmorStats plate) {
-        int defenseBonus = Math.max(1, plate.defense() - chainmail.defense());
+        int defenseBonus = Math.max(1, Math.round(chainmail.defense() * 0.25F));
         int durabilityBonus = Math.max(1, Math.round(plate.durabilityFactor() * 0.35F));
         return new ArmorStats(
-                chainmail.defense() + defenseBonus,
+                plate.defense() + defenseBonus,
                 chainmail.durabilityFactor() + durabilityBonus,
                 Math.max(chainmail.enchantmentValue(), plate.enchantmentValue()),
                 plate.toughness(),
