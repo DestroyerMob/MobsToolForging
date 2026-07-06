@@ -28,13 +28,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
@@ -111,6 +113,7 @@ public class MobsToolForging {
         modContainer.registerConfig(ModConfig.Type.COMMON, MobsToolForgingConfig.COMMON_SPEC);
 
         modEventBus.addListener(this::addCreativeTabContents);
+        modEventBus.addListener(this::registerCapabilities);
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::placeKnappingFlint);
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::placeGroundAssembly);
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::dropPlantFiber);
@@ -152,6 +155,7 @@ public class MobsToolForging {
             event.accept(ModBlocks.HEATING_FORGE);
             event.accept(ModBlocks.CRUCIBLE);
             event.accept(ModBlocks.FOUNDRY_FORGE);
+            event.accept(ModBlocks.ASH);
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.SMITHING_HAMMER);
@@ -169,15 +173,14 @@ public class MobsToolForging {
             event.accept(ModItems.SWORD_GUARD_PATTERN);
             event.accept(ModItems.SMITHING_HAMMER_HEAD_PATTERN);
             event.accept(ModItems.GEM_CUTTERS_BLADE_PATTERN);
-            event.accept(ModItems.HELMET_SKULL_PATTERN);
-            event.accept(ModItems.HELMET_COMB_PATTERN);
-            event.accept(ModItems.HELMET_VISOR_PATTERN);
+            event.accept(ModItems.HELMET_CHAINMAIL_PATTERN);
+            event.accept(ModItems.HELMET_PLATE_PATTERN);
             event.accept(ModItems.CHESTPLATE_CHAINMAIL_PATTERN);
             event.accept(ModItems.CHESTPLATE_BODY_PATTERN);
-            event.accept(ModItems.LEGGINGS_LEGS_PATTERN);
-            event.accept(ModItems.LEGGINGS_KNEES_PATTERN);
-            event.accept(ModItems.LEGGINGS_TASSETS_PATTERN);
-            event.accept(ModItems.BOOTS_FEET_PATTERN);
+            event.accept(ModItems.LEGGINGS_CHAINMAIL_PATTERN);
+            event.accept(ModItems.LEGGINGS_PLATE_PATTERN);
+            event.accept(ModItems.BOOTS_CHAINMAIL_PATTERN);
+            event.accept(ModItems.BOOTS_PLATE_PATTERN);
             ToolTypeRegistry.templates().stream()
                     .filter(template -> !template.id().getNamespace().equals(MOD_ID))
                     .map(MobsToolForging::templatePattern)
@@ -185,8 +188,12 @@ public class MobsToolForging {
             event.accept(ModItems.TEMPLATE_PATTERN);
         }
         if (event.getTabKey() == CreativeModeTabs.COMBAT) {
-            event.accept(ModItems.MODULAR_HELMET.get().create(MaterialCatalog.IRON, Optional.empty(), Optional.empty()));
+            event.accept(ModItems.MODULAR_HELMET.get().createChainmail());
             event.accept(ModItems.MODULAR_CHESTPLATE.get().createChainmail());
+            event.accept(ModItems.MODULAR_LEGGINGS.get().createChainmail());
+            event.accept(ModItems.MODULAR_BOOTS.get().createChainmail());
+            event.accept(ModItems.MODULAR_HELMET.get().create(MaterialCatalog.IRON));
+            event.accept(ModItems.MODULAR_CHESTPLATE.get().create(MaterialCatalog.IRON));
             event.accept(ModItems.MODULAR_LEGGINGS.get().create(MaterialCatalog.IRON));
             event.accept(ModItems.MODULAR_BOOTS.get().create(MaterialCatalog.IRON));
         }
@@ -194,10 +201,19 @@ public class MobsToolForging {
             event.accept(ModItems.PATTERN_BOARD);
             event.accept(ModItems.FLINT_SHARD);
             event.accept(ModItems.PLANT_FIBER);
+            event.accept(ModItems.ASH);
             event.accept(ModItems.SMITHING_HAMMER_HEAD);
             event.accept(ModItems.GEM_CUTTERS_BLADE);
             event.accept(ModItems.DIAMOND_POWDER);
         }
+    }
+
+    private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ModBlockEntities.HEATING_FORGE.get(),
+                (forge, side) -> forge.itemHandler(side)
+        );
     }
 
     private static ItemStack templatePattern(ForgeTemplateDefinition template) {

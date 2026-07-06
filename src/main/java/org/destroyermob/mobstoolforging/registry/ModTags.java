@@ -31,11 +31,14 @@ public final class ModTags {
         public static final TagKey<Item> PART_SCREWDRIVER_HEADS = itemTag("parts/screwdriver_head");
         public static final TagKey<Item> PART_GEM_CUTTERS_BLADES = itemTag("parts/gem_cutters_blade");
         public static final TagKey<Item> ARMOR_PARTS = itemTag("parts/armor");
-        public static final TagKey<Item> PART_HELMET_SKULLS = itemTag("parts/helmet_skull");
+        public static final TagKey<Item> PART_HELMET_CHAINMAILS = itemTag("parts/helmet_chainmail");
+        public static final TagKey<Item> PART_HELMET_PLATES = itemTag("parts/helmet_plate");
         public static final TagKey<Item> PART_CHESTPLATE_CHAINMAILS = itemTag("parts/chestplate_chainmail");
         public static final TagKey<Item> PART_CHESTPLATE_BODIES = itemTag("parts/chestplate_body");
-        public static final TagKey<Item> PART_LEGGINGS_LEGS = itemTag("parts/leggings_legs");
-        public static final TagKey<Item> PART_BOOTS_FEET = itemTag("parts/boots_feet");
+        public static final TagKey<Item> PART_LEGGINGS_CHAINMAILS = itemTag("parts/leggings_chainmail");
+        public static final TagKey<Item> PART_LEGGINGS_PLATES = itemTag("parts/leggings_plate");
+        public static final TagKey<Item> PART_BOOTS_CHAINMAILS = itemTag("parts/boots_chainmail");
+        public static final TagKey<Item> PART_BOOTS_PLATES = itemTag("parts/boots_plate");
         public static final TagKey<Item> TOOL_HANDLES = itemTag("tool_handles");
         public static final TagKey<Item> LAPIDARY_ABRASIVES = itemTag("lapidary_abrasives");
         public static final TagKey<Item> KNAPPING_TOOLS = itemTag("knapping_tools");

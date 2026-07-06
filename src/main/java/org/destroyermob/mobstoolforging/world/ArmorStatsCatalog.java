@@ -26,10 +26,21 @@ public final class ArmorStatsCatalog {
     }
 
     public static void apply(ItemStack stack, ArmorConstructionData construction) {
+        apply(stack, construction, true);
+    }
+
+    public static void applyPreservingDamage(ItemStack stack, ArmorConstructionData construction) {
+        apply(stack, construction, false);
+    }
+
+    private static void apply(ItemStack stack, ArmorConstructionData construction, boolean resetDamage) {
+        int previousMaxDamage = stack.getMaxDamage();
+        int previousDamage = stack.getDamageValue();
         ArmorSlotStats slotStats = slotStats(construction);
         ArmorStats stats = slotStats.stats();
-        stack.set(DataComponents.MAX_DAMAGE, slotStats.type().getDurability(stats.durabilityFactor()));
-        stack.set(DataComponents.DAMAGE, 0);
+        int maxDamage = slotStats.type().getDurability(stats.durabilityFactor());
+        stack.set(DataComponents.MAX_DAMAGE, maxDamage);
+        stack.set(DataComponents.DAMAGE, resetDamage ? 0 : scaledDamage(previousDamage, previousMaxDamage, maxDamage));
         stack.set(DataComponents.ATTRIBUTE_MODIFIERS, attributes(stats, slotStats.modifierId(), slotStats.slotGroup()));
         if (stats.fireResistant()) {
             stack.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
@@ -38,8 +49,20 @@ public final class ArmorStatsCatalog {
         }
     }
 
+    private static int scaledDamage(int previousDamage, int previousMaxDamage, int newMaxDamage) {
+        if (previousMaxDamage <= 0 || previousDamage <= 0 || newMaxDamage <= 0) {
+            return 0;
+        }
+        int scaled = Math.round(previousDamage * (newMaxDamage / (float) previousMaxDamage));
+        return Math.max(0, Math.min(newMaxDamage - 1, scaled));
+    }
+
     public static ArmorStats helmetStats(ResourceLocation materialId) {
         return HELMET_STATS.getOrDefault(materialId, HELMET_STATS.get(MaterialCatalog.IRON));
+    }
+
+    public static ArmorStats chainmailHelmetStats(ResourceLocation materialId) {
+        return new ArmorStats(2, 15, 12, 0.0F, 0.0F, false);
     }
 
     public static ArmorStats chestplateStats(ResourceLocation materialId) {
@@ -47,17 +70,23 @@ public final class ArmorStatsCatalog {
     }
 
     public static ArmorStats chainmailChestplateStats(ResourceLocation materialId) {
-        return MaterialCatalog.IRON.equals(materialId)
-                ? new ArmorStats(5, 15, 12, 0.0F, 0.0F, false)
-                : chestplateStats(materialId);
+        return new ArmorStats(5, 15, 12, 0.0F, 0.0F, false);
     }
 
     public static ArmorStats leggingsStats(ResourceLocation materialId) {
         return LEGGINGS_STATS.getOrDefault(materialId, LEGGINGS_STATS.get(MaterialCatalog.IRON));
     }
 
+    public static ArmorStats chainmailLeggingsStats(ResourceLocation materialId) {
+        return new ArmorStats(4, 15, 12, 0.0F, 0.0F, false);
+    }
+
     public static ArmorStats bootsStats(ResourceLocation materialId) {
         return BOOTS_STATS.getOrDefault(materialId, BOOTS_STATS.get(MaterialCatalog.IRON));
+    }
+
+    public static ArmorStats chainmailBootsStats(ResourceLocation materialId) {
+        return new ArmorStats(1, 15, 12, 0.0F, 0.0F, false);
     }
 
     public static ArmorStats stats(ArmorConstructionData construction) {
@@ -81,7 +110,9 @@ public final class ArmorStatsCatalog {
                     ArmorItem.Type.BOOTS,
                     EquipmentSlotGroup.FEET,
                     BOOTS_ARMOR_ID,
-                    bootsStats(construction.skullMaterial())
+                    construction.bootsPlateMaterial()
+                            .map(material -> combinedStats(chainmailBootsStats(construction.bootsChainmailMaterial()), bootsStats(material)))
+                            .orElseGet(() -> chainmailBootsStats(construction.bootsChainmailMaterial()))
             );
         }
         if (ArmorConstructionData.LEGGINGS_TYPE.equals(construction.armorType())) {
@@ -89,7 +120,9 @@ public final class ArmorStatsCatalog {
                     ArmorItem.Type.LEGGINGS,
                     EquipmentSlotGroup.LEGS,
                     LEGGINGS_ARMOR_ID,
-                    leggingsStats(construction.skullMaterial())
+                    construction.leggingsPlateMaterial()
+                            .map(material -> combinedStats(chainmailLeggingsStats(construction.leggingsChainmailMaterial()), leggingsStats(material)))
+                            .orElseGet(() -> chainmailLeggingsStats(construction.leggingsChainmailMaterial()))
             );
         }
         if (ArmorConstructionData.CHESTPLATE_TYPE.equals(construction.armorType())) {
@@ -98,7 +131,7 @@ public final class ArmorStatsCatalog {
                     EquipmentSlotGroup.CHEST,
                     CHESTPLATE_ARMOR_ID,
                     construction.chestplatePlateMaterial()
-                            .map(ArmorStatsCatalog::chestplateStats)
+                            .map(material -> combinedStats(chainmailChestplateStats(construction.chestplateChainmailMaterial()), chestplateStats(material)))
                             .orElseGet(() -> chainmailChestplateStats(construction.chestplateChainmailMaterial()))
             );
         }
@@ -106,7 +139,22 @@ public final class ArmorStatsCatalog {
                 ArmorItem.Type.HELMET,
                 EquipmentSlotGroup.HEAD,
                 HELMET_ARMOR_ID,
-                helmetStats(construction.skullMaterial())
+                construction.helmetPlateMaterial()
+                        .map(material -> combinedStats(chainmailHelmetStats(construction.helmetChainmailMaterial()), helmetStats(material)))
+                        .orElseGet(() -> chainmailHelmetStats(construction.helmetChainmailMaterial()))
+        );
+    }
+
+    private static ArmorStats combinedStats(ArmorStats chainmail, ArmorStats plate) {
+        int defenseBonus = Math.max(1, plate.defense() - chainmail.defense());
+        int durabilityBonus = Math.max(1, Math.round(plate.durabilityFactor() * 0.35F));
+        return new ArmorStats(
+                chainmail.defense() + defenseBonus,
+                chainmail.durabilityFactor() + durabilityBonus,
+                Math.max(chainmail.enchantmentValue(), plate.enchantmentValue()),
+                plate.toughness(),
+                plate.knockbackResistance(),
+                chainmail.fireResistant() || plate.fireResistant()
         );
     }
 

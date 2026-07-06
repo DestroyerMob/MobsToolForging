@@ -25,7 +25,11 @@ public class ModularChestplateItem extends ArmorItem implements ModularArmorItem
     }
 
     public ItemStack create(ResourceLocation bodyMaterial) {
-        ArmorConstructionData construction = ArmorConstructionData.chestplate(bodyMaterial);
+        return create(bodyMaterial, ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack create(ResourceLocation bodyMaterial, int quality) {
+        ArmorConstructionData construction = ArmorConstructionData.chestplate(bodyMaterial, quality);
         ItemStack stack = new ItemStack(this);
         stack.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction);
         ArmorStatsCatalog.apply(stack, construction);
@@ -33,7 +37,11 @@ public class ModularChestplateItem extends ArmorItem implements ModularArmorItem
     }
 
     public ItemStack createChainmail() {
-        ArmorConstructionData construction = ArmorConstructionData.chainmailChestplate();
+        return createChainmail(ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack createChainmail(int quality) {
+        ArmorConstructionData construction = ArmorConstructionData.chainmailChestplate(quality);
         ItemStack stack = new ItemStack(this);
         stack.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction);
         ArmorStatsCatalog.apply(stack, construction);
@@ -86,9 +94,15 @@ public class ModularChestplateItem extends ArmorItem implements ModularArmorItem
             return;
         }
         tooltip.add(Component.translatable("tooltip.mobstoolforging.construction").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("tooltip.mobstoolforging.quality")
+                .withStyle(ChatFormatting.DARK_GRAY)
+                .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(construction.qualityLevel().displayName()));
         tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.chainmail", MaterialCatalog.displayName(construction.chestplateChainmailMaterial())).withStyle(ChatFormatting.DARK_GRAY));
-        construction.chestplatePlateMaterial()
-                .ifPresent(material -> tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.body", MaterialCatalog.displayName(material)).withStyle(ChatFormatting.DARK_GRAY)));
+        tooltip.add(Component.translatable(
+                "tooltip.mobstoolforging.armor_part.plate",
+                construction.chestplatePlateMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
+        ).withStyle(ChatFormatting.DARK_GRAY));
     }
 
     @Override

@@ -61,6 +61,10 @@ public class ModularArmorPartItem extends Item {
         ArmorPartData data = stack.get(ModDataComponents.ARMOR_PART.get());
         if (data != null && partType.equals(data.partType())) {
             tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part_material", MaterialCatalog.displayName(data.materialId())).withStyle(ChatFormatting.DARK_GRAY));
+            tooltip.add(Component.translatable("tooltip.mobstoolforging.quality")
+                    .withStyle(ChatFormatting.DARK_GRAY)
+                    .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
+                    .append(data.qualityLevel().displayName()));
         }
     }
 }

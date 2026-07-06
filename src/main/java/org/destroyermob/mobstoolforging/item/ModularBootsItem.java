@@ -1,6 +1,7 @@
 package org.destroyermob.mobstoolforging.item;
 
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -24,8 +25,32 @@ public class ModularBootsItem extends ArmorItem implements ModularArmorItem {
         super(material, Type.BOOTS, properties);
     }
 
-    public ItemStack create(ResourceLocation footMaterial) {
-        ArmorConstructionData construction = ArmorConstructionData.boots(footMaterial);
+    public ItemStack create(ResourceLocation plateMaterial) {
+        return create(plateMaterial, ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack create(ResourceLocation plateMaterial, int quality) {
+        return create(MaterialCatalog.IRON, Optional.of(plateMaterial), quality);
+    }
+
+    public ItemStack create(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial) {
+        return create(chainmailMaterial, plateMaterial, ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack create(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, int quality) {
+        ArmorConstructionData construction = ArmorConstructionData.boots(chainmailMaterial, plateMaterial, quality);
+        ItemStack stack = new ItemStack(this);
+        stack.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction);
+        ArmorStatsCatalog.apply(stack, construction);
+        return stack;
+    }
+
+    public ItemStack createChainmail() {
+        return createChainmail(ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack createChainmail(int quality) {
+        ArmorConstructionData construction = ArmorConstructionData.chainmailBoots(quality);
         ItemStack stack = new ItemStack(this);
         stack.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction);
         ArmorStatsCatalog.apply(stack, construction);
@@ -38,7 +63,9 @@ public class ModularBootsItem extends ArmorItem implements ModularArmorItem {
         if (construction == null || !ArmorConstructionData.BOOTS_TYPE.equals(construction.armorType())) {
             return super.getName(stack);
         }
-        return Component.translatable("item.mobstoolforging.material_modular_boots", MaterialCatalog.displayName(construction.skullMaterial()));
+        return construction.bootsPlateMaterial()
+                .map(material -> Component.translatable("item.mobstoolforging.material_modular_boots", MaterialCatalog.displayName(material)))
+                .orElseGet(() -> Component.translatable("item.mobstoolforging.modular_chainmail_boots"));
     }
 
     @Override
@@ -76,7 +103,15 @@ public class ModularBootsItem extends ArmorItem implements ModularArmorItem {
             return;
         }
         tooltip.add(Component.translatable("tooltip.mobstoolforging.construction").withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.feet", MaterialCatalog.displayName(construction.skullMaterial())).withStyle(ChatFormatting.DARK_GRAY));
+        tooltip.add(Component.translatable("tooltip.mobstoolforging.quality")
+                .withStyle(ChatFormatting.DARK_GRAY)
+                .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(construction.qualityLevel().displayName()));
+        tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.chainmail", MaterialCatalog.displayName(construction.bootsChainmailMaterial())).withStyle(ChatFormatting.DARK_GRAY));
+        tooltip.add(Component.translatable(
+                "tooltip.mobstoolforging.armor_part.plate",
+                construction.bootsPlateMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
+        ).withStyle(ChatFormatting.DARK_GRAY));
     }
 
     @Override

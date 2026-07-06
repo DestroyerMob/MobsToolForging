@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "loader": "mobstoolforging:pattern_cutout",
-  "textures": {
-    "board": "minecraft:block/oak_planks",
-    "layer0": "minecraft:block/oak_planks"
-  }
-}

@@ -128,11 +128,21 @@ public final class ModularBodyArmourGeometry {
     }
 
     private static float u(TextureAtlasSprite sprite, float textureU) {
-        return sprite.getU(textureU / 16.0F);
+        int textureWidth = Math.max(1, sprite.contents().width());
+        return sprite.getU(wrapTextureCoordinate(textureU, textureWidth) / textureWidth);
     }
 
     private static float v(TextureAtlasSprite sprite, float textureV) {
-        return sprite.getV(textureV / 16.0F);
+        int textureHeight = Math.max(1, sprite.contents().height());
+        return sprite.getV(wrapTextureCoordinate(textureV, textureHeight) / textureHeight);
+    }
+
+    private static float wrapTextureCoordinate(float coordinate, int textureSize) {
+        float wrapped = coordinate % textureSize;
+        if (wrapped < 0.0F) {
+            wrapped += textureSize;
+        }
+        return wrapped;
     }
 
     private static Cuboid cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float textureU, float textureV) {

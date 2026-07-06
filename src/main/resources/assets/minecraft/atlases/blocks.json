@@ -46,7 +46,67 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "minecraft:item/chainmail_helmet"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "minecraft:item/chainmail_chestplate"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/chainmail_leggings"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/chainmail_boots"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:models/armor/chainmail_layer_1"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:models/armor/chainmail_layer_2"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:models/armor/iron_layer_1"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:models/armor/iron_layer_2"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:models/armor/gold_layer_1"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:models/armor/gold_layer_2"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:models/armor/diamond_layer_1"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:models/armor/diamond_layer_2"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:models/armor/netherite_layer_1"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:models/armor/netherite_layer_2"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "mobstoolforging:models/armor/layer_1"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "mobstoolforging:models/armor/layer_2"
     },
     {
       "type": "minecraft:single",

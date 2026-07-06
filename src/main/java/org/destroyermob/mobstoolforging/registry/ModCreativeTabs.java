@@ -77,15 +77,14 @@ public final class ModCreativeTabs {
         output.accept(ModItems.SMITHING_HAMMER_HEAD_PATTERN.get());
         output.accept(ModItems.SCREWDRIVER_HEAD_PATTERN.get());
         output.accept(ModItems.GEM_CUTTERS_BLADE_PATTERN.get());
-        output.accept(ModItems.HELMET_SKULL_PATTERN.get());
-        output.accept(ModItems.HELMET_COMB_PATTERN.get());
-        output.accept(ModItems.HELMET_VISOR_PATTERN.get());
+        output.accept(ModItems.HELMET_CHAINMAIL_PATTERN.get());
+        output.accept(ModItems.HELMET_PLATE_PATTERN.get());
         output.accept(ModItems.CHESTPLATE_CHAINMAIL_PATTERN.get());
         output.accept(ModItems.CHESTPLATE_BODY_PATTERN.get());
-        output.accept(ModItems.LEGGINGS_LEGS_PATTERN.get());
-        output.accept(ModItems.LEGGINGS_KNEES_PATTERN.get());
-        output.accept(ModItems.LEGGINGS_TASSETS_PATTERN.get());
-        output.accept(ModItems.BOOTS_FEET_PATTERN.get());
+        output.accept(ModItems.LEGGINGS_CHAINMAIL_PATTERN.get());
+        output.accept(ModItems.LEGGINGS_PLATE_PATTERN.get());
+        output.accept(ModItems.BOOTS_CHAINMAIL_PATTERN.get());
+        output.accept(ModItems.BOOTS_PLATE_PATTERN.get());
         ToolTypeRegistry.templates().stream()
                 .filter(template -> !template.id().getNamespace().equals(MobsToolForging.MOD_ID))
                 .map(ModCreativeTabs::templatePattern)
@@ -100,11 +99,14 @@ public final class ModCreativeTabs {
         output.accept(ModItems.PICKAXE_HEAD.get().createPart(MaterialCatalog.IRON));
         output.accept(ModItems.AXE_HEAD.get().createPart(MaterialCatalog.IRON));
         output.accept(ModItems.HOE_HEAD.get().createPart(MaterialCatalog.IRON));
-        output.accept(ModItems.HELMET_SKULL.get().createPart(MaterialCatalog.IRON));
+        output.accept(ModItems.HELMET_CHAINMAIL.get().createPart(MaterialCatalog.IRON));
+        output.accept(ModItems.HELMET_PLATE.get().createPart(MaterialCatalog.IRON));
         output.accept(ModItems.CHESTPLATE_CHAINMAIL.get().createPart(MaterialCatalog.IRON));
         output.accept(ModItems.CHESTPLATE_BODY.get().createPart(MaterialCatalog.IRON));
-        output.accept(ModItems.LEGGINGS_LEGS.get().createPart(MaterialCatalog.IRON));
-        output.accept(ModItems.BOOTS_FEET.get().createPart(MaterialCatalog.IRON));
+        output.accept(ModItems.LEGGINGS_CHAINMAIL.get().createPart(MaterialCatalog.IRON));
+        output.accept(ModItems.LEGGINGS_PLATE.get().createPart(MaterialCatalog.IRON));
+        output.accept(ModItems.BOOTS_CHAINMAIL.get().createPart(MaterialCatalog.IRON));
+        output.accept(ModItems.BOOTS_PLATE.get().createPart(MaterialCatalog.IRON));
     }
 
     private static void acceptMaterials(CreativeModeTab.Output output) {
@@ -130,8 +132,12 @@ public final class ModCreativeTabs {
     }
 
     private static void acceptStarterArmor(CreativeModeTab.Output output) {
-        output.accept(ModItems.MODULAR_HELMET.get().create(MaterialCatalog.IRON, Optional.empty(), Optional.empty()));
+        output.accept(ModItems.MODULAR_HELMET.get().createChainmail());
         output.accept(ModItems.MODULAR_CHESTPLATE.get().createChainmail());
+        output.accept(ModItems.MODULAR_LEGGINGS.get().createChainmail());
+        output.accept(ModItems.MODULAR_BOOTS.get().createChainmail());
+        output.accept(ModItems.MODULAR_HELMET.get().create(MaterialCatalog.IRON));
+        output.accept(ModItems.MODULAR_CHESTPLATE.get().create(MaterialCatalog.IRON));
         output.accept(ModItems.MODULAR_LEGGINGS.get().create(MaterialCatalog.IRON));
         output.accept(ModItems.MODULAR_BOOTS.get().create(MaterialCatalog.IRON));
     }

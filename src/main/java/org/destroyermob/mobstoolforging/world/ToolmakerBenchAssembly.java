@@ -5,11 +5,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
+import org.destroyermob.mobstoolforging.item.ModularArmorPartItem;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModTags;
@@ -23,6 +25,13 @@ public final class ToolmakerBenchAssembly {
             return false;
         }
         if (stack.get(ModDataComponents.TOOL_CONSTRUCTION.get()) != null) {
+            return true;
+        }
+        if (stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get()) != null) {
+            return true;
+        }
+        ArmorPartData armorPart = stack.get(ModDataComponents.ARMOR_PART.get());
+        if (armorPart != null && ArmorAssemblyKind.isKnownPart(stack, armorPart)) {
             return true;
         }
         ToolPartData partData = stack.get(ModDataComponents.TOOL_PART.get());
@@ -55,6 +64,12 @@ public final class ToolmakerBenchAssembly {
         if (assemblyStacks.isEmpty() || assemblyStacks.stream().anyMatch(ToolmakerBenchAssembly::isFinishedTool)) {
             return ItemStack.EMPTY;
         }
+        if (plantFiberCount == 0) {
+            ItemStack armor = assembleArmor(stacks);
+            if (!armor.isEmpty()) {
+                return armor;
+            }
+        }
         for (ToolTypeDefinition definition : ToolTypeRegistry.toolTypes()) {
             Parts parts = findParts(stacks, definition);
             Optional<ToolConstructionData> construction = parts.validConstruction(definition);
@@ -80,6 +95,11 @@ public final class ToolmakerBenchAssembly {
     }
 
     public static Optional<List<ItemStack>> disassemble(ItemStack stack) {
+        ArmorConstructionData armorConstruction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
+        if (armorConstruction != null) {
+            return disassembleArmor(armorConstruction);
+        }
+
         ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
         if (construction == null) {
             return Optional.empty();
@@ -124,7 +144,54 @@ public final class ToolmakerBenchAssembly {
 
     public static boolean isFinishedTool(ItemStack stack) {
         ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
-        return construction != null && ToolTypeRegistry.toolType(construction.toolType()).isPresent();
+        if (construction != null && ToolTypeRegistry.toolType(construction.toolType()).isPresent()) {
+            return true;
+        }
+        ArmorConstructionData armorConstruction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
+        return armorConstruction != null && ArmorAssemblyKind.fromArmorType(armorConstruction.armorType()).isPresent();
+    }
+
+    private static ItemStack assembleArmor(List<ItemStack> stacks) {
+        ArmorAssemblyParts parts = findArmorParts(stacks);
+        return parts.valid() ? parts.kind().create(parts) : ItemStack.EMPTY;
+    }
+
+    private static ArmorAssemblyParts findArmorParts(List<ItemStack> stacks) {
+        ArmorAssemblyParts parts = new ArmorAssemblyParts();
+        for (ItemStack stack : stacks) {
+            if (stack.isEmpty()) {
+                continue;
+            }
+            if (WorkpieceHeat.hasHeat(stack)) {
+                return ArmorAssemblyParts.invalid();
+            }
+            ArmorPartData data = stack.get(ModDataComponents.ARMOR_PART.get());
+            if (data == null || !ArmorStatsCatalog.isSupportedArmorMaterial(data.materialId())) {
+                return ArmorAssemblyParts.invalid();
+            }
+            Optional<ArmorAssemblyKind> kind = ArmorAssemblyKind.fromPart(stack, data);
+            if (kind.isEmpty() || !kind.get().accept(parts, stack, data)) {
+                return ArmorAssemblyParts.invalid();
+            }
+        }
+        return parts;
+    }
+
+    private static Optional<List<ItemStack>> disassembleArmor(ArmorConstructionData construction) {
+        return ArmorAssemblyKind.fromArmorType(construction.armorType()).map(kind -> {
+            List<ItemStack> parts = new ArrayList<>();
+            ItemStack base = kind.createBasePart(MaterialCatalog.IRON, construction.quality());
+            if (!base.isEmpty()) {
+                parts.add(base);
+            }
+            construction.overlayMaterial().ifPresent(material -> {
+                ItemStack plate = kind.createPlatePart(material, construction.quality());
+                if (!plate.isEmpty()) {
+                    parts.add(plate);
+                }
+            });
+            return List.copyOf(parts);
+        }).filter(parts -> !parts.isEmpty());
     }
 
     private static Parts findParts(List<ItemStack> stacks, ToolTypeDefinition definition) {
@@ -279,6 +346,214 @@ public final class ToolmakerBenchAssembly {
             copy.set(ModDataComponents.TOOL_PART.get(), data.withTreatment(construction.treatment().get()));
         }
         return copy;
+    }
+
+    private enum ArmorAssemblyKind {
+        HELMET(
+                ArmorConstructionData.HELMET_TYPE,
+                ArmorPartData.HELMET_CHAINMAIL,
+                ModItems.HELMET_CHAINMAIL::get,
+                ArmorPartData.HELMET_PLATE,
+                ModItems.HELMET_PLATE::get
+        ) {
+            @Override
+            ItemStack create(ArmorAssemblyParts parts) {
+                return optionalMaterial(parts.plate)
+                        .map(material -> ModItems.MODULAR_HELMET.get().create(material, quality(parts)))
+                        .orElseGet(() -> ModItems.MODULAR_HELMET.get().createChainmail(quality(parts)));
+            }
+        },
+        CHESTPLATE(
+                ArmorConstructionData.CHESTPLATE_TYPE,
+                ArmorPartData.CHESTPLATE_CHAINMAIL,
+                ModItems.CHESTPLATE_CHAINMAIL::get,
+                ArmorPartData.CHESTPLATE_BODY,
+                ModItems.CHESTPLATE_BODY::get
+        ) {
+            @Override
+            ItemStack create(ArmorAssemblyParts parts) {
+                return optionalMaterial(parts.plate)
+                        .map(material -> ModItems.MODULAR_CHESTPLATE.get().create(material, quality(parts)))
+                        .orElseGet(() -> ModItems.MODULAR_CHESTPLATE.get().createChainmail(quality(parts)));
+            }
+        },
+        LEGGINGS(
+                ArmorConstructionData.LEGGINGS_TYPE,
+                ArmorPartData.LEGGINGS_CHAINMAIL,
+                ModItems.LEGGINGS_CHAINMAIL::get,
+                ArmorPartData.LEGGINGS_PLATE,
+                ModItems.LEGGINGS_PLATE::get
+        ) {
+            @Override
+            ItemStack create(ArmorAssemblyParts parts) {
+                return optionalMaterial(parts.plate)
+                        .map(material -> ModItems.MODULAR_LEGGINGS.get().create(material, quality(parts)))
+                        .orElseGet(() -> ModItems.MODULAR_LEGGINGS.get().createChainmail(quality(parts)));
+            }
+        },
+        BOOTS(
+                ArmorConstructionData.BOOTS_TYPE,
+                ArmorPartData.BOOTS_CHAINMAIL,
+                ModItems.BOOTS_CHAINMAIL::get,
+                ArmorPartData.BOOTS_PLATE,
+                ModItems.BOOTS_PLATE::get
+        ) {
+            @Override
+            ItemStack create(ArmorAssemblyParts parts) {
+                return optionalMaterial(parts.plate)
+                        .map(material -> ModItems.MODULAR_BOOTS.get().create(material, quality(parts)))
+                        .orElseGet(() -> ModItems.MODULAR_BOOTS.get().createChainmail(quality(parts)));
+            }
+        };
+
+        private final ResourceLocation armorType;
+        private final String basePartType;
+        private final Supplier<ModularArmorPartItem> baseItem;
+        private final String platePartType;
+        private final Supplier<ModularArmorPartItem> plateItem;
+
+        ArmorAssemblyKind(ResourceLocation armorType, String basePartType, Supplier<ModularArmorPartItem> baseItem, String platePartType, Supplier<ModularArmorPartItem> plateItem) {
+            this.armorType = armorType;
+            this.basePartType = basePartType;
+            this.baseItem = baseItem;
+            this.platePartType = platePartType;
+            this.plateItem = plateItem;
+        }
+
+        private boolean accept(ArmorAssemblyParts parts, ItemStack stack, ArmorPartData data) {
+            if (matchesBase(stack, data)) {
+                return parts.setKind(this) && parts.setBase(stack);
+            }
+            if (matchesPlate(stack, data)) {
+                return parts.setKind(this) && parts.setPlate(stack);
+            }
+            return false;
+        }
+
+        private boolean matchesBase(ItemStack stack, ArmorPartData data) {
+            return matches(stack, data, basePartType, baseItem) && MaterialCatalog.IRON.equals(data.materialId());
+        }
+
+        private boolean matchesPlate(ItemStack stack, ArmorPartData data) {
+            return matches(stack, data, platePartType, plateItem);
+        }
+
+        private ItemStack createBasePart(ResourceLocation material, int quality) {
+            return baseItem.get().createPart(material, quality);
+        }
+
+        private ItemStack createPlatePart(ResourceLocation material, int quality) {
+            return plateItem.get().createPart(material, quality);
+        }
+
+        abstract ItemStack create(ArmorAssemblyParts parts);
+
+        private static Optional<ArmorAssemblyKind> fromPart(ItemStack stack, ArmorPartData data) {
+            for (ArmorAssemblyKind kind : values()) {
+                if (kind.matchesBase(stack, data) || kind.matchesPlate(stack, data)) {
+                    return Optional.of(kind);
+                }
+            }
+            return Optional.empty();
+        }
+
+        private static Optional<ArmorAssemblyKind> fromArmorType(ResourceLocation armorType) {
+            for (ArmorAssemblyKind kind : values()) {
+                if (kind.armorType.equals(armorType)) {
+                    return Optional.of(kind);
+                }
+            }
+            return Optional.empty();
+        }
+
+        private static boolean isKnownPart(ItemStack stack, ArmorPartData data) {
+            return fromPart(stack, data).isPresent();
+        }
+
+        private static boolean matches(ItemStack stack, ArmorPartData data, String partType, Supplier<ModularArmorPartItem> item) {
+            return stack.is(item.get()) && partType.equals(data.partType());
+        }
+
+        private static Optional<ResourceLocation> optionalMaterial(ItemStack stack) {
+            ArmorPartData data = stack.get(ModDataComponents.ARMOR_PART.get());
+            return data == null ? Optional.empty() : Optional.of(data.materialId());
+        }
+
+        private static int quality(ArmorAssemblyParts parts) {
+            if (!MobsToolForgingConfig.ENABLE_QUALITY.get()) {
+                return ArmorPartData.DEFAULT_QUALITY;
+            }
+            List<ArmorPartData> partData = parts.stacks().stream()
+                    .map(stack -> stack.get(ModDataComponents.ARMOR_PART.get()))
+                    .filter(java.util.Objects::nonNull)
+                    .toList();
+            if (partData.isEmpty()) {
+                return ArmorPartData.DEFAULT_QUALITY;
+            }
+            float total = 0.0F;
+            for (ArmorPartData data : partData) {
+                total += data.quality();
+            }
+            return ForgingQuality.clampScore(Math.round(total / partData.size()));
+        }
+    }
+
+    private static final class ArmorAssemblyParts {
+        private ArmorAssemblyKind kind;
+        private ItemStack base = ItemStack.EMPTY;
+        private ItemStack plate = ItemStack.EMPTY;
+        private boolean invalid;
+
+        private static ArmorAssemblyParts invalid() {
+            ArmorAssemblyParts parts = new ArmorAssemblyParts();
+            parts.invalid = true;
+            return parts;
+        }
+
+        private boolean valid() {
+            return !invalid && kind != null && !base.isEmpty();
+        }
+
+        private ArmorAssemblyKind kind() {
+            return kind;
+        }
+
+        private boolean setKind(ArmorAssemblyKind nextKind) {
+            if (kind != null && kind != nextKind) {
+                return false;
+            }
+            kind = nextKind;
+            return true;
+        }
+
+        private boolean setBase(ItemStack stack) {
+            if (!base.isEmpty()) {
+                return false;
+            }
+            base = stack;
+            return true;
+        }
+
+        private boolean setPlate(ItemStack stack) {
+            if (!plate.isEmpty()) {
+                return false;
+            }
+            plate = stack;
+            return true;
+        }
+
+        private List<ItemStack> stacks() {
+            List<ItemStack> stacks = new ArrayList<>();
+            addIfPresent(stacks, base);
+            addIfPresent(stacks, plate);
+            return stacks;
+        }
+
+        private static void addIfPresent(List<ItemStack> stacks, ItemStack stack) {
+            if (!stack.isEmpty()) {
+                stacks.add(stack);
+            }
+        }
     }
 
     private record Parts(

@@ -288,9 +288,6 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (template == null || isComplete()) {
             return 0;
         }
-        if (ArmorForgeAttachment.isAttachmentTemplate(template) && !hasArmorAttachmentTarget()) {
-            return 0;
-        }
         if (materialId != null && !materialId.equals(material.id())) {
             return 0;
         }
@@ -315,8 +312,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         ForgeTemplateDefinition template = template();
         return template != null
                 && materialCount >= template.requiredMaterials()
-                && !isComplete()
-                && (!ArmorForgeAttachment.isAttachmentTemplate(template) || hasArmorAttachmentTarget());
+                && !isComplete();
     }
 
     public boolean hammer(boolean precisionTool) {
@@ -736,7 +732,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 || !hasArmorAttachmentTarget()) {
             return;
         }
-        ItemStack output = ArmorForgeAttachment.apply(benchStacks.get(0), template.id(), materialId);
+        ItemStack output = ArmorForgeAttachment.apply(benchStacks.get(0), template.id(), materialId, completedQualityScore());
         if (output.isEmpty()) {
             return;
         }

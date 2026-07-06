@@ -13,25 +13,20 @@ public final class ModularHelmetGeometry {
     private static final int WHITE = 0xFFFFFFFF;
     private static final List<Direction> FULL_CUBE_DIRECTIONS = List.of(Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST);
 
-    public static final List<Cuboid> SKULL = List.of(
-            cuboid(-5, -9, -5, 5, -9, 5, -8, -8),
-            cuboid(-5, -9, 5, 5, -2, 5, -3, 2),
-            cuboid(-2, -2, 5, 2, -1, 5, 1, 2),
-            cuboid(-5, -9, -5, 5, -5, -5, -3, 2),
-            cuboid(5, -9, -5, 5, -3, 5, -8, -8),
-            cuboid(-5, -9, -5, -5, -3, 5, -8, -8),
-            cuboid(-5, -3, 1, -5, -2, 5, -2, -2),
-            cuboid(5, -3, 1, 5, -2, 5, -2, -2)
+    public static final List<Cuboid> CHAINMAIL = List.of(
+            cuboid(-5, -2, -3, -5, -1, 3, -12, -4),
+            cuboid(-5, -4, -5, -5, -2, 5, -16, -8),
+            cuboid(-5, -5, 5, 5, -3, 5, -6, 2),
+            cuboid(-5, -5, -5, 5, -3, -5, -6, 2),
+            cuboid(-5, -3, -5, 0, -2, -5, -6, 2),
+            cuboid(-5, -3, 5, 0, -2, 5, -6, 2)
     );
-    public static final List<Cuboid> COMB = List.of(
-            cuboid(-1, -10, -6, 1, -9, 6, -10, -10),
-            cuboid(-1, -9, -6, 1, -4, -5, 1, 1),
-            cuboid(-1, -9, 5, 1, -4, 6, 1, 1)
-    );
-    public static final List<Cuboid> VISOR = List.of(
-            cuboid(-6, -3, -6, -5, -1, 2, -5, -6),
-            cuboid(5, -3, -6, 6, -1, 2, -5, -6),
-            cuboid(-5, -2, -6, 5, 0, -5, -7, 1)
+    public static final List<Cuboid> MATERIAL = List.of(
+            cuboid(-5, -9, 5, 5, -5, 5, -6, 2),
+            cuboid(-5, -9, -5, -5, -4, 5, -16, -8),
+            cuboid(5, -9, -5, 5, -6, 5, 0, -6),
+            cuboid(-5, -9, -5, 5, -9, 5, -10, 0),
+            cuboid(-5, -9, -5, 5, -5, -5, 0, 0)
     );
 
     private ModularHelmetGeometry() {
@@ -97,11 +92,21 @@ public final class ModularHelmetGeometry {
     }
 
     private static float u(TextureAtlasSprite sprite, float textureU) {
-        return sprite.getU(textureU / 16.0F);
+        int textureWidth = Math.max(1, sprite.contents().width());
+        return sprite.getU(wrapTextureCoordinate(textureU, textureWidth) / textureWidth);
     }
 
     private static float v(TextureAtlasSprite sprite, float textureV) {
-        return sprite.getV(textureV / 16.0F);
+        int textureHeight = Math.max(1, sprite.contents().height());
+        return sprite.getV(wrapTextureCoordinate(textureV, textureHeight) / textureHeight);
+    }
+
+    private static float wrapTextureCoordinate(float coordinate, int textureSize) {
+        float wrapped = coordinate % textureSize;
+        if (wrapped < 0.0F) {
+            wrapped += textureSize;
+        }
+        return wrapped;
     }
 
     private static Cuboid cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float textureU, float textureV) {

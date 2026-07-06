@@ -319,9 +319,6 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (template == null || forge.remainingMaterials() <= 0) {
             return false;
         }
-        if (ArmorForgeAttachment.isAttachmentTemplate(template) && !forge.hasArmorAttachmentTarget()) {
-            return false;
-        }
         ToolMaterialDefinition material = MaterialCatalog.resolve(stack).orElse(null);
         if (material == null || material.category() != kind.materialCategory()) {
             return false;
@@ -371,10 +368,6 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         ForgeTemplateDefinition template = forge.template();
         if (template == null) {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.select_template"), true);
-            return ItemInteractionResult.CONSUME;
-        }
-        if (ArmorForgeAttachment.isAttachmentTemplate(template) && !forge.hasArmorAttachmentTarget()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.armor_attachment_needs_target"), true);
             return ItemInteractionResult.CONSUME;
         }
         ToolMaterialDefinition material = MaterialCatalog.resolve(stack).orElse(null);
@@ -667,7 +660,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return workStationRecipe(stack, hammerLevel, forge, level, pos, player);
         }
         if (!forge.canHammer()) {
-            player.displayClientMessage(Component.translatable(ArmorForgeAttachment.isAttachmentTemplate(forge.templateId()) && !forge.hasArmorAttachmentTarget() ? "message.mobstoolforging.armor_attachment_needs_target" : "message.mobstoolforging.need_materials"), true);
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.need_materials"), true);
             return ItemInteractionResult.CONSUME;
         }
         ForgeTemplateDefinition template = forge.template();

@@ -12,7 +12,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.destroyermob.mobstoolforging.network.SetForgeTemplatePayload;
-import org.destroyermob.mobstoolforging.world.ArmorForgeAttachment;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
@@ -131,9 +130,7 @@ public class ToolForgeTemplateScreen extends Screen {
 
     private ItemStack previewStack(ForgeTemplateDefinition template) {
         ResourceLocation material = previewMaterial();
-        return ArmorForgeAttachment.isAttachmentTemplate(template)
-                ? ArmorForgeAttachment.previewOutputStack(template.id(), material)
-                : template.outputStack(material);
+        return template.outputStack(material);
     }
 
     private ResourceLocation previewMaterial() {

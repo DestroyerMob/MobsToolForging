@@ -2,7 +2,6 @@ package org.destroyermob.mobstoolforging.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.List;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -13,18 +12,21 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.destroyermob.mobstoolforging.client.model.ArmorMaterialTextureManager;
-import org.destroyermob.mobstoolforging.client.model.ModularLowerArmourGeometry;
+import org.destroyermob.mobstoolforging.client.model.ModularLowerArmourModel;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
+import org.destroyermob.mobstoolforging.world.ArmorPartData;
 
 public final class ModularLowerArmourLayer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
-    public ModularLowerArmourLayer(RenderLayerParent<T, M> renderer) {
+    private final ModularLowerArmourModel lowerArmourModel;
+
+    public ModularLowerArmourLayer(RenderLayerParent<T, M> renderer, ModularLowerArmourModel lowerArmourModel) {
         super(renderer);
+        this.lowerArmourModel = lowerArmourModel;
     }
 
     @Override
@@ -33,7 +35,7 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
             return;
         }
         renderLeggingsSlot(poseStack, bufferSource, packedLight, humanoidModel, livingEntity);
-        renderSlot(poseStack, bufferSource, packedLight, humanoidModel, livingEntity, EquipmentSlot.FEET, ArmorConstructionData.BOOTS_TYPE, ModularLowerArmourGeometry.BOOTS);
+        renderBootsSlot(poseStack, bufferSource, packedLight, humanoidModel, livingEntity);
     }
 
     private void renderLeggingsSlot(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, HumanoidModel<?> humanoidModel, T livingEntity) {
@@ -48,58 +50,94 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
         }
     }
 
-    private void renderSlot(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, HumanoidModel<?> humanoidModel, T livingEntity, EquipmentSlot slot, ResourceLocation armorType, List<ModularLowerArmourGeometry.Cuboid> cuboids) {
-        ItemStack stack = livingEntity.getItemBySlot(slot);
+    private void renderBootsSlot(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, HumanoidModel<?> humanoidModel, T livingEntity) {
+        ItemStack stack = livingEntity.getItemBySlot(EquipmentSlot.FEET);
         ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
-        if (construction == null || !armorType.equals(construction.armorType())) {
+        if (construction == null || !ArmorConstructionData.BOOTS_TYPE.equals(construction.armorType())) {
             return;
         }
-        TextureAtlasSprite sprite = sprite(construction.skullMaterial());
-        renderLegs(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), packedLight, cuboids, sprite);
+        renderBootsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), packedLight, construction);
         if (stack.hasFoil()) {
-            renderLegs(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), packedLight, cuboids, sprite);
+            renderBootsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), packedLight, construction);
         }
     }
 
     private void renderLeggingsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int packedLight, ArmorConstructionData construction) {
-        TextureAtlasSprite legsSprite = sprite(construction.skullMaterial());
-        renderForwardLeg(poseStack, humanoidModel.rightLeg, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_RIGHT_LEG, legsSprite);
-        renderForwardLeg(poseStack, humanoidModel.leftLeg, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_LEFT_LEG, legsSprite);
-        construction.combMaterial().ifPresent(material -> {
-            TextureAtlasSprite kneesSprite = sprite(material);
-            renderForwardLeg(poseStack, humanoidModel.rightLeg, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_RIGHT_KNEE, kneesSprite);
-            renderForwardLeg(poseStack, humanoidModel.leftLeg, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_LEFT_KNEE, kneesSprite);
+        TextureAtlasSprite chainmailSprite = ArmorMaterialTextureManager.INSTANCE.wornChainmailSprite(ArmorPartData.LEGGINGS_CHAINMAIL);
+        renderChainmailRightLeggings(poseStack, humanoidModel.rightLeg, consumer, chainmailSprite, packedLight);
+        renderChainmailLeftLeggings(poseStack, humanoidModel.leftLeg, consumer, chainmailSprite, packedLight);
+        construction.leggingsPlateMaterial().ifPresent(material -> {
+            ArmorMaterialTextureManager.ResolvedArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.LEGGINGS_PLATE);
+            renderRightLeggings(poseStack, humanoidModel.rightLeg, consumer, texture, packedLight);
+            renderLeftLeggings(poseStack, humanoidModel.leftLeg, consumer, texture, packedLight);
         });
-        construction.visorMaterial().ifPresent(material -> renderForwardBody(poseStack, humanoidModel.body, consumer, packedLight, ModularLowerArmourGeometry.LEGGING_TASSETS, sprite(material)));
     }
 
-    private void renderLegs(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
-        renderLeg(poseStack, humanoidModel.rightLeg, consumer, packedLight, cuboids, sprite, ModularLowerArmourGeometry.LegSide.RIGHT);
-        renderLeg(poseStack, humanoidModel.leftLeg, consumer, packedLight, cuboids, sprite, ModularLowerArmourGeometry.LegSide.LEFT);
+    private void renderBootsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int packedLight, ArmorConstructionData construction) {
+        TextureAtlasSprite chainmailSprite = ArmorMaterialTextureManager.INSTANCE.wornChainmailSprite(ArmorPartData.BOOTS_CHAINMAIL);
+        renderChainmailRightBoot(poseStack, humanoidModel.rightLeg, consumer, chainmailSprite, packedLight);
+        renderChainmailLeftBoot(poseStack, humanoidModel.leftLeg, consumer, chainmailSprite, packedLight);
+        construction.bootsPlateMaterial().ifPresent(material -> {
+            ArmorMaterialTextureManager.ResolvedArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.BOOTS_PLATE);
+            renderRightBoot(poseStack, humanoidModel.rightLeg, consumer, texture, packedLight);
+            renderLeftBoot(poseStack, humanoidModel.leftLeg, consumer, texture, packedLight);
+        });
     }
 
-    private void renderLeg(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite, ModularLowerArmourGeometry.LegSide side) {
+    private void renderChainmailRightLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        ModularLowerArmourGeometry.renderLegCuboids(cuboids, side, parentPart.x, parentPart.y, parentPart.z, poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        lowerArmourModel.renderChainmailRightLeggings(poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
-    private void renderForwardLeg(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
+    private void renderChainmailLeftLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        ModularLowerArmourGeometry.renderForwardLegCuboids(cuboids, parentPart.x, parentPart.y, parentPart.z, poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        lowerArmourModel.renderChainmailLeftLeggings(poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
-    private void renderForwardBody(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int packedLight, List<ModularLowerArmourGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
+    private void renderRightLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, ArmorMaterialTextureManager.ResolvedArmorTexture texture, int packedLight) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        ModularLowerArmourGeometry.renderForwardBodyCuboids(cuboids, parentPart.x, parentPart.y, parentPart.z, poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        lowerArmourModel.renderRightLeggings(poseStack, consumer, texture.sprite(), texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
-    private TextureAtlasSprite sprite(ResourceLocation materialId) {
-        return ArmorMaterialTextureManager.INSTANCE.sprite(materialId);
+    private void renderLeftLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, ArmorMaterialTextureManager.ResolvedArmorTexture texture, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        lowerArmourModel.renderLeftLeggings(poseStack, consumer, texture.sprite(), texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
     }
+
+    private void renderChainmailRightBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        lowerArmourModel.renderChainmailRightBoot(poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderChainmailLeftBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        lowerArmourModel.renderChainmailLeftBoot(poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderRightBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, ArmorMaterialTextureManager.ResolvedArmorTexture texture, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        lowerArmourModel.renderRightBoot(poseStack, consumer, texture.sprite(), texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderLeftBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, ArmorMaterialTextureManager.ResolvedArmorTexture texture, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        lowerArmourModel.renderLeftBoot(poseStack, consumer, texture.sprite(), texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
 }

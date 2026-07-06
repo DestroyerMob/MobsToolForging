@@ -51,13 +51,13 @@ public class ModRecipeProvider extends RecipeProvider {
                 .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.HEATING_FORGE)
-                .define('C', Items.COPPER_INGOT)
+                .define('I', Items.IRON_INGOT)
                 .define('F', Items.FURNACE)
                 .define('S', Items.COBBLESTONE)
-                .pattern("CSC")
-                .pattern("CFC")
-                .pattern("CCC")
-                .unlockedBy("has_copper_ingot", has(Items.COPPER_INGOT))
+                .pattern("ISI")
+                .pattern("IFI")
+                .pattern("III")
+                .unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
                 .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.CRUCIBLE)

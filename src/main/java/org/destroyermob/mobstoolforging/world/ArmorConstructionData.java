@@ -25,7 +25,7 @@ public record ArmorConstructionData(
     public ArmorConstructionData {
         combMaterial = combMaterial == null ? Optional.empty() : combMaterial;
         visorMaterial = visorMaterial == null ? Optional.empty() : visorMaterial;
-        quality = DEFAULT_QUALITY;
+        quality = ForgingQuality.clampScore(quality);
     }
 
     public static final Codec<ArmorConstructionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -38,16 +38,52 @@ public record ArmorConstructionData(
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ArmorConstructionData> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 
-    public static ArmorConstructionData helmet(ResourceLocation skullMaterial, Optional<ResourceLocation> combMaterial, Optional<ResourceLocation> visorMaterial) {
-        return new ArmorConstructionData(HELMET_TYPE, skullMaterial, combMaterial, visorMaterial, DEFAULT_QUALITY);
+    public static ArmorConstructionData helmet(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial) {
+        return helmet(chainmailMaterial, plateMaterial, DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData helmet(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, int quality) {
+        return new ArmorConstructionData(HELMET_TYPE, chainmailMaterial, plateMaterial, Optional.empty(), quality);
+    }
+
+    public static ArmorConstructionData helmet(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, Optional<ResourceLocation> legacyVisorMaterial) {
+        return helmet(chainmailMaterial, plateMaterial.or(() -> legacyVisorMaterial), DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData helmet(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, Optional<ResourceLocation> legacyVisorMaterial, int quality) {
+        return helmet(chainmailMaterial, plateMaterial.or(() -> legacyVisorMaterial), quality);
+    }
+
+    public static ArmorConstructionData chainmailHelmet() {
+        return chainmailHelmet(DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData chainmailHelmet(int quality) {
+        return helmet(MaterialCatalog.IRON, Optional.empty(), quality);
+    }
+
+    public ResourceLocation helmetChainmailMaterial() {
+        return chainmailMaterial();
+    }
+
+    public Optional<ResourceLocation> helmetPlateMaterial() {
+        return overlayMaterial();
     }
 
     public static ArmorConstructionData chestplate(ResourceLocation bodyMaterial) {
-        return new ArmorConstructionData(CHESTPLATE_TYPE, MaterialCatalog.IRON, Optional.of(bodyMaterial), Optional.of(MaterialCatalog.IRON), DEFAULT_QUALITY);
+        return chestplate(bodyMaterial, DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData chestplate(ResourceLocation bodyMaterial, int quality) {
+        return new ArmorConstructionData(CHESTPLATE_TYPE, MaterialCatalog.IRON, Optional.of(bodyMaterial), Optional.empty(), quality);
     }
 
     public static ArmorConstructionData chainmailChestplate() {
-        return new ArmorConstructionData(CHESTPLATE_TYPE, MaterialCatalog.IRON, Optional.empty(), Optional.of(MaterialCatalog.IRON), DEFAULT_QUALITY);
+        return chainmailChestplate(DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData chainmailChestplate(int quality) {
+        return new ArmorConstructionData(CHESTPLATE_TYPE, MaterialCatalog.IRON, Optional.empty(), Optional.empty(), quality);
     }
 
     public boolean isChestplate() {
@@ -55,28 +91,93 @@ public record ArmorConstructionData(
     }
 
     public ResourceLocation chestplateChainmailMaterial() {
-        return MaterialCatalog.IRON;
+        return isChestplate() ? chainmailMaterial() : MaterialCatalog.IRON;
     }
 
     public Optional<ResourceLocation> chestplatePlateMaterial() {
-        if (!isChestplate()) {
-            return Optional.empty();
+        return isChestplate() ? overlayMaterial() : Optional.empty();
+    }
+
+    public static ArmorConstructionData leggings(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial) {
+        return leggings(chainmailMaterial, plateMaterial, DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData leggings(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, int quality) {
+        return new ArmorConstructionData(LEGGINGS_TYPE, chainmailMaterial, plateMaterial, Optional.empty(), quality);
+    }
+
+    public static ArmorConstructionData leggings(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, Optional<ResourceLocation> legacyTassetMaterial) {
+        return leggings(chainmailMaterial, plateMaterial.or(() -> legacyTassetMaterial), DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData leggings(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, Optional<ResourceLocation> legacyTassetMaterial, int quality) {
+        return leggings(chainmailMaterial, plateMaterial.or(() -> legacyTassetMaterial), quality);
+    }
+
+    public static ArmorConstructionData chainmailLeggings() {
+        return chainmailLeggings(DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData chainmailLeggings(int quality) {
+        return leggings(MaterialCatalog.IRON, Optional.empty(), quality);
+    }
+
+    public ResourceLocation leggingsChainmailMaterial() {
+        return chainmailMaterial();
+    }
+
+    public Optional<ResourceLocation> leggingsPlateMaterial() {
+        return overlayMaterial();
+    }
+
+    public static ArmorConstructionData boots(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial) {
+        return boots(chainmailMaterial, plateMaterial, DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData boots(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, int quality) {
+        return new ArmorConstructionData(BOOTS_TYPE, chainmailMaterial, plateMaterial, Optional.empty(), quality);
+    }
+
+    public static ArmorConstructionData chainmailBoots() {
+        return chainmailBoots(DEFAULT_QUALITY);
+    }
+
+    public static ArmorConstructionData chainmailBoots(int quality) {
+        return boots(MaterialCatalog.IRON, Optional.empty(), quality);
+    }
+
+    public ResourceLocation bootsChainmailMaterial() {
+        return chainmailMaterial();
+    }
+
+    public Optional<ResourceLocation> bootsPlateMaterial() {
+        return overlayMaterial();
+    }
+
+    public ResourceLocation chainmailMaterial() {
+        if (combMaterial.isEmpty() && visorMaterial.isEmpty() && !MaterialCatalog.IRON.equals(skullMaterial)) {
+            return MaterialCatalog.IRON;
         }
+        return skullMaterial;
+    }
+
+    public Optional<ResourceLocation> overlayMaterial() {
         if (combMaterial.isPresent()) {
             return combMaterial;
         }
-        return visorMaterial.isPresent() ? Optional.empty() : Optional.of(skullMaterial);
+        if (isChestplate() && visorMaterial.isEmpty() && !MaterialCatalog.IRON.equals(skullMaterial)) {
+            return Optional.of(skullMaterial);
+        }
+        if (!isChestplate() && combMaterial.isEmpty() && visorMaterial.isEmpty() && !MaterialCatalog.IRON.equals(skullMaterial)) {
+            return Optional.of(skullMaterial);
+        }
+        if (!isChestplate() && visorMaterial.isPresent()) {
+            return visorMaterial;
+        }
+        return Optional.empty();
     }
 
-    public static ArmorConstructionData leggings(ResourceLocation legMaterial) {
-        return new ArmorConstructionData(LEGGINGS_TYPE, legMaterial, Optional.empty(), Optional.empty(), DEFAULT_QUALITY);
-    }
-
-    public static ArmorConstructionData leggings(ResourceLocation legMaterial, Optional<ResourceLocation> kneeMaterial, Optional<ResourceLocation> tassetMaterial) {
-        return new ArmorConstructionData(LEGGINGS_TYPE, legMaterial, kneeMaterial, tassetMaterial, DEFAULT_QUALITY);
-    }
-
-    public static ArmorConstructionData boots(ResourceLocation footMaterial) {
-        return new ArmorConstructionData(BOOTS_TYPE, footMaterial, Optional.empty(), Optional.empty(), DEFAULT_QUALITY);
+    public ForgingQuality qualityLevel() {
+        return ForgingQuality.fromScore(quality);
     }
 }

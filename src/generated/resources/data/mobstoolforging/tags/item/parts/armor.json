@@ -1,9 +1,12 @@
 {
   "values": [
-    "#mobstoolforging:parts/helmet_skull",
+    "#mobstoolforging:parts/helmet_chainmail",
+    "#mobstoolforging:parts/helmet_plate",
     "#mobstoolforging:parts/chestplate_chainmail",
     "#mobstoolforging:parts/chestplate_body",
-    "#mobstoolforging:parts/leggings_legs",
-    "#mobstoolforging:parts/boots_feet"
+    "#mobstoolforging:parts/leggings_chainmail",
+    "#mobstoolforging:parts/leggings_plate",
+    "#mobstoolforging:parts/boots_chainmail",
+    "#mobstoolforging:parts/boots_plate"
   ]
 }

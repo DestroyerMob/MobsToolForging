@@ -112,6 +112,7 @@ public final class ModItems {
             "foundry_forge",
             () -> new BlockItem(ModBlocks.FOUNDRY_FORGE.get(), new Item.Properties())
     );
+    public static final DeferredItem<BlockItem> ASH = blockItem("ash", ModBlocks.ASH);
     public static final DeferredItem<Item> SMITHING_HAMMER = ITEMS.register(
             "smithing_hammer",
             () -> new StationToolItem(new Item.Properties().durability(128))
@@ -196,17 +197,13 @@ public final class ModItems {
             "gem_cutters_blade_pattern",
             () -> new ToolTemplateItem(ToolTypeRegistry.GEM_CUTTERS_BLADE_TEMPLATE, WorkstationKind.TOOL_FORGE, new Item.Properties())
     );
-    public static final DeferredItem<ToolTemplateItem> HELMET_SKULL_PATTERN = ITEMS.register(
-            "helmet_skull_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_SKULL_TEMPLATE, new Item.Properties())
+    public static final DeferredItem<ToolTemplateItem> HELMET_CHAINMAIL_PATTERN = ITEMS.register(
+            "helmet_chainmail_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_CHAINMAIL_TEMPLATE, new Item.Properties())
     );
-    public static final DeferredItem<ToolTemplateItem> HELMET_COMB_PATTERN = ITEMS.register(
-            "helmet_comb_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_COMB_TEMPLATE, new Item.Properties())
-    );
-    public static final DeferredItem<ToolTemplateItem> HELMET_VISOR_PATTERN = ITEMS.register(
-            "helmet_visor_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_VISOR_TEMPLATE, new Item.Properties())
+    public static final DeferredItem<ToolTemplateItem> HELMET_PLATE_PATTERN = ITEMS.register(
+            "helmet_plate_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.HELMET_PLATE_TEMPLATE, new Item.Properties())
     );
     public static final DeferredItem<ToolTemplateItem> CHESTPLATE_CHAINMAIL_PATTERN = ITEMS.register(
             "chestplate_chainmail_pattern",
@@ -216,21 +213,21 @@ public final class ModItems {
             "chestplate_body_pattern",
             () -> new ToolTemplateItem(ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE, new Item.Properties())
     );
-    public static final DeferredItem<ToolTemplateItem> LEGGINGS_LEGS_PATTERN = ITEMS.register(
-            "leggings_legs_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_LEGS_TEMPLATE, new Item.Properties())
+    public static final DeferredItem<ToolTemplateItem> LEGGINGS_CHAINMAIL_PATTERN = ITEMS.register(
+            "leggings_chainmail_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_CHAINMAIL_TEMPLATE, new Item.Properties())
     );
-    public static final DeferredItem<ToolTemplateItem> LEGGINGS_KNEES_PATTERN = ITEMS.register(
-            "leggings_knees_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE, new Item.Properties())
+    public static final DeferredItem<ToolTemplateItem> LEGGINGS_PLATE_PATTERN = ITEMS.register(
+            "leggings_plate_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_PLATE_TEMPLATE, new Item.Properties())
     );
-    public static final DeferredItem<ToolTemplateItem> LEGGINGS_TASSETS_PATTERN = ITEMS.register(
-            "leggings_tassets_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE, new Item.Properties())
+    public static final DeferredItem<ToolTemplateItem> BOOTS_CHAINMAIL_PATTERN = ITEMS.register(
+            "boots_chainmail_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.BOOTS_CHAINMAIL_TEMPLATE, new Item.Properties())
     );
-    public static final DeferredItem<ToolTemplateItem> BOOTS_FEET_PATTERN = ITEMS.register(
-            "boots_feet_pattern",
-            () -> new ToolTemplateItem(ToolTypeRegistry.BOOTS_FEET_TEMPLATE, new Item.Properties())
+    public static final DeferredItem<ToolTemplateItem> BOOTS_PLATE_PATTERN = ITEMS.register(
+            "boots_plate_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.BOOTS_PLATE_TEMPLATE, new Item.Properties())
     );
     public static final DeferredItem<ToolTemplateItem> TEMPLATE_PATTERN = ITEMS.register(
             "template_pattern",
@@ -260,9 +257,13 @@ public final class ModItems {
             "hoe_head",
             () -> new ModularToolPartItem(ToolKind.HOE, new Item.Properties())
     );
-    public static final DeferredItem<ModularArmorPartItem> HELMET_SKULL = ITEMS.register(
-            ArmorPartData.HELMET_SKULL,
-            () -> new ModularArmorPartItem(ArmorPartData.HELMET_SKULL, new Item.Properties())
+    public static final DeferredItem<ModularArmorPartItem> HELMET_CHAINMAIL = ITEMS.register(
+            ArmorPartData.HELMET_CHAINMAIL,
+            () -> new ModularArmorPartItem(ArmorPartData.HELMET_CHAINMAIL, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> HELMET_PLATE = ITEMS.register(
+            ArmorPartData.HELMET_PLATE,
+            () -> new ModularArmorPartItem(ArmorPartData.HELMET_PLATE, new Item.Properties())
     );
     public static final DeferredItem<ModularArmorPartItem> CHESTPLATE_CHAINMAIL = ITEMS.register(
             ArmorPartData.CHESTPLATE_CHAINMAIL,
@@ -272,13 +273,21 @@ public final class ModItems {
             ArmorPartData.CHESTPLATE_BODY,
             () -> new ModularArmorPartItem(ArmorPartData.CHESTPLATE_BODY, new Item.Properties())
     );
-    public static final DeferredItem<ModularArmorPartItem> LEGGINGS_LEGS = ITEMS.register(
-            ArmorPartData.LEGGINGS_LEGS,
-            () -> new ModularArmorPartItem(ArmorPartData.LEGGINGS_LEGS, new Item.Properties())
+    public static final DeferredItem<ModularArmorPartItem> LEGGINGS_CHAINMAIL = ITEMS.register(
+            ArmorPartData.LEGGINGS_CHAINMAIL,
+            () -> new ModularArmorPartItem(ArmorPartData.LEGGINGS_CHAINMAIL, new Item.Properties())
     );
-    public static final DeferredItem<ModularArmorPartItem> BOOTS_FEET = ITEMS.register(
-            ArmorPartData.BOOTS_FEET,
-            () -> new ModularArmorPartItem(ArmorPartData.BOOTS_FEET, new Item.Properties())
+    public static final DeferredItem<ModularArmorPartItem> LEGGINGS_PLATE = ITEMS.register(
+            ArmorPartData.LEGGINGS_PLATE,
+            () -> new ModularArmorPartItem(ArmorPartData.LEGGINGS_PLATE, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> BOOTS_CHAINMAIL = ITEMS.register(
+            ArmorPartData.BOOTS_CHAINMAIL,
+            () -> new ModularArmorPartItem(ArmorPartData.BOOTS_CHAINMAIL, new Item.Properties())
+    );
+    public static final DeferredItem<ModularArmorPartItem> BOOTS_PLATE = ITEMS.register(
+            ArmorPartData.BOOTS_PLATE,
+            () -> new ModularArmorPartItem(ArmorPartData.BOOTS_PLATE, new Item.Properties())
     );
     public static final DeferredItem<ModularSwordItem> SWORD = ITEMS.register(
             "sword",

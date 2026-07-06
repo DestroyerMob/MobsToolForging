@@ -80,9 +80,6 @@ public record ForgeTemplateDefinition(
     }
 
     public ItemStack outputStack(ResourceLocation materialId, int quality) {
-        if (ArmorForgeAttachment.isBaseArmorTemplate(id)) {
-            return ArmorForgeAttachment.baseOutputStack(id, materialId);
-        }
         ResourceLocation resolvedOutputItem = outputItems.getOrDefault(materialId, outputItem);
         if (resolvedOutputItem != null) {
             Item item = BuiltInRegistries.ITEM.get(resolvedOutputItem);

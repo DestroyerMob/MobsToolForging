@@ -25,8 +25,36 @@ public class ModularHelmetItem extends ArmorItem implements ModularArmorItem {
         super(material, Type.HELMET, properties);
     }
 
-    public ItemStack create(ResourceLocation skullMaterial, Optional<ResourceLocation> combMaterial, Optional<ResourceLocation> visorMaterial) {
-        ArmorConstructionData construction = ArmorConstructionData.helmet(skullMaterial, combMaterial, visorMaterial);
+    public ItemStack create(ResourceLocation plateMaterial) {
+        return create(plateMaterial, ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack create(ResourceLocation plateMaterial, int quality) {
+        return create(MaterialCatalog.IRON, Optional.of(plateMaterial), quality);
+    }
+
+    public ItemStack create(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial) {
+        return create(chainmailMaterial, plateMaterial, ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack create(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, int quality) {
+        ArmorConstructionData construction = ArmorConstructionData.helmet(chainmailMaterial, plateMaterial, quality);
+        ItemStack stack = new ItemStack(this);
+        stack.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction);
+        ArmorStatsCatalog.apply(stack, construction);
+        return stack;
+    }
+
+    public ItemStack create(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, Optional<ResourceLocation> legacyVisorMaterial) {
+        return create(chainmailMaterial, plateMaterial.or(() -> legacyVisorMaterial));
+    }
+
+    public ItemStack createChainmail() {
+        return createChainmail(ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack createChainmail(int quality) {
+        ArmorConstructionData construction = ArmorConstructionData.chainmailHelmet(quality);
         ItemStack stack = new ItemStack(this);
         stack.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction);
         ArmorStatsCatalog.apply(stack, construction);
@@ -39,7 +67,9 @@ public class ModularHelmetItem extends ArmorItem implements ModularArmorItem {
         if (construction == null) {
             return super.getName(stack);
         }
-        return Component.translatable("item.mobstoolforging.material_modular_helmet", MaterialCatalog.displayName(construction.skullMaterial()));
+        return construction.helmetPlateMaterial()
+                .map(material -> Component.translatable("item.mobstoolforging.material_modular_helmet", MaterialCatalog.displayName(material)))
+                .orElseGet(() -> Component.translatable("item.mobstoolforging.modular_chainmail_helmet"));
     }
 
     @Override
@@ -50,7 +80,7 @@ public class ModularHelmetItem extends ArmorItem implements ModularArmorItem {
     @Override
     public int getEnchantmentValue(ItemStack stack) {
         ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
-        return finishedArmorEnchantmentValue(stack, construction == null ? super.getEnchantmentValue(stack) : ArmorStatsCatalog.helmetStats(construction.skullMaterial()).enchantmentValue());
+        return finishedArmorEnchantmentValue(stack, construction == null ? super.getEnchantmentValue(stack) : ArmorStatsCatalog.stats(construction).enchantmentValue());
     }
 
     @Override
@@ -77,21 +107,21 @@ public class ModularHelmetItem extends ArmorItem implements ModularArmorItem {
             return;
         }
         tooltip.add(Component.translatable("tooltip.mobstoolforging.construction").withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.skull", MaterialCatalog.displayName(construction.skullMaterial())).withStyle(ChatFormatting.DARK_GRAY));
+        tooltip.add(Component.translatable("tooltip.mobstoolforging.quality")
+                .withStyle(ChatFormatting.DARK_GRAY)
+                .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(construction.qualityLevel().displayName()));
+        tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.chainmail", MaterialCatalog.displayName(construction.helmetChainmailMaterial())).withStyle(ChatFormatting.DARK_GRAY));
         tooltip.add(Component.translatable(
-                "tooltip.mobstoolforging.armor_part.comb",
-                construction.combMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
-        ).withStyle(ChatFormatting.DARK_GRAY));
-        tooltip.add(Component.translatable(
-                "tooltip.mobstoolforging.armor_part.visor",
-                construction.visorMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
+                "tooltip.mobstoolforging.armor_part.plate",
+                construction.helmetPlateMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
         ).withStyle(ChatFormatting.DARK_GRAY));
     }
 
     @Override
     public boolean onEntityItemUpdate(ItemStack stack, ItemEntity entity) {
         ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
-        if (construction != null && ArmorStatsCatalog.helmetStats(construction.skullMaterial()).fireResistant()) {
+        if (construction != null && ArmorStatsCatalog.stats(construction).fireResistant()) {
             stack.set(DataComponents.FIRE_RESISTANT, net.minecraft.util.Unit.INSTANCE);
         }
         return false;
@@ -100,7 +130,7 @@ public class ModularHelmetItem extends ArmorItem implements ModularArmorItem {
     @Override
     public boolean canBeHurtBy(ItemStack stack, DamageSource source) {
         ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
-        if (construction != null && source.is(DamageTypeTags.IS_FIRE) && ArmorStatsCatalog.helmetStats(construction.skullMaterial()).fireResistant()) {
+        if (construction != null && source.is(DamageTypeTags.IS_FIRE) && ArmorStatsCatalog.stats(construction).fireResistant()) {
             stack.set(DataComponents.FIRE_RESISTANT, net.minecraft.util.Unit.INSTANCE);
             return false;
         }

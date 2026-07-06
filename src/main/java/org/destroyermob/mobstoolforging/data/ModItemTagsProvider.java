@@ -56,11 +56,14 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.PART_GUARDS)
                 .addTag(ModTags.Items.PART_SWORD_GUARDS);
         tag(ModTags.Items.ARMOR_PARTS)
-                .addTag(ModTags.Items.PART_HELMET_SKULLS)
+                .addTag(ModTags.Items.PART_HELMET_CHAINMAILS)
+                .addTag(ModTags.Items.PART_HELMET_PLATES)
                 .addTag(ModTags.Items.PART_CHESTPLATE_CHAINMAILS)
                 .addTag(ModTags.Items.PART_CHESTPLATE_BODIES)
-                .addTag(ModTags.Items.PART_LEGGINGS_LEGS)
-                .addTag(ModTags.Items.PART_BOOTS_FEET);
+                .addTag(ModTags.Items.PART_LEGGINGS_CHAINMAILS)
+                .addTag(ModTags.Items.PART_LEGGINGS_PLATES)
+                .addTag(ModTags.Items.PART_BOOTS_CHAINMAILS)
+                .addTag(ModTags.Items.PART_BOOTS_PLATES);
         tag(ModTags.Items.PART_HANDLES)
                 .add(Items.STICK, Items.BLAZE_ROD, Items.BREEZE_ROD);
         tag(ModTags.Items.PART_SWORD_BLADES)
@@ -79,16 +82,22 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .add(ModItems.SCREWDRIVER_HEAD.get());
         tag(ModTags.Items.PART_GEM_CUTTERS_BLADES)
                 .add(ModItems.GEM_CUTTERS_BLADE.get());
-        tag(ModTags.Items.PART_HELMET_SKULLS)
-                .add(ModItems.HELMET_SKULL.get());
+        tag(ModTags.Items.PART_HELMET_CHAINMAILS)
+                .add(ModItems.HELMET_CHAINMAIL.get());
+        tag(ModTags.Items.PART_HELMET_PLATES)
+                .add(ModItems.HELMET_PLATE.get());
         tag(ModTags.Items.PART_CHESTPLATE_CHAINMAILS)
                 .add(ModItems.CHESTPLATE_CHAINMAIL.get());
         tag(ModTags.Items.PART_CHESTPLATE_BODIES)
                 .add(ModItems.CHESTPLATE_BODY.get());
-        tag(ModTags.Items.PART_LEGGINGS_LEGS)
-                .add(ModItems.LEGGINGS_LEGS.get());
-        tag(ModTags.Items.PART_BOOTS_FEET)
-                .add(ModItems.BOOTS_FEET.get());
+        tag(ModTags.Items.PART_LEGGINGS_CHAINMAILS)
+                .add(ModItems.LEGGINGS_CHAINMAIL.get());
+        tag(ModTags.Items.PART_LEGGINGS_PLATES)
+                .add(ModItems.LEGGINGS_PLATE.get());
+        tag(ModTags.Items.PART_BOOTS_CHAINMAILS)
+                .add(ModItems.BOOTS_CHAINMAIL.get());
+        tag(ModTags.Items.PART_BOOTS_PLATES)
+                .add(ModItems.BOOTS_PLATE.get());
         tag(ModTags.Items.TOOL_HANDLES)
                 .add(Items.STICK, Items.BLAZE_ROD, Items.BREEZE_ROD)
                 .addTag(Tags.Items.RODS_WOODEN)

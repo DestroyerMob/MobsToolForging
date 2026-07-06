@@ -5,11 +5,13 @@ import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.world.AshBlock;
 import org.destroyermob.mobstoolforging.world.CrucibleBlock;
 import org.destroyermob.mobstoolforging.world.CrudeAnvilBlock;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlock;
@@ -111,6 +113,10 @@ public final class ModBlocks {
     public static final DeferredBlock<GroundToolAssemblyBlock> GROUND_TOOL_ASSEMBLY = BLOCKS.register(
             "ground_tool_assembly",
             () -> new GroundToolAssemblyBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON).strength(0.1F).noCollission().noOcclusion())
+    );
+    public static final DeferredBlock<AshBlock> ASH = BLOCKS.register(
+            "ash",
+            () -> new AshBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRAY_CONCRETE_POWDER).strength(0.1F).sound(SoundType.SAND).noCollission().noOcclusion())
     );
 
     private ModBlocks() {

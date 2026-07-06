@@ -10,6 +10,9 @@ public record HeatingForgeInsertVisual(ResourceLocation model, ResourceLocation 
     public static final ResourceLocation DEFAULT_FUEL_TEXTURE = ResourceLocation.withDefaultNamespace("block/coal_block");
     public static final ResourceLocation DEFAULT_WORKPIECE_MODEL = modLoc("block/heating_forge/billet");
     public static final ResourceLocation DEFAULT_WORKPIECE_TEXTURE = ResourceLocation.withDefaultNamespace("block/iron_block");
+    public static final ResourceLocation DEFAULT_ASH_MODEL = modLoc("block/heating_forge/ash_layer");
+    public static final ResourceLocation DEFAULT_ASH_TEXTURE = ResourceLocation.withDefaultNamespace("block/gray_concrete_powder");
+    public static final ResourceLocation SPENT_FUEL_TEXTURE = ResourceLocation.withDefaultNamespace("block/white_concrete_powder");
 
     public static HeatingForgeInsertVisual defaultFuel() {
         return new HeatingForgeInsertVisual(DEFAULT_FUEL_MODEL, DEFAULT_FUEL_TEXTURE, null, null);
@@ -17,6 +20,14 @@ public record HeatingForgeInsertVisual(ResourceLocation model, ResourceLocation 
 
     public static HeatingForgeInsertVisual defaultWorkpiece() {
         return new HeatingForgeInsertVisual(DEFAULT_WORKPIECE_MODEL, DEFAULT_WORKPIECE_TEXTURE, null, null);
+    }
+
+    public static HeatingForgeInsertVisual defaultAsh() {
+        return new HeatingForgeInsertVisual(DEFAULT_ASH_MODEL, DEFAULT_ASH_TEXTURE, null, null);
+    }
+
+    public static HeatingForgeInsertVisual spentFuel() {
+        return new HeatingForgeInsertVisual(DEFAULT_FUEL_MODEL, SPENT_FUEL_TEXTURE, null, null);
     }
 
     public static HeatingForgeInsertVisual fuelFromJson(JsonObject json, HeatingForgeInsertVisual fallback) {

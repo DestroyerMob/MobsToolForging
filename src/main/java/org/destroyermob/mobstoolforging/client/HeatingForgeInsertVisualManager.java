@@ -38,6 +38,18 @@ public class HeatingForgeInsertVisualManager extends SimplePreparableReloadListe
         return new ResolvedInsert(visual, visuals.model(visual.model()));
     }
 
+    public static ResolvedInsert spentFuel() {
+        LoadedVisuals visuals = loaded;
+        HeatingForgeInsertVisual visual = HeatingForgeInsertVisual.spentFuel();
+        return new ResolvedInsert(visual, visuals.model(visual.model()));
+    }
+
+    public static ResolvedInsert ash() {
+        LoadedVisuals visuals = loaded;
+        HeatingForgeInsertVisual visual = HeatingForgeInsertVisual.defaultAsh();
+        return new ResolvedInsert(visual, visuals.model(visual.model()));
+    }
+
     public static ResolvedInsert workpiece(ItemStack stack) {
         LoadedVisuals visuals = loaded;
         ResourceLocation materialId = materialId(stack);
@@ -72,6 +84,7 @@ public class HeatingForgeInsertVisualManager extends SimplePreparableReloadListe
         Set<ResourceLocation> modelIds = new LinkedHashSet<>();
         modelIds.add(visuals.fallbackFuel().model());
         modelIds.add(visuals.fallbackWorkpiece().model());
+        modelIds.add(HeatingForgeInsertVisual.DEFAULT_ASH_MODEL);
         visuals.fuelItemVisuals().values().forEach(visual -> modelIds.add(visual.model()));
         visuals.workpieceItemVisuals().values().forEach(visual -> modelIds.add(visual.model()));
         visuals.materialVisuals().values().forEach(visual -> modelIds.add(visual.model()));

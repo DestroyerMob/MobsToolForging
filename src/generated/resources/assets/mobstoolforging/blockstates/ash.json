@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "layers=1": {
+      "model": "mobstoolforging:block/ash_layer_1"
+    },
+    "layers=2": {
+      "model": "mobstoolforging:block/ash_layer_2"
+    },
+    "layers=3": {
+      "model": "mobstoolforging:block/ash_layer_3"
+    }
+  }
+}

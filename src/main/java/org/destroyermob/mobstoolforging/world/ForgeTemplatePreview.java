@@ -13,9 +13,7 @@ public final class ForgeTemplatePreview {
     }
 
     public static ItemStack stack(ForgeTemplateDefinition template, ResourceLocation material) {
-        return ArmorForgeAttachment.isAttachmentTemplate(template)
-                ? ArmorForgeAttachment.previewOutputStack(template.id(), material)
-                : template.outputStack(material);
+        return template.outputStack(material);
     }
 
     public static ResourceLocation material(ForgeTemplateDefinition template) {

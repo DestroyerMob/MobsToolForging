@@ -15,6 +15,7 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModItems;
+import org.destroyermob.mobstoolforging.world.AshBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolPartSpriteKey;
@@ -67,6 +68,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
         heatingForgeBlock(heatingForge, heatingForgeModel);
         simpleBlockItem(heatingForge, heatingForgeModel);
 
+        ashBlock();
+
         ModelFile invisibleGroundModel = models().getBuilder("block/invisible_ground")
                 .texture("particle", mcLoc("block/gravel"));
         horizontalBlock(ModBlocks.KNAPPING_FLINT.get(), invisibleGroundModel);
@@ -80,8 +83,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
         itemModels().withExistingParent("diamond_powder", mcLoc("item/generated")).texture("layer0", modLoc("item/diamond_powder"));
         modularHelmetModel();
         modularChestplateModel();
-        itemModels().withExistingParent("modular_leggings", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_leggings"));
-        itemModels().withExistingParent("modular_boots", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_boots"));
+        itemModels().withExistingParent("modular_leggings", mcLoc("item/generated")).texture("layer0", mcLoc("item/chainmail_leggings"));
+        itemModels().withExistingParent("modular_boots", mcLoc("item/generated")).texture("layer0", mcLoc("item/chainmail_boots"));
         patternModel(ModItems.PICKAXE_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.AXE_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.SHOVEL_HEAD_PATTERN.getId().getPath());
@@ -91,21 +94,23 @@ public class ModBlockStateProvider extends BlockStateProvider {
         patternModel(ModItems.SMITHING_HAMMER_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.SCREWDRIVER_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.GEM_CUTTERS_BLADE_PATTERN.getId().getPath());
-        patternModel(ModItems.HELMET_SKULL_PATTERN.getId().getPath());
-        patternModel(ModItems.HELMET_COMB_PATTERN.getId().getPath());
-        patternModel(ModItems.HELMET_VISOR_PATTERN.getId().getPath());
+        patternModel(ModItems.HELMET_CHAINMAIL_PATTERN.getId().getPath());
+        patternModel(ModItems.HELMET_PLATE_PATTERN.getId().getPath());
         patternModel(ModItems.CHESTPLATE_CHAINMAIL_PATTERN.getId().getPath());
         patternModel(ModItems.CHESTPLATE_BODY_PATTERN.getId().getPath());
-        patternModel(ModItems.LEGGINGS_LEGS_PATTERN.getId().getPath());
-        patternModel(ModItems.LEGGINGS_KNEES_PATTERN.getId().getPath());
-        patternModel(ModItems.LEGGINGS_TASSETS_PATTERN.getId().getPath());
-        patternModel(ModItems.BOOTS_FEET_PATTERN.getId().getPath());
+        patternModel(ModItems.LEGGINGS_CHAINMAIL_PATTERN.getId().getPath());
+        patternModel(ModItems.LEGGINGS_PLATE_PATTERN.getId().getPath());
+        patternModel(ModItems.BOOTS_CHAINMAIL_PATTERN.getId().getPath());
+        patternModel(ModItems.BOOTS_PLATE_PATTERN.getId().getPath());
         patternModel(ModItems.TEMPLATE_PATTERN.getId().getPath());
-        armorPartModel(ModItems.HELMET_SKULL.getId().getPath(), mcLoc("item/iron_helmet"));
+        armorPartModel(ModItems.HELMET_CHAINMAIL.getId().getPath(), mcLoc("item/chainmail_helmet"));
+        armorPartModel(ModItems.HELMET_PLATE.getId().getPath(), mcLoc("item/iron_helmet"));
         armorPartModel(ModItems.CHESTPLATE_CHAINMAIL.getId().getPath(), mcLoc("item/chainmail_chestplate"));
         armorPartModel(ModItems.CHESTPLATE_BODY.getId().getPath(), mcLoc("item/iron_chestplate"));
-        armorPartModel(ModItems.LEGGINGS_LEGS.getId().getPath(), mcLoc("item/iron_leggings"));
-        armorPartModel(ModItems.BOOTS_FEET.getId().getPath(), mcLoc("item/iron_boots"));
+        armorPartModel(ModItems.LEGGINGS_CHAINMAIL.getId().getPath(), mcLoc("item/chainmail_leggings"));
+        armorPartModel(ModItems.LEGGINGS_PLATE.getId().getPath(), mcLoc("item/iron_leggings"));
+        armorPartModel(ModItems.BOOTS_CHAINMAIL.getId().getPath(), mcLoc("item/chainmail_boots"));
+        armorPartModel(ModItems.BOOTS_PLATE.getId().getPath(), mcLoc("item/iron_boots"));
         for (ToolKind toolKind : ToolKind.values()) {
             if (toolKind != ToolKind.MATTOCK) {
                 partModel(toolKind);
@@ -130,6 +135,15 @@ public class ModBlockStateProvider extends BlockStateProvider {
             case WEST -> 0;
             default -> 90;
         };
+    }
+
+    private void ashBlock() {
+        getVariantBuilder(ModBlocks.ASH.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(new ModelFile.UncheckedModelFile(modLoc("block/ash_layer_" + state.getValue(AshBlock.LAYERS))))
+                .build()
+        );
+        itemModels().getBuilder("ash")
+                .parent(new ModelFile.UncheckedModelFile(modLoc("block/ash_layer_1")));
     }
 
     private ModelFile patternRackModel(ModBlocks.PatternRackVariant variant) {
@@ -184,30 +198,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void modularHelmetModel() {
-        ItemModelBuilder builder = itemModels().withExistingParent("modular_helmet", mcLoc("item/generated"))
-                .texture("layer0", mcLoc("item/iron_helmet"));
-
-        armorDisplayTransforms(builder);
+        itemModels().withExistingParent("modular_helmet", mcLoc("item/generated"))
+                .texture("layer0", mcLoc("item/chainmail_helmet"));
     }
 
     private void modularChestplateModel() {
-        ItemModelBuilder builder = itemModels().withExistingParent("modular_chestplate", mcLoc("item/generated"))
+        itemModels().withExistingParent("modular_chestplate", mcLoc("item/generated"))
                 .texture("layer0", mcLoc("item/chainmail_chestplate"));
-
-        armorDisplayTransforms(builder);
-    }
-
-    private void armorDisplayTransforms(ItemModelBuilder builder) {
-        builder.transforms()
-                .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND).translation(0, 3, 1).scale(0.55F).end()
-                .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND).translation(0, 3, 1).scale(0.55F).end()
-                .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND).rotation(0, -90, 25).translation(1.13F, 3.2F, 1.13F).scale(0.68F).end()
-                .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND).rotation(0, -90, 25).translation(1.13F, 3.2F, 1.13F).scale(0.68F).end()
-                .transform(ItemDisplayContext.GROUND).translation(0, 2, 0).scale(0.5F).end()
-                .transform(ItemDisplayContext.GUI).rotation(30, -135, 0).scale(0.625F).end()
-                .transform(ItemDisplayContext.HEAD).rotation(0, -180, 0).translation(0, 13, 7).end()
-                .transform(ItemDisplayContext.FIXED).scale(0.5F).end()
-                .end();
     }
 
     private void patternModel(String name) {

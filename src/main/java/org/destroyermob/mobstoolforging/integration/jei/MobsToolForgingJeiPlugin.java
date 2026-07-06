@@ -23,7 +23,6 @@ import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
-import org.destroyermob.mobstoolforging.world.ArmorForgeAttachment;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCategory;
@@ -100,9 +99,8 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 if (pattern.isEmpty()) {
                     continue;
                 }
-                boolean armorAttachment = ArmorForgeAttachment.isAttachmentTemplate(template);
-                ItemStack target = armorAttachment ? ArmorForgeAttachment.previewTargetStack(template.id()) : ItemStack.EMPTY;
-                ItemStack output = armorAttachment ? ArmorForgeAttachment.previewOutputStack(template.id(), materialId) : template.outputStack(materialId);
+                ItemStack target = ItemStack.EMPTY;
+                ItemStack output = template.outputStack(materialId);
                 if (output.isEmpty()) {
                     continue;
                 }

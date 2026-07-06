@@ -1,10 +1,14 @@
 package org.destroyermob.mobstoolforging.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.List;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -15,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ArmorForgeAttachment;
+import org.destroyermob.mobstoolforging.world.ForgeTemplatePreview;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolmakerBenchAssembly;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
@@ -26,6 +31,8 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
     private static final float CAMPFIRE_ITEM_SCALE = 0.375F;
     private static final float TOOLMAKER_RESULT_FLOAT_Y = 1.18F;
     private static final float TOOLMAKER_RESULT_SCALE = 0.56F;
+    private static final float GHOST_MATERIAL_ALPHA = 0.45F;
+    private static final int MATERIAL_PREVIEW_TICKS = 40;
 
     private final ItemRenderer itemRenderer;
 
@@ -47,10 +54,13 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         }
         if (forge.hasArmorAttachmentTarget() && !forge.isComplete()) {
             renderArmorAttachmentWork(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
+            renderTemplateMaterialRequirements(forge, partialTick, poseStack, bufferSource, packedLight, packedOverlay, layout);
+            renderAnvilReadyPartPreview(forge, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
             return;
         }
         if (forge.template() != null && !forge.isComplete()) {
-            renderTemplatePreview(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
+            renderTemplateMaterialRequirements(forge, partialTick, poseStack, bufferSource, packedLight, packedOverlay, layout);
+            renderAnvilReadyPartPreview(forge, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
         }
         renderAbrasive(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
 
@@ -149,28 +159,104 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         BlockState state = forge.getBlockState();
         float facingRotation = state.hasProperty(ToolWorkstationBlock.FACING) ? state.getValue(ToolWorkstationBlock.FACING).toYRot() : 0.0F;
         float time = level.getGameTime() + partialTick;
+
+        renderFloatingItem(level, preview, time, facingRotation, poseStack, bufferSource, packedLight, packedOverlay, 13);
+    }
+
+    private void renderAnvilReadyPartPreview(ToolForgeBlockEntity forge, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+        Level level = forge.getLevel();
+        ForgeTemplateDefinition template = forge.template();
+        ResourceLocation material = forge.materialId();
+        if (level == null
+                || template == null
+                || material == null
+                || !forge.workstationKind().isSmithingAnvilLike()
+                || forge.hitCount() > 0
+                || !forge.canHammer()) {
+            return;
+        }
+
+        ItemStack preview = ArmorForgeAttachment.isAttachmentTemplate(template) && forge.hasArmorAttachmentTarget()
+                ? ArmorForgeAttachment.apply(forge.armorAttachmentTarget(), template.id(), material, forge.completedQualityScore())
+                : template.outputStack(material, forge.completedQualityScore());
+        if (preview.isEmpty()) {
+            return;
+        }
+
+        BlockState state = forge.getBlockState();
+        float facingRotation = state.hasProperty(ToolWorkstationBlock.FACING) ? state.getValue(ToolWorkstationBlock.FACING).toYRot() : 0.0F;
+        float time = level.getGameTime() + partialTick;
+        renderFloatingItem(level, preview, time, facingRotation, poseStack, bufferSource, packedLight, packedOverlay, 29);
+    }
+
+    private void renderFloatingItem(Level level, ItemStack stack, float time, float facingRotation, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, int seed) {
         float bob = (float) Math.sin(time * 0.16F) * 0.035F;
 
         poseStack.pushPose();
         poseStack.translate(0.5F, TOOLMAKER_RESULT_FLOAT_Y + bob, 0.5F);
         poseStack.mulPose(Axis.YP.rotationDegrees(time * 2.25F - facingRotation));
         poseStack.scale(TOOLMAKER_RESULT_SCALE, TOOLMAKER_RESULT_SCALE, TOOLMAKER_RESULT_SCALE);
-        itemRenderer.renderStatic(preview, ItemDisplayContext.FIXED, packedLight, packedOverlay, poseStack, bufferSource, level, 13);
+        itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, packedLight, packedOverlay, poseStack, bufferSource, level, seed);
         poseStack.popPose();
     }
 
-    private void renderTemplatePreview(ToolForgeBlockEntity forge, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
+    private void renderTemplateMaterialRequirements(ToolForgeBlockEntity forge, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
         ForgeTemplateDefinition template = forge.template();
         if (template == null) {
             return;
         }
-        ResourceLocation material = previewMaterial(forge);
-        ItemStack preview = ArmorForgeAttachment.isAttachmentTemplate(template)
-                ? ArmorForgeAttachment.previewOutputStack(template.id(), material)
-                : template.outputStack(material);
-        if (!preview.isEmpty()) {
-            renderFlatItem(forge, preview, poseStack, bufferSource, packedLight, packedOverlay, 0.0F, 0.0F, layout.previewScale(), layout.previewSurfaceY(), 0.0F);
+        int remaining = Math.max(0, template.requiredMaterials() - forge.materialCount());
+        if (remaining <= 0) {
+            return;
         }
+
+        ResourceLocation material = forge.materialId() == null ? cycledPreviewMaterial(forge, template) : forge.materialId();
+        if (material == null) {
+            return;
+        }
+        ItemStack preview = MaterialCatalog.displayStack(material);
+        if (preview.isEmpty()) {
+            return;
+        }
+
+        renderGhostMaterials(forge, preview, remaining, partialTick, poseStack, bufferSource, packedLight, packedOverlay, layout);
+    }
+
+    private void renderGhostMaterials(ToolForgeBlockEntity forge, ItemStack stack, int count, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
+        Level level = forge.getLevel();
+        float time = level == null ? partialTick : level.getGameTime() + partialTick;
+        int columns = count <= 3 ? count : Math.min(4, (int) Math.ceil(Math.sqrt(count)));
+        int rows = (int) Math.ceil(count / (float) columns);
+        float step = count <= 3 ? 0.18F : 0.15F;
+        float startX = -(columns - 1) * step * 0.5F;
+        float startZ = -(rows - 1) * step * 0.5F;
+        float scale = count <= 3 ? layout.materialScale() * 0.74F : layout.centerMaterialScale() * 0.58F;
+
+        for (int index = 0; index < count; index++) {
+            int column = index % columns;
+            int row = index / columns;
+            float shimmer = (float) Math.sin(time * 0.18F + index * 0.9F) * 0.012F;
+            float localX = startX + column * step;
+            float localZ = startZ + row * step;
+            float rotation = forge.displayRotationDegrees() + time * 0.45F + index * 29.0F;
+            renderGhostFlatItem(forge, stack, poseStack, bufferSource, packedLight, packedOverlay, localX, localZ, scale, layout.previewSurfaceY() + 0.018F + shimmer, rotation, index);
+        }
+    }
+
+    private void renderGhostFlatItem(ToolForgeBlockEntity forge, ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float localX, float localZ, float scale, float surfaceY, float localRotation, int seed) {
+        Level level = forge.getLevel();
+        BlockState state = forge.getBlockState();
+        float facingRotation = state.hasProperty(ToolWorkstationBlock.FACING) ? state.getValue(ToolWorkstationBlock.FACING).toYRot() : 0.0F;
+
+        poseStack.pushPose();
+        poseStack.translate(0.5F, surfaceY, 0.5F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-facingRotation));
+        poseStack.translate(localX, 0.0F, localZ);
+        poseStack.mulPose(Axis.YP.rotationDegrees(localRotation + 180.0F));
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+        poseStack.scale(scale, scale, scale);
+        itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, LightTexture.FULL_BRIGHT, packedOverlay, poseStack, new GhostBufferSource(bufferSource, GHOST_MATERIAL_ALPHA), level, 100 + seed);
+        poseStack.popPose();
     }
 
     private void renderItem(ToolForgeBlockEntity forge, ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout, float offset, float scale) {
@@ -202,12 +288,23 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         poseStack.popPose();
     }
 
-    private static ResourceLocation previewMaterial(ToolForgeBlockEntity forge) {
-        BlockState state = forge.getBlockState();
-        if (state.getBlock() instanceof ToolWorkstationBlock workstation && workstation.kind() == WorkstationKind.LAPIDARY_TABLE) {
-            return MaterialCatalog.DIAMOND;
+    private static ResourceLocation cycledPreviewMaterial(ToolForgeBlockEntity forge, ForgeTemplateDefinition template) {
+        WorkstationKind kind = forge.workstationKind();
+        List<ResourceLocation> materials = MaterialCatalog.starterMaterialIds().stream()
+                .filter(template::allowsMaterial)
+                .filter(material -> MaterialCatalog.definition(material)
+                        .filter(definition -> definition.category() == kind.materialCategory())
+                        .isPresent())
+                .filter(material -> !ForgeTemplatePreview.stack(template, material).isEmpty())
+                .toList();
+        if (materials.isEmpty()) {
+            return null;
         }
-        return MaterialCatalog.IRON;
+
+        Level level = forge.getLevel();
+        long gameTime = level == null ? 0L : level.getGameTime();
+        int index = (int) (gameTime / MATERIAL_PREVIEW_TICKS % materials.size());
+        return materials.get(index);
     }
 
     private static DisplayLayout layout(ToolForgeBlockEntity forge) {
@@ -289,5 +386,63 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
                 0.0F,
                 0.0F
         );
+    }
+
+    private record GhostBufferSource(MultiBufferSource delegate, float alpha) implements MultiBufferSource {
+        @Override
+        public VertexConsumer getBuffer(RenderType renderType) {
+            return new GhostVertexConsumer(delegate.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), alpha);
+        }
+    }
+
+    private static class GhostVertexConsumer implements VertexConsumer {
+        private final VertexConsumer delegate;
+        private final float alpha;
+
+        private GhostVertexConsumer(VertexConsumer delegate, float alpha) {
+            this.delegate = delegate;
+            this.alpha = Math.max(0.0F, Math.min(1.0F, alpha));
+        }
+
+        @Override
+        public VertexConsumer addVertex(float x, float y, float z) {
+            delegate.addVertex(x, y, z);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+            int ghostAlpha = Math.min(alpha, Math.round(alpha * this.alpha));
+            delegate.setColor(mix(red, 185, 0.18F), mix(green, 225, 0.18F), mix(blue, 255, 0.18F), ghostAlpha);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setUv(float u, float v) {
+            delegate.setUv(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setUv1(int u, int v) {
+            delegate.setUv1(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setUv2(int u, int v) {
+            delegate.setUv2(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setNormal(float x, float y, float z) {
+            delegate.setNormal(x, y, z);
+            return this;
+        }
+
+        private static int mix(int base, int target, float amount) {
+            return Math.round(base + (target - base) * amount);
+        }
     }
 }

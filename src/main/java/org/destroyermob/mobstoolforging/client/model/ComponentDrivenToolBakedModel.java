@@ -230,19 +230,30 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
 
     private BakedModel composeArmor(ArmorVisualKey key) {
         if (ArmorConstructionData.HELMET_TYPE.equals(key.armorType())) {
-            return ModularHelmetItemModel.compose(key, fallback.getTransforms());
+            return composeArmorItem(key.helmetPlateMaterial(), ArmorPartData.HELMET_PLATE, ArmorPartData.HELMET_CHAINMAIL);
         }
         if (ArmorConstructionData.CHESTPLATE_TYPE.equals(key.armorType())) {
-            return ModularBodyArmourItemModel.compose(key, fallback);
+            return composeArmorItem(key.chestplatePlateMaterial(), ArmorPartData.CHESTPLATE_BODY, ArmorPartData.CHESTPLATE_CHAINMAIL);
         }
         if (ArmorConstructionData.LEGGINGS_TYPE.equals(key.armorType())) {
-            return ModularLowerArmourItemModel.composeLeggings(key, fallback.getTransforms());
+            return composeArmorItem(key.leggingsPlateMaterial(), ArmorPartData.LEGGINGS_PLATE, ArmorPartData.LEGGINGS_CHAINMAIL);
         }
         if (ArmorConstructionData.BOOTS_TYPE.equals(key.armorType())) {
-            return ModularLowerArmourItemModel.composeBoots(key, fallback.getTransforms());
+            return composeArmorItem(key.bootsPlateMaterial(), ArmorPartData.BOOTS_PLATE, ArmorPartData.BOOTS_CHAINMAIL);
         }
         warnOnce("missing_armor_type|" + key.armorType(), "Cannot render MTF armor stack because armor type {} is not loaded on the client.", key.armorType());
         return fallback;
+    }
+
+    private BakedModel composeArmorItem(Optional<ResourceLocation> plateMaterial, String platePartType, String chainmailPartType) {
+        ArmorMaterialTextureManager.ResolvedArmorTexture texture = plateMaterial
+                .map(material -> ArmorMaterialTextureManager.INSTANCE.itemTexture(material, platePartType))
+                .orElseGet(() -> ArmorMaterialTextureManager.INSTANCE.itemTexture(MaterialCatalog.IRON, chainmailPartType));
+        return new ResolvedPartedItemModel(
+                quadFactory.bakeLayer(0, texture.sprite(), texture.color()),
+                texture.sprite(),
+                fallback.getTransforms()
+        );
     }
 
     private Optional<ToolTypeDefinition> findPartDefinition(ItemStack stack, ToolPartData partData) {

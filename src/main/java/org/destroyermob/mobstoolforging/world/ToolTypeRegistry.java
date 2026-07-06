@@ -21,15 +21,14 @@ public final class ToolTypeRegistry {
     public static final ResourceLocation SCREWDRIVER_HEAD_TEMPLATE = modLoc("screwdriver_head");
     public static final ResourceLocation GEM_CUTTERS_KNIFE_TOOL_TYPE = modLoc("gem_cutters_knife");
     public static final ResourceLocation GEM_CUTTERS_BLADE_TEMPLATE = modLoc("gem_cutters_blade");
-    public static final ResourceLocation HELMET_SKULL_TEMPLATE = modLoc(ArmorPartData.HELMET_SKULL);
-    public static final ResourceLocation HELMET_COMB_TEMPLATE = modLoc(ArmorPartData.HELMET_COMB);
-    public static final ResourceLocation HELMET_VISOR_TEMPLATE = modLoc(ArmorPartData.HELMET_VISOR);
+    public static final ResourceLocation HELMET_CHAINMAIL_TEMPLATE = modLoc(ArmorPartData.HELMET_CHAINMAIL);
+    public static final ResourceLocation HELMET_PLATE_TEMPLATE = modLoc(ArmorPartData.HELMET_PLATE);
     public static final ResourceLocation CHESTPLATE_CHAINMAIL_TEMPLATE = modLoc(ArmorPartData.CHESTPLATE_CHAINMAIL);
     public static final ResourceLocation CHESTPLATE_BODY_TEMPLATE = modLoc(ArmorPartData.CHESTPLATE_BODY);
-    public static final ResourceLocation LEGGINGS_LEGS_TEMPLATE = modLoc(ArmorPartData.LEGGINGS_LEGS);
-    public static final ResourceLocation LEGGINGS_KNEES_TEMPLATE = modLoc(ArmorPartData.LEGGINGS_KNEES);
-    public static final ResourceLocation LEGGINGS_TASSETS_TEMPLATE = modLoc(ArmorPartData.LEGGINGS_TASSETS);
-    public static final ResourceLocation BOOTS_FEET_TEMPLATE = modLoc(ArmorPartData.BOOTS_FEET);
+    public static final ResourceLocation LEGGINGS_CHAINMAIL_TEMPLATE = modLoc(ArmorPartData.LEGGINGS_CHAINMAIL);
+    public static final ResourceLocation LEGGINGS_PLATE_TEMPLATE = modLoc(ArmorPartData.LEGGINGS_PLATE);
+    public static final ResourceLocation BOOTS_CHAINMAIL_TEMPLATE = modLoc(ArmorPartData.BOOTS_CHAINMAIL);
+    public static final ResourceLocation BOOTS_PLATE_TEMPLATE = modLoc(ArmorPartData.BOOTS_PLATE);
     private static final Map<ResourceLocation, ToolTypeDefinition> TOOL_TYPES = new LinkedHashMap<>();
     private static final Map<ResourceLocation, ForgeTemplateDefinition> TEMPLATES = new LinkedHashMap<>();
     private static final List<ToolStatModifier> STAT_MODIFIERS = new ArrayList<>();
@@ -121,15 +120,14 @@ public final class ToolTypeRegistry {
                 true,
                 1
         ));
-        registerArmorTemplate(HELMET_SKULL_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_SKULL, 5, ModItems.HELMET_SKULL.getId());
-        registerArmorTemplate(HELMET_COMB_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_COMB, 1, null);
-        registerArmorTemplate(HELMET_VISOR_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_VISOR, 1, null);
-        registerArmorTemplate(CHESTPLATE_CHAINMAIL_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, ArmorPartData.CHESTPLATE_CHAINMAIL, 8, ModItems.CHESTPLATE_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
-        registerArmorTemplate(CHESTPLATE_BODY_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, ArmorPartData.CHESTPLATE_BODY, 8, ModItems.CHESTPLATE_BODY.getId());
-        registerArmorTemplate(LEGGINGS_LEGS_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_LEGS, 7, ModItems.LEGGINGS_LEGS.getId());
-        registerArmorTemplate(LEGGINGS_KNEES_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_KNEES, 2, null);
-        registerArmorTemplate(LEGGINGS_TASSETS_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_TASSETS, 2, null);
-        registerArmorTemplate(BOOTS_FEET_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, ArmorPartData.BOOTS_FEET, 4, ModItems.BOOTS_FEET.getId());
+        registerArmorTemplate(HELMET_CHAINMAIL_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_CHAINMAIL, 2, ModItems.HELMET_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
+        registerArmorTemplate(HELMET_PLATE_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_PLATE, 3, ModItems.HELMET_PLATE.getId());
+        registerArmorTemplate(CHESTPLATE_CHAINMAIL_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, ArmorPartData.CHESTPLATE_CHAINMAIL, 3, ModItems.CHESTPLATE_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
+        registerArmorTemplate(CHESTPLATE_BODY_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, ArmorPartData.CHESTPLATE_BODY, 5, ModItems.CHESTPLATE_BODY.getId());
+        registerArmorTemplate(LEGGINGS_CHAINMAIL_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_CHAINMAIL, 3, ModItems.LEGGINGS_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
+        registerArmorTemplate(LEGGINGS_PLATE_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_PLATE, 4, ModItems.LEGGINGS_PLATE.getId());
+        registerArmorTemplate(BOOTS_CHAINMAIL_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, ArmorPartData.BOOTS_CHAINMAIL, 1, ModItems.BOOTS_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
+        registerArmorTemplate(BOOTS_PLATE_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, ArmorPartData.BOOTS_PLATE, 2, ModItems.BOOTS_PLATE.getId());
     }
 
     private static void registerArmorTemplate(ResourceLocation templateId, ResourceLocation armorType, String partType, int requiredMaterials, ResourceLocation outputItem) {

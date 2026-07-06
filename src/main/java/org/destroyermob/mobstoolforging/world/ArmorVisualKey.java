@@ -34,18 +34,59 @@ public record ArmorVisualKey(
         return ArmorConstructionData.CHESTPLATE_TYPE.equals(armorType);
     }
 
+    public ResourceLocation helmetChainmailMaterial() {
+        return chainmailMaterial();
+    }
+
+    public Optional<ResourceLocation> helmetPlateMaterial() {
+        return overlayMaterial();
+    }
+
     public ResourceLocation chestplateChainmailMaterial() {
-        return MaterialCatalog.IRON;
+        return isChestplate() ? chainmailMaterial() : MaterialCatalog.IRON;
     }
 
     public Optional<ResourceLocation> chestplatePlateMaterial() {
-        if (!isChestplate()) {
-            return Optional.empty();
+        return isChestplate() ? overlayMaterial() : Optional.empty();
+    }
+
+    public ResourceLocation leggingsChainmailMaterial() {
+        return chainmailMaterial();
+    }
+
+    public Optional<ResourceLocation> leggingsPlateMaterial() {
+        return overlayMaterial();
+    }
+
+    public ResourceLocation bootsChainmailMaterial() {
+        return chainmailMaterial();
+    }
+
+    public Optional<ResourceLocation> bootsPlateMaterial() {
+        return overlayMaterial();
+    }
+
+    public ResourceLocation chainmailMaterial() {
+        if (combMaterial.isEmpty() && visorMaterial.isEmpty() && !MaterialCatalog.IRON.equals(skullMaterial)) {
+            return MaterialCatalog.IRON;
         }
+        return skullMaterial;
+    }
+
+    public Optional<ResourceLocation> overlayMaterial() {
         if (combMaterial.isPresent()) {
             return combMaterial;
         }
-        return visorMaterial.isPresent() ? Optional.empty() : Optional.of(skullMaterial);
+        if (isChestplate() && visorMaterial.isEmpty() && !MaterialCatalog.IRON.equals(skullMaterial)) {
+            return Optional.of(skullMaterial);
+        }
+        if (!isChestplate() && combMaterial.isEmpty() && visorMaterial.isEmpty() && !MaterialCatalog.IRON.equals(skullMaterial)) {
+            return Optional.of(skullMaterial);
+        }
+        if (!isChestplate() && visorMaterial.isPresent()) {
+            return visorMaterial;
+        }
+        return Optional.empty();
     }
 
     private static int damageBucket(ItemStack stack) {

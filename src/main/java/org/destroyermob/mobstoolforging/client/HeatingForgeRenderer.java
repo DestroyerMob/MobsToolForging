@@ -14,12 +14,17 @@ import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlockEntity> {
-    private static final float WORKPIECE_PAIR_SIDE_OFFSET = 0.18F;
-    private static final float[][] FUEL_OFFSETS = {
-            {-0.12F, -0.18F, -12.0F},
-            {0.12F, -0.18F, 18.0F},
-            {-0.12F, 0.05F, 24.0F},
-            {0.12F, 0.05F, -28.0F}
+    private static final Placement[] FUEL_PLACEMENTS = {
+            new Placement(-0.1875F, -0.1875F, 1.0F, 0.75F, 0.0F),
+            new Placement(0.1875F, -0.1875F, 1.0F, 0.75F, 0.0F),
+            new Placement(0.1875F, 0.1875F, 1.0F, 0.75F, 0.0F),
+            new Placement(-0.1875F, 0.1875F, 1.0F, 0.75F, 0.0F)
+    };
+    private static final Placement[] WORKPIECE_PLACEMENTS = {
+            new Placement(-0.21875F, -0.15625F, 1.0F, 0.875F, 90.0F),
+            new Placement(-0.15625F, 0.21875F, 1.0F, 0.875F, 0.0F),
+            new Placement(0.15625F, -0.21875F, 1.0F, 0.875F, 0.0F),
+            new Placement(0.21875F, 0.15625F, 1.0F, 0.875F, 90.0F)
     };
 
     public HeatingForgeRenderer(BlockEntityRendererProvider.Context context) {
@@ -27,43 +32,47 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
 
     @Override
     public void render(HeatingForgeBlockEntity forge, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+        renderAsh(forge, poseStack, bufferSource, packedLight, packedOverlay);
         renderFuel(forge, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
-        int workpieceCount = forge.workpieceCount();
-        int renderedWorkpiece = 0;
         for (int slot = 0; slot < forge.workpieceSlots(); slot++) {
             ItemStack workpiece = forge.workpieceStack(slot);
             if (workpiece.isEmpty()) {
                 continue;
             }
-            float localZ = workpieceCount == 1 ? 0.0F : (renderedWorkpiece == 0 ? -WORKPIECE_PAIR_SIDE_OFFSET : WORKPIECE_PAIR_SIDE_OFFSET);
-            float localRotation = workpieceCount == 1 ? 0.0F : (renderedWorkpiece == 0 ? -4.0F : 4.0F);
+            Placement placement = WORKPIECE_PLACEMENTS[Math.min(slot, WORKPIECE_PLACEMENTS.length - 1)];
             float heat = heatAmount(forge, slot, workpiece);
-            renderInsert(forge, HeatingForgeInsertVisualManager.workpiece(workpiece), poseStack, bufferSource, packedLight, packedOverlay, 0.0F, localZ, 1.15F, 0.60F, localRotation, heat);
-            renderedWorkpiece++;
+            renderInsert(forge, HeatingForgeInsertVisualManager.workpiece(workpiece), poseStack, bufferSource, packedLight, packedOverlay, placement, heat);
+        }
+    }
+
+    private void renderAsh(HeatingForgeBlockEntity forge, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+        HeatingForgeInsertVisualManager.ResolvedInsert ash = HeatingForgeInsertVisualManager.ash();
+        for (int layer = 0; layer < forge.ashLayers(); layer++) {
+            renderInsert(forge, ash, poseStack, bufferSource, packedLight, packedOverlay, new Placement(0.0F, 0.0F, 1.0F, (2.0F + layer) / 16.0F, 0.0F), 0.0F);
         }
     }
 
     private void renderFuel(HeatingForgeBlockEntity forge, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         ItemStack fuel = forge.fuelStack();
-        int visibleFuel = Math.min(FUEL_OFFSETS.length, fuel.getCount() + (forge.isLit() ? 1 : 0));
+        int visibleFuel = Math.min(FUEL_PLACEMENTS.length, forge.fuelBedCount());
         if (visibleFuel <= 0) {
             return;
         }
-        ItemStack visualFuel = fuel.isEmpty() ? new ItemStack(Items.COAL) : fuel;
-        HeatingForgeInsertVisualManager.ResolvedInsert visual = HeatingForgeInsertVisualManager.fuel(visualFuel);
+        HeatingForgeInsertVisualManager.ResolvedInsert visual = forge.hasSpentFuelBed()
+                ? HeatingForgeInsertVisualManager.spentFuel()
+                : HeatingForgeInsertVisualManager.fuel(fuel.isEmpty() ? new ItemStack(Items.COAL) : fuel);
         for (int index = 0; index < visibleFuel; index++) {
-            float[] offset = FUEL_OFFSETS[index];
-            renderInsert(forge, visual, poseStack, bufferSource, packedLight, packedOverlay, offset[0], offset[1], 1.65F, 0.13F, offset[2], fuelHeat(forge, partialTick, index));
+            renderInsert(forge, visual, poseStack, bufferSource, packedLight, packedOverlay, FUEL_PLACEMENTS[index], forge.hasSpentFuelBed() ? 0.0F : fuelHeat(forge, partialTick, index));
         }
     }
 
-    private void renderInsert(HeatingForgeBlockEntity forge, HeatingForgeInsertVisualManager.ResolvedInsert visual, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float localX, float localZ, float scale, float surfaceY, float localRotation, float heat) {
+    private void renderInsert(HeatingForgeBlockEntity forge, HeatingForgeInsertVisualManager.ResolvedInsert visual, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, Placement placement, float heat) {
         poseStack.pushPose();
-        poseStack.translate(0.5F, surfaceY, 0.5F);
+        poseStack.translate(0.5F, placement.surfaceY(), 0.5F);
         poseStack.mulPose(Axis.YP.rotationDegrees(facingRotation(forge.getBlockState().getValue(HeatingForgeBlock.FACING))));
-        poseStack.translate(localX, 0.0F, localZ);
-        poseStack.mulPose(Axis.YP.rotationDegrees(localRotation));
-        poseStack.scale(scale, scale, scale);
+        poseStack.translate(placement.localX(), 0.0F, placement.localZ());
+        poseStack.mulPose(Axis.YP.rotationDegrees(placement.rotation()));
+        poseStack.scale(placement.scale(), placement.scale(), placement.scale());
         HeatingForgeVoxelRenderer.render(visual.model(), visual.visual(), poseStack, bufferSource, packedLight, packedOverlay, heat);
         poseStack.popPose();
     }
@@ -91,11 +100,15 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
         Level level = forge.getLevel();
         float time = level == null ? 0.0F : level.getGameTime() + partialTick;
         float pulse = ((float) Math.sin(time * 0.18F + index * 1.7F) + 1.0F) * 0.5F;
+        float fuelTemperature = forge.fuelTemperatureFraction();
         float workpieceBonus = forge.hasWorkpiece() ? forge.heatProgressFraction() * 0.08F : 0.0F;
-        return clamp(0.38F + pulse * 0.18F + workpieceBonus, 0.0F, 0.68F);
+        return clamp(0.24F + fuelTemperature * 0.42F + pulse * 0.12F + workpieceBonus, 0.0F, 0.84F);
     }
 
     private static float clamp(float value, float min, float max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    private record Placement(float localX, float localZ, float scale, float surfaceY, float rotation) {
     }
 }

@@ -293,9 +293,6 @@ public final class PatternRackSelection {
         if (kind == WorkstationKind.TOOLMAKERS_BENCH) {
             return false;
         }
-        if (ArmorForgeAttachment.isAttachmentTemplate(template) || ArmorForgeAttachment.isBaseArmorTemplate(template.id())) {
-            return false;
-        }
         if (pattern.getItem() instanceof org.destroyermob.mobstoolforging.item.ToolTemplateItem templateItem && !templateItem.canUseOn(kind)) {
             return false;
         }

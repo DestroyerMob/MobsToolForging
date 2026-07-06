@@ -44,16 +44,20 @@ public class HeatingForgeBlock extends BaseEntityBlock {
     public static final MapCodec<HeatingForgeBlock> CODEC = simpleCodec(HeatingForgeBlock::new);
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape NORTH_SHAPE = Shapes.or(
-            Block.box(0.0, 0.0, 0.0, 16.0, 1.0, 16.0),
-            Block.box(0.0, 15.0, 1.0, 15.0, 16.0, 15.0),
-            Block.box(1.0, 8.0, 1.0, 15.0, 9.0, 15.0),
-            Block.box(15.0, 1.0, 0.0, 16.0, 16.0, 16.0),
-            Block.box(0.0, 1.0, 0.0, 15.0, 16.0, 1.0),
-            Block.box(0.0, 1.0, 15.0, 15.0, 16.0, 16.0)
+            Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0),
+            Block.box(0.0, 2.0, 14.0, 14.0, 16.0, 16.0),
+            Block.box(2.0, 2.0, 0.0, 16.0, 16.0, 2.0),
+            Block.box(14.0, 2.0, 2.0, 16.0, 16.0, 16.0),
+            Block.box(0.0, 8.0, 0.0, 2.0, 16.0, 14.0),
+            Block.box(0.0, 2.0, 0.0, 2.0, 8.0, 2.0),
+            Block.box(0.0, 2.0, 2.0, 2.0, 4.0, 14.0),
+            Block.box(2.0, 11.0, 2.0, 14.0, 12.0, 14.0)
     ).optimize();
     private static final VoxelShape EAST_SHAPE = rotateClockwise(NORTH_SHAPE);
     private static final VoxelShape SOUTH_SHAPE = rotateClockwise(EAST_SHAPE);
     private static final VoxelShape WEST_SHAPE = rotateClockwise(SOUTH_SHAPE);
+    private static final double[] WORKPIECE_SLOT_X = {-0.21875D, -0.15625D, 0.15625D, 0.21875D};
+    private static final double[] WORKPIECE_SLOT_Z = {-0.15625D, 0.21875D, -0.21875D, 0.15625D};
 
     public HeatingForgeBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -91,7 +95,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             level.addParticle(
                     ParticleTypes.WHITE_SMOKE,
                     pos.getX() + 0.5D + (random.nextDouble() - 0.5D) * 0.22D,
-                    pos.getY() + 0.72D,
+                    pos.getY() + 0.9D,
                     pos.getZ() + 0.5D + (random.nextDouble() - 0.5D) * 0.22D,
                     (random.nextDouble() - 0.5D) * 0.015D,
                     0.055D + random.nextDouble() * 0.025D,
@@ -102,7 +106,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             level.addParticle(
                     ParticleTypes.SMALL_FLAME,
                     pos.getX() + 0.5D + (random.nextDouble() - 0.5D) * 0.16D,
-                    pos.getY() + 0.34D,
+                    pos.getY() + 0.78D,
                     pos.getZ() + 0.5D + (random.nextDouble() - 0.5D) * 0.16D,
                     0.0D,
                     0.01D,
@@ -143,6 +147,8 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             if (forge.acceptFuel(stack)) {
                 level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 0.5F, 0.85F);
                 player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_fuel_added"), true);
+            } else {
+                player.displayClientMessage(heatingFuelRejectedMessage(forge), true);
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -150,11 +156,12 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             if (level.isClientSide) {
                 return ItemInteractionResult.SUCCESS;
             }
-            if (forge.acceptWorkpiece(stack)) {
+            int slot = workpieceSlotFromHit(state, pos, hitResult);
+            if (forge.acceptWorkpiece(stack, slot)) {
                 level.playSound(null, pos, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 0.5F, 1.1F);
                 player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_workpiece_added"), true);
             } else {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_workpiece_busy"), true);
+                player.displayClientMessage(heatingWorkpieceRejectedMessage(forge, slot), true);
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -175,14 +182,39 @@ public class HeatingForgeBlock extends BaseEntityBlock {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
-        if (forge.hasWorkpiece()) {
-            giveOrDrop(player, forge.removeWorkpiece());
+        if (player.isShiftKeyDown()) {
+            if (forge.hasAsh()) {
+                giveOrDrop(player, forge.collectAsh());
+                level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 0.75F);
+                return InteractionResult.CONSUME;
+            }
+            if (forge.hasSpentFuelBed()) {
+                forge.clearSpentFuelBed();
+                level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.45F, 0.65F);
+                player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_embers_cleared"), true);
+                return InteractionResult.CONSUME;
+            }
+            if (forge.hasFuel()) {
+                giveOrDrop(player, forge.removeFuel());
+                level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 0.85F);
+                return InteractionResult.CONSUME;
+            }
+        }
+        int slot = workpieceSlotFromHit(state, pos, hitResult);
+        if (!forge.workpieceStack(slot).isEmpty()) {
+            giveOrDrop(player, forge.removeWorkpiece(slot));
             level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.0F);
             return InteractionResult.CONSUME;
         }
-        if (player.isShiftKeyDown() && forge.hasFuel()) {
-            giveOrDrop(player, forge.removeFuel());
-            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 0.85F);
+        if (forge.hasAsh()) {
+            giveOrDrop(player, forge.collectAsh());
+            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 0.75F);
+            return InteractionResult.CONSUME;
+        }
+        if (forge.hasSpentFuelBed()) {
+            forge.clearSpentFuelBed();
+            level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.45F, 0.65F);
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_embers_cleared"), true);
             return InteractionResult.CONSUME;
         }
         player.displayClientMessage(Component.translatable(forge.isLit() ? "message.mobstoolforging.heating_lit" : "message.mobstoolforging.heating_status"), true);
@@ -198,6 +230,10 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             ItemStack fuel = forge.fuelDropStack();
             if (!fuel.isEmpty()) {
                 Block.popResource(level, pos, fuel);
+            }
+            ItemStack ash = forge.ashDropStack();
+            if (!ash.isEmpty()) {
+                Block.popResource(level, pos, ash);
             }
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
@@ -233,8 +269,16 @@ public class HeatingForgeBlock extends BaseEntityBlock {
         if (level.isClientSide) {
             return ItemInteractionResult.SUCCESS;
         }
-        if (!forge.hasFuel() && !forge.isLit()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_needs_fuel"), true);
+        if (forge.hasSpentFuelBed()) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_clear_embers"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        if (forge.ashTrayFull()) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_ash_full"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        if (!forge.isFuelBedFull() && !forge.isLit()) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_needs_full_fuel_bed"), true);
             return ItemInteractionResult.CONSUME;
         }
         if (forge.ignite()) {
@@ -251,6 +295,67 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_ignited"), true);
         }
         return ItemInteractionResult.CONSUME;
+    }
+
+    private static Component heatingFuelRejectedMessage(HeatingForgeBlockEntity forge) {
+        if (forge.hasSpentFuelBed()) {
+            return Component.translatable("message.mobstoolforging.heating_clear_embers");
+        }
+        if (forge.ashTrayFull()) {
+            return Component.translatable("message.mobstoolforging.heating_ash_full");
+        }
+        if (forge.isFuelBedFull()) {
+            return Component.translatable("message.mobstoolforging.heating_fuel_full");
+        }
+        return Component.translatable("message.mobstoolforging.heating_fuel_rejected");
+    }
+
+    private static Component heatingWorkpieceRejectedMessage(HeatingForgeBlockEntity forge, int slot) {
+        if (forge.hasSpentFuelBed()) {
+            return Component.translatable("message.mobstoolforging.heating_clear_embers");
+        }
+        if (forge.ashTrayFull()) {
+            return Component.translatable("message.mobstoolforging.heating_ash_full");
+        }
+        if (!forge.isFuelBedFull()) {
+            return Component.translatable("message.mobstoolforging.heating_needs_full_fuel_bed");
+        }
+        if (!forge.workpieceStack(slot).isEmpty()) {
+            return Component.translatable("message.mobstoolforging.heating_workpiece_slot_busy");
+        }
+        return Component.translatable("message.mobstoolforging.heating_workpiece_busy");
+    }
+
+    private static int workpieceSlotFromHit(BlockState state, BlockPos pos, BlockHitResult hitResult) {
+        double x = hitResult.getLocation().x - pos.getX() - 0.5D;
+        double z = hitResult.getLocation().z - pos.getZ() - 0.5D;
+        double radians = Math.toRadians(modelRotationDegrees(state.getValue(FACING)));
+        double cos = Math.cos(radians);
+        double sin = Math.sin(radians);
+        double authoredX = x * cos + z * sin;
+        double authoredZ = -x * sin + z * cos;
+        int closestSlot = 0;
+        double closestDistance = Double.MAX_VALUE;
+        for (int slot = 0; slot < WORKPIECE_SLOT_X.length; slot++) {
+            double dx = authoredX - WORKPIECE_SLOT_X[slot];
+            double dz = authoredZ - WORKPIECE_SLOT_Z[slot];
+            double distance = dx * dx + dz * dz;
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestSlot = slot;
+            }
+        }
+        return closestSlot;
+    }
+
+    private static int modelRotationDegrees(Direction direction) {
+        // Matches the authored forge model rotation used by the blockstate and renderer.
+        return switch (direction) {
+            case EAST -> 180;
+            case SOUTH -> 270;
+            case WEST -> 0;
+            default -> 90;
+        };
     }
 
     private static boolean isFireStick(ItemStack stack) {

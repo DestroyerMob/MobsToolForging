@@ -2,20 +2,20 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "C": {
-      "item": "minecraft:copper_ingot"
-    },
     "F": {
       "item": "minecraft:furnace"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
     },
     "S": {
       "item": "minecraft:cobblestone"
     }
   },
   "pattern": [
-    "CSC",
-    "CFC",
-    "CCC"
+    "ISI",
+    "IFI",
+    "III"
   ],
   "result": {
     "count": 1,

@@ -9,15 +9,14 @@ import net.minecraft.resources.ResourceLocation;
 
 public record ArmorPartData(String partType, ResourceLocation materialId, int quality) {
     public static final int DEFAULT_QUALITY = ArmorConstructionData.DEFAULT_QUALITY;
-    public static final String HELMET_SKULL = "helmet_skull";
-    public static final String HELMET_COMB = "helmet_comb";
-    public static final String HELMET_VISOR = "helmet_visor";
+    public static final String HELMET_CHAINMAIL = "helmet_chainmail";
+    public static final String HELMET_PLATE = "helmet_plate";
     public static final String CHESTPLATE_CHAINMAIL = "chestplate_chainmail";
     public static final String CHESTPLATE_BODY = "chestplate_body";
-    public static final String LEGGINGS_LEGS = "leggings_legs";
-    public static final String LEGGINGS_KNEES = "leggings_knees";
-    public static final String LEGGINGS_TASSETS = "leggings_tassets";
-    public static final String BOOTS_FEET = "boots_feet";
+    public static final String LEGGINGS_CHAINMAIL = "leggings_chainmail";
+    public static final String LEGGINGS_PLATE = "leggings_plate";
+    public static final String BOOTS_CHAINMAIL = "boots_chainmail";
+    public static final String BOOTS_PLATE = "boots_plate";
 
     public static final Codec<ArmorPartData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("part_type").forGetter(ArmorPartData::partType),
@@ -32,6 +31,10 @@ public record ArmorPartData(String partType, ResourceLocation materialId, int qu
     }
 
     public ArmorPartData {
-        quality = DEFAULT_QUALITY;
+        quality = ForgingQuality.clampScore(quality);
+    }
+
+    public ForgingQuality qualityLevel() {
+        return ForgingQuality.fromScore(quality);
     }
 }

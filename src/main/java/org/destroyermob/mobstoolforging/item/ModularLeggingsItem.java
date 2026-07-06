@@ -25,12 +25,36 @@ public class ModularLeggingsItem extends ArmorItem implements ModularArmorItem {
         super(material, Type.LEGGINGS, properties);
     }
 
-    public ItemStack create(ResourceLocation legMaterial) {
-        return create(legMaterial, Optional.empty(), Optional.empty());
+    public ItemStack create(ResourceLocation plateMaterial) {
+        return create(plateMaterial, ArmorConstructionData.DEFAULT_QUALITY);
     }
 
-    public ItemStack create(ResourceLocation legMaterial, Optional<ResourceLocation> kneeMaterial, Optional<ResourceLocation> tassetMaterial) {
-        ArmorConstructionData construction = ArmorConstructionData.leggings(legMaterial, kneeMaterial, tassetMaterial);
+    public ItemStack create(ResourceLocation plateMaterial, int quality) {
+        return create(MaterialCatalog.IRON, Optional.of(plateMaterial), quality);
+    }
+
+    public ItemStack create(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial) {
+        return create(chainmailMaterial, plateMaterial, ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack create(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, int quality) {
+        ArmorConstructionData construction = ArmorConstructionData.leggings(chainmailMaterial, plateMaterial, quality);
+        ItemStack stack = new ItemStack(this);
+        stack.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction);
+        ArmorStatsCatalog.apply(stack, construction);
+        return stack;
+    }
+
+    public ItemStack create(ResourceLocation chainmailMaterial, Optional<ResourceLocation> plateMaterial, Optional<ResourceLocation> legacyTassetMaterial) {
+        return create(chainmailMaterial, plateMaterial.or(() -> legacyTassetMaterial));
+    }
+
+    public ItemStack createChainmail() {
+        return createChainmail(ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack createChainmail(int quality) {
+        ArmorConstructionData construction = ArmorConstructionData.chainmailLeggings(quality);
         ItemStack stack = new ItemStack(this);
         stack.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction);
         ArmorStatsCatalog.apply(stack, construction);
@@ -43,7 +67,9 @@ public class ModularLeggingsItem extends ArmorItem implements ModularArmorItem {
         if (construction == null || !ArmorConstructionData.LEGGINGS_TYPE.equals(construction.armorType())) {
             return super.getName(stack);
         }
-        return Component.translatable("item.mobstoolforging.material_modular_leggings", MaterialCatalog.displayName(construction.skullMaterial()));
+        return construction.leggingsPlateMaterial()
+                .map(material -> Component.translatable("item.mobstoolforging.material_modular_leggings", MaterialCatalog.displayName(material)))
+                .orElseGet(() -> Component.translatable("item.mobstoolforging.modular_chainmail_leggings"));
     }
 
     @Override
@@ -81,14 +107,14 @@ public class ModularLeggingsItem extends ArmorItem implements ModularArmorItem {
             return;
         }
         tooltip.add(Component.translatable("tooltip.mobstoolforging.construction").withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.legs", MaterialCatalog.displayName(construction.skullMaterial())).withStyle(ChatFormatting.DARK_GRAY));
+        tooltip.add(Component.translatable("tooltip.mobstoolforging.quality")
+                .withStyle(ChatFormatting.DARK_GRAY)
+                .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(construction.qualityLevel().displayName()));
+        tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.chainmail", MaterialCatalog.displayName(construction.leggingsChainmailMaterial())).withStyle(ChatFormatting.DARK_GRAY));
         tooltip.add(Component.translatable(
-                "tooltip.mobstoolforging.armor_part.knees",
-                construction.combMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
-        ).withStyle(ChatFormatting.DARK_GRAY));
-        tooltip.add(Component.translatable(
-                "tooltip.mobstoolforging.armor_part.tassets",
-                construction.visorMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
+                "tooltip.mobstoolforging.armor_part.plate",
+                construction.leggingsPlateMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
         ).withStyle(ChatFormatting.DARK_GRAY));
     }
 

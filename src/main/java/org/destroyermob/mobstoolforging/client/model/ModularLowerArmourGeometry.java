@@ -56,6 +56,9 @@ public final class ModularLowerArmourGeometry {
             cuboid(-3, 20, 4, 3, 24, 5, -3, 1),
             cuboid(-3, 20, 0, -2, 24, 4, -1, -2)
     );
+    public static final List<Cuboid> LEGGING_RIGHT_PLATE = inflated(LEGGING_RIGHT_LEG, 0.25F);
+    public static final List<Cuboid> LEGGING_LEFT_PLATE = inflated(LEGGING_LEFT_LEG, 0.25F);
+    public static final List<Cuboid> BOOTS_PLATE = inflated(BOOTS, 0.25F);
 
     private ModularLowerArmourGeometry() {
     }
@@ -147,15 +150,29 @@ public final class ModularLowerArmourGeometry {
     }
 
     private static float u(TextureAtlasSprite sprite, float textureU) {
-        return sprite.getU(textureU / 16.0F);
+        int textureWidth = Math.max(1, sprite.contents().width());
+        return sprite.getU(wrapTextureCoordinate(textureU, textureWidth) / textureWidth);
     }
 
     private static float v(TextureAtlasSprite sprite, float textureV) {
-        return sprite.getV(textureV / 16.0F);
+        int textureHeight = Math.max(1, sprite.contents().height());
+        return sprite.getV(wrapTextureCoordinate(textureV, textureHeight) / textureHeight);
+    }
+
+    private static float wrapTextureCoordinate(float coordinate, int textureSize) {
+        float wrapped = coordinate % textureSize;
+        if (wrapped < 0.0F) {
+            wrapped += textureSize;
+        }
+        return wrapped;
     }
 
     private static Cuboid cuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float textureU, float textureV) {
         return new Cuboid(minX, minY, minZ, maxX, maxY, maxZ, textureU, textureV);
+    }
+
+    private static List<Cuboid> inflated(List<Cuboid> cuboids, float amount) {
+        return cuboids.stream().map(cuboid -> cuboid.inflate(amount)).toList();
     }
 
     public enum LegSide {
@@ -182,6 +199,10 @@ public final class ModularLowerArmourGeometry {
 
         public Cuboid yRotatedQuarterFacingForward() {
             return new Cuboid(minZ, minY, minX, maxZ, maxY, maxX, textureU, textureV);
+        }
+
+        public Cuboid inflate(float amount) {
+            return new Cuboid(minX - amount, minY - amount, minZ - amount, maxX + amount, maxY + amount, maxZ + amount, textureU, textureV);
         }
 
         private boolean hasNoSurface() {

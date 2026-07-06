@@ -19,27 +19,23 @@ public final class ModularLowerArmourItemModel {
     }
 
     public static ResolvedArmorItemModel composeLeggings(ArmorVisualKey key, ItemTransforms transforms) {
-        TextureAtlasSprite legsSprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(key.skullMaterial(), ArmorPartData.LEGGINGS_LEGS);
+        TextureAtlasSprite chainmailSprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(key.leggingsChainmailMaterial(), ArmorPartData.LEGGINGS_CHAINMAIL);
         List<BakedQuad> quads = new ArrayList<>();
-        addForwardCuboids(quads, ModularLowerArmourGeometry.LEGGING_RIGHT_LEG, legsSprite);
-        addForwardCuboids(quads, ModularLowerArmourGeometry.LEGGING_LEFT_LEG, legsSprite);
-        key.combMaterial().ifPresent(material -> {
-            TextureAtlasSprite kneesSprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(material, ArmorPartData.LEGGINGS_KNEES);
-            addForwardCuboids(quads, ModularLowerArmourGeometry.LEGGING_RIGHT_KNEE, kneesSprite);
-            addForwardCuboids(quads, ModularLowerArmourGeometry.LEGGING_LEFT_KNEE, kneesSprite);
+        addForwardCuboids(quads, ModularLowerArmourGeometry.LEGGING_RIGHT_LEG, chainmailSprite);
+        addForwardCuboids(quads, ModularLowerArmourGeometry.LEGGING_LEFT_LEG, chainmailSprite);
+        key.leggingsPlateMaterial().ifPresent(material -> {
+            TextureAtlasSprite plateSprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(material, ArmorPartData.LEGGINGS_PLATE);
+            addForwardCuboids(quads, ModularLowerArmourGeometry.LEGGING_RIGHT_PLATE, plateSprite);
+            addForwardCuboids(quads, ModularLowerArmourGeometry.LEGGING_LEFT_PLATE, plateSprite);
         });
-        key.visorMaterial().ifPresent(material -> addForwardCuboids(quads, ModularLowerArmourGeometry.LEGGING_TASSETS, ArmorMaterialTextureManager.INSTANCE.geometrySprite(material, ArmorPartData.LEGGINGS_TASSETS)));
-        return new ResolvedArmorItemModel(List.copyOf(quads), legsSprite, transforms);
+        return new ResolvedArmorItemModel(List.copyOf(quads), chainmailSprite, transforms);
     }
 
     public static ResolvedArmorItemModel composeBoots(ArmorVisualKey key, ItemTransforms transforms) {
-        return compose(key, ModularLowerArmourGeometry.BOOTS, transforms);
-    }
-
-    private static ResolvedArmorItemModel compose(ArmorVisualKey key, List<ModularLowerArmourGeometry.Cuboid> cuboids, ItemTransforms transforms) {
-        TextureAtlasSprite sprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(key.skullMaterial(), ArmorPartData.BOOTS_FEET);
+        TextureAtlasSprite sprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(key.bootsChainmailMaterial(), ArmorPartData.BOOTS_CHAINMAIL);
         List<BakedQuad> quads = new ArrayList<>();
-        addCuboids(quads, cuboids, sprite);
+        addCuboids(quads, ModularLowerArmourGeometry.BOOTS, sprite);
+        key.bootsPlateMaterial().ifPresent(material -> addCuboids(quads, ModularLowerArmourGeometry.BOOTS_PLATE, ArmorMaterialTextureManager.INSTANCE.geometrySprite(material, ArmorPartData.BOOTS_PLATE)));
         return new ResolvedArmorItemModel(List.copyOf(quads), sprite, transforms);
     }
 

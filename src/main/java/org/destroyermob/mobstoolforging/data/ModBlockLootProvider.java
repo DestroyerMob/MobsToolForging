@@ -27,6 +27,7 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.FOUNDRY_FORGE.get());
         add(ModBlocks.KNAPPING_FLINT.get(), noDrop());
         add(ModBlocks.GROUND_TOOL_ASSEMBLY.get(), noDrop());
+        dropSelf(ModBlocks.ASH.get());
     }
 
     @Override
@@ -40,7 +41,8 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
                 ModBlocks.CRUCIBLE.get(),
                 ModBlocks.FOUNDRY_FORGE.get(),
                 ModBlocks.KNAPPING_FLINT.get(),
-                ModBlocks.GROUND_TOOL_ASSEMBLY.get()
+                ModBlocks.GROUND_TOOL_ASSEMBLY.get(),
+                ModBlocks.ASH.get()
         ));
         ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));

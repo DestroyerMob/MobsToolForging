@@ -18,32 +18,29 @@ public final class ModularHelmetItemModel {
     }
 
     public static ResolvedArmorItemModel compose(ArmorVisualKey key, ItemTransforms transforms) {
-        TextureAtlasSprite skullSprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(key.skullMaterial(), ArmorPartData.HELMET_SKULL);
+        TextureAtlasSprite chainmailSprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(key.helmetChainmailMaterial(), ArmorPartData.HELMET_CHAINMAIL);
         List<BakedQuad> quads = new ArrayList<>();
-        addElements(quads, ModularHelmetItemGeometry.SKULL, skullSprite);
-        key.combMaterial().ifPresent(material -> addElements(quads, ModularHelmetItemGeometry.COMB, ArmorMaterialTextureManager.INSTANCE.geometrySprite(material, ArmorPartData.HELMET_COMB)));
-        key.visorMaterial().ifPresent(material -> addElements(quads, ModularHelmetItemGeometry.VISOR, ArmorMaterialTextureManager.INSTANCE.geometrySprite(material, ArmorPartData.HELMET_VISOR)));
-        return new ResolvedArmorItemModel(List.copyOf(quads), skullSprite, transforms);
+        addCuboids(quads, ModularHelmetGeometry.CHAINMAIL, chainmailSprite);
+        key.helmetPlateMaterial().ifPresent(material -> addCuboids(quads, ModularHelmetGeometry.MATERIAL, ArmorMaterialTextureManager.INSTANCE.geometrySprite(material, ArmorPartData.HELMET_PLATE)));
+        return new ResolvedArmorItemModel(List.copyOf(quads), chainmailSprite, transforms);
     }
 
-    private static void addElements(List<BakedQuad> quads, List<ModularHelmetItemGeometry.Element> elements, TextureAtlasSprite sprite) {
-        for (ModularHelmetItemGeometry.Element element : elements) {
-            for (ModularHelmetItemGeometry.Face face : element.faces()) {
-                if (element.hasArea(face.direction())) {
-                    quads.add(bakeFace(element, face, sprite));
-                }
+    private static void addCuboids(List<BakedQuad> quads, List<ModularHelmetGeometry.Cuboid> cuboids, TextureAtlasSprite sprite) {
+        for (ModularHelmetGeometry.Cuboid cuboid : cuboids) {
+            for (net.minecraft.core.Direction direction : cuboid.renderDirections()) {
+                quads.add(bakeFace(cuboid, direction, sprite));
             }
         }
     }
 
-    private static BakedQuad bakeFace(ModularHelmetItemGeometry.Element element, ModularHelmetItemGeometry.Face itemFace, TextureAtlasSprite sprite) {
-        BlockElementFace face = new BlockElementFace(null, BlockElementFace.NO_TINT, "#texture", itemFace.uv());
+    private static BakedQuad bakeFace(ModularHelmetGeometry.Cuboid cuboid, net.minecraft.core.Direction direction, TextureAtlasSprite sprite) {
+        BlockElementFace face = new BlockElementFace(null, BlockElementFace.NO_TINT, "#texture", cuboid.blockFaceUv(direction));
         return FACE_BAKERY.bakeQuad(
-                element.from(),
-                element.to(),
+                cuboid.itemFrom(),
+                cuboid.itemTo(),
                 face,
                 sprite,
-                itemFace.direction(),
+                direction,
                 BlockModelRotation.X0_Y0,
                 null,
                 true

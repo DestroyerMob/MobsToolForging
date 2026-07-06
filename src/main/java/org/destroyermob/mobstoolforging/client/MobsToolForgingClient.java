@@ -3,7 +3,6 @@ package org.destroyermob.mobstoolforging.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
@@ -31,6 +30,7 @@ import org.destroyermob.mobstoolforging.client.model.ArmorMaterialTextureManager
 import org.destroyermob.mobstoolforging.client.model.ComponentDrivenToolBakedModel;
 import org.destroyermob.mobstoolforging.client.model.ModularBodyArmourModel;
 import org.destroyermob.mobstoolforging.client.model.ModularHelmetModel;
+import org.destroyermob.mobstoolforging.client.model.ModularLowerArmourModel;
 import org.destroyermob.mobstoolforging.client.model.PatternCutoutModelLoader;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
 import org.destroyermob.mobstoolforging.client.model.ToolMaterialVisualManager;
@@ -86,6 +86,7 @@ public final class MobsToolForgingClient {
     private static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(ModularHelmetModel.LAYER_LOCATION, ModularHelmetModel::createBodyLayer);
         event.registerLayerDefinition(ModularBodyArmourModel.LAYER_LOCATION, ModularBodyArmourModel::createBodyLayer);
+        event.registerLayerDefinition(ModularLowerArmourModel.LAYER_LOCATION, ModularLowerArmourModel::createBodyLayer);
         event.registerLayerDefinition(ModularHelmetModel.BLANK_ARMOR_LAYER, ModularHelmetModel::createBlankArmorLayer);
     }
 
@@ -107,9 +108,10 @@ public final class MobsToolForgingClient {
             livingRenderer.addLayer(new ModularHelmetLayer(livingRenderer, new ModularHelmetModel(modelSet.bakeLayer(ModularHelmetModel.LAYER_LOCATION))));
             livingRenderer.addLayer(new ModularBodyArmourLayer(
                     livingRenderer,
-                    new ModularBodyArmourModel(modelSet.bakeLayer(ModularBodyArmourModel.LAYER_LOCATION)),
-                    new HumanoidModel<>(modelSet.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR))));
-            livingRenderer.addLayer(new ModularLowerArmourLayer(livingRenderer));
+                    new ModularBodyArmourModel(modelSet.bakeLayer(ModularBodyArmourModel.LAYER_LOCATION))));
+            livingRenderer.addLayer(new ModularLowerArmourLayer(
+                    livingRenderer,
+                    new ModularLowerArmourModel(modelSet.bakeLayer(ModularLowerArmourModel.LAYER_LOCATION))));
         }
     }
 

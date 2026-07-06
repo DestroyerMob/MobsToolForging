@@ -17,18 +17,10 @@ public final class ArmorForgeAttachment {
     }
 
     public static boolean isAttachmentTemplate(@Nullable ResourceLocation templateId) {
-        return ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId)
-                || ToolTypeRegistry.HELMET_VISOR_TEMPLATE.equals(templateId)
+        return ToolTypeRegistry.HELMET_PLATE_TEMPLATE.equals(templateId)
                 || ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)
-                || ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE.equals(templateId)
-                || ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE.equals(templateId);
-    }
-
-    public static boolean isBaseArmorTemplate(@Nullable ResourceLocation templateId) {
-        return ToolTypeRegistry.HELMET_SKULL_TEMPLATE.equals(templateId)
-                || ToolTypeRegistry.CHESTPLATE_CHAINMAIL_TEMPLATE.equals(templateId)
-                || ToolTypeRegistry.LEGGINGS_LEGS_TEMPLATE.equals(templateId)
-                || ToolTypeRegistry.BOOTS_FEET_TEMPLATE.equals(templateId);
+                || ToolTypeRegistry.LEGGINGS_PLATE_TEMPLATE.equals(templateId)
+                || ToolTypeRegistry.BOOTS_PLATE_TEMPLATE.equals(templateId);
     }
 
     public static boolean isAttachmentStation(WorkstationKind workstationKind) {
@@ -48,60 +40,35 @@ public final class ArmorForgeAttachment {
         if (construction == null) {
             return false;
         }
-        if (ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId) || ToolTypeRegistry.HELMET_VISOR_TEMPLATE.equals(templateId)) {
+        if (ToolTypeRegistry.HELMET_PLATE_TEMPLATE.equals(templateId)) {
             return stack.is(ModItems.MODULAR_HELMET.get()) && ArmorConstructionData.HELMET_TYPE.equals(construction.armorType());
         }
         if (ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)) {
             return stack.is(ModItems.MODULAR_CHESTPLATE.get()) && construction.isChestplate();
         }
-        if (ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE.equals(templateId)) {
+        if (ToolTypeRegistry.LEGGINGS_PLATE_TEMPLATE.equals(templateId)) {
             return stack.is(ModItems.MODULAR_LEGGINGS.get()) && ArmorConstructionData.LEGGINGS_TYPE.equals(construction.armorType());
+        }
+        if (ToolTypeRegistry.BOOTS_PLATE_TEMPLATE.equals(templateId)) {
+            return stack.is(ModItems.MODULAR_BOOTS.get()) && ArmorConstructionData.BOOTS_TYPE.equals(construction.armorType());
         }
         return false;
     }
 
     public static ItemStack apply(ItemStack target, ResourceLocation templateId, ResourceLocation attachmentMaterial) {
+        return apply(target, templateId, attachmentMaterial, ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public static ItemStack apply(ItemStack target, ResourceLocation templateId, ResourceLocation attachmentMaterial, int attachmentQuality) {
         ArmorConstructionData construction = target.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
         if (construction == null || !isCompatibleTarget(templateId, target)) {
             return ItemStack.EMPTY;
         }
         ItemStack output = target.copyWithCount(1);
-        output.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), updatedConstruction(construction, templateId, attachmentMaterial));
+        ArmorConstructionData updatedConstruction = updatedConstruction(construction, templateId, attachmentMaterial, attachmentQuality);
+        output.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), updatedConstruction);
+        ArmorStatsCatalog.applyPreservingDamage(output, updatedConstruction);
         return output;
-    }
-
-    public static ItemStack baseOutputStack(ResourceLocation templateId, ResourceLocation materialId) {
-        if (ToolTypeRegistry.HELMET_SKULL_TEMPLATE.equals(templateId)) {
-            return ModItems.MODULAR_HELMET.get().create(materialId, Optional.empty(), Optional.empty());
-        }
-        if (ToolTypeRegistry.CHESTPLATE_CHAINMAIL_TEMPLATE.equals(templateId)) {
-            return ModItems.MODULAR_CHESTPLATE.get().createChainmail();
-        }
-        if (ToolTypeRegistry.LEGGINGS_LEGS_TEMPLATE.equals(templateId)) {
-            return ModItems.MODULAR_LEGGINGS.get().create(materialId);
-        }
-        if (ToolTypeRegistry.BOOTS_FEET_TEMPLATE.equals(templateId)) {
-            return ModItems.MODULAR_BOOTS.get().create(materialId);
-        }
-        return ItemStack.EMPTY;
-    }
-
-    public static ItemStack previewTargetStack(ResourceLocation templateId) {
-        if (ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId) || ToolTypeRegistry.HELMET_VISOR_TEMPLATE.equals(templateId)) {
-            return ModItems.MODULAR_HELMET.get().create(MaterialCatalog.IRON, Optional.empty(), Optional.empty());
-        }
-        if (ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)) {
-            return ModItems.MODULAR_CHESTPLATE.get().createChainmail();
-        }
-        if (ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE.equals(templateId)) {
-            return ModItems.MODULAR_LEGGINGS.get().create(MaterialCatalog.IRON);
-        }
-        return ItemStack.EMPTY;
-    }
-
-    public static ItemStack previewOutputStack(ResourceLocation templateId, ResourceLocation attachmentMaterial) {
-        ItemStack target = previewTargetStack(templateId);
-        return target.isEmpty() ? ItemStack.EMPTY : apply(target, templateId, attachmentMaterial);
     }
 
     public static Component statusMessage(ToolForgeBlockEntity forge) {
@@ -154,31 +121,37 @@ public final class ArmorForgeAttachment {
         if (ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)) {
             return construction.chestplatePlateMaterial();
         }
-        if (ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE.equals(templateId)) {
-            return construction.combMaterial();
+        if (ToolTypeRegistry.HELMET_PLATE_TEMPLATE.equals(templateId)) {
+            return construction.helmetPlateMaterial();
         }
-        if (ToolTypeRegistry.HELMET_VISOR_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE.equals(templateId)) {
-            return construction.visorMaterial();
+        if (ToolTypeRegistry.LEGGINGS_PLATE_TEMPLATE.equals(templateId)) {
+            return construction.leggingsPlateMaterial();
+        }
+        if (ToolTypeRegistry.BOOTS_PLATE_TEMPLATE.equals(templateId)) {
+            return construction.bootsPlateMaterial();
         }
         return Optional.empty();
     }
 
-    private static ArmorConstructionData updatedConstruction(ArmorConstructionData construction, ResourceLocation templateId, ResourceLocation attachmentMaterial) {
-        Optional<ResourceLocation> firstOptional = construction.combMaterial();
-        Optional<ResourceLocation> secondOptional = construction.visorMaterial();
-        if (ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)) {
-            return new ArmorConstructionData(
-                    construction.armorType(),
-                    MaterialCatalog.IRON,
-                    Optional.of(attachmentMaterial),
-                    Optional.of(MaterialCatalog.IRON),
-                    construction.quality()
-            );
-        } else if (ToolTypeRegistry.HELMET_COMB_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_KNEES_TEMPLATE.equals(templateId)) {
-            firstOptional = Optional.of(attachmentMaterial);
-        } else if (ToolTypeRegistry.HELMET_VISOR_TEMPLATE.equals(templateId) || ToolTypeRegistry.LEGGINGS_TASSETS_TEMPLATE.equals(templateId)) {
-            secondOptional = Optional.of(attachmentMaterial);
+    private static ArmorConstructionData updatedConstruction(ArmorConstructionData construction, ResourceLocation templateId, ResourceLocation attachmentMaterial, int attachmentQuality) {
+        int quality = combinedQuality(construction, attachmentQuality);
+        return new ArmorConstructionData(construction.armorType(), primaryMaterial(construction), Optional.of(attachmentMaterial), Optional.empty(), quality);
+    }
+
+    private static int combinedQuality(ArmorConstructionData construction, int attachmentQuality) {
+        return ForgingQuality.clampScore(Math.round((construction.quality() + ForgingQuality.clampScore(attachmentQuality)) / 2.0F));
+    }
+
+    private static ResourceLocation primaryMaterial(ArmorConstructionData construction) {
+        if (ArmorConstructionData.HELMET_TYPE.equals(construction.armorType())) {
+            return construction.helmetChainmailMaterial();
         }
-        return new ArmorConstructionData(construction.armorType(), construction.skullMaterial(), firstOptional, secondOptional, construction.quality());
+        if (ArmorConstructionData.LEGGINGS_TYPE.equals(construction.armorType())) {
+            return construction.leggingsChainmailMaterial();
+        }
+        if (ArmorConstructionData.BOOTS_TYPE.equals(construction.armorType())) {
+            return construction.bootsChainmailMaterial();
+        }
+        return construction.chestplateChainmailMaterial();
     }
 }
