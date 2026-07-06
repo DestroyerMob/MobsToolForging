@@ -10,7 +10,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 
@@ -38,40 +37,40 @@ public final class ModularBodyArmourModel {
         this.materialLeftArm = root.getChild(MATERIAL_LEFT_ARM);
     }
 
-    public void renderChainmailBody(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        render(chainmailBody, poseStack, consumer, sprite, 0xFFFFFFFF, packedLight, packedOverlay);
+    public void renderChainmailBody(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(chainmailBody, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderChainmailRightArm(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        render(chainmailRightArm, poseStack, consumer, sprite, 0xFFFFFFFF, packedLight, packedOverlay);
+    public void renderChainmailRightArm(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(chainmailRightArm, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderChainmailLeftArm(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        render(chainmailLeftArm, poseStack, consumer, sprite, 0xFFFFFFFF, packedLight, packedOverlay);
+    public void renderChainmailLeftArm(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(chainmailLeftArm, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderBody(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        renderBody(poseStack, consumer, sprite, 0xFFFFFFFF, packedLight, packedOverlay);
+    public void renderBody(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {
+        renderBody(poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
     }
 
-    public void renderBody(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int color, int packedLight, int packedOverlay) {
-        render(materialBody, poseStack, consumer, sprite, color, packedLight, packedOverlay);
+    public void renderBody(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(materialBody, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderRightArm(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        renderRightArm(poseStack, consumer, sprite, 0xFFFFFFFF, packedLight, packedOverlay);
+    public void renderRightArm(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {
+        renderRightArm(poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
     }
 
-    public void renderRightArm(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int color, int packedLight, int packedOverlay) {
-        render(materialRightArm, poseStack, consumer, sprite, color, packedLight, packedOverlay);
+    public void renderRightArm(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(materialRightArm, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderLeftArm(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        renderLeftArm(poseStack, consumer, sprite, 0xFFFFFFFF, packedLight, packedOverlay);
+    public void renderLeftArm(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {
+        renderLeftArm(poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
     }
 
-    public void renderLeftArm(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int color, int packedLight, int packedOverlay) {
-        render(materialLeftArm, poseStack, consumer, sprite, color, packedLight, packedOverlay);
+    public void renderLeftArm(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(materialLeftArm, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -108,7 +107,7 @@ public final class ModularBodyArmourModel {
                 .addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, deformation), PartPose.ZERO);
     }
 
-    private static void render(ModelPart part, PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int color, int packedLight, int packedOverlay) {
-        part.render(poseStack, new SpriteUvVertexConsumer(consumer, sprite, color), packedLight, packedOverlay);
+    private static void render(ModelPart part, PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        part.render(poseStack, new TintingVertexConsumer(consumer, color), packedLight, packedOverlay);
     }
 }

@@ -10,8 +10,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -44,9 +42,9 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
         if (construction == null || !ArmorConstructionData.LEGGINGS_TYPE.equals(construction.armorType())) {
             return;
         }
-        renderLeggingsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), packedLight, construction);
+        renderLeggingsParts(poseStack, humanoidModel, bufferSource, packedLight, construction);
         if (stack.hasFoil()) {
-            renderLeggingsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), packedLight, construction);
+            renderLeggingsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), 0xFFFFFFFF, packedLight, construction);
         }
     }
 
@@ -56,87 +54,109 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
         if (construction == null || !ArmorConstructionData.BOOTS_TYPE.equals(construction.armorType())) {
             return;
         }
-        renderBootsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), packedLight, construction);
+        renderBootsParts(poseStack, humanoidModel, bufferSource, packedLight, construction);
         if (stack.hasFoil()) {
-            renderBootsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), packedLight, construction);
+            renderBootsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), 0xFFFFFFFF, packedLight, construction);
         }
     }
 
-    private void renderLeggingsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int packedLight, ArmorConstructionData construction) {
-        TextureAtlasSprite chainmailSprite = ArmorMaterialTextureManager.INSTANCE.wornChainmailSprite(ArmorPartData.LEGGINGS_CHAINMAIL);
-        renderChainmailRightLeggings(poseStack, humanoidModel.rightLeg, consumer, chainmailSprite, packedLight);
-        renderChainmailLeftLeggings(poseStack, humanoidModel.leftLeg, consumer, chainmailSprite, packedLight);
+    private void renderLeggingsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
+        ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(ArmorPartData.LEGGINGS_CHAINMAIL);
+        VertexConsumer chainmailConsumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture()));
+        renderChainmailRightLeggings(poseStack, humanoidModel.rightLeg, chainmailConsumer, chainmail.color(), packedLight);
+        renderChainmailLeftLeggings(poseStack, humanoidModel.leftLeg, chainmailConsumer, chainmail.color(), packedLight);
         construction.leggingsPlateMaterial().ifPresent(material -> {
-            ArmorMaterialTextureManager.ResolvedArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.LEGGINGS_PLATE);
-            renderRightLeggings(poseStack, humanoidModel.rightLeg, consumer, texture, packedLight);
-            renderLeftLeggings(poseStack, humanoidModel.leftLeg, consumer, texture, packedLight);
+            ArmorMaterialTextureManager.WornArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.LEGGINGS_PLATE);
+            VertexConsumer materialConsumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(texture.texture()));
+            renderRightLeggings(poseStack, humanoidModel.rightLeg, materialConsumer, texture.color(), packedLight);
+            renderLeftLeggings(poseStack, humanoidModel.leftLeg, materialConsumer, texture.color(), packedLight);
         });
     }
 
-    private void renderBootsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int packedLight, ArmorConstructionData construction) {
-        TextureAtlasSprite chainmailSprite = ArmorMaterialTextureManager.INSTANCE.wornChainmailSprite(ArmorPartData.BOOTS_CHAINMAIL);
-        renderChainmailRightBoot(poseStack, humanoidModel.rightLeg, consumer, chainmailSprite, packedLight);
-        renderChainmailLeftBoot(poseStack, humanoidModel.leftLeg, consumer, chainmailSprite, packedLight);
+    private void renderLeggingsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int color, int packedLight, ArmorConstructionData construction) {
+        renderChainmailRightLeggings(poseStack, humanoidModel.rightLeg, consumer, color, packedLight);
+        renderChainmailLeftLeggings(poseStack, humanoidModel.leftLeg, consumer, color, packedLight);
+        if (construction.leggingsPlateMaterial().isPresent()) {
+            renderRightLeggings(poseStack, humanoidModel.rightLeg, consumer, color, packedLight);
+            renderLeftLeggings(poseStack, humanoidModel.leftLeg, consumer, color, packedLight);
+        }
+    }
+
+    private void renderBootsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
+        ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(ArmorPartData.BOOTS_CHAINMAIL);
+        VertexConsumer chainmailConsumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture()));
+        renderChainmailRightBoot(poseStack, humanoidModel.rightLeg, chainmailConsumer, chainmail.color(), packedLight);
+        renderChainmailLeftBoot(poseStack, humanoidModel.leftLeg, chainmailConsumer, chainmail.color(), packedLight);
         construction.bootsPlateMaterial().ifPresent(material -> {
-            ArmorMaterialTextureManager.ResolvedArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.BOOTS_PLATE);
-            renderRightBoot(poseStack, humanoidModel.rightLeg, consumer, texture, packedLight);
-            renderLeftBoot(poseStack, humanoidModel.leftLeg, consumer, texture, packedLight);
+            ArmorMaterialTextureManager.WornArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.BOOTS_PLATE);
+            VertexConsumer materialConsumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(texture.texture()));
+            renderRightBoot(poseStack, humanoidModel.rightLeg, materialConsumer, texture.color(), packedLight);
+            renderLeftBoot(poseStack, humanoidModel.leftLeg, materialConsumer, texture.color(), packedLight);
         });
     }
 
-    private void renderChainmailRightLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight) {
+    private void renderBootsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int color, int packedLight, ArmorConstructionData construction) {
+        renderChainmailRightBoot(poseStack, humanoidModel.rightLeg, consumer, color, packedLight);
+        renderChainmailLeftBoot(poseStack, humanoidModel.leftLeg, consumer, color, packedLight);
+        if (construction.bootsPlateMaterial().isPresent()) {
+            renderRightBoot(poseStack, humanoidModel.rightLeg, consumer, color, packedLight);
+            renderLeftBoot(poseStack, humanoidModel.leftLeg, consumer, color, packedLight);
+        }
+    }
+
+    private void renderChainmailRightLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int color, int packedLight) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        lowerArmourModel.renderChainmailRightLeggings(poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        lowerArmourModel.renderChainmailRightLeggings(poseStack, consumer, color, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
-    private void renderChainmailLeftLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight) {
+    private void renderChainmailLeftLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int color, int packedLight) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        lowerArmourModel.renderChainmailLeftLeggings(poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        lowerArmourModel.renderChainmailLeftLeggings(poseStack, consumer, color, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
-    private void renderRightLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, ArmorMaterialTextureManager.ResolvedArmorTexture texture, int packedLight) {
+    private void renderRightLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int color, int packedLight) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        lowerArmourModel.renderRightLeggings(poseStack, consumer, texture.sprite(), texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
+        lowerArmourModel.renderRightLeggings(poseStack, consumer, color, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
-    private void renderLeftLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, ArmorMaterialTextureManager.ResolvedArmorTexture texture, int packedLight) {
+    private void renderLeftLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int color, int packedLight) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        lowerArmourModel.renderLeftLeggings(poseStack, consumer, texture.sprite(), texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
+        lowerArmourModel.renderLeftLeggings(poseStack, consumer, color, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
-    private void renderChainmailRightBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight) {
+    private void renderChainmailRightBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int color, int packedLight) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        lowerArmourModel.renderChainmailRightBoot(poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        lowerArmourModel.renderChainmailRightBoot(poseStack, consumer, color, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
-    private void renderChainmailLeftBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight) {
+    private void renderChainmailLeftBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int color, int packedLight) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        lowerArmourModel.renderChainmailLeftBoot(poseStack, consumer, sprite, packedLight, OverlayTexture.NO_OVERLAY);
+        lowerArmourModel.renderChainmailLeftBoot(poseStack, consumer, color, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
-    private void renderRightBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, ArmorMaterialTextureManager.ResolvedArmorTexture texture, int packedLight) {
+    private void renderRightBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int color, int packedLight) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        lowerArmourModel.renderRightBoot(poseStack, consumer, texture.sprite(), texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
+        lowerArmourModel.renderRightBoot(poseStack, consumer, color, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
-    private void renderLeftBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, ArmorMaterialTextureManager.ResolvedArmorTexture texture, int packedLight) {
+    private void renderLeftBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, int color, int packedLight) {
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
-        lowerArmourModel.renderLeftBoot(poseStack, consumer, texture.sprite(), texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
+        lowerArmourModel.renderLeftBoot(poseStack, consumer, color, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 

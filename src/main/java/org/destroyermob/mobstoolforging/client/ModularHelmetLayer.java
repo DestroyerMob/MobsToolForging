@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -48,24 +47,24 @@ public final class ModularHelmetLayer<T extends LivingEntity, M extends EntityMo
     }
 
     private void renderParts(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
-        VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
-        renderChainmail(poseStack, consumer, packedLight);
+        ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(ArmorPartData.HELMET_CHAINMAIL);
+        renderChainmail(poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture())), chainmail.color(), packedLight);
         construction.helmetPlateMaterial().ifPresent(material -> {
-            ArmorMaterialTextureManager.ResolvedArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.HELMET_PLATE);
-            helmetModel.renderMaterial(poseStack, consumer, texture.sprite(), texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
+            ArmorMaterialTextureManager.WornArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.HELMET_PLATE);
+            VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(texture.texture()));
+            helmetModel.renderMaterial(poseStack, consumer, texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
         });
     }
 
     private void renderGlint(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
         VertexConsumer glint = bufferSource.getBuffer(RenderType.armorEntityGlint());
-        renderChainmail(poseStack, glint, packedLight);
+        renderChainmail(poseStack, glint, 0xFFFFFFFF, packedLight);
         construction.helmetPlateMaterial().ifPresent(material -> {
-            ArmorMaterialTextureManager.ResolvedArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.HELMET_PLATE);
-            helmetModel.renderMaterial(poseStack, glint, texture.sprite(), texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
+            helmetModel.renderMaterial(poseStack, glint, 0xFFFFFFFF, packedLight, OverlayTexture.NO_OVERLAY);
         });
     }
 
-    private void renderChainmail(PoseStack poseStack, VertexConsumer consumer, int packedLight) {
-        helmetModel.renderChainmail(poseStack, consumer, ArmorMaterialTextureManager.INSTANCE.wornChainmailSprite(ArmorPartData.HELMET_CHAINMAIL), packedLight, OverlayTexture.NO_OVERLAY);
+    private void renderChainmail(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight) {
+        helmetModel.renderChainmail(poseStack, consumer, packedLight, OverlayTexture.NO_OVERLAY);
     }
 }

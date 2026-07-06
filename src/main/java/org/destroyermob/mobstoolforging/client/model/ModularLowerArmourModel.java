@@ -10,7 +10,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 
@@ -44,36 +43,36 @@ public final class ModularLowerArmourModel {
         this.materialLeftBoot = root.getChild(MATERIAL_LEFT_BOOT);
     }
 
-    public void renderChainmailRightLeggings(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        render(chainmailRightLeggings, poseStack, consumer, sprite, 0xFFFFFFFF, packedLight, packedOverlay);
+    public void renderChainmailRightLeggings(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(chainmailRightLeggings, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderChainmailLeftLeggings(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        render(chainmailLeftLeggings, poseStack, consumer, sprite, 0xFFFFFFFF, packedLight, packedOverlay);
+    public void renderChainmailLeftLeggings(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(chainmailLeftLeggings, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderRightLeggings(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int color, int packedLight, int packedOverlay) {
-        render(materialRightLeggings, poseStack, consumer, sprite, color, packedLight, packedOverlay);
+    public void renderRightLeggings(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(materialRightLeggings, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderLeftLeggings(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int color, int packedLight, int packedOverlay) {
-        render(materialLeftLeggings, poseStack, consumer, sprite, color, packedLight, packedOverlay);
+    public void renderLeftLeggings(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(materialLeftLeggings, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderChainmailRightBoot(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        render(chainmailRightBoot, poseStack, consumer, sprite, 0xFFFFFFFF, packedLight, packedOverlay);
+    public void renderChainmailRightBoot(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(chainmailRightBoot, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderChainmailLeftBoot(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        render(chainmailLeftBoot, poseStack, consumer, sprite, 0xFFFFFFFF, packedLight, packedOverlay);
+    public void renderChainmailLeftBoot(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(chainmailLeftBoot, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderRightBoot(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int color, int packedLight, int packedOverlay) {
-        render(materialRightBoot, poseStack, consumer, sprite, color, packedLight, packedOverlay);
+    public void renderRightBoot(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(materialRightBoot, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
-    public void renderLeftBoot(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int color, int packedLight, int packedOverlay) {
-        render(materialLeftBoot, poseStack, consumer, sprite, color, packedLight, packedOverlay);
+    public void renderLeftBoot(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        render(materialLeftBoot, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -108,7 +107,7 @@ public final class ModularLowerArmourModel {
                 .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, deformation), PartPose.ZERO);
     }
 
-    private static void render(ModelPart part, PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int color, int packedLight, int packedOverlay) {
-        part.render(poseStack, new SpriteUvVertexConsumer(consumer, sprite, color), packedLight, packedOverlay);
+    private static void render(ModelPart part, PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        part.render(poseStack, new TintingVertexConsumer(consumer, color), packedLight, packedOverlay);
     }
 }

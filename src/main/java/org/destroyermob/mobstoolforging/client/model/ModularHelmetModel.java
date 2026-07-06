@@ -10,7 +10,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 
@@ -27,16 +26,16 @@ public final class ModularHelmetModel {
         this.materialHelmet = root.getChild(MATERIAL_HELMET);
     }
 
-    public void renderChainmail(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        chainmailHelmet.render(poseStack, new SpriteUvVertexConsumer(consumer, sprite), packedLight, packedOverlay);
+    public void renderChainmail(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {
+        chainmailHelmet.render(poseStack, consumer, packedLight, packedOverlay);
     }
 
-    public void renderMaterial(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {
-        renderMaterial(poseStack, consumer, sprite, 0xFFFFFFFF, packedLight, packedOverlay);
+    public void renderMaterial(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {
+        renderMaterial(poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
     }
 
-    public void renderMaterial(PoseStack poseStack, VertexConsumer consumer, TextureAtlasSprite sprite, int color, int packedLight, int packedOverlay) {
-        materialHelmet.render(poseStack, new SpriteUvVertexConsumer(consumer, sprite, color), packedLight, packedOverlay);
+    public void renderMaterial(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        materialHelmet.render(poseStack, new TintingVertexConsumer(consumer, color), packedLight, packedOverlay);
     }
 
     public static LayerDefinition createBodyLayer() {

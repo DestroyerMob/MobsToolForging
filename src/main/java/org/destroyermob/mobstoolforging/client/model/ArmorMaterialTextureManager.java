@@ -35,10 +35,10 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
     private static final ResourceLocation VANILLA_CHAINMAIL_CHESTPLATE_TEXTURE = ResourceLocation.withDefaultNamespace("item/chainmail_chestplate");
     private static final ResourceLocation VANILLA_CHAINMAIL_LEGGINGS_TEXTURE = ResourceLocation.withDefaultNamespace("item/chainmail_leggings");
     private static final ResourceLocation VANILLA_CHAINMAIL_BOOTS_TEXTURE = ResourceLocation.withDefaultNamespace("item/chainmail_boots");
-    private static final ResourceLocation WORN_CHAINMAIL_LAYER_1_TEXTURE = ResourceLocation.withDefaultNamespace("models/armor/chainmail_layer_1");
-    private static final ResourceLocation WORN_CHAINMAIL_LAYER_2_TEXTURE = ResourceLocation.withDefaultNamespace("models/armor/chainmail_layer_2");
-    private static final ResourceLocation WORN_MATERIAL_LAYER_1_TEXTURE = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "models/armor/layer_1");
-    private static final ResourceLocation WORN_MATERIAL_LAYER_2_TEXTURE = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "models/armor/layer_2");
+    private static final ResourceLocation WORN_CHAINMAIL_LAYER_1_TEXTURE = ResourceLocation.withDefaultNamespace("textures/models/armor/chainmail_layer_1.png");
+    private static final ResourceLocation WORN_CHAINMAIL_LAYER_2_TEXTURE = ResourceLocation.withDefaultNamespace("textures/models/armor/chainmail_layer_2.png");
+    private static final ResourceLocation WORN_MATERIAL_LAYER_1_TEXTURE = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "textures/models/armor/layer_1.png");
+    private static final ResourceLocation WORN_MATERIAL_LAYER_2_TEXTURE = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "textures/models/armor/layer_2.png");
     private final Set<ResourceLocation> warnedMissingTextures = ConcurrentHashMap.newKeySet();
     private volatile Map<ResourceLocation, ArmorMaterialTextures> textures = defaults();
 
@@ -66,23 +66,19 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
         return texture.color() == 0xFFFFFFFF ? texture.sprite() : sprite(materialId);
     }
 
-    public TextureAtlasSprite wornMaterialSprite(ResourceLocation materialId, String partType) {
-        return wornMaterialTexture(materialId, partType).sprite();
-    }
-
-    public ResolvedArmorTexture wornMaterialTexture(ResourceLocation materialId, String partType) {
+    public WornArmorTexture wornMaterialTexture(ResourceLocation materialId, String partType) {
         ResourceLocation wornTexture = wornArmorTexture(materialId, partType);
         if (wornTexture != null) {
-            return resolvedTexture(wornTexture, 0xFFFFFFFF, materialId);
+            return new WornArmorTexture(wornTexture, 0xFFFFFFFF);
         }
         ResourceLocation tintedTexture = ArmorPartData.LEGGINGS_PLATE.equals(partType)
                 ? WORN_MATERIAL_LAYER_2_TEXTURE
                 : WORN_MATERIAL_LAYER_1_TEXTURE;
-        return resolvedTexture(tintedTexture, ToolMaterialVisualManager.INSTANCE.tintColor(materialId), materialId);
+        return new WornArmorTexture(tintedTexture, ToolMaterialVisualManager.INSTANCE.tintColor(materialId));
     }
 
-    public TextureAtlasSprite wornChainmailSprite(String partType) {
-        return sprite(wornChainmailTexture(partType), MaterialCatalog.IRON);
+    public WornArmorTexture wornChainmailTexture(String partType) {
+        return new WornArmorTexture(wornChainmailLayerTexture(partType), 0xFFFFFFFF);
     }
 
     public TextureAtlasSprite chainmailSprite() {
@@ -185,7 +181,7 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
         };
     }
 
-    private static ResourceLocation wornChainmailTexture(String partType) {
+    private static ResourceLocation wornChainmailLayerTexture(String partType) {
         return ArmorPartData.LEGGINGS_CHAINMAIL.equals(partType)
                 ? WORN_CHAINMAIL_LAYER_2_TEXTURE
                 : WORN_CHAINMAIL_LAYER_1_TEXTURE;
@@ -197,7 +193,7 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
             return null;
         }
         String layer = ArmorPartData.LEGGINGS_PLATE.equals(partType) ? "2" : "1";
-        return ResourceLocation.withDefaultNamespace("models/armor/" + prefix + "_layer_" + layer);
+        return ResourceLocation.withDefaultNamespace("textures/models/armor/" + prefix + "_layer_" + layer + ".png");
     }
 
     private static String vanillaArmorLayerPrefix(ResourceLocation materialId) {
@@ -275,6 +271,9 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
     }
 
     public record ResolvedArmorTexture(TextureAtlasSprite sprite, int color, ResourceLocation texture) {
+    }
+
+    public record WornArmorTexture(ResourceLocation texture, int color) {
     }
 
     private record ArmorMaterialTextures(ResourceLocation texture, Map<String, ArmorItemTexture> itemTextures) {

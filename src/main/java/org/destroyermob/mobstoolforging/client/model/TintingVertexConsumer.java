@@ -1,23 +1,16 @@
 package org.destroyermob.mobstoolforging.client.model;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
-final class SpriteUvVertexConsumer implements VertexConsumer {
+final class TintingVertexConsumer implements VertexConsumer {
     private final VertexConsumer delegate;
-    private final TextureAtlasSprite sprite;
     private final int redTint;
     private final int greenTint;
     private final int blueTint;
     private final int alphaTint;
 
-    SpriteUvVertexConsumer(VertexConsumer delegate, TextureAtlasSprite sprite) {
-        this(delegate, sprite, 0xFFFFFFFF);
-    }
-
-    SpriteUvVertexConsumer(VertexConsumer delegate, TextureAtlasSprite sprite, int color) {
+    TintingVertexConsumer(VertexConsumer delegate, int color) {
         this.delegate = delegate;
-        this.sprite = sprite;
         this.alphaTint = color >>> 24 & 0xFF;
         this.redTint = color >>> 16 & 0xFF;
         this.greenTint = color >>> 8 & 0xFF;
@@ -43,7 +36,7 @@ final class SpriteUvVertexConsumer implements VertexConsumer {
 
     @Override
     public VertexConsumer setUv(float u, float v) {
-        delegate.setUv(sprite.getU(wrapUv(u) * 16.0F), sprite.getV(wrapUv(v) * 16.0F));
+        delegate.setUv(u, v);
         return this;
     }
 
@@ -63,16 +56,5 @@ final class SpriteUvVertexConsumer implements VertexConsumer {
     public VertexConsumer setNormal(float x, float y, float z) {
         delegate.setNormal(x, y, z);
         return this;
-    }
-
-    private static float wrapUv(float value) {
-        if (value >= 0.0F && value <= 1.0F) {
-            return value;
-        }
-        float wrapped = value - (float) Math.floor(value);
-        if (wrapped == 0.0F && value > 0.0F) {
-            return 1.0F;
-        }
-        return wrapped;
     }
 }
