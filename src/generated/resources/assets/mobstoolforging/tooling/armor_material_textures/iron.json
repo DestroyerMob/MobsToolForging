@@ -1,10 +1,11 @@
 {
   "item_textures": {
-    "boots": "minecraft:item/iron_boots",
-    "chestplate": "minecraft:item/iron_chestplate",
-    "helmet": "minecraft:item/iron_helmet",
-    "leggings": "minecraft:item/iron_leggings"
+    "boots": "mobstoolforging:item/armor/boots",
+    "chestplate": "mobstoolforging:item/armor/chestplate",
+    "helmet": "mobstoolforging:item/armor/helmet",
+    "leggings": "mobstoolforging:item/armor/leggings"
   },
   "material": "mobstoolforging:iron",
-  "texture": "minecraft:block/iron_block"
+  "texture": "minecraft:block/iron_block",
+  "tint_item_textures": true
 }

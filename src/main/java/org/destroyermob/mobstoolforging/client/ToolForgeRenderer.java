@@ -281,7 +281,7 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         poseStack.scale(scale, scale, scale);
         float heat = level == null ? WorkpieceHeat.storedTemperature(stack) : WorkpieceHeat.temperature(stack, level);
         if (heat > 0.02F) {
-            HeatRenderUtil.renderHeatedItem(itemRenderer, stack, ItemDisplayContext.FIXED, packedOverlay, poseStack, bufferSource, level, heat);
+            HeatRenderUtil.renderHeatedItem(itemRenderer, stack, ItemDisplayContext.FIXED, packedLight, packedOverlay, poseStack, bufferSource, level, heat);
         } else {
             itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
         }

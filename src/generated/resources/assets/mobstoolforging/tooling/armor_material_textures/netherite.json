@@ -1,10 +1,11 @@
 {
   "item_textures": {
-    "boots": "minecraft:item/netherite_boots",
-    "chestplate": "minecraft:item/netherite_chestplate",
-    "helmet": "minecraft:item/netherite_helmet",
-    "leggings": "minecraft:item/netherite_leggings"
+    "boots": "mobstoolforging:item/armor/boots",
+    "chestplate": "mobstoolforging:item/armor/chestplate",
+    "helmet": "mobstoolforging:item/armor/helmet",
+    "leggings": "mobstoolforging:item/armor/leggings"
   },
   "material": "mobstoolforging:netherite",
-  "texture": "minecraft:block/netherite_block"
+  "texture": "minecraft:block/netherite_block",
+  "tint_item_textures": true
 }

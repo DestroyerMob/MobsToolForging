@@ -327,18 +327,18 @@ public class HeatingForgeBlock extends BaseEntityBlock {
     }
 
     private static int workpieceSlotFromHit(BlockState state, BlockPos pos, BlockHitResult hitResult) {
-        double x = hitResult.getLocation().x - pos.getX() - 0.5D;
-        double z = hitResult.getLocation().z - pos.getZ() - 0.5D;
+        double hitX = hitResult.getLocation().x - pos.getX() - 0.5D;
+        double hitZ = hitResult.getLocation().z - pos.getZ() - 0.5D;
         double radians = Math.toRadians(modelRotationDegrees(state.getValue(FACING)));
         double cos = Math.cos(radians);
         double sin = Math.sin(radians);
-        double authoredX = x * cos + z * sin;
-        double authoredZ = -x * sin + z * cos;
         int closestSlot = 0;
         double closestDistance = Double.MAX_VALUE;
         for (int slot = 0; slot < WORKPIECE_SLOT_X.length; slot++) {
-            double dx = authoredX - WORKPIECE_SLOT_X[slot];
-            double dz = authoredZ - WORKPIECE_SLOT_Z[slot];
+            double slotX = rotatedX(WORKPIECE_SLOT_X[slot], WORKPIECE_SLOT_Z[slot], cos, sin);
+            double slotZ = rotatedZ(WORKPIECE_SLOT_X[slot], WORKPIECE_SLOT_Z[slot], cos, sin);
+            double dx = hitX - slotX;
+            double dz = hitZ - slotZ;
             double distance = dx * dx + dz * dz;
             if (distance < closestDistance) {
                 closestDistance = distance;
@@ -346,6 +346,14 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             }
         }
         return closestSlot;
+    }
+
+    private static double rotatedX(double x, double z, double cos, double sin) {
+        return x * cos + z * sin;
+    }
+
+    private static double rotatedZ(double x, double z, double cos, double sin) {
+        return -x * sin + z * cos;
     }
 
     private static int modelRotationDegrees(Direction direction) {

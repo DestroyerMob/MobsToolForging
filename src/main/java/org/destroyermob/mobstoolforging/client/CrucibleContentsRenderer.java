@@ -130,9 +130,10 @@ public final class CrucibleContentsRenderer {
         poseStack.mulPose(Axis.YP.rotationDegrees(itemRotation(level, partialTick)));
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.scale(meltScale, meltScale, meltScale);
-        itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
         if (contents.heat() > 0.02F) {
-            HeatRenderUtil.renderHeatedItem(itemRenderer, stack, ItemDisplayContext.GROUND, packedOverlay, poseStack, bufferSource, level, contents.heat());
+            HeatRenderUtil.renderHeatedItem(itemRenderer, stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, contents.heat());
+        } else {
+            itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight, packedOverlay, poseStack, bufferSource, level, 0);
         }
         poseStack.popPose();
     }

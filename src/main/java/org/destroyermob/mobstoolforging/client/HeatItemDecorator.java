@@ -16,30 +16,48 @@ public class HeatItemDecorator implements IItemDecorator {
 
     @Override
     public boolean render(GuiGraphics guiGraphics, Font font, ItemStack stack, int xOffset, int yOffset) {
-        float temperature = temperature(stack);
+        float temperature = HeatVisuals.clamp(temperature(stack));
         if (temperature <= 0.0F) {
             return false;
         }
 
-        renderHeatLayer(guiGraphics, stack, xOffset, yOffset, 1.14F, 1.0F, 0.16F + temperature * 0.34F, 0.02F, 0.32F + temperature * 0.34F, 190.0F);
-        renderHeatLayer(guiGraphics, stack, xOffset, yOffset, 0.94F, 1.0F, 0.47F + temperature * 0.52F, 0.14F + temperature * 0.76F, 0.48F + temperature * 0.42F, 200.0F);
-
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0.0F, 0.0F, 210.0F);
-        int fillWidth = Math.max(1, Math.round(13.0F * temperature));
-        int fillColor = WorkpieceHeat.data(stack).map(data -> data.workable() ? 0xFFFFF1C6 : 0xFFFF6A1A).orElse(0xFFFF6A1A);
-        guiGraphics.fill(xOffset + 2, yOffset + 13, xOffset + 15, yOffset + 15, 0xAA230900);
-        guiGraphics.fill(xOffset + 2, yOffset + 13, xOffset + 2 + fillWidth, yOffset + 15, fillColor);
-        guiGraphics.pose().popPose();
+        int heatColor = HeatVisuals.heatColor(temperature);
+        renderHeatLayer(guiGraphics, stack, xOffset, yOffset, 1.0F, heatColor, 0.18F + temperature * 0.20F, 190.0F);
+        renderHeatLayer(guiGraphics, stack, xOffset, yOffset, 1.0F, HeatVisuals.lerpColor(heatColor, 0xFFFFFFFF, temperature * 0.55F), 0.10F + temperature * 0.18F, 200.0F);
+        renderHeatGauge(guiGraphics, stack, xOffset, yOffset, temperature);
         return true;
     }
 
-    private static void renderHeatLayer(GuiGraphics guiGraphics, ItemStack stack, int xOffset, int yOffset, float scale, float red, float green, float blue, float alpha, float z) {
+    private static void renderHeatGauge(GuiGraphics guiGraphics, ItemStack stack, int xOffset, int yOffset, float temperature) {
+        boolean workable = WorkpieceHeat.isWorkable(stack);
+        int x = xOffset + 1;
+        int y = yOffset + 2;
+        int frameColor = workable ? 0xFFFFE8A3 : 0xFF5D1205;
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0.0F, 0.0F, 400.0F);
+        guiGraphics.fill(x, y - 1, x + 4, y + 12, 0xF0100300);
+        guiGraphics.fill(x, y - 1, x + 4, y, frameColor);
+        guiGraphics.fill(x, y + 11, x + 4, y + 12, frameColor);
+        guiGraphics.fill(x, y, x + 1, y + 11, frameColor);
+        guiGraphics.fill(x + 3, y, x + 4, y + 11, frameColor);
+        int litSegments = Math.max(1, Math.round(temperature * 5.0F));
+        for (int segment = 0; segment < 5; segment++) {
+            int segmentY = y + 9 - segment * 2;
+            int color = segment < litSegments ? HeatVisuals.heatColor((segment + 1.0F) / 5.0F) : 0x66340B03;
+            guiGraphics.fill(x + 1, segmentY, x + 3, segmentY + 2, color);
+        }
+        if (temperature >= 0.98F) {
+            guiGraphics.fill(x + 1, y - 2, x + 3, y - 1, 0xFFFFFFFF);
+        }
+        guiGraphics.pose().popPose();
+    }
+
+    private static void renderHeatLayer(GuiGraphics guiGraphics, ItemStack stack, int xOffset, int yOffset, float scale, int color, float alpha, float z) {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(xOffset + 8.0F, yOffset + 8.0F, z);
         guiGraphics.pose().scale(scale, scale, 1.0F);
         guiGraphics.pose().translate(-(xOffset + 8.0F), -(yOffset + 8.0F), 0.0F);
-        guiGraphics.setColor(red, green, blue, alpha);
+        guiGraphics.setColor((color >>> 16 & 0xFF) / 255.0F, (color >>> 8 & 0xFF) / 255.0F, (color & 0xFF) / 255.0F, alpha);
         guiGraphics.renderFakeItem(stack, xOffset, yOffset);
         guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
         guiGraphics.pose().popPose();

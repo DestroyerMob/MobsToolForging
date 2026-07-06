@@ -1,10 +1,11 @@
 {
   "item_textures": {
-    "boots": "minecraft:item/golden_boots",
-    "chestplate": "minecraft:item/golden_chestplate",
-    "helmet": "minecraft:item/golden_helmet",
-    "leggings": "minecraft:item/golden_leggings"
+    "boots": "mobstoolforging:item/armor/boots",
+    "chestplate": "mobstoolforging:item/armor/chestplate",
+    "helmet": "mobstoolforging:item/armor/helmet",
+    "leggings": "mobstoolforging:item/armor/leggings"
   },
   "material": "mobstoolforging:gold",
-  "texture": "minecraft:block/gold_block"
+  "texture": "minecraft:block/gold_block",
+  "tint_item_textures": true
 }

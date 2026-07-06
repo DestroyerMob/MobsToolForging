@@ -212,25 +212,21 @@ public class ModVisualDefinitionProvider implements DataProvider {
     }
 
     private static ArmorMaterialTextureSpec vanillaArmor(ResourceLocation material, ResourceLocation texture, String vanillaPrefix) {
-        return new ArmorMaterialTextureSpec(
-                material,
-                texture,
-                ResourceLocation.withDefaultNamespace("item/" + vanillaPrefix + "_helmet"),
-                ResourceLocation.withDefaultNamespace("item/" + vanillaPrefix + "_chestplate"),
-                ResourceLocation.withDefaultNamespace("item/" + vanillaPrefix + "_leggings"),
-                ResourceLocation.withDefaultNamespace("item/" + vanillaPrefix + "_boots"),
-                false
-        );
+        return materialArmor(material, texture);
     }
 
     private static ArmorMaterialTextureSpec tintedLeatherArmor(ResourceLocation material, ResourceLocation texture) {
+        return materialArmor(material, texture);
+    }
+
+    private static ArmorMaterialTextureSpec materialArmor(ResourceLocation material, ResourceLocation texture) {
         return new ArmorMaterialTextureSpec(
                 material,
                 texture,
-                ResourceLocation.withDefaultNamespace("item/leather_helmet"),
-                ResourceLocation.withDefaultNamespace("item/leather_chestplate"),
-                ResourceLocation.withDefaultNamespace("item/leather_leggings"),
-                ResourceLocation.withDefaultNamespace("item/leather_boots"),
+                modLoc("item/armor/helmet"),
+                modLoc("item/armor/chestplate"),
+                modLoc("item/armor/leggings"),
+                modLoc("item/armor/boots"),
                 true
         );
     }
