@@ -104,6 +104,7 @@ public final class ModularBodyArmourModel {
     private static void addLeftArm(PartDefinition root, String name, CubeDeformation deformation) {
         root.addOrReplaceChild(name, CubeListBuilder.create()
                 .texOffs(40, 16)
+                .mirror()
                 .addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, deformation), PartPose.ZERO);
     }
 

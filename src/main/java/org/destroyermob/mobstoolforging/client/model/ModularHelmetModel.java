@@ -41,24 +41,16 @@ public final class ModularHelmetModel {
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition root = meshdefinition.getRoot();
-        PartPose headLocalPose = PartPose.offset(0.0F, 2.0F, 5.0F);
-        CubeDeformation chainmailDeformation = new CubeDeformation(0.05F);
-        CubeDeformation materialDeformation = new CubeDeformation(0.12F);
+        CubeDeformation chainmailDeformation = new CubeDeformation(0.5F);
+        CubeDeformation materialDeformation = new CubeDeformation(0.65F);
 
         root.addOrReplaceChild(CHAINMAIL_HELMET, CubeListBuilder.create()
-                .texOffs(4, 8).addBox(-5.0F, -3.0F, -8.0F, 0.0F, 1.0F, 6.0F, chainmailDeformation)
-                .texOffs(0, 4).addBox(-5.0F, -5.0F, -10.0F, 0.0F, 2.0F, 10.0F, chainmailDeformation)
-                .texOffs(10, 14).addBox(-5.0F, -6.0F, 0.0F, 10.0F, 2.0F, 0.0F, chainmailDeformation)
-                .texOffs(10, 14).addBox(-5.0F, -6.0F, -10.0F, 10.0F, 2.0F, 0.0F, chainmailDeformation)
-                .texOffs(10, 14).addBox(-5.0F, -4.0F, -10.0F, 5.0F, 1.0F, 0.0F, chainmailDeformation)
-                .texOffs(10, 14).addBox(-5.0F, -4.0F, 0.0F, 5.0F, 1.0F, 0.0F, chainmailDeformation), headLocalPose);
+                .texOffs(0, 0)
+                .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, chainmailDeformation), PartPose.ZERO);
 
         root.addOrReplaceChild(MATERIAL_HELMET, CubeListBuilder.create()
-                .texOffs(-6, 2).addBox(-5.0F, -10.0F, 0.0F, 10.0F, 4.0F, 0.0F, materialDeformation)
-                .texOffs(-16, -8).addBox(-5.0F, -10.0F, -10.0F, 0.0F, 5.0F, 10.0F, materialDeformation)
-                .texOffs(0, -6).addBox(5.0F, -10.0F, -10.0F, 0.0F, 3.0F, 10.0F, materialDeformation)
-                .texOffs(-10, 0).addBox(-5.0F, -10.0F, -10.0F, 10.0F, 0.0F, 10.0F, materialDeformation)
-                .texOffs(0, 0).addBox(-5.0F, -10.0F, -10.0F, 10.0F, 4.0F, 0.0F, materialDeformation), headLocalPose);
+                .texOffs(0, 0)
+                .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, materialDeformation), PartPose.ZERO);
 
         return LayerDefinition.create(meshdefinition, 64, 32);
     }

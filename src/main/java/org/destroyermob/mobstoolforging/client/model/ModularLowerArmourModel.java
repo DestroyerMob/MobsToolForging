@@ -83,27 +83,24 @@ public final class ModularLowerArmourModel {
         CubeDeformation bootChainmailDeformation = new CubeDeformation(1.0F);
         CubeDeformation bootMaterialDeformation = new CubeDeformation(1.15F);
 
-        addLeggingLeg(root, CHAINMAIL_RIGHT_LEGGINGS, leggingsChainmailDeformation);
-        addLeggingLeg(root, CHAINMAIL_LEFT_LEGGINGS, leggingsChainmailDeformation);
-        addLeggingLeg(root, MATERIAL_RIGHT_LEGGINGS, leggingsMaterialDeformation);
-        addLeggingLeg(root, MATERIAL_LEFT_LEGGINGS, leggingsMaterialDeformation);
-        addBootLeg(root, CHAINMAIL_RIGHT_BOOT, bootChainmailDeformation);
-        addBootLeg(root, CHAINMAIL_LEFT_BOOT, bootChainmailDeformation);
-        addBootLeg(root, MATERIAL_RIGHT_BOOT, bootMaterialDeformation);
-        addBootLeg(root, MATERIAL_LEFT_BOOT, bootMaterialDeformation);
+        addLeg(root, CHAINMAIL_RIGHT_LEGGINGS, leggingsChainmailDeformation, false);
+        addLeg(root, CHAINMAIL_LEFT_LEGGINGS, leggingsChainmailDeformation, true);
+        addLeg(root, MATERIAL_RIGHT_LEGGINGS, leggingsMaterialDeformation, false);
+        addLeg(root, MATERIAL_LEFT_LEGGINGS, leggingsMaterialDeformation, true);
+        addLeg(root, CHAINMAIL_RIGHT_BOOT, bootChainmailDeformation, false);
+        addLeg(root, CHAINMAIL_LEFT_BOOT, bootChainmailDeformation, true);
+        addLeg(root, MATERIAL_RIGHT_BOOT, bootMaterialDeformation, false);
+        addLeg(root, MATERIAL_LEFT_BOOT, bootMaterialDeformation, true);
 
         return LayerDefinition.create(meshdefinition, 64, 32);
     }
 
-    private static void addLeggingLeg(PartDefinition root, String name, CubeDeformation deformation) {
-        root.addOrReplaceChild(name, CubeListBuilder.create()
-                .texOffs(0, 16)
-                .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, deformation), PartPose.ZERO);
-    }
-
-    private static void addBootLeg(PartDefinition root, String name, CubeDeformation deformation) {
-        root.addOrReplaceChild(name, CubeListBuilder.create()
-                .texOffs(24, 15)
+    private static void addLeg(PartDefinition root, String name, CubeDeformation deformation, boolean mirror) {
+        CubeListBuilder builder = CubeListBuilder.create().texOffs(0, 16);
+        if (mirror) {
+            builder = builder.mirror();
+        }
+        root.addOrReplaceChild(name, builder
                 .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, deformation), PartPose.ZERO);
     }
 
