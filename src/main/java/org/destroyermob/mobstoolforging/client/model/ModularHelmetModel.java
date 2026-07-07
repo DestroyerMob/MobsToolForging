@@ -27,7 +27,11 @@ public final class ModularHelmetModel {
     }
 
     public void renderChainmail(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {
-        chainmailHelmet.render(poseStack, consumer, packedLight, packedOverlay);
+        renderChainmail(poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
+    }
+
+    public void renderChainmail(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
+        chainmailHelmet.render(poseStack, new TintingVertexConsumer(consumer, color), packedLight, packedOverlay);
     }
 
     public void renderMaterial(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {

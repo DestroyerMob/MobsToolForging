@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.ArmorVisualKey;
+import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 
 public final class ModularBodyArmourItemModel {
     private static final FaceBakery FACE_BAKERY = new FaceBakery();
@@ -20,13 +21,24 @@ public final class ModularBodyArmourItemModel {
     }
 
     public static BakedModel compose(ArmorVisualKey key, BakedModel fallback) {
-        if (key.chestplatePlateMaterial().isEmpty()) {
+        boolean customBase = !MaterialCatalog.IRON.equals(key.chestplateChainmailMaterial());
+        boolean hasPlate = key.chestplatePlateMaterial().isPresent();
+        if (!customBase && !hasPlate) {
             return fallback;
         }
 
-        List<BakedQuad> quads = new ArrayList<>(fallback.getQuads(null, null, RandomSource.create(42L)));
+        List<BakedQuad> quads = customBase ? new ArrayList<>() : new ArrayList<>(fallback.getQuads(null, null, RandomSource.create(42L)));
         TextureAtlasSprite particle = fallback.getParticleIcon();
-        if (key.chestplatePlateMaterial().isPresent()) {
+        if (customBase) {
+            TextureAtlasSprite baseSprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(key.chestplateChainmailMaterial(), ArmorPartData.CHESTPLATE_CHAINMAIL);
+            particle = baseSprite;
+            for (ModularBodyArmourGeometry.ItemCuboid cuboid : ModularBodyArmourGeometry.CHAINMAIL_ITEM) {
+                for (Direction direction : Direction.values()) {
+                    quads.add(bakeFace(cuboid, direction, baseSprite));
+                }
+            }
+        }
+        if (hasPlate) {
             TextureAtlasSprite bodySprite = ArmorMaterialTextureManager.INSTANCE.geometrySprite(key.chestplatePlateMaterial().orElseThrow(), ArmorPartData.CHESTPLATE_BODY);
             particle = bodySprite;
             for (ModularBodyArmourGeometry.ItemCuboid cuboid : ModularBodyArmourGeometry.ITEM) {

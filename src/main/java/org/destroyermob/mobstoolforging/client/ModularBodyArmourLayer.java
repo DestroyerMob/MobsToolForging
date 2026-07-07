@@ -38,7 +38,7 @@ public final class ModularBodyArmourLayer<T extends LivingEntity, M extends Enti
             return;
         }
 
-        renderChainmailLayer(poseStack, bufferSource, packedLight, humanoidModel);
+        renderChainmailLayer(poseStack, bufferSource, packedLight, construction, humanoidModel);
         renderLayer(poseStack, bufferSource, packedLight, humanoidModel, construction);
         if (stack.hasFoil()) {
             VertexConsumer glint = bufferSource.getBuffer(RenderType.armorEntityGlint());
@@ -47,8 +47,8 @@ public final class ModularBodyArmourLayer<T extends LivingEntity, M extends Enti
         }
     }
 
-    private void renderChainmailLayer(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, HumanoidModel<?> humanoidModel) {
-        ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(ArmorPartData.CHESTPLATE_CHAINMAIL);
+    private void renderChainmailLayer(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction, HumanoidModel<?> humanoidModel) {
+        ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(construction.chestplateChainmailMaterial(), ArmorPartData.CHESTPLATE_CHAINMAIL);
         VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture()));
         renderChainmailLayer(poseStack, consumer, chainmail.color(), packedLight, humanoidModel);
     }

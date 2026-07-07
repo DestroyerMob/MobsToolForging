@@ -53,7 +53,7 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
     }
 
     public ResolvedArmorTexture itemTexture(ResourceLocation materialId, String partType) {
-        if (isChainmailPart(partType)) {
+        if (isChainmailPart(partType) && !MaterialCatalog.LEATHER.equals(materialId)) {
             return resolvedTexture(chainmailTexture(partType), 0xFFFFFFFF, materialId);
         }
         ArmorItemTexture texture = materialTextures(materialId).itemTexture(roleForPart(partType));
@@ -79,6 +79,13 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
 
     public WornArmorTexture wornChainmailTexture(String partType) {
         return new WornArmorTexture(wornChainmailLayerTexture(partType), 0xFFFFFFFF);
+    }
+
+    public WornArmorTexture wornChainmailTexture(ResourceLocation materialId, String partType) {
+        if (MaterialCatalog.LEATHER.equals(materialId)) {
+            return wornMaterialTexture(materialId, partType);
+        }
+        return wornChainmailTexture(partType);
     }
 
     public TextureAtlasSprite chainmailSprite() {
@@ -214,6 +221,7 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
 
     private static Map<ResourceLocation, ArmorMaterialTextures> defaults() {
         Map<ResourceLocation, ArmorMaterialTextures> defaults = new LinkedHashMap<>();
+        defaults.put(MaterialCatalog.LEATHER, tintedLeather(ResourceLocation.withDefaultNamespace("item/leather")));
         defaults.put(MaterialCatalog.IRON, exact(ResourceLocation.withDefaultNamespace("block/iron_block"), "iron"));
         defaults.put(MaterialCatalog.GOLD, exact(ResourceLocation.withDefaultNamespace("block/gold_block"), "golden"));
         defaults.put(MaterialCatalog.COPPER, tintedLeather(ResourceLocation.withDefaultNamespace("block/copper_block")));

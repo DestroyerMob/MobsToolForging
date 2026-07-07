@@ -62,6 +62,9 @@ public final class ArmorStatsCatalog {
     }
 
     public static ArmorStats chainmailHelmetStats(ResourceLocation materialId) {
+        if (MaterialCatalog.LEATHER.equals(materialId)) {
+            return helmetStats(MaterialCatalog.LEATHER);
+        }
         return new ArmorStats(2, 15, 12, 0.0F, 0.0F, false);
     }
 
@@ -70,6 +73,9 @@ public final class ArmorStatsCatalog {
     }
 
     public static ArmorStats chainmailChestplateStats(ResourceLocation materialId) {
+        if (MaterialCatalog.LEATHER.equals(materialId)) {
+            return chestplateStats(MaterialCatalog.LEATHER);
+        }
         return new ArmorStats(5, 15, 12, 0.0F, 0.0F, false);
     }
 
@@ -78,6 +84,9 @@ public final class ArmorStatsCatalog {
     }
 
     public static ArmorStats chainmailLeggingsStats(ResourceLocation materialId) {
+        if (MaterialCatalog.LEATHER.equals(materialId)) {
+            return leggingsStats(MaterialCatalog.LEATHER);
+        }
         return new ArmorStats(4, 15, 12, 0.0F, 0.0F, false);
     }
 
@@ -86,6 +95,9 @@ public final class ArmorStatsCatalog {
     }
 
     public static ArmorStats chainmailBootsStats(ResourceLocation materialId) {
+        if (MaterialCatalog.LEATHER.equals(materialId)) {
+            return bootsStats(MaterialCatalog.LEATHER);
+        }
         return new ArmorStats(1, 15, 12, 0.0F, 0.0F, false);
     }
 
@@ -184,6 +196,7 @@ public final class ArmorStatsCatalog {
 
     private static Map<ResourceLocation, ArmorStats> builtInHelmetStats() {
         Map<ResourceLocation, ArmorStats> stats = new LinkedHashMap<>();
+        stats.put(MaterialCatalog.LEATHER, new ArmorStats(1, 5, 15, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.IRON, new ArmorStats(2, 15, 9, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.GOLD, new ArmorStats(2, 7, 25, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.COPPER, new ArmorStats(2, 12, 16, 0.0F, 0.0F, false));
@@ -197,6 +210,7 @@ public final class ArmorStatsCatalog {
 
     private static Map<ResourceLocation, ArmorStats> builtInChestplateStats() {
         Map<ResourceLocation, ArmorStats> stats = new LinkedHashMap<>();
+        stats.put(MaterialCatalog.LEATHER, new ArmorStats(3, 5, 15, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.IRON, new ArmorStats(6, 15, 9, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.GOLD, new ArmorStats(5, 7, 25, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.COPPER, new ArmorStats(5, 12, 16, 0.0F, 0.0F, false));
@@ -210,6 +224,7 @@ public final class ArmorStatsCatalog {
 
     private static Map<ResourceLocation, ArmorStats> builtInLeggingsStats() {
         Map<ResourceLocation, ArmorStats> stats = new LinkedHashMap<>();
+        stats.put(MaterialCatalog.LEATHER, new ArmorStats(2, 5, 15, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.IRON, new ArmorStats(5, 15, 9, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.GOLD, new ArmorStats(3, 7, 25, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.COPPER, new ArmorStats(4, 12, 16, 0.0F, 0.0F, false));
@@ -223,6 +238,7 @@ public final class ArmorStatsCatalog {
 
     private static Map<ResourceLocation, ArmorStats> builtInBootsStats() {
         Map<ResourceLocation, ArmorStats> stats = new LinkedHashMap<>();
+        stats.put(MaterialCatalog.LEATHER, new ArmorStats(1, 5, 15, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.IRON, new ArmorStats(2, 15, 9, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.GOLD, new ArmorStats(1, 7, 25, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.COPPER, new ArmorStats(2, 12, 16, 0.0F, 0.0F, false));

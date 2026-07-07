@@ -34,6 +34,7 @@ public final class MaterialCatalog {
     public static final ResourceLocation EMERALD = materialId("emerald");
     public static final ResourceLocation RUBY = materialId("ruby");
     public static final ResourceLocation SAPPHIRE = materialId("sapphire");
+    public static final ResourceLocation LEATHER = materialId("leather");
     public static final ResourceLocation FLINT = materialId("flint");
     public static final ResourceLocation OAK = materialId("oak");
     public static final ResourceLocation DARK_OAK = materialId("dark_oak");
@@ -108,6 +109,7 @@ public final class MaterialCatalog {
                 SAPPHIRE_TIER,
                 List.of(ModTags.Items.GEMS_SAPPHIRE, ModTags.Items.LEGACY_FORGE_GEMS_SAPPHIRE)
         );
+        registerVirtual(LEATHER, MaterialCategory.ORGANIC, Items.LEATHER, Tiers.WOOD);
         registerVirtual(FLINT, MaterialCategory.GEM, Items.FLINT, CrudeFlintTiers.FLINT);
     }
 
@@ -178,7 +180,7 @@ public final class MaterialCatalog {
     }
 
     public static boolean isNormalForgingMaterial(ResourceLocation materialId) {
-        return !NETHERITE.equals(materialId);
+        return !NETHERITE.equals(materialId) && !LEATHER.equals(materialId);
     }
 
     public static List<ResourceLocation> handleMaterialIds() {

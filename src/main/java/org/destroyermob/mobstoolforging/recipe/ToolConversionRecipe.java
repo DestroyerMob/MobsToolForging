@@ -43,7 +43,7 @@ public class ToolConversionRecipe extends CustomRecipe {
         }
         ItemStack oneItem = original.copy();
         oneItem.setCount(1);
-        return VanillaToolConverter.convert(oneItem, MaterialCatalog.OAK);
+        return VanillaToolConverter.convertLootOrEquipment(oneItem, MaterialCatalog.OAK);
     }
 
     private static ItemStack singleInput(CraftingInput input) {

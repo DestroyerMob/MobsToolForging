@@ -1,6 +1,7 @@
 package org.destroyermob.mobstoolforging.item;
 
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -22,6 +23,18 @@ import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 public class ModularChestplateItem extends ArmorItem implements ModularArmorItem {
     public ModularChestplateItem(Holder<ArmorMaterial> material, Properties properties) {
         super(material, Type.CHESTPLATE, properties);
+    }
+
+    public ItemStack createBase(ResourceLocation baseMaterial) {
+        return createBase(baseMaterial, ArmorConstructionData.DEFAULT_QUALITY);
+    }
+
+    public ItemStack createBase(ResourceLocation baseMaterial, int quality) {
+        ArmorConstructionData construction = ArmorConstructionData.chestplateBase(baseMaterial, quality);
+        ItemStack stack = new ItemStack(this);
+        stack.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction);
+        ArmorStatsCatalog.apply(stack, construction);
+        return stack;
     }
 
     public ItemStack create(ResourceLocation bodyMaterial) {
@@ -56,7 +69,9 @@ public class ModularChestplateItem extends ArmorItem implements ModularArmorItem
         }
         return construction.chestplatePlateMaterial()
                 .map(material -> Component.translatable("item.mobstoolforging.material_modular_chestplate", MaterialCatalog.displayName(material)))
-                .orElseGet(() -> Component.translatable("item.mobstoolforging.modular_chainmail_chestplate"));
+                .orElseGet(() -> MaterialCatalog.LEATHER.equals(construction.chestplateChainmailMaterial())
+                        ? Component.translatable("item.mobstoolforging.material_modular_chestplate", MaterialCatalog.displayName(MaterialCatalog.LEATHER))
+                        : Component.translatable("item.mobstoolforging.modular_chainmail_chestplate"));
     }
 
     @Override
@@ -98,7 +113,9 @@ public class ModularChestplateItem extends ArmorItem implements ModularArmorItem
                 .withStyle(ChatFormatting.DARK_GRAY)
                 .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
                 .append(construction.qualityLevel().displayName()));
-        tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.chainmail", MaterialCatalog.displayName(construction.chestplateChainmailMaterial())).withStyle(ChatFormatting.DARK_GRAY));
+        ResourceLocation baseMaterial = construction.chestplateChainmailMaterial();
+        String baseKey = MaterialCatalog.LEATHER.equals(baseMaterial) ? "tooltip.mobstoolforging.armor_part.base" : "tooltip.mobstoolforging.armor_part.chainmail";
+        tooltip.add(Component.translatable(baseKey, MaterialCatalog.displayName(baseMaterial)).withStyle(ChatFormatting.DARK_GRAY));
         tooltip.add(Component.translatable(
                 "tooltip.mobstoolforging.armor_part.plate",
                 construction.chestplatePlateMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))

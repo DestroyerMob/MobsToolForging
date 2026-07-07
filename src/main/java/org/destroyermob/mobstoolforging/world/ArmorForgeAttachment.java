@@ -40,6 +40,9 @@ public final class ArmorForgeAttachment {
         if (construction == null) {
             return false;
         }
+        if (construction.hasLeatherBase()) {
+            return false;
+        }
         if (ToolTypeRegistry.HELMET_PLATE_TEMPLATE.equals(templateId)) {
             return stack.is(ModItems.MODULAR_HELMET.get()) && ArmorConstructionData.HELMET_TYPE.equals(construction.armorType());
         }

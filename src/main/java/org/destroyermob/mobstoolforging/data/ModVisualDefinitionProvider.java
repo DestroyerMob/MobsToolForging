@@ -188,6 +188,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 new MaterialVisualSpec(MaterialCatalog.EMERALD, "gem", "facets", false, 0, palette(0xFF06451F, 0xFF0C6C32, 0xFF159949, 0xFF33C967, 0xFF89F2A8, 0xFFE3FFE9)),
                 new MaterialVisualSpec(MaterialCatalog.RUBY, "gem", "facets", false, 0, palette(0xFF4A0610, 0xFF7A0B1A, 0xFFB5152C, 0xFFE83E52, 0xFFFF8A98, 0xFFFFD8DD)),
                 new MaterialVisualSpec(MaterialCatalog.SAPPHIRE, "gem", "facets", false, 0, palette(0xFF071A4A, 0xFF0B2E78, 0xFF174BB0, 0xFF3C78E8, 0xFF8AB7FF, 0xFFDCEAFF)),
+                new MaterialVisualSpec(MaterialCatalog.LEATHER, "leather", "wood_grain", false, 0, palette(0xFF4D2B1C, 0xFF6F4528, 0xFF8A5A35, 0xFFA9784C, 0xFFC99B6B, 0xFFE5C18F)),
                 new MaterialVisualSpec(MaterialCatalog.FLINT, "stone", "chipped_edges", false, 0, palette(0xFF15171A, 0xFF252932, 0xFF3D4550, 0xFF59636D, 0xFF7C8792, 0xFFB7C0C8)),
                 new MaterialVisualSpec(MaterialCatalog.OAK, "wood", "wood_grain", false, 0, palette(0xFF3B2613, 0xFF5A371A, 0xFF7D5126, 0xFFA5733A, 0xFFC99758, 0xFFE2BE80)),
                 new MaterialVisualSpec(MaterialCatalog.DARK_OAK, "wood", "wood_grain", false, 0, palette(0xFF17100B, 0xFF24180F, 0xFF3A2818, 0xFF5A3D22, 0xFF7D5732, 0xFFA77A4A)),
@@ -200,6 +201,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
 
     private static List<ArmorMaterialTextureSpec> armorMaterialTextureSpecs() {
         return List.of(
+                tintedLeatherArmor(MaterialCatalog.LEATHER, ResourceLocation.withDefaultNamespace("item/leather")),
                 vanillaArmor(MaterialCatalog.IRON, ResourceLocation.withDefaultNamespace("block/iron_block"), "iron"),
                 vanillaArmor(MaterialCatalog.GOLD, ResourceLocation.withDefaultNamespace("block/gold_block"), "golden"),
                 tintedLeatherArmor(MaterialCatalog.COPPER, ResourceLocation.withDefaultNamespace("block/copper_block")),

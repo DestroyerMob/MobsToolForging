@@ -69,7 +69,9 @@ public class ModularHelmetItem extends ArmorItem implements ModularArmorItem {
         }
         return construction.helmetPlateMaterial()
                 .map(material -> Component.translatable("item.mobstoolforging.material_modular_helmet", MaterialCatalog.displayName(material)))
-                .orElseGet(() -> Component.translatable("item.mobstoolforging.modular_chainmail_helmet"));
+                .orElseGet(() -> MaterialCatalog.LEATHER.equals(construction.helmetChainmailMaterial())
+                        ? Component.translatable("item.mobstoolforging.material_modular_helmet", MaterialCatalog.displayName(MaterialCatalog.LEATHER))
+                        : Component.translatable("item.mobstoolforging.modular_chainmail_helmet"));
     }
 
     @Override
@@ -111,7 +113,9 @@ public class ModularHelmetItem extends ArmorItem implements ModularArmorItem {
                 .withStyle(ChatFormatting.DARK_GRAY)
                 .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
                 .append(construction.qualityLevel().displayName()));
-        tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part.chainmail", MaterialCatalog.displayName(construction.helmetChainmailMaterial())).withStyle(ChatFormatting.DARK_GRAY));
+        ResourceLocation baseMaterial = construction.helmetChainmailMaterial();
+        String baseKey = MaterialCatalog.LEATHER.equals(baseMaterial) ? "tooltip.mobstoolforging.armor_part.base" : "tooltip.mobstoolforging.armor_part.chainmail";
+        tooltip.add(Component.translatable(baseKey, MaterialCatalog.displayName(baseMaterial)).withStyle(ChatFormatting.DARK_GRAY));
         tooltip.add(Component.translatable(
                 "tooltip.mobstoolforging.armor_part.plate",
                 construction.helmetPlateMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))

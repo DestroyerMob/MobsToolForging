@@ -194,6 +194,10 @@ public class MobsToolForging {
             event.accept(ModItems.TEMPLATE_PATTERN);
         }
         if (event.getTabKey() == CreativeModeTabs.COMBAT) {
+            event.accept(ModItems.MODULAR_HELMET.get().create(MaterialCatalog.LEATHER, Optional.empty()));
+            event.accept(ModItems.MODULAR_CHESTPLATE.get().createBase(MaterialCatalog.LEATHER));
+            event.accept(ModItems.MODULAR_LEGGINGS.get().create(MaterialCatalog.LEATHER, Optional.empty()));
+            event.accept(ModItems.MODULAR_BOOTS.get().create(MaterialCatalog.LEATHER, Optional.empty()));
             event.accept(ModItems.MODULAR_HELMET.get().createChainmail());
             event.accept(ModItems.MODULAR_CHESTPLATE.get().createChainmail());
             event.accept(ModItems.MODULAR_LEGGINGS.get().createChainmail());

@@ -1,0 +1,17 @@
+{
+  "type": "mobstoolforging:material_visual",
+  "emissive": false,
+  "fallbacks": [
+    "leather"
+  ],
+  "family": "leather",
+  "palette": {
+    "102": "0xFF6F4528",
+    "140": "0xFF8A5A35",
+    "178": "0xFFA9784C",
+    "216": "0xFFC99B6B",
+    "255": "0xFFE5C18F",
+    "63": "0xFF4D2B1C"
+  },
+  "texture_noise": "wood_grain"
+}

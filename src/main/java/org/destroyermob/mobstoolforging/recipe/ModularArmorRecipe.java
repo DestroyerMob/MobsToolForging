@@ -8,6 +8,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
@@ -33,11 +34,14 @@ public class ModularArmorRecipe extends CustomRecipe {
 
     @Override
     public boolean matches(CraftingInput input, Level level) {
-        return findParts(input).isValid();
+        return armorKind.matchesLeatherRecipe(input) || findParts(input).isValid();
     }
 
     @Override
     public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+        if (armorKind.matchesLeatherRecipe(input)) {
+            return armorKind.createLeather();
+        }
         Parts parts = findParts(input);
         if (!parts.isValid()) {
             return ItemStack.EMPTY;
@@ -82,36 +86,56 @@ public class ModularArmorRecipe extends CustomRecipe {
     }
 
     public enum ArmorKind {
-        HELMET(ArmorPartData.HELMET_CHAINMAIL, ModItems.HELMET_CHAINMAIL::get, ArmorPartData.HELMET_PLATE, ModItems.HELMET_PLATE::get) {
+        HELMET(ArmorPartData.HELMET_CHAINMAIL, ModItems.HELMET_CHAINMAIL::get, ArmorPartData.HELMET_PLATE, ModItems.HELMET_PLATE::get, "LLL", "L L") {
             @Override
             ItemStack create(Parts parts) {
                 return optionalMaterial(parts.plate)
                         .map(material -> ModItems.MODULAR_HELMET.get().create(material, quality(parts)))
                         .orElseGet(() -> ModItems.MODULAR_HELMET.get().createChainmail(quality(parts)));
             }
+
+            @Override
+            ItemStack createLeather() {
+                return ModItems.MODULAR_HELMET.get().create(MaterialCatalog.LEATHER, Optional.empty());
+            }
         },
-        CHESTPLATE(ArmorPartData.CHESTPLATE_CHAINMAIL, ModItems.CHESTPLATE_CHAINMAIL::get, ArmorPartData.CHESTPLATE_BODY, ModItems.CHESTPLATE_BODY::get) {
+        CHESTPLATE(ArmorPartData.CHESTPLATE_CHAINMAIL, ModItems.CHESTPLATE_CHAINMAIL::get, ArmorPartData.CHESTPLATE_BODY, ModItems.CHESTPLATE_BODY::get, "L L", "LLL", "LLL") {
             @Override
             ItemStack create(Parts parts) {
                 return optionalMaterial(parts.plate)
                         .map(material -> ModItems.MODULAR_CHESTPLATE.get().create(material, quality(parts)))
                         .orElseGet(() -> ModItems.MODULAR_CHESTPLATE.get().createChainmail(quality(parts)));
             }
+
+            @Override
+            ItemStack createLeather() {
+                return ModItems.MODULAR_CHESTPLATE.get().createBase(MaterialCatalog.LEATHER);
+            }
         },
-        LEGGINGS(ArmorPartData.LEGGINGS_CHAINMAIL, ModItems.LEGGINGS_CHAINMAIL::get, ArmorPartData.LEGGINGS_PLATE, ModItems.LEGGINGS_PLATE::get) {
+        LEGGINGS(ArmorPartData.LEGGINGS_CHAINMAIL, ModItems.LEGGINGS_CHAINMAIL::get, ArmorPartData.LEGGINGS_PLATE, ModItems.LEGGINGS_PLATE::get, "LLL", "L L", "L L") {
             @Override
             ItemStack create(Parts parts) {
                 return optionalMaterial(parts.plate)
                         .map(material -> ModItems.MODULAR_LEGGINGS.get().create(material, quality(parts)))
                         .orElseGet(() -> ModItems.MODULAR_LEGGINGS.get().createChainmail(quality(parts)));
             }
+
+            @Override
+            ItemStack createLeather() {
+                return ModItems.MODULAR_LEGGINGS.get().create(MaterialCatalog.LEATHER, Optional.empty());
+            }
         },
-        BOOTS(ArmorPartData.BOOTS_CHAINMAIL, ModItems.BOOTS_CHAINMAIL::get, ArmorPartData.BOOTS_PLATE, ModItems.BOOTS_PLATE::get) {
+        BOOTS(ArmorPartData.BOOTS_CHAINMAIL, ModItems.BOOTS_CHAINMAIL::get, ArmorPartData.BOOTS_PLATE, ModItems.BOOTS_PLATE::get, "L L", "L L") {
             @Override
             ItemStack create(Parts parts) {
                 return optionalMaterial(parts.plate)
                         .map(material -> ModItems.MODULAR_BOOTS.get().create(material, quality(parts)))
                         .orElseGet(() -> ModItems.MODULAR_BOOTS.get().createChainmail(quality(parts)));
+            }
+
+            @Override
+            ItemStack createLeather() {
+                return ModItems.MODULAR_BOOTS.get().create(MaterialCatalog.LEATHER, Optional.empty());
             }
         };
 
@@ -119,12 +143,18 @@ public class ModularArmorRecipe extends CustomRecipe {
         private final Supplier<Item> baseItem;
         private final String platePartType;
         private final Supplier<Item> plateItem;
+        private final String[] leatherPattern;
 
-        ArmorKind(String basePartType, Supplier<Item> baseItem, String platePartType, Supplier<Item> plateItem) {
+        ArmorKind(String basePartType, Supplier<Item> baseItem, String platePartType, Supplier<Item> plateItem, String... leatherPattern) {
             this.basePartType = basePartType;
             this.baseItem = baseItem;
             this.platePartType = platePartType;
             this.plateItem = plateItem;
+            this.leatherPattern = leatherPattern;
+        }
+
+        boolean matchesLeatherRecipe(CraftingInput input) {
+            return matchesLeatherPattern(input, leatherPattern);
         }
 
         boolean matchesBase(ItemStack stack, ArmorPartData data) {
@@ -140,8 +170,54 @@ public class ModularArmorRecipe extends CustomRecipe {
 
         abstract ItemStack create(Parts parts);
 
+        abstract ItemStack createLeather();
+
         private static boolean matches(ItemStack stack, ArmorPartData data, String partType, Supplier<Item> item) {
             return partType != null && item != null && stack.is(item.get()) && partType.equals(data.partType());
+        }
+
+        private static boolean matchesLeatherPattern(CraftingInput input, String[] pattern) {
+            int minX = input.width();
+            int minY = input.height();
+            int maxX = -1;
+            int maxY = -1;
+            for (int y = 0; y < input.height(); y++) {
+                for (int x = 0; x < input.width(); x++) {
+                    ItemStack stack = input.getItem(x + y * input.width());
+                    if (stack.isEmpty()) {
+                        continue;
+                    }
+                    if (!stack.is(Items.LEATHER)) {
+                        return false;
+                    }
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x);
+                    maxY = Math.max(maxY, y);
+                }
+            }
+            if (maxX < 0 || pattern.length == 0) {
+                return false;
+            }
+            int patternHeight = pattern.length;
+            int patternWidth = pattern[0].length();
+            if (maxX - minX + 1 != patternWidth || maxY - minY + 1 != patternHeight) {
+                return false;
+            }
+            for (int y = 0; y < patternHeight; y++) {
+                String row = pattern[y];
+                if (row.length() != patternWidth) {
+                    return false;
+                }
+                for (int x = 0; x < patternWidth; x++) {
+                    boolean expectedLeather = row.charAt(x) == 'L';
+                    ItemStack stack = input.getItem(minX + x + (minY + y) * input.width());
+                    if (expectedLeather != stack.is(Items.LEATHER)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         private static ResourceLocation material(ItemStack stack) {

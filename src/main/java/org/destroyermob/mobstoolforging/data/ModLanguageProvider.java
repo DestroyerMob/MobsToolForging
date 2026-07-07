@@ -131,6 +131,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("material.mobstoolforging.emerald", "Emerald");
         add("material.mobstoolforging.ruby", "Ruby");
         add("material.mobstoolforging.sapphire", "Sapphire");
+        add("material.mobstoolforging.leather", "Leather");
         add("material.mobstoolforging.flint", "Flint");
         add("material.mobstoolforging.oak", "Oak");
         add("material.mobstoolforging.dark_oak", "Dark Oak");
@@ -346,6 +347,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.part.guard", "Guard");
         add("tooltip.mobstoolforging.part.second_head", "Second Head");
         add("tooltip.mobstoolforging.armor_part.chainmail", "Chainmail: %s");
+        add("tooltip.mobstoolforging.armor_part.base", "Base: %s");
         add("tooltip.mobstoolforging.armor_part.plate", "Material Plate: %s");
         add("tooltip.mobstoolforging.stat_profile", "Stat Profile");
         add("tooltip.mobstoolforging.debug", "Debug");

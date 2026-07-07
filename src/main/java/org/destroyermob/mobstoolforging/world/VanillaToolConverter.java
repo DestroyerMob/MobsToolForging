@@ -246,6 +246,18 @@ public final class VanillaToolConverter {
     }
 
     private static ArmorConversion armorConversion(Item item) {
+        if (isAny(item, Items.LEATHER_HELMET)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_HELMET.get().create(MaterialCatalog.LEATHER, Optional.empty()));
+        }
+        if (isAny(item, Items.LEATHER_CHESTPLATE)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_CHESTPLATE.get().createBase(MaterialCatalog.LEATHER));
+        }
+        if (isAny(item, Items.LEATHER_LEGGINGS)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_LEGGINGS.get().create(MaterialCatalog.LEATHER, Optional.empty()));
+        }
+        if (isAny(item, Items.LEATHER_BOOTS)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_BOOTS.get().create(MaterialCatalog.LEATHER, Optional.empty()));
+        }
         if (isAny(item, Items.CHAINMAIL_HELMET)) {
             return new ArmorConversion(() -> ModItems.MODULAR_HELMET.get().createChainmail());
         }

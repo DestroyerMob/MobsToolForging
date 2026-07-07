@@ -61,7 +61,7 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
     }
 
     private void renderLeggingsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
-        ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(ArmorPartData.LEGGINGS_CHAINMAIL);
+        ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(construction.leggingsChainmailMaterial(), ArmorPartData.LEGGINGS_CHAINMAIL);
         VertexConsumer chainmailConsumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture()));
         renderChainmailRightLeggings(poseStack, humanoidModel.rightLeg, chainmailConsumer, chainmail.color(), packedLight);
         renderChainmailLeftLeggings(poseStack, humanoidModel.leftLeg, chainmailConsumer, chainmail.color(), packedLight);
@@ -83,7 +83,7 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
     }
 
     private void renderBootsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
-        ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(ArmorPartData.BOOTS_CHAINMAIL);
+        ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(construction.bootsChainmailMaterial(), ArmorPartData.BOOTS_CHAINMAIL);
         VertexConsumer chainmailConsumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture()));
         renderChainmailRightBoot(poseStack, humanoidModel.rightLeg, chainmailConsumer, chainmail.color(), packedLight);
         renderChainmailLeftBoot(poseStack, humanoidModel.leftLeg, chainmailConsumer, chainmail.color(), packedLight);

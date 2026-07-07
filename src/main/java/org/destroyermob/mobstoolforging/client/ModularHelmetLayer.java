@@ -47,7 +47,7 @@ public final class ModularHelmetLayer<T extends LivingEntity, M extends EntityMo
     }
 
     private void renderParts(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
-        ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(ArmorPartData.HELMET_CHAINMAIL);
+        ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(construction.helmetChainmailMaterial(), ArmorPartData.HELMET_CHAINMAIL);
         renderChainmail(poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture())), chainmail.color(), packedLight);
         construction.helmetPlateMaterial().ifPresent(material -> {
             ArmorMaterialTextureManager.WornArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.HELMET_PLATE);
@@ -65,6 +65,6 @@ public final class ModularHelmetLayer<T extends LivingEntity, M extends EntityMo
     }
 
     private void renderChainmail(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight) {
-        helmetModel.renderChainmail(poseStack, consumer, packedLight, OverlayTexture.NO_OVERLAY);
+        helmetModel.renderChainmail(poseStack, consumer, color, packedLight, OverlayTexture.NO_OVERLAY);
     }
 }

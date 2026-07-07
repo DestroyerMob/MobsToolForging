@@ -67,7 +67,7 @@ public record ArmorVisualKey(
     }
 
     public ResourceLocation chainmailMaterial() {
-        if (combMaterial.isEmpty() && visorMaterial.isEmpty() && !MaterialCatalog.IRON.equals(skullMaterial)) {
+        if (storesLegacyOverlayAsSkull()) {
             return MaterialCatalog.IRON;
         }
         return skullMaterial;
@@ -77,16 +77,24 @@ public record ArmorVisualKey(
         if (combMaterial.isPresent()) {
             return combMaterial;
         }
-        if (isChestplate() && visorMaterial.isEmpty() && !MaterialCatalog.IRON.equals(skullMaterial)) {
-            return Optional.of(skullMaterial);
-        }
-        if (!isChestplate() && combMaterial.isEmpty() && visorMaterial.isEmpty() && !MaterialCatalog.IRON.equals(skullMaterial)) {
+        if (storesLegacyOverlayAsSkull()) {
             return Optional.of(skullMaterial);
         }
         if (!isChestplate() && visorMaterial.isPresent()) {
             return visorMaterial;
         }
         return Optional.empty();
+    }
+
+    public boolean hasLeatherBase() {
+        return MaterialCatalog.LEATHER.equals(chainmailMaterial());
+    }
+
+    private boolean storesLegacyOverlayAsSkull() {
+        return combMaterial.isEmpty()
+                && visorMaterial.isEmpty()
+                && !MaterialCatalog.IRON.equals(skullMaterial)
+                && !MaterialCatalog.LEATHER.equals(skullMaterial);
     }
 
     private static int damageBucket(ItemStack stack) {
