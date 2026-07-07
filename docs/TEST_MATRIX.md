@@ -15,11 +15,11 @@ Unknown tagged rod handles should craft as handles but resolve to a known visual
 
 | Test | Expected Result |
 | --- | --- |
-| Early flint to copper route | Player can gather Plant Fiber, knap flint, make a Flint Pick, craft Pattern Boards, create patterns, and reach first copper parts without paper, screwdriver assembly, or the copper Smithing Anvil. |
+| Early flint to copper route | Player can knap flint, assemble a Flint Pick at a Toolmaker's Station with a stick/handle, craft Pattern Boards, create patterns, and reach first copper parts without Plant Fiber binding, paper, screwdriver assembly, or the copper Tool Forge. |
 | Crude Anvil start | Crude Anvil recipe is cheap, accepts basic metal templates, and can start materials whose definitions allow low heat after they have been warmed. Built-in copper, gold, and iron allow campfire-low heat. Output quality caps at Worked by default. |
-| Smithing Anvil upgrade | Smithing Anvil recipe uses one copper block plus four copper ingots. It supports the same physical flow with a Fine quality cap by default. |
+| Tool Forge upgrade | Tool Forge recipe uses one copper block plus four copper ingots. It supports the same physical flow with a Fine quality cap by default. |
 | Workshop heat | Right-clicking a lit campfire with a heatable ingot or metal part inserts one workpiece into the campfire's normal visible slots; dropped heatable workpieces on a lit campfire insert if a slot is free. The campfire ejects a low-heat workpiece when the timer completes. Cold ingots cannot start low-heat forging just by being near a campfire. Low-heat workpieces can cool from the 55% target down to `lowHeatMinimumForgeTemperature`. Finished parts retain heat data and can be quenched. A fueled Heating Forge provides hot buffered nearby heat. Hammering does not stop mid-craft when `requireHeatAtJobStartOnly=true` and `workpieceCoolsMidCraft=false`. |
-| Toolmaker's Bench assembly | Placed compatible parts assemble with empty-hand interaction or Smithing Hammer. A placed finished tool separates with Smithing Hammer. Screwdriver remains registered but is not required for normal assembly. |
+| Toolmaker's Station assembly | Placed compatible parts assemble with empty-hand interaction or Smithing Hammer. A placed finished tool separates with Smithing Hammer. Screwdriver remains registered but is not required for normal assembly. |
 
 ## Quality Checks
 
@@ -35,8 +35,11 @@ Unknown tagged rod handles should craft as handles but resolve to a known visual
 
 | Test | Expected Result |
 | --- | --- |
-| Emerald, ruby, and sapphire parts | Gem parts complete on the Lapidary Table without a Gem Cutter's Knife and without Diamond Powder by default. Knife use provides optional quality help. |
-| Diamond parts | Diamond parts require `mobstoolforging:diamond_powder` when `diamondRequiresAbrasive=true`; the `mobstoolforging:lapidary_abrasives` tag remains valid. |
+| Heated metal part placement | A heated forged metal tool part can be placed on the Lapidary Table without selecting a pattern. A cold part is rejected with the heat message. |
+| Gem shell material | Diamond material requires diamond-tier abrasive in the table first. Emerald, ruby, and sapphire material can be added after the heated part without abrasive. Required material count follows the matching part shape cost. |
+| Coated part output | Completed output is named as a metal-gem part, stores gem material as `material_id`, stores metal core as `coating_base_material`, renders as the gem part, and head pieces assemble into tools with the gem head stats. |
+| Coated quality | Coated part quality averages the original metal part quality with lapidary gem-work quality. Gem and coated parts can still be polished afterward. |
+| Lapidary abrasive tiers | Diamond Powder and the `mobstoolforging:lapidary_abrasives/diamond` tag satisfy diamond's abrasive requirement. The umbrella `mobstoolforging:lapidary_abrasives` tag remains valid for optional quality helper checks. |
 | Knife-required config | With `gemcuttersFileRequired=true`, empty-hand and hammer lapidary work are blocked with the knife hint. |
 
 ## Compatibility Checks

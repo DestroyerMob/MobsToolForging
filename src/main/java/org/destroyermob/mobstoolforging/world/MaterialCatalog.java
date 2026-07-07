@@ -92,7 +92,7 @@ public final class MaterialCatalog {
         register(GOLD, MaterialCategory.METAL, Items.GOLD_INGOT, Tiers.GOLD, HeatLevel.LOW);
         register(COPPER, MaterialCategory.METAL, Items.COPPER_INGOT, COPPER_TIER, HeatLevel.LOW);
         register(NETHERITE, MaterialCategory.METAL, Items.NETHERITE_INGOT, Tiers.NETHERITE, HeatLevel.HIGH);
-        register(DIAMOND, MaterialCategory.GEM, Items.DIAMOND, Tiers.DIAMOND);
+        register(DIAMOND, MaterialCategory.GEM, Items.DIAMOND, Tiers.DIAMOND, LapidaryAbrasives.DIAMOND_TIER);
         register(EMERALD, MaterialCategory.GEM, Items.EMERALD, EMERALD_TIER);
         registerTagged(
                 RUBY,
@@ -354,6 +354,19 @@ public final class MaterialCatalog {
 
     private static void register(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier) {
         ToolMaterialDefinition definition = new ToolMaterialDefinition(id, category, displayItem, tier);
+        putDefinition(definition);
+    }
+
+    private static void register(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier, ResourceLocation requiredLapidaryAbrasiveTier) {
+        ToolMaterialDefinition definition = new ToolMaterialDefinition(
+                id,
+                category,
+                displayItem,
+                tier,
+                ToolMaterialDefinition.defaultMinimumForgeHeat(category),
+                Optional.of(requiredLapidaryAbrasiveTier),
+                null
+        );
         putDefinition(definition);
     }
 

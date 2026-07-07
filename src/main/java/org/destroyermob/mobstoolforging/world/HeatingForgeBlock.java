@@ -195,6 +195,10 @@ public class HeatingForgeBlock extends BaseEntityBlock {
                 return InteractionResult.CONSUME;
             }
             if (forge.hasFuel()) {
+                if (forge.isLit()) {
+                    player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_fuel_burning"), true);
+                    return InteractionResult.CONSUME;
+                }
                 giveOrDrop(player, forge.removeFuel());
                 level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 0.85F);
                 return InteractionResult.CONSUME;

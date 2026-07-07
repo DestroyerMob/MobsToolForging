@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -54,12 +55,13 @@ public class MaterialDefinitionReloadListener extends SimpleJsonResourceReloadLi
         String translationKey = GsonHelper.getAsString(json, "translation_key", null);
         Tier tier = parseTier(json, category, displayItem);
         HeatLevel minimumForgeHeat = parseMinimumForgeHeat(json, category);
+        Optional<ResourceLocation> requiredLapidaryAbrasiveTier = parseRequiredLapidaryAbrasiveTier(json);
         List<Item> sourceItems = items(json, "items");
         List<TagKey<Item>> sourceTags = itemTags(json, "tags");
         List<String> visualSlots = strings(json, "visual_slots");
         List<Item> handleItems = items(json, "handle_items");
         return new MaterialEntry(
-                new ToolMaterialDefinition(id, category, displayItem, tier, minimumForgeHeat, translationKey),
+                new ToolMaterialDefinition(id, category, displayItem, tier, minimumForgeHeat, requiredLapidaryAbrasiveTier, translationKey),
                 sourceItems,
                 sourceTags,
                 visualSlots,
@@ -91,6 +93,27 @@ public class MaterialDefinitionReloadListener extends SimpleJsonResourceReloadLi
             throw new IllegalArgumentException("Unknown minimum forge heat: " + value);
         }
         return parsed;
+    }
+
+    private static Optional<ResourceLocation> parseRequiredLapidaryAbrasiveTier(JsonObject json) {
+        String value = null;
+        if (json.has("required_lapidary_abrasive_tier")) {
+            value = GsonHelper.getAsString(json, "required_lapidary_abrasive_tier");
+        } else if (json.has("lapidary_abrasive_tier")) {
+            value = GsonHelper.getAsString(json, "lapidary_abrasive_tier");
+        }
+        if (value == null || value.isBlank() || value.equalsIgnoreCase("none")) {
+            return Optional.empty();
+        }
+        return Optional.of(parseAbrasiveTierId(value));
+    }
+
+    private static ResourceLocation parseAbrasiveTierId(String value) {
+        String trimmed = value.trim();
+        if (trimmed.contains(":")) {
+            return ResourceLocation.parse(trimmed);
+        }
+        return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, trimmed);
     }
 
     private static Tier parseTier(JsonObject json, MaterialCategory category, Item displayItem) {

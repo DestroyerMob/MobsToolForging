@@ -168,10 +168,10 @@ public final class MobsToolForgingConfig {
                 .comment("When true, the Gem Cutter's Knife is required for every Lapidary Table work action. When false, it is optional quality help.")
                 .define("gemcuttersFileRequired", false);
         DIAMOND_REQUIRES_ABRASIVE = builder
-                .comment("When true, diamond parts require abrasive on the Lapidary Table.")
-                .define("diamondRequiresAbrasive", true);
+                .comment("Deprecated compatibility option. Diamond Powder is optional lapidary quality help and no longer gates diamond work.")
+                .define("diamondRequiresAbrasive", false);
         DIAMOND_ABRASIVE_ITEM = builder
-                .comment("Item id used as the diamond abrasive. The default intentionally standardises on diamond_powder.")
+                .comment("Item id used as the optional lapidary abrasive. The default intentionally standardises on diamond_powder.")
                 .define("diamondAbrasiveItem", "mobstoolforging:diamond_powder");
         builder.pop();
         builder.push("bloomery");

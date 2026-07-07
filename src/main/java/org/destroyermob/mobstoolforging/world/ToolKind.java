@@ -53,8 +53,24 @@ public enum ToolKind {
         return Component.translatable("item.mobstoolforging.material_" + partType, MaterialCatalog.displayName(materialId));
     }
 
+    public Component coatedPartName(ResourceLocation baseMaterialId, ResourceLocation coatingMaterialId) {
+        return Component.translatable(
+                "item.mobstoolforging.coated_material_" + partType,
+                MaterialCatalog.displayName(baseMaterialId),
+                MaterialCatalog.displayName(coatingMaterialId)
+        );
+    }
+
     public Component toolName(ResourceLocation materialId) {
         return Component.translatable("item.mobstoolforging.material_" + id, MaterialCatalog.displayName(materialId));
+    }
+
+    public Component coatedToolName(ResourceLocation baseMaterialId, ResourceLocation coatingMaterialId) {
+        return Component.translatable(
+                "item.mobstoolforging.coated_material_" + id,
+                MaterialCatalog.displayName(baseMaterialId),
+                MaterialCatalog.displayName(coatingMaterialId)
+        );
     }
 
     public ItemStack createPart(ResourceLocation materialId) {

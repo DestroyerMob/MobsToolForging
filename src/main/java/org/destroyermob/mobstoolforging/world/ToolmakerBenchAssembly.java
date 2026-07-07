@@ -45,38 +45,21 @@ public final class ToolmakerBenchAssembly {
         if (isFinishedTool(stack)) {
             return existingStacks.isEmpty();
         }
-        if (isPlantFiber(stack)) {
-            return needsPlantFiber(existingStacks);
-        }
-        return !hasPlantFiber(existingStacks) && isPlaceable(stack);
-    }
-
-    public static boolean needsPlantFiber(List<ItemStack> stacks) {
-        return plantFiberCount(stacks) == 0 && hasCompleteConstructionRequiringPlantFiber(stacks);
+        return isPlaceable(stack);
     }
 
     public static ItemStack assemble(List<ItemStack> stacks, HolderLookup.Provider registries) {
-        int plantFiberCount = plantFiberCount(stacks);
-        if (plantFiberCount > 1) {
+        if (stacks.isEmpty() || stacks.stream().anyMatch(ToolmakerBenchAssembly::isFinishedTool)) {
             return ItemStack.EMPTY;
         }
-        List<ItemStack> assemblyStacks = assemblyStacks(stacks);
-        if (assemblyStacks.isEmpty() || assemblyStacks.stream().anyMatch(ToolmakerBenchAssembly::isFinishedTool)) {
-            return ItemStack.EMPTY;
-        }
-        if (plantFiberCount == 0) {
-            ItemStack armor = assembleArmor(stacks);
-            if (!armor.isEmpty()) {
-                return armor;
-            }
+        ItemStack armor = assembleArmor(stacks);
+        if (!armor.isEmpty()) {
+            return armor;
         }
         for (ToolTypeDefinition definition : ToolTypeRegistry.toolTypes()) {
             Parts parts = findParts(stacks, definition);
             Optional<ToolConstructionData> construction = parts.validConstruction(definition);
             if (construction.isEmpty()) {
-                continue;
-            }
-            if ((plantFiberCount == 1) != requiresPlantFiber(construction.get())) {
                 continue;
             }
             ItemStack output = definition.createTool(construction.get());
@@ -86,7 +69,7 @@ public final class ToolmakerBenchAssembly {
             ToolPartWear.applyStoredWear(output, parts.part());
             if (ToolAssemblyEnchantments.mergeOnto(output, parts.enchantmentSources(), registries)) {
                 ToolExternalComponents.copyPrimaryHeadComponentsToTool(parts.part(), output);
-                output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(assemblyStacks));
+                output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(stacks));
                 ToolAssemblyEnchantments.syncRoutedToolEnchantments(output, registries);
                 return output;
             }
@@ -202,9 +185,6 @@ public final class ToolmakerBenchAssembly {
             if (stack.isEmpty()) {
                 continue;
             }
-            if (isPlantFiber(stack)) {
-                continue;
-            }
             if (WorkpieceHeat.hasHeat(stack)) {
                 return Parts.invalid();
             }
@@ -251,48 +231,6 @@ public final class ToolmakerBenchAssembly {
         return definition.requiredAssemblyParts().stream()
                 .filter(partType -> matchesPart(definition, stack, partData, partType))
                 .findFirst();
-    }
-
-    private static boolean hasCompleteConstructionRequiringPlantFiber(List<ItemStack> stacks) {
-        if (stacks.isEmpty() || stacks.stream().anyMatch(ToolmakerBenchAssembly::isFinishedTool)) {
-            return false;
-        }
-        for (ToolTypeDefinition definition : ToolTypeRegistry.toolTypes()) {
-            Optional<ToolConstructionData> construction = findParts(stacks, definition).validConstruction(definition);
-            if (construction.filter(ToolmakerBenchAssembly::requiresPlantFiber).isPresent()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean requiresPlantFiber(ToolConstructionData construction) {
-        return MaterialCatalog.FLINT.equals(construction.headMaterial());
-    }
-
-    private static List<ItemStack> assemblyStacks(List<ItemStack> stacks) {
-        return stacks.stream()
-                .filter(stack -> !isPlantFiber(stack))
-                .map(ItemStack::copy)
-                .toList();
-    }
-
-    private static boolean hasPlantFiber(List<ItemStack> stacks) {
-        return stacks.stream().anyMatch(ToolmakerBenchAssembly::isPlantFiber);
-    }
-
-    private static int plantFiberCount(List<ItemStack> stacks) {
-        int count = 0;
-        for (ItemStack stack : stacks) {
-            if (isPlantFiber(stack)) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    private static boolean isPlantFiber(ItemStack stack) {
-        return stack.is(ModItems.PLANT_FIBER.get());
     }
 
     private static ItemStack handleStack(ResourceLocation material) {
@@ -343,7 +281,13 @@ public final class ToolmakerBenchAssembly {
         ItemStack copy = stack.copyWithCount(1);
         ToolPartData data = copy.get(ModDataComponents.TOOL_PART.get());
         if (data != null && data.treatment().isEmpty() && construction.treatment().isPresent()) {
-            copy.set(ModDataComponents.TOOL_PART.get(), data.withTreatment(construction.treatment().get()));
+            data = data.withTreatment(construction.treatment().get());
+        }
+        if (data != null && data.coatingBaseMaterial().isEmpty() && construction.headBaseMaterial().isPresent()) {
+            data = data.withCoatingBaseMaterial(construction.headBaseMaterial().get());
+        }
+        if (data != null) {
+            copy.set(ModDataComponents.TOOL_PART.get(), data);
         }
         return copy;
     }
@@ -582,6 +526,7 @@ public final class ToolmakerBenchAssembly {
             return Optional.of(new ToolConstructionData(
                     definition.id(),
                     partData.materialId(),
+                    partData.coatingBaseMaterial(),
                     MaterialCatalog.handleMaterial(handle),
                     guardMaterial(),
                     Optional.empty(),

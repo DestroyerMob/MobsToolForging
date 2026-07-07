@@ -15,14 +15,30 @@ public final class ToolStackNames {
         }
     }
 
+    public static void applyCoatedPartName(ItemStack stack, String partType, ResourceLocation baseMaterialId, ResourceLocation coatingMaterialId) {
+        if (!stack.isEmpty()) {
+            stack.set(DataComponents.ITEM_NAME, coatedPartName(partType, baseMaterialId, coatingMaterialId));
+        }
+    }
+
     public static void applyToolName(ItemStack stack, ToolTypeDefinition definition, ToolConstructionData construction) {
         if (!stack.isEmpty()) {
-            stack.set(DataComponents.ITEM_NAME, toolName(definition, construction.headMaterial()));
+            stack.set(DataComponents.ITEM_NAME, toolName(definition, construction));
         }
     }
 
     public static Component partName(String partType, ResourceLocation materialId) {
         return materialPrefix(materialId, titleCase(partType));
+    }
+
+    public static Component coatedPartName(String partType, ResourceLocation baseMaterialId, ResourceLocation coatingMaterialId) {
+        return materialPairPrefix(baseMaterialId, coatingMaterialId, titleCase(partType));
+    }
+
+    public static Component toolName(ToolTypeDefinition definition, ToolConstructionData construction) {
+        return construction.headBaseMaterial()
+                .map(baseMaterial -> materialPairPrefix(baseMaterial, construction.headMaterial(), titleCase(definition.id().getPath())))
+                .orElseGet(() -> toolName(definition, construction.headMaterial()));
     }
 
     public static Component toolName(ToolTypeDefinition definition, ResourceLocation materialId) {
@@ -32,6 +48,15 @@ public final class ToolStackNames {
     private static Component materialPrefix(ResourceLocation materialId, String noun) {
         return Component.empty()
                 .append(MaterialCatalog.displayName(materialId))
+                .append(" ")
+                .append(Component.literal(noun));
+    }
+
+    private static Component materialPairPrefix(ResourceLocation baseMaterialId, ResourceLocation coatingMaterialId, String noun) {
+        return Component.empty()
+                .append(MaterialCatalog.displayName(baseMaterialId))
+                .append("-")
+                .append(MaterialCatalog.displayName(coatingMaterialId))
                 .append(" ")
                 .append(Component.literal(noun));
     }

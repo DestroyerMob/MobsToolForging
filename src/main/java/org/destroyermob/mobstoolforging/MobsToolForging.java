@@ -419,8 +419,8 @@ public class MobsToolForging {
                 .withStyle(ChatFormatting.DARK_GRAY)
                 .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
                 .append(part.effectiveQualityLevel().displayName()));
-        if (part.isPolishable()) {
-            event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.finish")
+        if (part.finishAffectsQuality()) {
+            event.getToolTip().add(Component.translatable(part.isCoated() ? "tooltip.mobstoolforging.core_finish" : "tooltip.mobstoolforging.finish")
                     .withStyle(ChatFormatting.DARK_GRAY)
                     .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
                     .append(part.finish().displayName()));
@@ -428,6 +428,10 @@ public class MobsToolForging {
                 event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.unpolished_hint").withStyle(ChatFormatting.GRAY));
             }
         }
+        part.coatingBaseMaterial().ifPresent(baseMaterial -> event.getToolTip().add(Component.translatable(
+                "tooltip.mobstoolforging.coating_base",
+                MaterialCatalog.displayName(baseMaterial)
+        ).withStyle(ChatFormatting.DARK_GRAY)));
         part.treatment().ifPresent(treatment -> event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.part_treatment", MaterialCatalog.displayName(treatment)).withStyle(ChatFormatting.DARK_GRAY)));
         int remainingDurability = ToolPartWear.remainingDurabilityPercent(stack);
         if (remainingDurability < 100) {

@@ -104,6 +104,8 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .addTag(Tags.Items.RODS_BLAZE)
                 .addTag(Tags.Items.RODS_BREEZE);
         tag(ModTags.Items.LAPIDARY_ABRASIVES)
+                .addTag(ModTags.Items.LAPIDARY_ABRASIVES_DIAMOND);
+        tag(ModTags.Items.LAPIDARY_ABRASIVES_DIAMOND)
                 .add(ModItems.DIAMOND_POWDER.get());
         tag(ModTags.Items.KNAPPING_TOOLS)
                 .add(Items.FLINT);

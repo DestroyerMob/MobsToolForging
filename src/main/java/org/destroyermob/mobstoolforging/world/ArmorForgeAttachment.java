@@ -79,9 +79,6 @@ public final class ArmorForgeAttachment {
         ItemStack target = forge.armorAttachmentTarget();
         ResourceLocation materialId = forge.materialId();
         if (materialId == null) {
-            if (forge.workstationKind() == WorkstationKind.LAPIDARY_TABLE && !forge.hasAbrasive()) {
-                return Component.translatable("message.mobstoolforging.lapidary_needs_abrasive");
-            }
             return Component.translatable("message.mobstoolforging.armor_attachment_needs_material", template.displayName());
         }
         ArmorConstructionData construction = target.get(ModDataComponents.ARMOR_CONSTRUCTION.get());

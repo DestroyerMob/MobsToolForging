@@ -2,19 +2,26 @@
 
 A NeoForge 1.21.1 mod that adds physical, modular tool making without changing vanilla anvil behavior.
 
+## Project Facts
+
+- Mod id: `mobstoolforging`
+- Current version: `0.1.0`
+- Target: Minecraft 1.21.1, NeoForge 21.1.234, Java 21
+- Common config: `config/mobstoolforging-common.toml`
+
 ## Current Features
 
-- Smithing Anvil workstation for metal tool heads.
+- Tool Forge workstation for metal tool parts.
 - Crude Anvil workstation for cheap early metal shaping with a lower quality cap.
-- Lapidary Table workstation for gem tool heads.
+- Lapidary Table workstation for coating heated metal tool parts with gem shells.
 - Heating Forge and campfire workpiece warming for start-of-job metal heat.
-- Toolmaker's Bench for physical, no-GUI assembly and separating modular tools.
+- Toolmaker's Station variants for physical, no-GUI assembly and separating modular tools.
 - Pattern Creation Station, cheap Pattern Boards, paper-compatible inputs, and physical pattern items for selecting part templates.
 - In-world station previews show the selected part shape before material is added.
 - Smithing Hammer workflow with material placement, progress, timing quality cues, and block-entity visuals.
 - Modular vanilla-style tool and weapon set: sword, shovel, pickaxe, axe, and hoe.
 - Modular armour base pieces with material add-ons: helmet, chestplate, leggings, and boots.
-- In-world flint knapping and Plant Fiber ground assembly for modular starter flint tools.
+- In-world flint knapping for modular starter flint parts, assembled at a Toolmaker's Station without Plant Fiber binding.
 - Tag-driven starter materials:
   - Metals: iron, gold, copper
   - Gems: diamond, emerald
@@ -29,11 +36,7 @@ A NeoForge 1.21.1 mod that adds physical, modular tool making without changing v
 
 ## Development
 
-Requirements:
-
-- Java 21
-- NeoForge 21.1.234
-- Gradle wrapper included
+Requirements are Java 21 and the included Gradle wrapper.
 
 Useful commands:
 
@@ -49,7 +52,7 @@ The built jar is written to `build/libs/`.
 The common config controls progression and unfinished systems:
 
 - Vanilla material tool recipes are disabled by default so the forging loop owns tool progression.
-- Starter flint progression, Crude Anvil availability, pattern input requirements, copper harvest rules, start-of-job heat, timing quality, lapidary abrasive rules, and loot conversion are configurable.
+- Starter flint progression, Crude Anvil availability, pattern input requirements, copper harvest rules, start-of-job heat, timing quality, tiered lapidary abrasive requirements, and loot conversion are configurable.
 - `debugTemplateSelector=false` keeps the old template selector screen disabled during normal play.
 - Bloomery, crucible, and casting switches are present but reserved for future work and default to off.
 
@@ -61,11 +64,11 @@ Procedural sprites are placeholder defaults. Final-quality art should come from 
 
 ## Current Limitations
 
-- Pattern items currently define shape only. The station defines the material process: metals are shaped on the Crude Anvil or Smithing Anvil, and gems are shaped on the Lapidary Table.
+- Pattern items define forged metal shapes. The Lapidary Table no longer uses patterns; it coats already-forged, heated metal tool parts with gem material.
 - Armour base patterns create the finished wearable armour piece directly. Add-on patterns such as helmet combs, helmet visors, knees, and tassets install onto that armour afterward.
-- Armour add-ons follow the same material split as tool heads. This pass keeps armour quality fields compatible but does not add new armour quality effects or armour progression.
+- Armour add-ons follow the same material split as tool parts. This pass keeps armour quality fields compatible but does not add new armour quality effects or armour progression.
 - The old template selector screen is a debug fallback only and is disabled during normal play unless the debug config is enabled.
 - Bridge support is data-driven. MoreWeapons currently supplies bridge data for great swords, katanas, battle axes, knives, and machetes; other non-vanilla families still need bridge data from their owning mods.
 - Generated part sprites are useful for wiring tests, but they are not final art.
-- Early progression uses grass/fern Plant Fiber, placed flint knapping, ground assembly, Pattern Boards, campfire low heat, and the Crude Anvil before the copper Smithing Anvil upgrade. See `docs/PROGRESSION.md`.
+- Early progression uses placed flint knapping, Toolmaker's Station assembly, Pattern Boards, campfire low heat, and the Crude Anvil before the copper Tool Forge upgrade. Plant Fiber is not required for starter flint tools. See `docs/PROGRESSION.md`.
 - Bloomery, crucible, and casting progression are scaffolded in config/data but are not the active production path yet.

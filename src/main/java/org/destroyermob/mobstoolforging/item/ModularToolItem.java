@@ -111,7 +111,12 @@ public interface ModularToolItem extends IItemExtension {
 
     default Component getModularName(ItemStack stack, Component fallback) {
         ToolConstructionData data = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
-        return data == null ? fallback : toolKind().toolName(data.headMaterial());
+        if (data == null) {
+            return fallback;
+        }
+        return data.headBaseMaterial()
+                .map(baseMaterial -> toolKind().coatedToolName(baseMaterial, data.headMaterial()))
+                .orElseGet(() -> toolKind().toolName(data.headMaterial()));
     }
 
     default void appendModularTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flag) {

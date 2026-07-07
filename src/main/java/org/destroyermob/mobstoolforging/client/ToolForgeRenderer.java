@@ -62,6 +62,10 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             renderTemplateMaterialRequirements(forge, partialTick, poseStack, bufferSource, packedLight, packedOverlay, layout);
             renderAnvilReadyPartPreview(forge, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
         }
+        if (forge.hasLapidaryCoatingBase() && !forge.isComplete()) {
+            renderLapidaryCoatingWork(forge, partialTick, poseStack, bufferSource, packedLight, packedOverlay, layout);
+            return;
+        }
         renderAbrasive(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
 
         ItemStack display = forge.displayMaterialStack();
@@ -75,15 +79,29 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
 
         int count = forge.materialCount();
         float spread = layout.spread() * (1.0F - forge.progress());
-        if (count == 1) {
-            renderItem(forge, display, poseStack, bufferSource, packedLight, packedOverlay, layout, 0.0F, layout.materialScale());
-        } else if (count == 2) {
-            renderItem(forge, display, poseStack, bufferSource, packedLight, packedOverlay, layout, -spread, layout.materialScale());
-            renderItem(forge, display, poseStack, bufferSource, packedLight, packedOverlay, layout, spread, layout.materialScale());
-        } else {
-            renderItem(forge, display, poseStack, bufferSource, packedLight, packedOverlay, layout, -spread, layout.materialScale());
-            renderItem(forge, display, poseStack, bufferSource, packedLight, packedOverlay, layout, 0.0F, layout.centerMaterialScale());
-            renderItem(forge, display, poseStack, bufferSource, packedLight, packedOverlay, layout, spread, layout.materialScale());
+        renderMaterialCopies(forge, display, count, spread, 0.0F, poseStack, bufferSource, packedLight, packedOverlay, layout);
+    }
+
+    private void renderLapidaryCoatingWork(ToolForgeBlockEntity forge, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
+        renderAbrasive(forge, poseStack, bufferSource, packedLight, packedOverlay, layout);
+
+        ItemStack base = forge.lapidaryCoatingBaseStack();
+        if (!base.isEmpty()) {
+            renderFlatItem(forge, base, poseStack, bufferSource, packedLight, packedOverlay, 0.0F, 0.13F, layout.outputScale(), layout.materialSurfaceY(), forge.displayRotationDegrees());
+        }
+
+        ItemStack preview = forge.lapidaryCoatingMaterialPreviewStack();
+        int remaining = forge.remainingMaterials();
+        if (!preview.isEmpty() && remaining > 0) {
+            renderGhostMaterials(forge, preview, remaining, partialTick, poseStack, bufferSource, packedLight, packedOverlay, layout, 0.0F, -0.17F);
+        }
+
+        if (forge.materialCount() > 0) {
+            ItemStack placed = forge.displayMaterialStack();
+            if (!placed.isEmpty()) {
+                float spread = layout.spread() * (1.0F - forge.progress());
+                renderMaterialCopies(forge, placed, forge.materialCount(), spread, -0.17F, poseStack, bufferSource, packedLight, packedOverlay, layout);
+            }
         }
     }
 
@@ -223,6 +241,10 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
     }
 
     private void renderGhostMaterials(ToolForgeBlockEntity forge, ItemStack stack, int count, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
+        renderGhostMaterials(forge, stack, count, partialTick, poseStack, bufferSource, packedLight, packedOverlay, layout, 0.0F, 0.0F);
+    }
+
+    private void renderGhostMaterials(ToolForgeBlockEntity forge, ItemStack stack, int count, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout, float originX, float originZ) {
         Level level = forge.getLevel();
         float time = level == null ? partialTick : level.getGameTime() + partialTick;
         int columns = count <= 3 ? count : Math.min(4, (int) Math.ceil(Math.sqrt(count)));
@@ -236,8 +258,8 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             int column = index % columns;
             int row = index / columns;
             float shimmer = (float) Math.sin(time * 0.18F + index * 0.9F) * 0.012F;
-            float localX = startX + column * step;
-            float localZ = startZ + row * step;
+            float localX = originX + startX + column * step;
+            float localZ = originZ + startZ + row * step;
             float rotation = forge.displayRotationDegrees() + time * 0.45F + index * 29.0F;
             renderGhostFlatItem(forge, stack, poseStack, bufferSource, packedLight, packedOverlay, localX, localZ, scale, layout.previewSurfaceY() + 0.018F + shimmer, rotation, index);
         }
@@ -257,6 +279,30 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         poseStack.scale(scale, scale, scale);
         itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, LightTexture.FULL_BRIGHT, packedOverlay, poseStack, new GhostBufferSource(bufferSource, GHOST_MATERIAL_ALPHA), level, 100 + seed);
         poseStack.popPose();
+    }
+
+    private void renderMaterialCopies(ToolForgeBlockEntity forge, ItemStack display, int count, float spread, float localZ, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
+        if (count <= 0) {
+            return;
+        }
+        if (count == 1) {
+            renderMaterialCopy(forge, display, 0.0F, localZ, layout.materialScale(), poseStack, bufferSource, packedLight, packedOverlay, layout);
+        } else if (count == 2) {
+            renderMaterialCopy(forge, display, -spread, localZ, layout.materialScale(), poseStack, bufferSource, packedLight, packedOverlay, layout);
+            renderMaterialCopy(forge, display, spread, localZ, layout.materialScale(), poseStack, bufferSource, packedLight, packedOverlay, layout);
+        } else {
+            renderMaterialCopy(forge, display, -spread, localZ, layout.materialScale(), poseStack, bufferSource, packedLight, packedOverlay, layout);
+            renderMaterialCopy(forge, display, 0.0F, localZ, layout.centerMaterialScale(), poseStack, bufferSource, packedLight, packedOverlay, layout);
+            renderMaterialCopy(forge, display, spread, localZ, layout.materialScale(), poseStack, bufferSource, packedLight, packedOverlay, layout);
+        }
+    }
+
+    private void renderMaterialCopy(ToolForgeBlockEntity forge, ItemStack stack, float offset, float localZ, float scale, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
+        float localX = layout.spreadAxis() == SpreadAxis.X ? offset : 0.0F;
+        float z = layout.spreadAxis() == SpreadAxis.Z ? offset + localZ : localZ;
+        boolean qualityWindow = forge.isTimingQualityWindow();
+        float surfaceY = qualityWindow ? layout.materialSurfaceY() + 0.018F : layout.materialSurfaceY();
+        renderFlatItem(forge, stack, poseStack, bufferSource, packedLight, packedOverlay, localX, z, scale, surfaceY, forge.displayRotationDegrees());
     }
 
     private void renderItem(ToolForgeBlockEntity forge, ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout, float offset, float scale) {

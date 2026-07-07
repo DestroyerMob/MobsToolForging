@@ -12,6 +12,7 @@ import org.destroyermob.mobstoolforging.MobsToolForging;
 public record ToolConstructionData(
         ResourceLocation toolType,
         ResourceLocation headMaterial,
+        Optional<ResourceLocation> headBaseMaterial,
         ResourceLocation handleMaterial,
         Optional<ResourceLocation> guardMaterial,
         Optional<ResourceLocation> bindingMaterial,
@@ -23,6 +24,7 @@ public record ToolConstructionData(
     public static final int DEFAULT_QUALITY = 100;
 
     public ToolConstructionData {
+        headBaseMaterial = headBaseMaterial == null ? Optional.empty() : headBaseMaterial;
         guardMaterial = guardMaterial == null ? Optional.empty() : guardMaterial;
         bindingMaterial = bindingMaterial == null ? Optional.empty() : bindingMaterial;
         wrapMaterial = wrapMaterial == null ? Optional.empty() : wrapMaterial;
@@ -41,18 +43,33 @@ public record ToolConstructionData(
             ResourceLocation toolType,
             ResourceLocation headMaterial,
             ResourceLocation handleMaterial,
+            Optional<ResourceLocation> guardMaterial,
             Optional<ResourceLocation> bindingMaterial,
             Optional<ResourceLocation> wrapMaterial,
             Optional<ResourceLocation> focusMaterial,
             Optional<ResourceLocation> treatment,
             int quality
     ) {
-        this(toolType, headMaterial, handleMaterial, Optional.empty(), bindingMaterial, wrapMaterial, focusMaterial, treatment, quality);
+        this(toolType, headMaterial, Optional.empty(), handleMaterial, guardMaterial, bindingMaterial, wrapMaterial, focusMaterial, treatment, quality);
+    }
+
+    public ToolConstructionData(
+            ResourceLocation toolType,
+            ResourceLocation headMaterial,
+            ResourceLocation handleMaterial,
+            Optional<ResourceLocation> bindingMaterial,
+            Optional<ResourceLocation> wrapMaterial,
+            Optional<ResourceLocation> focusMaterial,
+            Optional<ResourceLocation> treatment,
+            int quality
+    ) {
+        this(toolType, headMaterial, Optional.empty(), handleMaterial, Optional.empty(), bindingMaterial, wrapMaterial, focusMaterial, treatment, quality);
     }
 
     public static final Codec<ToolConstructionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("tool_type").forGetter(ToolConstructionData::toolType),
             ResourceLocation.CODEC.fieldOf("head_material").forGetter(ToolConstructionData::headMaterial),
+            ResourceLocation.CODEC.optionalFieldOf("head_base_material").forGetter(ToolConstructionData::headBaseMaterial),
             ResourceLocation.CODEC.fieldOf("handle_material").forGetter(ToolConstructionData::handleMaterial),
             ResourceLocation.CODEC.optionalFieldOf("guard_material").forGetter(ToolConstructionData::guardMaterial),
             ResourceLocation.CODEC.optionalFieldOf("binding_material").forGetter(ToolConstructionData::bindingMaterial),
@@ -68,6 +85,7 @@ public record ToolConstructionData(
         return new ToolConstructionData(
                 toolType(toolKind),
                 headMaterial,
+                Optional.empty(),
                 handleMaterial,
                 Optional.empty(),
                 Optional.empty(),

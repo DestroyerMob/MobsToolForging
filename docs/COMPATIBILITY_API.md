@@ -52,7 +52,19 @@ Material definition JSON lets a compat datapack say what an item or tag means to
 }
 ```
 
-`minimum_forge_heat` controls which workshop heat tier can start metal work for this material. Valid values are `"none"`, `"low"`, `"hot"`, and `"high"`; `"minimum_heat_level"` is accepted as an alias. Built-in copper, gold, and iron use `"low"` so campfire-tier forging can start early work. Other datapack metals default to `"hot"` unless they opt into `"low"` explicitly. Gem materials default to `"none"` because they are cut on the Lapidary Table rather than forged.
+`minimum_forge_heat` controls which workshop heat tier can start metal work for this material. Valid values are `"none"`, `"low"`, `"hot"`, and `"high"`; `"minimum_heat_level"` is accepted as an alias. Built-in copper, gold, and iron use `"low"` so campfire-tier forging can start early work. Other datapack metals default to `"hot"` unless they opt into `"low"` explicitly. Gem materials default to `"none"` because they are used as Lapidary Table shell material rather than forged directly.
+
+Gem materials can set `required_lapidary_abrasive_tier` to require an abrasive in the Lapidary Table before that material can be applied as a shell. `"lapidary_abrasive_tier"` is accepted as an alias, missing/blank/`"none"` means no requirement, and bare values like `"diamond"` resolve to `mobstoolforging:diamond`. A tier is satisfied by an item tag at `data/<namespace>/tags/item/lapidary_abrasives/<path>.json`; built-in diamond uses `mobstoolforging:diamond`, currently supplied by Diamond Powder through `mobstoolforging:lapidary_abrasives/diamond`. Emerald, ruby, and sapphire do not require abrasive by default.
+
+```json
+{
+  "category": "gem",
+  "display_item": "minecraft:diamond",
+  "required_lapidary_abrasive_tier": "diamond",
+  "tags": ["c:gems/diamond"],
+  "tier": "diamond"
+}
+```
 
 `tier` can also be a simple string such as `"iron"`, `"diamond"`, `"netherite"`, `"copper"`, or `"emerald"`. `items` and `tags` are accepted material sources. `visual_slots` controls which model layers should collect sprites for this material. `handle_items` maps specific handle items to this material id, but only use it when matching handle sprites exist.
 
@@ -115,7 +127,9 @@ Station-work JSON can target `"tool_forge"`, `"smithing_anvil"`, `"crude_anvil"`
 
 Tool parts and finished tools still store quality as an integer field on the existing `TOOL_PART` and `TOOL_CONSTRUCTION` components. The score maps to public display levels: Crude, Worked, Well Forged, Fine, and Masterwork. Missing quality data defaults to Well Forged, so existing saves and bridge-created stacks remain valid.
 
-Finished tool quality is derived during physical Toolmaker's Bench assembly from the primary part, required support parts, and a small assembly baseline. Datapacks and bridge mods can keep emitting the same components and let MTF compute quality naturally.
+Lapidary-coated tool parts store the visible material as the part `material_id` and the original metal core as optional `coating_base_material` on `TOOL_PART`. Finished tools carry a coated primary head's core as optional `head_base_material` on `TOOL_CONSTRUCTION`. Stat rules can target the primary head core with the `head_base`, `headBase`, `core`, or `coreMaterial` slot names.
+
+Finished tool quality is derived during physical Toolmaker's Station assembly from the primary part, required support parts, and a small assembly baseline. Datapacks and bridge mods can keep emitting the same components and let MTF compute quality naturally.
 
 Quality stat effects are intentionally modest and config-gated by `qualityAffectsStats`. Armour part quality fields remain compatible, but this pass does not add new armour quality effects or armour progression.
 
@@ -147,7 +161,7 @@ Stat rule JSON adds small construction-based modifiers after the built-in rules:
 }
 ```
 
-Supported `slot` values are `head`, `handle`, `binding`, `guard`, `wrap`, `focus`, `treatment`, and `any`.
+Supported `slot` values are `head`, `head_base`, `headBase`, `core`, `coreMaterial`, `handle`, `binding`, `guard`, `wrap`, `focus`, `treatment`, and `any`.
 
 Resource packs can:
 

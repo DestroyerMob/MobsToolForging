@@ -14,7 +14,7 @@ This document inventories the jar so Mobs Tool Forging can decide what to repurp
 
 - `flint_shard.png` -> `mobstoolforging:textures/item/flint_shard.png`
 - `plant_fiber.png` -> `mobstoolforging:textures/item/plant_fiber.png`
-- Old EarlyGame flint tool textures are no longer used. Starter flint tools now come from placed flint knapping and ground assembly, producing MTF modular tools from actual flint parts.
+- Old EarlyGame flint tool textures are no longer used. Starter flint tools now come from placed flint knapping and Toolmaker's Station assembly, producing MTF modular tools from actual flint parts.
 
 The jar does not contain a flint shovel texture.
 
@@ -183,7 +183,7 @@ Useful source model groups:
 
 ### Flint and Survival Recipes
 
-MTF does not use EarlyGame's flint-shard crafting recipes. The active starter loop uses placed flint knapping, sticks/handles, and Plant Fiber as a ground-assembly catalyst.
+MTF does not use EarlyGame's flint-shard crafting recipes. The active starter loop uses placed flint knapping, sticks/handles, and Toolmaker's Station assembly. Plant Fiber is no longer a starter binding or assembly catalyst.
 
 Source jar recipes:
 
@@ -410,7 +410,7 @@ Likely roles based on names, config, and lang keys:
 
 - flint knife, hatchet, and pick textures as reference only; MTF renders modular flint tools from part visuals
 - flint shard texture for compatibility content
-- plant fiber texture for starter ground assembly
+- plant fiber texture for optional or future primitive-material use; it is not required by current starter tool assembly
 - lashing texture for possible future primitive binding or handle-wrap progression
 - copper tool textures as reference or temporary placeholders for copper modular tools
 - copper nugget texture if copper recycling becomes useful

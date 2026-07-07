@@ -55,6 +55,7 @@ public final class ToolStatBuilder {
         );
 
         applyHeadMaterial(stats, construction.headMaterial(), "Head");
+        construction.headBaseMaterial().ifPresent(material -> applyHeadMaterial(stats, material, "Head Core"));
         if (definition.averageRequiredHeadDurability()) {
             construction.guardMaterial().ifPresent(material -> applyHeadMaterial(stats, material, "Second Head"));
         } else {

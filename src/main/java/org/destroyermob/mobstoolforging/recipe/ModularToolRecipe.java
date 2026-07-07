@@ -169,6 +169,7 @@ public class ModularToolRecipe extends CustomRecipe {
             return Optional.of(new ToolConstructionData(
                     definition.id(),
                     partData.materialId(),
+                    partData.coatingBaseMaterial(),
                     MaterialCatalog.handleMaterial(handle),
                     guardMaterial(),
                     Optional.empty(),

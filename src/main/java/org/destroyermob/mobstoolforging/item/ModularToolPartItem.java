@@ -44,6 +44,11 @@ public class ModularToolPartItem extends Item {
     public Component getName(ItemStack stack) {
         ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
         if (data != null && partType.equals(data.partType())) {
+            for (ToolKind toolKind : ToolKind.values()) {
+                if (toolKind.partType().equals(partType) && data.coatingBaseMaterial().isPresent()) {
+                    return toolKind.coatedPartName(data.coatingBaseMaterial().get(), data.materialId());
+                }
+            }
             return Component.translatable("item.mobstoolforging.material_" + partType, MaterialCatalog.displayName(data.materialId()));
         }
         return super.getName(stack);
@@ -68,8 +73,8 @@ public class ModularToolPartItem extends Item {
                     .withStyle(ChatFormatting.DARK_GRAY)
                     .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
                     .append(data.effectiveQualityLevel().displayName()));
-            if (data.isPolishable()) {
-                tooltip.add(Component.translatable("tooltip.mobstoolforging.finish")
+            if (data.finishAffectsQuality()) {
+                tooltip.add(Component.translatable(data.isCoated() ? "tooltip.mobstoolforging.core_finish" : "tooltip.mobstoolforging.finish")
                         .withStyle(ChatFormatting.DARK_GRAY)
                         .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
                         .append(data.finish().displayName()));
@@ -77,6 +82,10 @@ public class ModularToolPartItem extends Item {
                     tooltip.add(Component.translatable("tooltip.mobstoolforging.unpolished_hint").withStyle(ChatFormatting.GRAY));
                 }
             }
+            data.coatingBaseMaterial().ifPresent(baseMaterial -> tooltip.add(Component.translatable(
+                    "tooltip.mobstoolforging.coating_base",
+                    MaterialCatalog.displayName(baseMaterial)
+            ).withStyle(ChatFormatting.DARK_GRAY)));
             if (data.treatment().isPresent()) {
                 tooltip.add(Component.translatable("tooltip.mobstoolforging.part_treatment", MaterialCatalog.displayName(data.treatment().get())).withStyle(ChatFormatting.DARK_GRAY));
             }

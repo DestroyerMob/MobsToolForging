@@ -8,7 +8,6 @@ import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
-import org.destroyermob.mobstoolforging.world.LapidaryTableBlock;
 import org.destroyermob.mobstoolforging.world.PatternRackBlock;
 import org.destroyermob.mobstoolforging.world.PatternRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
@@ -84,8 +83,6 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
                     ).withStyle(forge.materialIsForgeReady() ? ChatFormatting.GOLD : ChatFormatting.DARK_GRAY));
                 }
                 tooltip.add(progressLine(forge.hitCount(), template.requiredHits()));
-            } else if (accessor.getBlock() instanceof LapidaryTableBlock && !forge.hasAbrasive()) {
-                tooltip.add(Component.translatable("message.mobstoolforging.lapidary_needs_abrasive").withStyle(ChatFormatting.DARK_GRAY));
             }
         }
     }

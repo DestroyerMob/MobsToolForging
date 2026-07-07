@@ -12,13 +12,14 @@ Finished tools store `mobstoolforging:tool_construction`:
 {
   "tool_type": "mobstoolforging:pickaxe",
   "head_material": "mobstoolforging:diamond",
+  "head_base_material": "mobstoolforging:iron",
   "handle_material": "mobstoolforging:oak",
   "binding_material": "mobstoolforging:copper",
   "quality": 100
 }
 ```
 
-Required fields are `tool_type`, `head_material`, and `handle_material`. Optional fields are `binding_material`, `wrap_material`, `focus_material`, and `treatment`. The `quality` field is retained for compatibility and should remain `100`; it does not affect stats or tooltips.
+Required fields are `tool_type`, `head_material`, and `handle_material`. Optional fields are `head_base_material`, `binding_material`, `wrap_material`, `focus_material`, and `treatment`. `head_base_material` is used by lapidary-coated metal-gem primary heads to remember the metal core while rendering and statting the visible gem shell as the head material. The `quality` field is generated from the part quality and can affect stats/tooltips when quality is enabled.
 
 ## Material Visuals
 
@@ -55,7 +56,7 @@ The `_part` texture is used for standalone part item models. The `_tool` texture
 
 ## Adding A Material
 
-1. Tag the source item as `mobstoolforging:materials/metals` or `mobstoolforging:materials/gems` if it can become a tool head.
+1. Tag the source item as `mobstoolforging:materials/metals` or `mobstoolforging:materials/gems` if it can become a tool material.
 2. For a bridge mod, call `MaterialCatalog.registerMaterial` if the material needs custom stats instead of fallback iron/diamond-like behavior.
 3. Add or override `tooling/material_visuals/<material>.json`.
 4. Provide hand-authored source textures for every material and part that should render.

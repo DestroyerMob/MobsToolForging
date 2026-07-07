@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -111,6 +112,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
         }
         if (stack.getItem() instanceof ToolTemplateItem templateItem) {
+            if (kind == WorkstationKind.LAPIDARY_TABLE) {
+                if (!level.isClientSide) {
+                    player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_use_heated_part"), true);
+                }
+                return ItemInteractionResult.CONSUME;
+            }
             if (!MobsToolForgingConfig.ALLOW_DIRECT_PATTERN_STATION_SELECTION.get()) {
                 if (!level.isClientSide) {
                     player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_select"), true);
@@ -118,6 +125,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                 return ItemInteractionResult.CONSUME;
             }
             return applyTemplateItem(stack, templateItem, forge, level, pos, player);
+        }
+        if (kind == WorkstationKind.LAPIDARY_TABLE && ToolForgeBlockEntity.isLapidaryCoatablePart(stack)) {
+            return placeLapidaryBasePart(stack, forge, level, pos, player);
         }
         if (ArmorForgeAttachment.isAttachmentStation(kind) && ArmorForgeAttachment.isAttachmentTemplate(forge.templateId())) {
             if (forge.canPlaceArmorAttachmentTarget(stack)) {
@@ -219,10 +229,18 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                 StationWorkRecipe recipe = forge.looseWorkRecipe();
                 if (recipe != null) {
                     player.displayClientMessage(Component.translatable("message.mobstoolforging.station_status", 1, 1, forge.hitCount(), recipe.requiredHits()), true);
+                } else if (kind == WorkstationKind.LAPIDARY_TABLE && forge.hasLapidaryCoatingBase()) {
+                    player.displayClientMessage(Component.translatable(
+                            "message.mobstoolforging.lapidary_coating_status",
+                            forge.materialCount(),
+                            forge.lapidaryCoatingRequiredMaterials(),
+                            forge.hitCount(),
+                            forge.lapidaryCoatingRequiredHits()
+                    ), true);
+                } else if (kind == WorkstationKind.LAPIDARY_TABLE && forge.template() == null) {
+                    player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_use_heated_part"), true);
                 } else if (forge.template() == null) {
                     player.displayClientMessage(Component.translatable("message.mobstoolforging.select_template"), true);
-                } else if (kind == WorkstationKind.LAPIDARY_TABLE && !forge.hasAbrasive()) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_needs_abrasive"), true);
                 } else if (forge.hasMaterialHeat()) {
                     player.displayClientMessage(Component.translatable(
                             "message.mobstoolforging.station_heat_status",
@@ -256,10 +274,16 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return true;
         }
         if (stack.getItem() instanceof ToolTemplateItem templateItem) {
+            if (kind == WorkstationKind.LAPIDARY_TABLE) {
+                return false;
+            }
             if (!MobsToolForgingConfig.ALLOW_DIRECT_PATTERN_STATION_SELECTION.get()) {
                 return false;
             }
             return canApplyTemplate(stack, templateItem, forge);
+        }
+        if (kind == WorkstationKind.LAPIDARY_TABLE && ToolForgeBlockEntity.isLapidaryCoatablePart(stack)) {
+            return forge.canPlaceLapidaryBasePart(stack);
         }
         if (kind == WorkstationKind.LAPIDARY_TABLE && LapidaryAbrasives.isAbrasive(stack)) {
             return forge.canPlaceAbrasive(stack);
@@ -310,23 +334,25 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
 
     private static boolean isPatternRackSelectable(WorkstationKind kind) {
         return kind == WorkstationKind.CRUDE_ANVIL
-                || kind == WorkstationKind.TOOL_FORGE
-                || kind == WorkstationKind.LAPIDARY_TABLE;
+                || kind == WorkstationKind.TOOL_FORGE;
     }
 
     private boolean canPlaceMaterial(ItemStack stack, ToolForgeBlockEntity forge, Level level) {
         ForgeTemplateDefinition template = forge.template();
+        ToolMaterialDefinition material = MaterialCatalog.resolve(stack).orElse(null);
+        if (kind == WorkstationKind.LAPIDARY_TABLE && template == null) {
+            return material != null && forge.canPlaceLapidaryCoatingMaterial(stack, material);
+        }
         if (template == null || forge.remainingMaterials() <= 0) {
             return false;
         }
-        ToolMaterialDefinition material = MaterialCatalog.resolve(stack).orElse(null);
         if (material == null || material.category() != kind.materialCategory()) {
             return false;
         }
-        if (kind == WorkstationKind.LAPIDARY_TABLE && lapidaryNeedsAbrasive(material) && !forge.hasAbrasive()) {
+        if (!template.allowsMaterial(material.id())) {
             return false;
         }
-        if (!template.allowsMaterial(material.id())) {
+        if (kind == WorkstationKind.LAPIDARY_TABLE && !forge.hasRequiredLapidaryAbrasive(material)) {
             return false;
         }
         if (kind.isSmithingAnvilLike()
@@ -366,24 +392,30 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return ItemInteractionResult.SUCCESS;
         }
         ForgeTemplateDefinition template = forge.template();
-        if (template == null) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.select_template"), true);
-            return ItemInteractionResult.CONSUME;
-        }
         ToolMaterialDefinition material = MaterialCatalog.resolve(stack).orElse(null);
         if (material == null) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        if (kind == WorkstationKind.LAPIDARY_TABLE && template == null) {
+            return placeLapidaryCoatingMaterial(stack, material, forge, level, pos, player);
+        }
+        if (template == null) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.select_template"), true);
+            return ItemInteractionResult.CONSUME;
         }
         if (material.category() != kind.materialCategory()) {
             player.displayClientMessage(Component.translatable(kind.wrongStationMessage()), true);
             return ItemInteractionResult.CONSUME;
         }
-        if (kind == WorkstationKind.LAPIDARY_TABLE && lapidaryNeedsAbrasive(material) && !forge.hasAbrasive()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_needs_abrasive"), true);
-            return ItemInteractionResult.CONSUME;
-        }
         if (!template.allowsMaterial(material.id())) {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.material_not_allowed"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        ResourceLocation missingAbrasiveTier = kind == WorkstationKind.LAPIDARY_TABLE
+                ? forge.missingRequiredLapidaryAbrasive(material).orElse(null)
+                : null;
+        if (missingAbrasiveTier != null) {
+            player.displayClientMessage(lapidaryNeedsAbrasiveMessage(missingAbrasiveTier), true);
             return ItemInteractionResult.CONSUME;
         }
         if (kind.isSmithingAnvilLike()
@@ -404,6 +436,59 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             if (ArmorForgeAttachment.isAttachmentTemplate(template) && forge.hasArmorAttachmentTarget()) {
                 player.displayClientMessage(ArmorForgeAttachment.statusMessage(forge), true);
             }
+            return ItemInteractionResult.CONSUME;
+        }
+        player.displayClientMessage(Component.translatable("message.mobstoolforging.materials_full"), true);
+        return ItemInteractionResult.CONSUME;
+    }
+
+    private ItemInteractionResult placeLapidaryBasePart(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        if (!forge.canPlaceLapidaryBasePart(stack)) {
+            boolean needsHeat = !WorkpieceHeat.isHot(stack, level);
+            player.displayClientMessage(Component.translatable(
+                    needsHeat ? "message.mobstoolforging.lapidary_part_needs_heat" : "message.mobstoolforging.forge_busy"
+            ), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        var item = stack.getItem();
+        if (forge.placeLapidaryBasePart(stack)) {
+            level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.8F, 1.0F + level.random.nextFloat() * 0.15F);
+            player.awardStat(Stats.ITEM_USED.get(item));
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_part_placed"), true);
+        }
+        return ItemInteractionResult.CONSUME;
+    }
+
+    private ItemInteractionResult placeLapidaryCoatingMaterial(ItemStack stack, ToolMaterialDefinition material, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (material.category() != MaterialCategory.GEM) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_needs_gem"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        if (!forge.hasLapidaryCoatingBase()) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_use_heated_part"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        ResourceLocation missingAbrasiveTier = forge.missingRequiredLapidaryAbrasive(material).orElse(null);
+        if (missingAbrasiveTier != null) {
+            player.displayClientMessage(lapidaryNeedsAbrasiveMessage(missingAbrasiveTier), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        if (forge.materialId() != null && !forge.materialId().equals(material.id())) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.mixed_materials"), true);
+            return ItemInteractionResult.CONSUME;
+        }
+        int taken = forge.acceptLapidaryCoatingMaterial(stack, material);
+        if (taken > 0) {
+            level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.8F, 1.15F + level.random.nextFloat() * 0.15F);
+            player.awardStat(Stats.ITEM_USED.get(material.displayItem()));
+            player.displayClientMessage(Component.translatable(
+                    "message.mobstoolforging.lapidary_shell_material_placed",
+                    forge.materialCount(),
+                    forge.lapidaryCoatingRequiredMaterials()
+            ), true);
             return ItemInteractionResult.CONSUME;
         }
         player.displayClientMessage(Component.translatable("message.mobstoolforging.materials_full"), true);
@@ -433,7 +518,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
             return InteractionResult.CONSUME;
         }
-        if (kind != WorkstationKind.TOOLMAKERS_BENCH && debugTemplateSelectorEnabled()) {
+        if (kind != WorkstationKind.TOOLMAKERS_BENCH && kind != WorkstationKind.LAPIDARY_TABLE && debugTemplateSelectorEnabled()) {
             openTemplateSelector(level, pos, player);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
@@ -583,11 +668,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         ItemStack output = ToolmakerBenchAssembly.assemble(forge.benchStacks(), level.registryAccess());
         if (output.isEmpty()) {
-            if (ToolmakerBenchAssembly.needsPlantFiber(forge.benchStacks())) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_needs_fiber"), true);
-            } else {
-                player.displayClientMessage(Component.translatable(forge.hasBenchStacks() ? "message.mobstoolforging.toolmaker_invalid" : "message.mobstoolforging.toolmaker_needs_parts"), true);
-            }
+            player.displayClientMessage(Component.translatable(forge.hasBenchStacks() ? "message.mobstoolforging.toolmaker_invalid" : "message.mobstoolforging.toolmaker_needs_parts"), true);
             return ItemInteractionResult.CONSUME;
         }
         forge.setToolmakerStacks(List.of(output));
@@ -687,7 +768,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (forge.hammer(precisionTool)) {
             playWorkEffects(stack, level, pos, player);
             if (forge.isComplete()) {
-                player.displayClientMessage(Component.translatable(armorAttachment ? "message.mobstoolforging.armor_attachment_complete" : "message.mobstoolforging.complete"), true);
+                String completeKey = armorAttachment
+                        ? "message.mobstoolforging.armor_attachment_complete"
+                        : kind == WorkstationKind.LAPIDARY_TABLE && forge.hasLapidaryCoatingBase()
+                        ? "message.mobstoolforging.lapidary_coating_complete"
+                        : "message.mobstoolforging.complete";
+                player.displayClientMessage(Component.translatable(completeKey), true);
             }
         }
         return ItemInteractionResult.CONSUME;
@@ -777,10 +863,8 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         return MobsToolForgingConfig.DEBUG_TEMPLATE_SELECTOR.get();
     }
 
-    private static boolean lapidaryNeedsAbrasive(ToolMaterialDefinition material) {
-        return material.category() == MaterialCategory.GEM
-                && MaterialCatalog.DIAMOND.equals(material.id())
-                && MobsToolForgingConfig.DIAMOND_REQUIRES_ABRASIVE.get();
+    private static Component lapidaryNeedsAbrasiveMessage(ResourceLocation tier) {
+        return Component.translatable("message.mobstoolforging.lapidary_needs_abrasive_tier", LapidaryAbrasives.displayName(tier));
     }
 
     private static Component metalNeedsHeatMessage(ForgeTemplateDefinition template) {

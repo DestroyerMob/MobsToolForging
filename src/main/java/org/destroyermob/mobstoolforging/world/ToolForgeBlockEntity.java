@@ -1,7 +1,9 @@
 package org.destroyermob.mobstoolforging.world;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -20,6 +22,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
+import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
@@ -195,6 +198,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public float progress() {
+        LapidaryCoatingWork coatingWork = lapidaryCoatingWork().orElse(null);
+        if (coatingWork != null) {
+            return Math.min(1.0F, hitCount / (float) coatingWork.template().requiredHits());
+        }
         ForgeTemplateDefinition template = template();
         StationWorkRecipe looseRecipe = looseWorkRecipe();
         if (looseRecipe != null && materialItemId != null) {
@@ -213,6 +220,12 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public boolean isComplete() {
         if (!directOutputStack.isEmpty()) {
             return true;
+        }
+        LapidaryCoatingWork coatingWork = lapidaryCoatingWork().orElse(null);
+        if (coatingWork != null) {
+            return materialId != null
+                    && materialCount >= coatingWork.template().requiredMaterials()
+                    && hitCount >= coatingWork.template().requiredHits();
         }
         ForgeTemplateDefinition template = template();
         return template != null && materialCount >= template.requiredMaterials() && hitCount >= template.requiredHits();
@@ -279,6 +292,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public int remainingMaterials() {
+        LapidaryCoatingWork coatingWork = lapidaryCoatingWork().orElse(null);
+        if (coatingWork != null) {
+            return Math.max(0, coatingWork.template().requiredMaterials() - materialCount);
+        }
         ForgeTemplateDefinition template = template();
         return template == null ? 0 : Math.max(0, template.requiredMaterials() - materialCount);
     }
@@ -286,6 +303,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public int acceptMaterials(ItemStack stack, ToolMaterialDefinition material) {
         ForgeTemplateDefinition template = template();
         if (template == null || isComplete()) {
+            return 0;
+        }
+        if (workstationKind() == WorkstationKind.LAPIDARY_TABLE && !hasRequiredLapidaryAbrasive(material)) {
             return 0;
         }
         if (materialId != null && !materialId.equals(material.id())) {
@@ -309,6 +329,12 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean canHammer() {
+        LapidaryCoatingWork coatingWork = lapidaryCoatingWork().orElse(null);
+        if (coatingWork != null) {
+            return materialId != null
+                    && materialCount >= coatingWork.template().requiredMaterials()
+                    && !isComplete();
+        }
         ForgeTemplateDefinition template = template();
         return template != null
                 && materialCount >= template.requiredMaterials()
@@ -322,7 +348,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
         hitCount++;
         applyTimingQuality(precisionTool);
         randomizeDisplayRotation();
-        completeArmorAttachmentIfReady();
+        if (lapidaryCoatingWork().isEmpty()) {
+            completeArmorAttachmentIfReady();
+        }
         sync();
         return true;
     }
@@ -330,6 +358,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public ItemStack outputStack() {
         if (!directOutputStack.isEmpty()) {
             return directOutputStack.copy();
+        }
+        if (isComplete() && lapidaryCoatingWork().isPresent()) {
+            return lapidaryCoatingOutput();
         }
         ForgeTemplateDefinition template = template();
         return isComplete() && template != null && materialId != null ? applyMaterialHeat(template.outputStack(materialId, completedQualityScore())) : ItemStack.EMPTY;
@@ -341,6 +372,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
         }
         if (isComplete()) {
             return outputStack();
+        }
+        if (hasLapidaryCoatingBase() && (materialCount <= 0 || materialItemId == null)) {
+            return lapidaryCoatingBaseStack();
         }
         if (materialCount <= 0 || materialItemId == null) {
             return ItemStack.EMPTY;
@@ -406,6 +440,109 @@ public class ToolForgeBlockEntity extends BlockEntity {
         stack.shrink(1);
         sync();
         return true;
+    }
+
+    public boolean hasRequiredLapidaryAbrasive(ToolMaterialDefinition material) {
+        return missingRequiredLapidaryAbrasive(material).isEmpty();
+    }
+
+    public Optional<ResourceLocation> missingRequiredLapidaryAbrasive(ToolMaterialDefinition material) {
+        if (material == null) {
+            return Optional.empty();
+        }
+        return material.requiredLapidaryAbrasiveTier()
+                .filter(tier -> !LapidaryAbrasives.satisfiesTier(abrasiveStack, tier));
+    }
+
+    public boolean hasLapidaryCoatingBase() {
+        return lapidaryCoatingWork().isPresent();
+    }
+
+    public ItemStack lapidaryCoatingBaseStack() {
+        return lapidaryCoatingWork()
+                .map(work -> work.baseStack().copyWithCount(1))
+                .orElse(ItemStack.EMPTY);
+    }
+
+    public int lapidaryCoatingRequiredMaterials() {
+        return lapidaryCoatingWork().map(work -> work.template().requiredMaterials()).orElse(0);
+    }
+
+    public int lapidaryCoatingRequiredHits() {
+        return lapidaryCoatingWork().map(work -> work.template().requiredHits()).orElse(0);
+    }
+
+    public boolean canPlaceLapidaryBasePart(ItemStack stack) {
+        return workstationKind() == WorkstationKind.LAPIDARY_TABLE
+                && directOutputStack.isEmpty()
+                && templateId == null
+                && materialId == null
+                && materialItemId == null
+                && materialHeatData == null
+                && startingHeatLevel == HeatLevel.NONE
+                && looseWorkRecipeId == null
+                && benchStacks.isEmpty()
+                && materialCount == 0
+                && hitCount == 0
+                && isLapidaryCoatablePart(stack)
+                && level != null
+                && WorkpieceHeat.isHot(stack, level);
+    }
+
+    public boolean placeLapidaryBasePart(ItemStack stack) {
+        if (!canPlaceLapidaryBasePart(stack)) {
+            return false;
+        }
+        benchStacks.add(stack.copyWithCount(1));
+        stack.shrink(1);
+        sync();
+        return true;
+    }
+
+    public boolean canPlaceLapidaryCoatingMaterial(ItemStack stack, ToolMaterialDefinition material) {
+        if (stack.isEmpty()
+                || material == null
+                || workstationKind() != WorkstationKind.LAPIDARY_TABLE
+                || material.category() != MaterialCategory.GEM
+                || !hasRequiredLapidaryAbrasive(material)
+                || remainingMaterials() <= 0
+                || isComplete()) {
+            return false;
+        }
+        LapidaryCoatingWork coatingWork = lapidaryCoatingWork().orElse(null);
+        if (coatingWork == null || !coatingWork.template().allowsMaterial(material.id())) {
+            return false;
+        }
+        return materialId == null || materialId.equals(material.id());
+    }
+
+    public int acceptLapidaryCoatingMaterial(ItemStack stack, ToolMaterialDefinition material) {
+        if (!canPlaceLapidaryCoatingMaterial(stack, material)) {
+            return 0;
+        }
+        int taken = Math.min(stack.getCount(), remainingMaterials());
+        if (taken <= 0) {
+            return 0;
+        }
+        if (materialId == null) {
+            materialId = material.id();
+            materialItemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            initializeQuality(material);
+        }
+        stack.shrink(taken);
+        materialCount += taken;
+        scheduleFirstGoodHitIfReady();
+        sync();
+        return taken;
+    }
+
+    public ItemStack lapidaryCoatingMaterialPreviewStack() {
+        LapidaryCoatingWork coatingWork = lapidaryCoatingWork().orElse(null);
+        if (coatingWork == null) {
+            return ItemStack.EMPTY;
+        }
+        ResourceLocation previewMaterial = materialId != null ? materialId : lapidaryCoatingPreviewMaterial(coatingWork);
+        return previewMaterial == null ? ItemStack.EMPTY : MaterialCatalog.displayStack(previewMaterial);
     }
 
     public boolean canPlaceRepairTool(ItemStack stack) {
@@ -722,6 +859,95 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return true;
     }
 
+    private Optional<LapidaryCoatingWork> lapidaryCoatingWork() {
+        if (workstationKind() != WorkstationKind.LAPIDARY_TABLE || benchStacks.size() != 1 || !directOutputStack.isEmpty()) {
+            return Optional.empty();
+        }
+        ItemStack baseStack = benchStacks.get(0);
+        ToolPartData baseData = baseStack.get(ModDataComponents.TOOL_PART.get());
+        if (baseData == null) {
+            return Optional.empty();
+        }
+        return lapidaryCoatingWork(baseStack, baseData);
+    }
+
+    public static boolean isLapidaryCoatablePart(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
+        return data != null && lapidaryCoatingWork(stack, data).isPresent();
+    }
+
+    private static Optional<LapidaryCoatingWork> lapidaryCoatingWork(ItemStack stack, ToolPartData data) {
+        if (data.coatingBaseMaterial().isPresent()) {
+            return Optional.empty();
+        }
+        if (MaterialCatalog.definition(data.materialId())
+                .filter(definition -> definition.category() == MaterialCategory.METAL)
+                .isEmpty()) {
+            return Optional.empty();
+        }
+        return ToolTypeRegistry.templates().stream()
+                .filter(template -> data.partType().equals(template.partType()))
+                .filter(template -> isCoatableToolType(template.toolType()))
+                .flatMap(template -> ToolTypeRegistry.toolType(template.toolType())
+                        .filter(definition -> definition.matchesPartItem(data.partType(), data.materialId(), stack))
+                        .map(definition -> new LapidaryCoatingWork(stack, data, template, definition))
+                        .stream())
+                .min(Comparator
+                        .comparingInt((LapidaryCoatingWork work) -> work.template().requiredMaterials())
+                        .thenComparing(work -> work.template().id().toString()));
+    }
+
+    private static boolean isCoatableToolType(ResourceLocation toolType) {
+        return !ToolTypeRegistry.SMITHING_HAMMER_TOOL_TYPE.equals(toolType)
+                && !ToolTypeRegistry.SCREWDRIVER_TOOL_TYPE.equals(toolType)
+                && !ToolTypeRegistry.GEM_CUTTERS_KNIFE_TOOL_TYPE.equals(toolType);
+    }
+
+    @Nullable
+    private ResourceLocation lapidaryCoatingPreviewMaterial(LapidaryCoatingWork coatingWork) {
+        List<ResourceLocation> materials = MaterialCatalog.starterMaterialIds().stream()
+                .filter(coatingWork.template()::allowsMaterial)
+                .filter(material -> MaterialCatalog.definition(material)
+                        .filter(definition -> definition.category() == MaterialCategory.GEM)
+                        .isPresent())
+                .filter(material -> !coatingWork.definition().createPart(coatingWork.baseData().partType(), material).isEmpty())
+                .toList();
+        if (materials.isEmpty()) {
+            return null;
+        }
+        long gameTime = level == null ? 0L : level.getGameTime();
+        return materials.get((int) (gameTime / 40L % materials.size()));
+    }
+
+    private ItemStack lapidaryCoatingOutput() {
+        LapidaryCoatingWork coatingWork = lapidaryCoatingWork().orElse(null);
+        if (coatingWork == null || materialId == null) {
+            return ItemStack.EMPTY;
+        }
+        int outputQuality = MobsToolForgingConfig.ENABLE_QUALITY.get()
+                ? ForgingQuality.clampScore(Math.round((coatingWork.baseData().quality() + completedQualityScore()) / 2.0F))
+                : ForgingQuality.DEFAULT_SCORE;
+        ItemStack output = coatingWork.definition().createPart(coatingWork.baseData().partType(), materialId, outputQuality);
+        if (output.isEmpty()) {
+            output = coatingWork.baseStack().copyWithCount(1);
+        }
+        ToolPartData coatedData = coatingWork.baseData().withCoating(materialId, outputQuality);
+        output.set(ModDataComponents.TOOL_PART.get(), coatedData);
+        output.remove(ModDataComponents.HEATED_WORKPIECE.get());
+        Integer wear = coatingWork.baseStack().get(ModDataComponents.TOOL_PART_WEAR.get());
+        if (wear != null) {
+            output.set(ModDataComponents.TOOL_PART_WEAR.get(), wear);
+        }
+        ToolExternalComponents.copyCompatibleExternalComponents(coatingWork.baseStack(), output);
+        if (!(output.getItem() instanceof ModularToolPartItem)) {
+            ToolStackNames.applyCoatedPartName(output, coatedData.partType(), coatingWork.baseData().materialId(), materialId);
+        }
+        return output;
+    }
+
     private void completeArmorAttachmentIfReady() {
         ForgeTemplateDefinition template = template();
         if (template == null
@@ -751,6 +977,14 @@ public class ToolForgeBlockEntity extends BlockEntity {
         benchStacks.clear();
         displayRotationDegrees = 0.0F;
         directOutputStack = output;
+    }
+
+    private record LapidaryCoatingWork(
+            ItemStack baseStack,
+            ToolPartData baseData,
+            ForgeTemplateDefinition template,
+            ToolTypeDefinition definition
+    ) {
     }
 
     public boolean materialIsForgeReady() {
@@ -848,8 +1082,8 @@ public class ToolForgeBlockEntity extends BlockEntity {
             return;
         }
         int score = ForgingQuality.DEFAULT_SCORE + workstationKind().setupQualityBonus() + startingHeatLevel.qualityBonus() + materialDifficultyPenalty(material);
-        if (workstationKind() == WorkstationKind.LAPIDARY_TABLE && hasAbrasive()) {
-            score += 6;
+        if (workstationKind() == WorkstationKind.LAPIDARY_TABLE) {
+            score += LapidaryAbrasives.qualityBonus(abrasiveStack);
         }
         qualityScore = ForgingQuality.clampScore(score);
     }

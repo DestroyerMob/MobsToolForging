@@ -204,6 +204,9 @@ public final class ToolTypeDefinition {
             return false;
         }
         if (!MaterialCatalog.isNormalForgingMaterial(construction.headMaterial())
+                || construction.headBaseMaterial().filter(material -> MaterialCatalog.definition(material)
+                .filter(definition -> definition.category() == MaterialCategory.METAL)
+                .isEmpty()).isPresent()
                 || construction.guardMaterial().filter(material -> !MaterialCatalog.isNormalForgingMaterial(material)).isPresent()) {
             return false;
         }

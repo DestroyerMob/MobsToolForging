@@ -49,10 +49,12 @@ public record ToolStatRule(
     private boolean matches(ToolConstructionData construction) {
         return switch (slot) {
             case "head", "headMaterial" -> material.equals(construction.headMaterial());
+            case "head_base", "headBase", "core", "coreMaterial" -> construction.headBaseMaterial().filter(material::equals).isPresent();
             case "handle", "handleMaterial" -> material.equals(construction.handleMaterial());
             case "guard", "guardMaterial" -> construction.guardMaterial().filter(material::equals).isPresent();
             case "treatment" -> construction.treatment().filter(material::equals).isPresent();
             case "any", "anyPart" -> material.equals(construction.headMaterial())
+                    || construction.headBaseMaterial().filter(material::equals).isPresent()
                     || material.equals(construction.handleMaterial())
                     || construction.guardMaterial().filter(material::equals).isPresent();
             default -> false;

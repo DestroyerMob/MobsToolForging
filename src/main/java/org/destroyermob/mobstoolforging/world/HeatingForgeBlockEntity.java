@@ -26,7 +26,9 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     public static final int WORKPIECE_SLOTS = 4;
     public static final int MAX_ASH_LAYERS = 3;
     public static final int HEATED_WORKPIECE_TICKS = 1600;
-    public static final int FULL_BED_BURN_TICKS = 2400;
+    public static final int FULL_BED_BURN_TICKS = 6000;
+    // A full coal bed provides four heat units per tick; active billets share that budget.
+    private static final int HEAT_UNITS_PER_TICK = WORKPIECE_SLOTS;
 
     private static final int ITEM_HANDLER_SLOTS = FUEL_BED_SLOTS + WORKPIECE_SLOTS + 1;
     private static final int WORKPIECE_HANDLER_SLOT_START = FUEL_BED_SLOTS;
@@ -73,18 +75,34 @@ public class HeatingForgeBlockEntity extends BlockEntity {
             }
         }
         boolean canHeat = forge.isFuelBurning();
+        int[] heatingSlots = new int[WORKPIECE_SLOTS];
+        int heatingSlotCount = 0;
         for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
             ItemStack workpiece = forge.workpieceStacks[slot];
             if (workpiece.isEmpty()) {
                 continue;
             }
             WorkpieceHeat.clearIfCooled(workpiece, level);
-            if (canHeat) {
+            if (canHeat && forge.heatProgress[slot] < HEATED_WORKPIECE_TICKS) {
+                heatingSlots[heatingSlotCount++] = slot;
+            }
+        }
+        if (canHeat && heatingSlotCount > 0) {
+            for (int unit = 0; unit < HEAT_UNITS_PER_TICK; unit++) {
+                int slot = heatingSlots[(int) ((level.getGameTime() + unit) % heatingSlotCount)];
                 if (forge.heatProgress[slot] < HEATED_WORKPIECE_TICKS) {
                     forge.heatProgress[slot]++;
                     changed = true;
-                    sync = sync || level.getGameTime() % 10L == 0L;
                 }
+            }
+            sync = sync || level.getGameTime() % 10L == 0L;
+        }
+        for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
+            ItemStack workpiece = forge.workpieceStacks[slot];
+            if (workpiece.isEmpty()) {
+                continue;
+            }
+            if (canHeat) {
                 if (forge.heatProgress[slot] >= HEATED_WORKPIECE_TICKS) {
                     if (!WorkpieceHeat.isHot(workpiece, level) || level.getGameTime() % 20L == 0L) {
                         WorkpieceHeat.heat(workpiece, level);
@@ -302,6 +320,9 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     }
 
     public ItemStack removeFuel() {
+        if (isLit()) {
+            return ItemStack.EMPTY;
+        }
         ItemStack result = fuelStack;
         fuelStack = ItemStack.EMPTY;
         burnTime = 0;
@@ -358,12 +379,20 @@ public class HeatingForgeBlockEntity extends BlockEntity {
         ToolPartData partData = stack.get(ModDataComponents.TOOL_PART.get());
         if (partData != null) {
             return MaterialCatalog.definition(partData.materialId())
-                    .filter(definition -> definition.category() == MaterialCategory.METAL)
+                    .filter(HeatingForgeBlockEntity::requiresTemperature)
+                    .isPresent()
+                    || partData.coatingBaseMaterial()
+                    .flatMap(MaterialCatalog::definition)
+                    .filter(HeatingForgeBlockEntity::requiresTemperature)
                     .isPresent();
         }
         return MaterialCatalog.resolve(stack)
-                .filter(definition -> definition.category() == MaterialCategory.METAL)
+                .filter(HeatingForgeBlockEntity::requiresTemperature)
                 .isPresent();
+    }
+
+    private static boolean requiresTemperature(ToolMaterialDefinition definition) {
+        return definition.minimumForgeHeat() != HeatLevel.NONE;
     }
 
     public static int fuelBurnTime(ItemStack stack) {

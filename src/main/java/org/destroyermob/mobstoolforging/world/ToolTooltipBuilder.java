@@ -86,6 +86,7 @@ public final class ToolTooltipBuilder {
     private static void addShiftTooltip(List<Component> lines, ToolTypeDefinition definition, ToolConstructionData construction, ToolStatProfile profile) {
         lines.add(Component.translatable("tooltip.mobstoolforging.construction").withStyle(ChatFormatting.GRAY));
         lines.add(partLine("tooltip.mobstoolforging.part.head", Optional.of(construction.headMaterial())));
+        construction.headBaseMaterial().ifPresent(material -> lines.add(partLine("tooltip.mobstoolforging.part.core", Optional.of(material))));
         lines.add(partLine("tooltip.mobstoolforging.part.handle", Optional.of(construction.handleMaterial())));
         if (!definition.requiredAssemblyParts().isEmpty()) {
             String label = definition.averageRequiredHeadDurability()
@@ -185,6 +186,7 @@ public final class ToolTooltipBuilder {
 
     private static String rawConstruction(ToolConstructionData construction) {
         return "head=" + construction.headMaterial()
+                + ", headBase=" + construction.headBaseMaterial().map(ResourceLocation::toString).orElse("-")
                 + ", handle=" + construction.handleMaterial()
                 + ", guard=" + construction.guardMaterial().map(ResourceLocation::toString).orElse("-")
                 + ", treatment=" + construction.treatment().map(ResourceLocation::toString).orElse("-")

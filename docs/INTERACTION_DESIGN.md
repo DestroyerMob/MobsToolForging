@@ -7,7 +7,7 @@ Mobs Tool Forging should feel like physical tool work, not menu-first crafting.
 The normal selection flow is:
 
 1. Hold a physical pattern item, such as `pickaxe_head_pattern`.
-2. Right-click the Crude Anvil, Smithing Anvil, or Lapidary Table.
+2. Right-click the Crude Anvil or Tool Forge.
 3. The station stores that template if it has no material or hammering progress.
 4. The station renders a small physical preview of the selected part on its surface.
 
@@ -16,10 +16,9 @@ The old stonecutter-style template screen still exists, but it is a debug fallba
 Pattern items define the physical shape to make. They are intentionally not station-specific right now. The station defines the material process:
 
 - Crude Anvil: metal materials with an early, lower quality cap.
-- Smithing Anvil: metal materials with the normal quality cap.
-- Lapidary Table: gem materials.
+- Tool Forge: metal materials with the normal quality cap.
 
-That means a Sword Blade Pattern can be used on either station, but the material placed afterward determines whether the work is forged metal or lapidary-cut gem.
+The Lapidary Table does not use patterns. It starts from an already-forged, heated metal tool part and adds a gem shell to that existing shape.
 
 Armour uses the same physical pattern idea, but base armour patterns produce the finished wearable armour piece directly. The Helmet Pattern makes a modular helmet rather than a loose skull part. Chestplate, leggings, and boots base patterns follow the same rule.
 
@@ -45,7 +44,7 @@ Sneak-right-clicking with a held item should not open the debug selector during 
 
 ## Heat
 
-Heat is a workshop condition by default rather than a repeated per-item chore. Lit campfires provide the first heat tier: right-click a lit campfire with a heatable ingot or metal part to use the campfire's normal visible inventory slots, or drop one onto the fire to insert it if space is available. The campfire warms the workpiece to low heat and ejects it when the low-heat timer completes. Low heat targets 55% by default, while low-heat forging only requires the configurable cooling-margin threshold, 40% by default. Nearby lit campfires count as low workshop heat only for already-warmed materials; cold ingots must be warmed in the campfire first. The built-in early metals are copper, gold, and rough iron. A fueled Heating Forge provides hot workshop heat and keeps that heat buffered nearby for repeated shaping. High heat is reserved for future upgrades.
+Heat is a workshop condition by default rather than a repeated per-item chore. Lit campfires provide the first heat tier: right-click a lit campfire with any heat-requiring material or tool part to use the campfire's normal visible inventory slots, or drop one onto the fire to insert it if space is available. The campfire warms the workpiece to low heat and ejects it when the low-heat timer completes. Low heat targets 55% by default, while low-heat forging only requires the configurable cooling-margin threshold, 40% by default. Nearby lit campfires count as low workshop heat only for already-warmed materials; cold ingots must be warmed in the campfire first. The built-in early metals are copper, gold, and rough iron. A fueled Heating Forge provides hot workshop heat and keeps that heat buffered nearby for repeated shaping. High heat is reserved for future upgrades.
 
 With `requireHeatAtJobStartOnly=true`, the station records the starting heat level in NBT. With `workpieceCoolsMidCraft=false`, hammering never stops halfway through because the workpiece cooled.
 
@@ -57,12 +56,14 @@ Quality is intentionally modest. It should reward care without making Masterwork
 
 ## Lapidary Table
 
-The Lapidary Table no longer requires a Gem Cutter's Knife for normal gem parts when `gemcuttersFileRequired=false`. Empty-hand/table action can complete the work. The knife remains useful as optional precision help for quality.
+The Lapidary Table no longer creates standalone gem parts from patterns. Place a heated metal tool part on the table, add the matching gem material cost for that part shape, then work it until the gem shell is set into the surface.
 
-Diamond parts require Diamond Powder when `diamondRequiresAbrasive=true`. Emerald, ruby, and sapphire parts do not require abrasive by default. The configured abrasive item is `mobstoolforging:diamond_powder`, and the existing lapidary abrasive tag remains valid.
+The output uses the gem as its visible material, keeps the metal part as a core material, and is named as a metal-gem part. Head pieces inherit the gem head stats when assembled into a tool. The coated part's quality averages the original metal part quality with the gem-work quality, and gem/coated parts can still be polished afterward.
 
-## Toolmaker's Bench
+The Lapidary Table does not require a Gem Cutter's Knife when `gemcuttersFileRequired=false`. Empty-hand/table action can complete the work. The knife remains useful as optional precision help for quality. Gem materials can require an abrasive tier before they can be applied. Built-in diamond requires diamond-tier abrasive, currently Diamond Powder or the `mobstoolforging:lapidary_abrasives/diamond` item tag. Emerald, ruby, and sapphire do not require abrasive yet. Any valid lapidary abrasive can still improve table quality.
 
-The Toolmaker's Bench remains physical and no-GUI. Place compatible parts on the bench, then use an empty hand or a Smithing Hammer to assemble the finished tool. A Smithing Hammer still separates one placed finished tool into its stored parts when possible.
+## Toolmaker's Station
+
+Toolmaker's Station variants remain physical and no-GUI. Place compatible parts on the station, then use an empty hand or a Smithing Hammer to assemble the finished tool. A Smithing Hammer still separates one placed finished tool into its stored parts when possible.
 
 The screwdriver item remains registered, but it is not required for normal finished-tool assembly.
