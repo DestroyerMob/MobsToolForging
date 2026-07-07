@@ -19,11 +19,14 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -39,6 +42,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
@@ -88,6 +92,7 @@ import org.destroyermob.mobstoolforging.world.ToolTooltipBuilder;
 import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolTypeReloadListener;
+import org.destroyermob.mobstoolforging.world.VanillaToolConverter;
 import org.destroyermob.mobstoolforging.world.WorkshopHeat;
 import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 import org.slf4j.Logger;
@@ -135,6 +140,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(this::addExternalModularToolTooltip);
         NeoForge.EVENT_BUS.addListener(this::addHeatTooltip);
         NeoForge.EVENT_BUS.addListener(this::addCrucibleTooltip);
+        NeoForge.EVENT_BUS.addListener(this::convertHostileMobEquipment);
         NeoForge.EVENT_BUS.addListener(this::boostGildedBlockExperience);
         NeoForge.EVENT_BUS.addListener(this::boostGildedMobExperience);
         NeoForge.EVENT_BUS.addListener(ModCommands::register);
@@ -250,6 +256,31 @@ public class MobsToolForging {
             return;
         }
         event.setDroppedExperience(boostExperience(experience));
+    }
+
+    private void convertHostileMobEquipment(EntityJoinLevelEvent event) {
+        if (!MobsToolForgingConfig.CONVERT_VANILLA_LOOT_TO_MODULAR_TOOLS.get()
+                || event.getLevel().isClientSide
+                || !(event.getEntity() instanceof Mob mob)
+                || !(mob instanceof Enemy)) {
+            return;
+        }
+        ResourceLocation handleMaterial = event.getLevel().dimension() == Level.NETHER
+                ? MaterialCatalog.BLAZE
+                : MaterialCatalog.OAK;
+        convertMobEquipment(mob, EquipmentSlot.MAINHAND, handleMaterial);
+        convertMobEquipment(mob, EquipmentSlot.OFFHAND, handleMaterial);
+        convertMobEquipment(mob, EquipmentSlot.HEAD, handleMaterial);
+        convertMobEquipment(mob, EquipmentSlot.CHEST, handleMaterial);
+        convertMobEquipment(mob, EquipmentSlot.LEGS, handleMaterial);
+        convertMobEquipment(mob, EquipmentSlot.FEET, handleMaterial);
+    }
+
+    private static void convertMobEquipment(Mob mob, EquipmentSlot slot, ResourceLocation handleMaterial) {
+        ItemStack converted = VanillaToolConverter.convertLootOrEquipment(mob.getItemBySlot(slot), handleMaterial);
+        if (!converted.isEmpty()) {
+            mob.setItemSlot(slot, converted);
+        }
     }
 
     public static <T> Map<ResourceLocation, T> filterDisabledProgressionRecipes(Map<ResourceLocation, T> recipes) {

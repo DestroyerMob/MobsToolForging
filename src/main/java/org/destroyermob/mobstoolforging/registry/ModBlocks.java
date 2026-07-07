@@ -116,7 +116,7 @@ public final class ModBlocks {
     );
     public static final DeferredBlock<AshBlock> ASH = BLOCKS.register(
             "ash",
-            () -> new AshBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRAY_CONCRETE_POWDER).strength(0.1F).sound(SoundType.SAND).noCollission().noOcclusion())
+            () -> new AshBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GRAY_CONCRETE_POWDER).strength(0.1F).sound(SoundType.SAND).noOcclusion())
     );
 
     private ModBlocks() {

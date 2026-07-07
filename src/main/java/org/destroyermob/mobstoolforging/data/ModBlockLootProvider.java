@@ -2,12 +2,21 @@ package org.destroyermob.mobstoolforging.data;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.data.loot.BlockLootSubProvider;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
+import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
+import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
+import org.destroyermob.mobstoolforging.world.AshBlock;
 
 public class ModBlockLootProvider extends BlockLootSubProvider {
     public ModBlockLootProvider(HolderLookup.Provider registries) {
@@ -27,7 +36,7 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.FOUNDRY_FORGE.get());
         add(ModBlocks.KNAPPING_FLINT.get(), noDrop());
         add(ModBlocks.GROUND_TOOL_ASSEMBLY.get(), noDrop());
-        dropSelf(ModBlocks.ASH.get());
+        add(ModBlocks.ASH.get(), this::createAshDrops);
     }
 
     @Override
@@ -47,5 +56,20 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         return blocks;
+    }
+
+    private LootTable.Builder createAshDrops(Block block) {
+        return LootTable.lootTable()
+                .withPool(
+                        LootPool.lootPool()
+                                .setRolls(ConstantValue.exactly(1.0F))
+                                .add((LootPoolEntryContainer.Builder<?>) applyExplosionDecay(
+                                        block,
+                                        LootItem.lootTableItem(block)
+                                                .apply(AshBlock.LAYERS.getPossibleValues(), layers -> SetItemCountFunction.setCount(ConstantValue.exactly(layers.floatValue()))
+                                                        .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+                                                                .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(AshBlock.LAYERS, layers))))
+                                ))
+                );
     }
 }

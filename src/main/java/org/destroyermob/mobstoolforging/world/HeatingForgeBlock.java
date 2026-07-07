@@ -58,6 +58,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
     private static final VoxelShape WEST_SHAPE = rotateClockwise(SOUTH_SHAPE);
     private static final double[] WORKPIECE_SLOT_X = {-0.21875D, -0.15625D, 0.15625D, 0.21875D};
     private static final double[] WORKPIECE_SLOT_Z = {-0.15625D, 0.21875D, -0.21875D, 0.15625D};
+    private static final double ASH_TRAY_CLICK_MAX_Y = 0.5D;
 
     public HeatingForgeBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -183,26 +184,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         }
         if (player.isShiftKeyDown()) {
-            if (forge.hasAsh()) {
-                giveOrDrop(player, forge.collectAsh());
-                level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 0.75F);
-                return InteractionResult.CONSUME;
-            }
-            if (forge.hasSpentFuelBed()) {
-                forge.clearSpentFuelBed();
-                level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.45F, 0.65F);
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_embers_cleared"), true);
-                return InteractionResult.CONSUME;
-            }
-            if (forge.hasFuel()) {
-                if (forge.isLit()) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_fuel_burning"), true);
-                    return InteractionResult.CONSUME;
-                }
-                giveOrDrop(player, forge.removeFuel());
-                level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 0.85F);
-                return InteractionResult.CONSUME;
-            }
+            return clearSelectedResidue(forge, level, pos, player, cleanupTargetFromHit(pos, hitResult), true);
         }
         int slot = workpieceSlotFromHit(state, pos, hitResult);
         if (!forge.workpieceStack(slot).isEmpty()) {
@@ -210,16 +192,9 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.0F);
             return InteractionResult.CONSUME;
         }
-        if (forge.hasAsh()) {
-            giveOrDrop(player, forge.collectAsh());
-            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 0.75F);
-            return InteractionResult.CONSUME;
-        }
-        if (forge.hasSpentFuelBed()) {
-            forge.clearSpentFuelBed();
-            level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.45F, 0.65F);
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_embers_cleared"), true);
-            return InteractionResult.CONSUME;
+        InteractionResult residueResult = clearSelectedResidue(forge, level, pos, player, cleanupTargetFromHit(pos, hitResult), false);
+        if (residueResult.consumesAction()) {
+            return residueResult;
         }
         player.displayClientMessage(Component.translatable(forge.isLit() ? "message.mobstoolforging.heating_lit" : "message.mobstoolforging.heating_status"), true);
         return InteractionResult.CONSUME;
@@ -352,6 +327,53 @@ public class HeatingForgeBlock extends BaseEntityBlock {
         return closestSlot;
     }
 
+    private static InteractionResult clearSelectedResidue(
+            HeatingForgeBlockEntity forge,
+            Level level,
+            BlockPos pos,
+            Player player,
+            CleanupTarget target,
+            boolean requireSelection
+    ) {
+        if (target == CleanupTarget.ASH) {
+            if (forge.hasAsh()) {
+                giveOrDrop(player, forge.collectAsh());
+                level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 0.75F);
+                return InteractionResult.CONSUME;
+            }
+            if (requireSelection || forge.hasSpentFuelBed() || forge.hasFuel()) {
+                player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_no_ash"), true);
+                return InteractionResult.CONSUME;
+            }
+            return InteractionResult.PASS;
+        }
+        if (forge.hasSpentFuelBed()) {
+            forge.clearSpentFuelBed();
+            level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.45F, 0.65F);
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_embers_cleared"), true);
+            return InteractionResult.CONSUME;
+        }
+        if (forge.hasFuel()) {
+            if (forge.isLit()) {
+                player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_fuel_burning"), true);
+                return InteractionResult.CONSUME;
+            }
+            giveOrDrop(player, forge.removeFuel());
+            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 0.85F);
+            return InteractionResult.CONSUME;
+        }
+        if (requireSelection || forge.hasAsh()) {
+            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_no_cinder"), true);
+            return InteractionResult.CONSUME;
+        }
+        return InteractionResult.PASS;
+    }
+
+    private static CleanupTarget cleanupTargetFromHit(BlockPos pos, BlockHitResult hitResult) {
+        double hitY = hitResult.getLocation().y - pos.getY();
+        return hitY < ASH_TRAY_CLICK_MAX_Y ? CleanupTarget.ASH : CleanupTarget.FUEL_BED;
+    }
+
     private static double rotatedX(double x, double z, double cos, double sin) {
         return x * cos + z * sin;
     }
@@ -423,5 +445,10 @@ public class HeatingForgeBlock extends BaseEntityBlock {
                 Shapes.box(1.0D - box.maxZ, box.minY, box.minX, 1.0D - box.minZ, box.maxY, box.maxX)
         ));
         return rotated[0].optimize();
+    }
+
+    private enum CleanupTarget {
+        ASH,
+        FUEL_BED
     }
 }

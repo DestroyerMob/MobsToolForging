@@ -13,6 +13,7 @@ import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
 import org.destroyermob.mobstoolforging.world.ToolPartWear;
+import org.destroyermob.mobstoolforging.world.ToolStackNames;
 
 public class ModularToolPartItem extends Item {
     private final String partType;
@@ -44,10 +45,8 @@ public class ModularToolPartItem extends Item {
     public Component getName(ItemStack stack) {
         ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
         if (data != null && partType.equals(data.partType())) {
-            for (ToolKind toolKind : ToolKind.values()) {
-                if (toolKind.partType().equals(partType) && data.coatingBaseMaterial().isPresent()) {
-                    return toolKind.coatedPartName(data.coatingBaseMaterial().get(), data.materialId());
-                }
+            if (data.coatingBaseMaterial().isPresent()) {
+                return ToolStackNames.coatedPartName(partType, data.coatingBaseMaterial().get(), data.materialId());
             }
             return Component.translatable("item.mobstoolforging.material_" + partType, MaterialCatalog.displayName(data.materialId()));
         }

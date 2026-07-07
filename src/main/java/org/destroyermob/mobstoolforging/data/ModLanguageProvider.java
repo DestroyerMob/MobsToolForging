@@ -295,9 +295,11 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.campfire_workpiece_full", "The campfire is full.");
         add("message.mobstoolforging.heating_needs_fuel", "Add fuel before lighting the forge.");
         add("message.mobstoolforging.heating_needs_full_fuel_bed", "Fill the coal bed before lighting the forge.");
-        add("message.mobstoolforging.heating_clear_embers", "Clear the spent embers first.");
-        add("message.mobstoolforging.heating_embers_cleared", "Spent embers cleared.");
+        add("message.mobstoolforging.heating_clear_embers", "Clear the cinder first.");
+        add("message.mobstoolforging.heating_embers_cleared", "Cinder cleared.");
         add("message.mobstoolforging.heating_ash_full", "Collect the ash before using the forge again.");
+        add("message.mobstoolforging.heating_no_ash", "There is no ash to collect.");
+        add("message.mobstoolforging.heating_no_cinder", "There is no cinder to clear.");
         add("message.mobstoolforging.heating_ignited", "Heating forge lit.");
         add("message.mobstoolforging.heating_lit", "The forge is burning.");
         add("message.mobstoolforging.heating_status", "Add fuel, place metal, then light the forge.");

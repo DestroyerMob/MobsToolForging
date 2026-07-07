@@ -9,9 +9,15 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 
 public final class VanillaToolConverter {
     private VanillaToolConverter() {
+    }
+
+    public static ItemStack convertLootOrEquipment(ItemStack original, ResourceLocation handleMaterial) {
+        ItemStack converted = convert(original, handleMaterial);
+        return converted.isEmpty() ? convertArmor(original) : converted;
     }
 
     public static ItemStack convert(ItemStack original, ResourceLocation handleMaterial) {
@@ -28,16 +34,27 @@ public final class VanillaToolConverter {
         if (converted.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        converted.setCount(original.getCount());
-        copyDamage(original, converted);
-        copyIfPresent(original, converted, DataComponents.CUSTOM_NAME);
-        copyIfPresent(original, converted, DataComponents.LORE);
-        copyIfPresent(original, converted, DataComponents.ENCHANTMENTS);
-        copyIfPresent(original, converted, DataComponents.REPAIR_COST);
-        copyIfPresent(original, converted, DataComponents.CUSTOM_DATA);
-        ToolExternalComponents.copyCompatibleExternalComponents(original, converted);
+        copyConvertedStackData(original, converted);
         ToolmakerBenchAssembly.disassemble(converted)
                 .ifPresent(parts -> converted.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts)));
+        return converted;
+    }
+
+    public static ItemStack convertArmor(ItemStack original) {
+        if (original.isEmpty() || original.get(ModDataComponents.ARMOR_CONSTRUCTION.get()) != null) {
+            return ItemStack.EMPTY;
+        }
+
+        ArmorConversion conversion = armorConversion(original.getItem());
+        if (conversion == null) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack converted = conversion.create();
+        if (converted.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        copyConvertedStackData(original, converted);
         return converted;
     }
 
@@ -228,6 +245,66 @@ public final class VanillaToolConverter {
         return null;
     }
 
+    private static ArmorConversion armorConversion(Item item) {
+        if (isAny(item, Items.CHAINMAIL_HELMET)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_HELMET.get().createChainmail());
+        }
+        if (isAny(item, Items.CHAINMAIL_CHESTPLATE)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_CHESTPLATE.get().createChainmail());
+        }
+        if (isAny(item, Items.CHAINMAIL_LEGGINGS)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_LEGGINGS.get().createChainmail());
+        }
+        if (isAny(item, Items.CHAINMAIL_BOOTS)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_BOOTS.get().createChainmail());
+        }
+
+        ResourceLocation material = armorMaterial(item);
+        if (material == null) {
+            return null;
+        }
+        if (isAny(item, Items.IRON_HELMET, Items.GOLDEN_HELMET, Items.DIAMOND_HELMET, Items.NETHERITE_HELMET)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_HELMET.get().create(material));
+        }
+        if (isAny(item, Items.IRON_CHESTPLATE, Items.GOLDEN_CHESTPLATE, Items.DIAMOND_CHESTPLATE, Items.NETHERITE_CHESTPLATE)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_CHESTPLATE.get().create(material));
+        }
+        if (isAny(item, Items.IRON_LEGGINGS, Items.GOLDEN_LEGGINGS, Items.DIAMOND_LEGGINGS, Items.NETHERITE_LEGGINGS)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_LEGGINGS.get().create(material));
+        }
+        if (isAny(item, Items.IRON_BOOTS, Items.GOLDEN_BOOTS, Items.DIAMOND_BOOTS, Items.NETHERITE_BOOTS)) {
+            return new ArmorConversion(() -> ModItems.MODULAR_BOOTS.get().create(material));
+        }
+        return null;
+    }
+
+    private static ResourceLocation armorMaterial(Item item) {
+        if (isAny(item, Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS)) {
+            return MaterialCatalog.IRON;
+        }
+        if (isAny(item, Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS)) {
+            return MaterialCatalog.GOLD;
+        }
+        if (isAny(item, Items.DIAMOND_HELMET, Items.DIAMOND_CHESTPLATE, Items.DIAMOND_LEGGINGS, Items.DIAMOND_BOOTS)) {
+            return MaterialCatalog.DIAMOND;
+        }
+        if (isAny(item, Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS)) {
+            return MaterialCatalog.NETHERITE;
+        }
+        return null;
+    }
+
+    private static void copyConvertedStackData(ItemStack original, ItemStack converted) {
+        converted.setCount(original.getCount());
+        copyDamage(original, converted);
+        copyIfPresent(original, converted, DataComponents.CUSTOM_NAME);
+        copyIfPresent(original, converted, DataComponents.LORE);
+        copyIfPresent(original, converted, DataComponents.ENCHANTMENTS);
+        copyIfPresent(original, converted, DataComponents.REPAIR_COST);
+        copyIfPresent(original, converted, DataComponents.CUSTOM_DATA);
+        ToolExternalComponents.copyCompatibleExternalComponents(original, converted);
+    }
+
     private static void copyDamage(ItemStack original, ItemStack converted) {
         if (!original.isDamageableItem() || !converted.isDamageableItem()) {
             return;
@@ -259,5 +336,11 @@ public final class VanillaToolConverter {
     }
 
     private record MaterialSelection(String prefix, ResourceLocation headMaterial, Optional<ResourceLocation> treatment) {
+    }
+
+    private record ArmorConversion(java.util.function.Supplier<ItemStack> factory) {
+        private ItemStack create() {
+            return factory.get();
+        }
     }
 }

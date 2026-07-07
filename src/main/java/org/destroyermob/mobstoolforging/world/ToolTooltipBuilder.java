@@ -1,9 +1,11 @@
 package org.destroyermob.mobstoolforging.world;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -35,7 +37,7 @@ public final class ToolTooltipBuilder {
         construction.treatment().ifPresent(treatment -> lines.add(treatmentLine(treatment)));
 
         if (flag.hasShiftDown()) {
-            addShiftTooltip(lines, definition, construction, profile);
+            addShiftTooltip(lines, stack, definition, construction, profile);
         } else {
             addNormalTooltip(lines, profile);
         }
@@ -83,16 +85,16 @@ public final class ToolTooltipBuilder {
         lines.add(Component.translatable("tooltip.mobstoolforging.hold_shift").withStyle(ChatFormatting.DARK_GRAY));
     }
 
-    private static void addShiftTooltip(List<Component> lines, ToolTypeDefinition definition, ToolConstructionData construction, ToolStatProfile profile) {
+    private static void addShiftTooltip(List<Component> lines, ItemStack stack, ToolTypeDefinition definition, ToolConstructionData construction, ToolStatProfile profile) {
+        ToolMaterialSummary materials = ToolMaterialSummary.from(stack, definition, construction);
         lines.add(Component.translatable("tooltip.mobstoolforging.construction").withStyle(ChatFormatting.GRAY));
-        lines.add(partLine("tooltip.mobstoolforging.part.head", Optional.of(construction.headMaterial())));
-        construction.headBaseMaterial().ifPresent(material -> lines.add(partLine("tooltip.mobstoolforging.part.core", Optional.of(material))));
+        lines.add(partLine("tooltip.mobstoolforging.part.head", materials.headMaterials()));
+        if (!materials.coreMaterials().isEmpty()) {
+            lines.add(partLine("tooltip.mobstoolforging.part.core", materials.coreMaterials()));
+        }
         lines.add(partLine("tooltip.mobstoolforging.part.handle", Optional.of(construction.handleMaterial())));
-        if (!definition.requiredAssemblyParts().isEmpty()) {
-            String label = definition.averageRequiredHeadDurability()
-                    ? "tooltip.mobstoolforging.part.second_head"
-                    : "tooltip.mobstoolforging.part.guard";
-            lines.add(partLine(label, construction.guardMaterial()));
+        if (!definition.requiredAssemblyParts().isEmpty() && !definition.averageRequiredHeadDurability()) {
+            lines.add(partLine("tooltip.mobstoolforging.part.guard", materials.guardMaterials(), construction.guardMaterial()));
         }
 
         List<ResourceLocation> displayTraits = displayTraits(profile);
@@ -142,13 +144,37 @@ public final class ToolTooltipBuilder {
     }
 
     private static Component partLine(String labelKey, Optional<ResourceLocation> material) {
+        return partLine(labelKey, material.map(List::of).orElseGet(List::of));
+    }
+
+    private static Component partLine(String labelKey, List<ResourceLocation> materials) {
+        return partLine(labelKey, materials, Optional.empty());
+    }
+
+    private static Component partLine(String labelKey, List<ResourceLocation> materials, Optional<ResourceLocation> fallbackMaterial) {
         MutableComponent line = Component.translatable(labelKey)
                 .withStyle(ChatFormatting.DARK_GRAY)
                 .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY));
-        Component value = material
-                .map(MaterialCatalog::displayName)
-                .orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"));
-        return line.append(value.copy().withStyle(ChatFormatting.GRAY));
+        Component value = materialList(materials, fallbackMaterial);
+        return line.append(value);
+    }
+
+    private static Component materialList(List<ResourceLocation> materials, Optional<ResourceLocation> fallbackMaterial) {
+        List<ResourceLocation> values = materials.isEmpty()
+                ? fallbackMaterial.map(List::of).orElseGet(List::of)
+                : materials;
+        if (values.isEmpty()) {
+            return Component.translatable("tooltip.mobstoolforging.none").withStyle(ChatFormatting.GRAY);
+        }
+
+        MutableComponent result = Component.empty();
+        for (int index = 0; index < values.size(); index++) {
+            if (index > 0) {
+                result.append(Component.literal(" \u00B7 ").withStyle(ChatFormatting.DARK_GRAY));
+            }
+            result.append(MaterialCatalog.displayName(values.get(index)).copy().withStyle(ChatFormatting.GRAY));
+        }
+        return result;
     }
 
     private static Component traitDescriptionLine(ResourceLocation traitId) {
@@ -196,6 +222,52 @@ public final class ToolTooltipBuilder {
     private static void addBlankIfNeeded(List<Component> lines) {
         if (!lines.isEmpty()) {
             lines.add(Component.empty());
+        }
+    }
+
+    private record ToolMaterialSummary(
+            List<ResourceLocation> headMaterials,
+            List<ResourceLocation> coreMaterials,
+            List<ResourceLocation> guardMaterials
+    ) {
+        private static ToolMaterialSummary from(ItemStack stack, ToolTypeDefinition definition, ToolConstructionData construction) {
+            Set<ResourceLocation> heads = new LinkedHashSet<>();
+            Set<ResourceLocation> cores = new LinkedHashSet<>();
+            Set<ResourceLocation> guards = new LinkedHashSet<>();
+
+            ToolAssemblyParts assemblyParts = stack.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
+            if (assemblyParts != null) {
+                for (ItemStack partStack : assemblyParts.stacks()) {
+                    ToolPartData part = partStack.get(ModDataComponents.TOOL_PART.get());
+                    if (part == null) {
+                        continue;
+                    }
+                    if (!definition.primaryPartType().equals(part.partType()) && !definition.requiredAssemblyParts().contains(part.partType())) {
+                        continue;
+                    }
+                    part.coatingBaseMaterial().ifPresent(cores::add);
+                    if (definition.primaryPartType().equals(part.partType()) || definition.averageRequiredHeadDurability()) {
+                        heads.add(part.materialId());
+                    } else {
+                        guards.add(part.materialId());
+                    }
+                }
+            }
+
+            if (heads.isEmpty()) {
+                heads.add(construction.headMaterial());
+                if (definition.averageRequiredHeadDurability()) {
+                    construction.guardMaterial().ifPresent(heads::add);
+                }
+            }
+            if (cores.isEmpty()) {
+                construction.headBaseMaterial().ifPresent(cores::add);
+            }
+            if (guards.isEmpty() && !definition.averageRequiredHeadDurability()) {
+                construction.guardMaterial().ifPresent(guards::add);
+            }
+
+            return new ToolMaterialSummary(List.copyOf(heads), List.copyOf(cores), List.copyOf(guards));
         }
     }
 }

@@ -1,0 +1,20 @@
+{
+  "textures": {
+    "ash": "minecraft:block/gray_concrete_powder",
+    "particle": "minecraft:block/gray_concrete_powder"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 5, 16],
+      "faces": {
+        "north": {"uv": [0, 0, 16, 5], "texture": "#ash"},
+        "east": {"uv": [0, 0, 16, 5], "texture": "#ash"},
+        "south": {"uv": [0, 0, 16, 5], "texture": "#ash"},
+        "west": {"uv": [0, 0, 16, 5], "texture": "#ash"},
+        "up": {"uv": [0, 0, 16, 16], "texture": "#ash"},
+        "down": {"uv": [0, 0, 16, 16], "texture": "#ash", "cullface": "down"}
+      }
+    }
+  ]
+}

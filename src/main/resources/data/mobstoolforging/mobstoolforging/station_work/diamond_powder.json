@@ -1,7 +1,7 @@
 {
   "workstation": "smithing_anvil",
   "input": {
-    "item": "minecraft:iron_ingot"
+    "item": "minecraft:diamond"
   },
   "output": {
     "id": "mobstoolforging:diamond_powder",
