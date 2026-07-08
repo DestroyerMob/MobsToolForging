@@ -1,0 +1,9 @@
+{
+  "input": {
+    "item": "minecraft:rotten_flesh"
+  },
+  "output": {
+    "item": "minecraft:leather"
+  },
+  "ticks": 400
+}

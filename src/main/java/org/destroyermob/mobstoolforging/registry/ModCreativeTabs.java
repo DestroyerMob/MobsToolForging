@@ -56,6 +56,7 @@ public final class ModCreativeTabs {
         ModItems.PATTERN_RACK_ITEMS.forEach(item -> output.accept(item.get()));
         ModItems.TOOLMAKER_STATION_ITEMS.forEach(item -> output.accept(item.get()));
         ModItems.LEATHER_STATION_ITEMS.forEach(item -> output.accept(item.get()));
+        ModItems.DRYING_RACK_ITEMS.forEach(item -> output.accept(item.get()));
         output.accept(ModItems.HEATING_FORGE.get());
         output.accept(ModItems.CRUCIBLE.get());
         output.accept(ModItems.FOUNDRY_FORGE.get());

@@ -18,10 +18,12 @@ import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
+import org.destroyermob.mobstoolforging.world.ArmorExternalComponents;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.ArmorStatsCatalog;
 import org.destroyermob.mobstoolforging.world.ForgingQuality;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.ToolAssemblyEnchantments;
 import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 public class ModularArmorRecipe extends CustomRecipe {
@@ -43,7 +45,15 @@ public class ModularArmorRecipe extends CustomRecipe {
         if (!parts.isValid()) {
             return ItemStack.EMPTY;
         }
-        return armorKind.create(parts);
+        ItemStack output = armorKind.create(parts);
+        if (output.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        if (!ToolAssemblyEnchantments.mergeOnto(output, parts.enchantmentSources(), registries)) {
+            return ItemStack.EMPTY;
+        }
+        ArmorExternalComponents.copyArmorPartComponentsToArmor(parts.base, parts.plate, output);
+        return output;
     }
 
     @Override
@@ -281,6 +291,10 @@ public class ModularArmorRecipe extends CustomRecipe {
             addIfPresent(stacks, base);
             addIfPresent(stacks, plate);
             return stacks;
+        }
+
+        private List<ItemStack> enchantmentSources() {
+            return stacks();
         }
 
         private static void addIfPresent(List<ItemStack> stacks, ItemStack stack) {

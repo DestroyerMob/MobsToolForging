@@ -10,7 +10,10 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 public final class MobsToolForgingMixinPlugin implements IMixinConfigPlugin {
     private static final String APOTHEOSIS_AFFIX_LOOT_MIXIN =
             "org.destroyermob.mobstoolforging.mixin.compat.ApotheosisAffixLootModifierMixin";
+    private static final String APOTHIC_STACK_ATTRIBUTE_MODIFIERS_EVENT_MIXIN =
+            "org.destroyermob.mobstoolforging.mixin.compat.ApothicStackAttributeModifiersEventMixin";
     private static final String APOTHEOSIS_MOD_ID = "apotheosis";
+    private static final String APOTHIC_ATTRIBUTES_MOD_ID = "apothic_attributes";
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -25,6 +28,9 @@ public final class MobsToolForgingMixinPlugin implements IMixinConfigPlugin {
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (APOTHEOSIS_AFFIX_LOOT_MIXIN.equals(mixinClassName)) {
             return isModPresent(APOTHEOSIS_MOD_ID);
+        }
+        if (APOTHIC_STACK_ATTRIBUTE_MODIFIERS_EVENT_MIXIN.equals(mixinClassName)) {
+            return isModPresent(APOTHIC_ATTRIBUTES_MOD_ID);
         }
         return true;
     }

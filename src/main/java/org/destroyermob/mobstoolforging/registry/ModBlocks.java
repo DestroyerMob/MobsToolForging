@@ -14,6 +14,7 @@ import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.AshBlock;
 import org.destroyermob.mobstoolforging.world.CrucibleBlock;
 import org.destroyermob.mobstoolforging.world.CrudeAnvilBlock;
+import org.destroyermob.mobstoolforging.world.DryingRackBlock;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlock;
 import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
@@ -119,6 +120,30 @@ public final class ModBlocks {
             leatherStationVariant("crimson_leather_station", "Crimson Leather Station", CRIMSON_LEATHER_STATION, Blocks.CRIMSON_PLANKS, Blocks.CRIMSON_STEM, "crimson_stem", "crimson_planks"),
             leatherStationVariant("warped_leather_station", "Warped Leather Station", WARPED_LEATHER_STATION, Blocks.WARPED_PLANKS, Blocks.WARPED_STEM, "warped_stem", "warped_planks")
     );
+    public static final DeferredBlock<DryingRackBlock> DRYING_RACK = registerDryingRack("drying_rack", Blocks.OAK_PLANKS);
+    public static final DeferredBlock<DryingRackBlock> SPRUCE_DRYING_RACK = registerDryingRack("spruce_drying_rack", Blocks.SPRUCE_PLANKS);
+    public static final DeferredBlock<DryingRackBlock> BIRCH_DRYING_RACK = registerDryingRack("birch_drying_rack", Blocks.BIRCH_PLANKS);
+    public static final DeferredBlock<DryingRackBlock> JUNGLE_DRYING_RACK = registerDryingRack("jungle_drying_rack", Blocks.JUNGLE_PLANKS);
+    public static final DeferredBlock<DryingRackBlock> ACACIA_DRYING_RACK = registerDryingRack("acacia_drying_rack", Blocks.ACACIA_PLANKS);
+    public static final DeferredBlock<DryingRackBlock> DARK_OAK_DRYING_RACK = registerDryingRack("dark_oak_drying_rack", Blocks.DARK_OAK_PLANKS);
+    public static final DeferredBlock<DryingRackBlock> MANGROVE_DRYING_RACK = registerDryingRack("mangrove_drying_rack", Blocks.MANGROVE_PLANKS);
+    public static final DeferredBlock<DryingRackBlock> CHERRY_DRYING_RACK = registerDryingRack("cherry_drying_rack", Blocks.CHERRY_PLANKS);
+    public static final DeferredBlock<DryingRackBlock> BAMBOO_DRYING_RACK = registerDryingRack("bamboo_drying_rack", Blocks.BAMBOO_PLANKS);
+    public static final DeferredBlock<DryingRackBlock> CRIMSON_DRYING_RACK = registerDryingRack("crimson_drying_rack", Blocks.CRIMSON_PLANKS);
+    public static final DeferredBlock<DryingRackBlock> WARPED_DRYING_RACK = registerDryingRack("warped_drying_rack", Blocks.WARPED_PLANKS);
+    public static final List<DryingRackVariant> DRYING_RACK_VARIANTS = List.of(
+            dryingRackVariant("drying_rack", "Oak Drying Rack", DRYING_RACK, Blocks.OAK_SLAB, "oak_planks"),
+            dryingRackVariant("spruce_drying_rack", "Spruce Drying Rack", SPRUCE_DRYING_RACK, Blocks.SPRUCE_SLAB, "spruce_planks"),
+            dryingRackVariant("birch_drying_rack", "Birch Drying Rack", BIRCH_DRYING_RACK, Blocks.BIRCH_SLAB, "birch_planks"),
+            dryingRackVariant("jungle_drying_rack", "Jungle Drying Rack", JUNGLE_DRYING_RACK, Blocks.JUNGLE_SLAB, "jungle_planks"),
+            dryingRackVariant("acacia_drying_rack", "Acacia Drying Rack", ACACIA_DRYING_RACK, Blocks.ACACIA_SLAB, "acacia_planks"),
+            dryingRackVariant("dark_oak_drying_rack", "Dark Oak Drying Rack", DARK_OAK_DRYING_RACK, Blocks.DARK_OAK_SLAB, "dark_oak_planks"),
+            dryingRackVariant("mangrove_drying_rack", "Mangrove Drying Rack", MANGROVE_DRYING_RACK, Blocks.MANGROVE_SLAB, "mangrove_planks"),
+            dryingRackVariant("cherry_drying_rack", "Cherry Drying Rack", CHERRY_DRYING_RACK, Blocks.CHERRY_SLAB, "cherry_planks"),
+            dryingRackVariant("bamboo_drying_rack", "Bamboo Drying Rack", BAMBOO_DRYING_RACK, Blocks.BAMBOO_SLAB, "bamboo_planks"),
+            dryingRackVariant("crimson_drying_rack", "Crimson Drying Rack", CRIMSON_DRYING_RACK, Blocks.CRIMSON_SLAB, "crimson_planks"),
+            dryingRackVariant("warped_drying_rack", "Warped Drying Rack", WARPED_DRYING_RACK, Blocks.WARPED_SLAB, "warped_planks")
+    );
     public static final DeferredBlock<HeatingForgeBlock> HEATING_FORGE = BLOCKS.register(
             "heating_forge",
             () -> new HeatingForgeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).noOcclusion())
@@ -168,6 +193,13 @@ public final class ModBlocks {
         );
     }
 
+    private static DeferredBlock<DryingRackBlock> registerDryingRack(String id, Block baseBlock) {
+        return BLOCKS.register(
+                id,
+                () -> new DryingRackBlock(BlockBehaviour.Properties.ofFullCopy(baseBlock).strength(1.5F, 3.0F).noOcclusion())
+        );
+    }
+
     private static PatternRackVariant patternRackVariant(String id, String displayName, DeferredBlock<PatternRackBlock> block, Block recipePlanks, String logTexture, String planksTexture) {
         return new PatternRackVariant(
                 id,
@@ -202,6 +234,16 @@ public final class ModBlocks {
         );
     }
 
+    private static DryingRackVariant dryingRackVariant(String id, String displayName, DeferredBlock<DryingRackBlock> block, Block recipeSlab, String planksTexture) {
+        return new DryingRackVariant(
+                id,
+                displayName,
+                block,
+                recipeSlab,
+                ResourceLocation.withDefaultNamespace("block/" + planksTexture)
+        );
+    }
+
     public static Block[] patternRackBlocks() {
         return PATTERN_RACK_VARIANTS.stream()
                 .map(variant -> variant.block().get())
@@ -216,6 +258,12 @@ public final class ModBlocks {
 
     public static Block[] leatherStationBlocks() {
         return LEATHER_STATION_VARIANTS.stream()
+                .map(variant -> variant.block().get())
+                .toArray(Block[]::new);
+    }
+
+    public static Block[] dryingRackBlocks() {
+        return DRYING_RACK_VARIANTS.stream()
                 .map(variant -> variant.block().get())
                 .toArray(Block[]::new);
     }
@@ -261,6 +309,15 @@ public final class ModBlocks {
             Block recipePlanks,
             Block recipeLog,
             ResourceLocation logTexture,
+            ResourceLocation planksTexture
+    ) {
+    }
+
+    public record DryingRackVariant(
+            String id,
+            String displayName,
+            DeferredBlock<DryingRackBlock> block,
+            Block recipeSlab,
             ResourceLocation planksTexture
     ) {
     }

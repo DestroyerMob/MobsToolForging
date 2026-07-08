@@ -92,16 +92,17 @@ public final class CampfireWorkpieceHeating {
             if (recipe.isEmpty() || recipe.get().targetTemperature() <= 0.0F) {
                 continue;
             }
-            float targetTemperature = recipe.get().targetTemperature();
-            holdVanillaCampfireTimer(campfire, slot, recipe.get().ticks());
+            HeatingRecipe heatingRecipe = recipe.get();
+            float targetTemperature = heatingRecipe.targetTemperature();
             float currentTemperature = WorkpieceHeat.temperature(stack, level);
-            float nextTemperature = Math.min(targetTemperature, currentTemperature + temperatureStep(targetTemperature, recipe.get().ticks()));
+            syncVanillaCampfireTimer(campfire, slot, heatingRecipe.ticks(), heatProgressTicks(currentTemperature, targetTemperature, heatingRecipe.ticks()));
+            float nextTemperature = Math.min(targetTemperature, currentTemperature + temperatureStep(targetTemperature, heatingRecipe.ticks()));
             boolean reachedCampfireTarget = nextTemperature >= targetTemperature - WORKABLE_EPSILON;
-            boolean workable = WorkpieceHeat.isWorkable(stack) || (reachedCampfireTarget && recipe.get().workable());
+            boolean workable = WorkpieceHeat.isWorkable(stack) || (reachedCampfireTarget && heatingRecipe.workable());
             WorkpieceHeat.setTemperature(stack, level, reachedCampfireTarget ? targetTemperature : nextTemperature, workable);
             heated = true;
             if (reachedCampfireTarget) {
-                releaseHeatedWorkpiece(level, pos, campfire, items, slot, stack, recipe.get());
+                releaseHeatedWorkpiece(level, pos, campfire, items, slot, stack, heatingRecipe);
                 released = true;
             }
         }
@@ -158,15 +159,40 @@ public final class CampfireWorkpieceHeating {
                 && state.getValue(CampfireBlock.LIT);
     }
 
-    private static void holdVanillaCampfireTimer(CampfireBlockEntity campfire, int slot, int ticks) {
+    public static int remainingHeatTicks(ItemStack stack, Level level, HeatingRecipe recipe) {
+        return remainingHeatTicks(WorkpieceHeat.temperature(stack, level), recipe.targetTemperature(), recipe.ticks());
+    }
+
+    private static int remainingHeatTicks(float currentTemperature, float targetTemperature, int ticks) {
+        if (ticks <= 0 || targetTemperature <= 0.0F) {
+            return 0;
+        }
+        float current = Math.max(0.0F, Math.min(targetTemperature, currentTemperature));
+        if (current >= targetTemperature - WORKABLE_EPSILON) {
+            return 0;
+        }
+        float netStep = targetTemperature / ticks;
+        if (netStep <= 0.0F) {
+            return ticks;
+        }
+        return Math.max(1, Math.min(ticks, (int) Math.ceil((targetTemperature - current) / netStep)));
+    }
+
+    private static int heatProgressTicks(float currentTemperature, float targetTemperature, int ticks) {
+        return Math.max(0, ticks - remainingHeatTicks(currentTemperature, targetTemperature, ticks));
+    }
+
+    private static void syncVanillaCampfireTimer(CampfireBlockEntity campfire, int slot, int ticks, int progress) {
         CampfireBlockEntityAccessor accessor = (CampfireBlockEntityAccessor) campfire;
         int[] cookingProgress = accessor.mobstoolforging$cookingProgress();
         int[] cookingTime = accessor.mobstoolforging$cookingTime();
+        int duration = Math.max(1, ticks);
+        int clampedProgress = Math.max(0, Math.min(duration - 1, progress));
         if (slot < cookingProgress.length) {
-            cookingProgress[slot] = 0;
+            cookingProgress[slot] = clampedProgress;
         }
         if (slot < cookingTime.length) {
-            cookingTime[slot] = ticks;
+            cookingTime[slot] = duration;
         }
     }
 

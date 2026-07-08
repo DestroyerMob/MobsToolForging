@@ -8,8 +8,6 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
@@ -73,8 +71,7 @@ public class ForgeShapingCategory implements IRecipeCategory<ForgeShapingJeiReci
 
     @Override
     public void draw(ForgeShapingJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        guiGraphics.drawString(Minecraft.getInstance().font, Component.literal("->").withStyle(ChatFormatting.DARK_GRAY), 97, 25, 0xFF555555, false);
-        Component detail = Component.translatable("jei.mobstoolforging.station_detail", recipe.requiredHits(), recipe.hammer().getHoverName());
-        guiGraphics.drawString(Minecraft.getInstance().font, detail, 28, 0, 0xFF606060, false);
+        JeiRecipeVisuals.drawArrow(guiGraphics, 96, 25);
+        JeiRecipeVisuals.drawHitCount(guiGraphics, 96, 43, recipe.requiredHits());
     }
 }

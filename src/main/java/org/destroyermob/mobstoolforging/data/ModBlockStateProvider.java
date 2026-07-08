@@ -71,6 +71,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
             leatherStationBlock(variant, invisibleLeatherStationModel);
         }
 
+        for (ModBlocks.DryingRackVariant variant : ModBlocks.DRYING_RACK_VARIANTS) {
+            Block dryingRack = variant.block().get();
+            ModelFile dryingRackModel = dryingRackModel(variant);
+            horizontalBlock(dryingRack, dryingRackModel);
+            simpleBlockItem(dryingRack, dryingRackModel);
+        }
+
         Block heatingForge = ModBlocks.HEATING_FORGE.get();
         ModelFile heatingForgeModel = new ModelFile.UncheckedModelFile(modLoc("block/heating_forge"));
         heatingForgeBlock(heatingForge, heatingForgeModel);
@@ -189,6 +196,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .texture("display_left", mcLoc("item/leather"))
                 .texture("display_right", modLoc("item/plant_fiber"))
                 .texture("particle", variant.logTexture());
+    }
+
+    private ModelFile dryingRackModel(ModBlocks.DryingRackVariant variant) {
+        return models().withExistingParent("block/" + variant.id(), modLoc("block/template_drying_rack"))
+                .texture("planks", variant.planksTexture())
+                .texture("particle", variant.planksTexture());
     }
 
     private static int horizontalRotation(Direction facing) {

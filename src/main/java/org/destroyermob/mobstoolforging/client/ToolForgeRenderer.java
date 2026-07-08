@@ -29,6 +29,7 @@ import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEntity> {
     private static final float CAMPFIRE_ITEM_SCALE = 0.375F;
+    private static final float ARMOR_FLAT_ITEM_SCALE = 14.0F / 16.0F;
     private static final float TOOLMAKER_RESULT_FLOAT_Y = 1.18F;
     private static final float TOOLMAKER_RESULT_SCALE = 0.56F;
     private static final float GHOST_MATERIAL_ALPHA = 0.45F;
@@ -145,15 +146,15 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             return;
         }
         if (count == 1) {
-            renderFlatItem(forge, stacks.get(0), poseStack, bufferSource, packedLight, packedOverlay, 0.0F, 0.0F, layout.materialScale(), layout.materialSurfaceY(), forge.displayRotationDegrees());
+            renderFlatItem(forge, stacks.get(0), poseStack, bufferSource, packedLight, packedOverlay, layout.originX(), layout.originZ(), layout.materialScale(), layout.materialSurfaceY(), forge.displayRotationDegrees());
             return;
         }
         float radius = count <= 4 ? 0.18F : 0.25F;
         float scale = count <= 4 ? layout.materialScale() : layout.centerMaterialScale();
         for (int index = 0; index < count; index++) {
             float angle = (float) (Math.PI * 2.0D * index / count);
-            float localX = (float) Math.cos(angle) * radius;
-            float localZ = (float) Math.sin(angle) * radius;
+            float localX = layout.originX() + (float) Math.cos(angle) * radius;
+            float localZ = layout.originZ() + (float) Math.sin(angle) * radius;
             renderFlatItem(forge, stacks.get(index), poseStack, bufferSource, packedLight, packedOverlay, localX, localZ, scale, layout.materialSurfaceY(), forge.displayRotationDegrees() + index * 23.0F);
         }
     }
@@ -258,8 +259,8 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             int column = index % columns;
             int row = index / columns;
             float shimmer = (float) Math.sin(time * 0.18F + index * 0.9F) * 0.012F;
-            float localX = originX + startX + column * step;
-            float localZ = originZ + startZ + row * step;
+            float localX = layout.originX() + originX + startX + column * step;
+            float localZ = layout.originZ() + originZ + startZ + row * step;
             float rotation = forge.displayRotationDegrees() + time * 0.45F + index * 29.0F;
             renderGhostFlatItem(forge, stack, poseStack, bufferSource, packedLight, packedOverlay, localX, localZ, scale, layout.previewSurfaceY() + 0.018F + shimmer, rotation, index);
         }
@@ -298,16 +299,16 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
     }
 
     private void renderMaterialCopy(ToolForgeBlockEntity forge, ItemStack stack, float offset, float localZ, float scale, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout) {
-        float localX = layout.spreadAxis() == SpreadAxis.X ? offset : 0.0F;
-        float z = layout.spreadAxis() == SpreadAxis.Z ? offset + localZ : localZ;
+        float localX = layout.originX() + (layout.spreadAxis() == SpreadAxis.X ? offset : 0.0F);
+        float z = layout.originZ() + (layout.spreadAxis() == SpreadAxis.Z ? offset + localZ : localZ);
         boolean qualityWindow = forge.isTimingQualityWindow();
         float surfaceY = qualityWindow ? layout.materialSurfaceY() + 0.018F : layout.materialSurfaceY();
         renderFlatItem(forge, stack, poseStack, bufferSource, packedLight, packedOverlay, localX, z, scale, surfaceY, forge.displayRotationDegrees());
     }
 
     private void renderItem(ToolForgeBlockEntity forge, ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, DisplayLayout layout, float offset, float scale) {
-        float localX = layout.spreadAxis() == SpreadAxis.X ? offset : 0.0F;
-        float localZ = layout.spreadAxis() == SpreadAxis.Z ? offset : 0.0F;
+        float localX = layout.originX() + (layout.spreadAxis() == SpreadAxis.X ? offset : 0.0F);
+        float localZ = layout.originZ() + (layout.spreadAxis() == SpreadAxis.Z ? offset : 0.0F);
         boolean qualityWindow = forge.isTimingQualityWindow();
         float surfaceY = qualityWindow ? layout.materialSurfaceY() + 0.018F : layout.materialSurfaceY();
         renderFlatItem(forge, stack, poseStack, bufferSource, packedLight, packedOverlay, localX, localZ, scale, surfaceY, forge.displayRotationDegrees());
@@ -324,6 +325,7 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
         poseStack.translate(localX, 0.0F, localZ);
         poseStack.mulPose(Axis.YP.rotationDegrees(localRotation + 180.0F));
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+        scale = fittedFlatItemScale(stack, scale);
         poseStack.scale(scale, scale, scale);
         float heat = level == null ? WorkpieceHeat.storedTemperature(stack) : WorkpieceHeat.temperature(stack, level);
         if (heat > 0.02F) {
@@ -359,6 +361,9 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             if (workstation.kind() == WorkstationKind.LAPIDARY_TABLE) {
                 return DisplayLayout.LAPIDARY;
             }
+            if (workstation.kind() == WorkstationKind.LEATHER_STATION) {
+                return DisplayLayout.LEATHER_STATION;
+            }
             if (workstation.kind() == WorkstationKind.TOOLMAKERS_BENCH) {
                 return DisplayLayout.TOOLMAKERS_BENCH;
             }
@@ -369,6 +374,10 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
     private static boolean isToolmakersBench(ToolForgeBlockEntity forge) {
         BlockState state = forge.getBlockState();
         return state.getBlock() instanceof ToolWorkstationBlock workstation && workstation.kind() == WorkstationKind.TOOLMAKERS_BENCH;
+    }
+
+    private static float fittedFlatItemScale(ItemStack stack, float scale) {
+        return ArmorForgeAttachment.isArmorStack(stack) ? scale * ARMOR_FLAT_ITEM_SCALE : scale;
     }
 
     private enum SpreadAxis {
@@ -385,6 +394,8 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
             float previewScale,
             float spread,
             SpreadAxis spreadAxis,
+            float originX,
+            float originZ,
             float abrasiveSurfaceY,
             float abrasiveScale,
             float abrasiveX,
@@ -402,6 +413,8 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
                 0.0F,
                 0.0F,
                 0.0F,
+                0.0F,
+                0.0F,
                 0.0F
         );
         private static final DisplayLayout LAPIDARY = new DisplayLayout(
@@ -413,10 +426,28 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
                 CAMPFIRE_ITEM_SCALE,
                 0.20F,
                 SpreadAxis.X,
+                0.0F,
+                0.0F,
                 0.775F,
                 CAMPFIRE_ITEM_SCALE,
                 0.0F,
                 -0.28F
+        );
+        private static final DisplayLayout LEATHER_STATION = new DisplayLayout(
+                0.822F,
+                0.814F,
+                CAMPFIRE_ITEM_SCALE * 0.86F,
+                CAMPFIRE_ITEM_SCALE * 0.74F,
+                CAMPFIRE_ITEM_SCALE * 0.86F,
+                CAMPFIRE_ITEM_SCALE * 0.86F,
+                0.24F,
+                SpreadAxis.X,
+                0.5F,
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F
         );
         private static final DisplayLayout TOOLMAKERS_BENCH = new DisplayLayout(
                 0.770F,
@@ -427,6 +458,8 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
                 CAMPFIRE_ITEM_SCALE,
                 0.20F,
                 SpreadAxis.X,
+                0.0F,
+                0.0F,
                 0.0F,
                 0.0F,
                 0.0F,

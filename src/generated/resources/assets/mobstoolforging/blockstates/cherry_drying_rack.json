@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "mobstoolforging:block/cherry_drying_rack",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "mobstoolforging:block/cherry_drying_rack"
+    },
+    "facing=south": {
+      "model": "mobstoolforging:block/cherry_drying_rack",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mobstoolforging:block/cherry_drying_rack",
+      "y": 270
+    }
+  }
+}

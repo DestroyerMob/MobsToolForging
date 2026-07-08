@@ -8,11 +8,8 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 
 public class StationWorkCategory implements IRecipeCategory<StationWorkJeiRecipe> {
     private final IDrawable background;
@@ -66,13 +63,7 @@ public class StationWorkCategory implements IRecipeCategory<StationWorkJeiRecipe
 
     @Override
     public void draw(StationWorkJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        guiGraphics.drawString(Minecraft.getInstance().font, Component.literal("->").withStyle(ChatFormatting.DARK_GRAY), 80, 23, 0xFF555555, false);
-        Component detail = Component.translatable("jei.mobstoolforging.station_detail", recipe.requiredHits(), recipe.hammer().getHoverName());
-        guiGraphics.drawString(Minecraft.getInstance().font, detail, 28, 0, 0xFF606060, false);
-        if (!recipe.catalyst().isEmpty()) {
-            ItemStack catalyst = recipe.catalyst();
-            Component catalystText = Component.translatable("jei.mobstoolforging.catalyst", catalyst.getHoverName());
-            guiGraphics.drawString(Minecraft.getInstance().font, catalystText, 2, 46, 0xFF606060, false);
-        }
+        JeiRecipeVisuals.drawArrow(guiGraphics, 78, 23);
+        JeiRecipeVisuals.drawHitCount(guiGraphics, 82, 39, recipe.requiredHits());
     }
 }

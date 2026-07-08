@@ -449,7 +449,7 @@ public final class ModCommands {
         ServerPlayer player = source.getPlayerOrException();
         ItemStack original = player.getMainHandItem();
         Component originalName = original.getHoverName().copy();
-        ItemStack converted = VanillaToolConverter.convert(original, MaterialCatalog.OAK);
+        ItemStack converted = VanillaToolConverter.convertLootOrEquipment(original, MaterialCatalog.OAK);
         if (converted.isEmpty()) {
             source.sendFailure(Component.translatable("commands.mobstoolforging.convert_vanilla_tool.not_supported"));
             return 0;

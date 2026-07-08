@@ -333,7 +333,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
     }
 
     private static boolean isRepairStation(WorkstationKind kind) {
-        return kind.isSmithingAnvilLike();
+        return kind.isSmithingAnvilLike() || kind == WorkstationKind.LEATHER_STATION;
     }
 
     private static boolean isRepairStack(ItemStack stack, ToolForgeBlockEntity forge, WorkstationKind kind) {
@@ -703,7 +703,8 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return ItemInteractionResult.CONSUME;
         }
         ItemStack benchTool = benchStacks.get(0);
-        if (Boolean.TRUE.equals(benchTool.get(ModDataComponents.TOOL_BROKEN.get()))) {
+        if (Boolean.TRUE.equals(benchTool.get(ModDataComponents.TOOL_BROKEN.get()))
+                || Boolean.TRUE.equals(benchTool.get(ModDataComponents.ARMOR_BROKEN.get()))) {
             player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_broken_tool"), true);
             return ItemInteractionResult.CONSUME;
         }

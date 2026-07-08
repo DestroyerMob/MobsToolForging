@@ -127,6 +127,30 @@ public final class ModItems {
             CRIMSON_LEATHER_STATION,
             WARPED_LEATHER_STATION
     );
+    public static final DeferredItem<BlockItem> DRYING_RACK = blockItem("drying_rack", ModBlocks.DRYING_RACK);
+    public static final DeferredItem<BlockItem> SPRUCE_DRYING_RACK = blockItem("spruce_drying_rack", ModBlocks.SPRUCE_DRYING_RACK);
+    public static final DeferredItem<BlockItem> BIRCH_DRYING_RACK = blockItem("birch_drying_rack", ModBlocks.BIRCH_DRYING_RACK);
+    public static final DeferredItem<BlockItem> JUNGLE_DRYING_RACK = blockItem("jungle_drying_rack", ModBlocks.JUNGLE_DRYING_RACK);
+    public static final DeferredItem<BlockItem> ACACIA_DRYING_RACK = blockItem("acacia_drying_rack", ModBlocks.ACACIA_DRYING_RACK);
+    public static final DeferredItem<BlockItem> DARK_OAK_DRYING_RACK = blockItem("dark_oak_drying_rack", ModBlocks.DARK_OAK_DRYING_RACK);
+    public static final DeferredItem<BlockItem> MANGROVE_DRYING_RACK = blockItem("mangrove_drying_rack", ModBlocks.MANGROVE_DRYING_RACK);
+    public static final DeferredItem<BlockItem> CHERRY_DRYING_RACK = blockItem("cherry_drying_rack", ModBlocks.CHERRY_DRYING_RACK);
+    public static final DeferredItem<BlockItem> BAMBOO_DRYING_RACK = blockItem("bamboo_drying_rack", ModBlocks.BAMBOO_DRYING_RACK);
+    public static final DeferredItem<BlockItem> CRIMSON_DRYING_RACK = blockItem("crimson_drying_rack", ModBlocks.CRIMSON_DRYING_RACK);
+    public static final DeferredItem<BlockItem> WARPED_DRYING_RACK = blockItem("warped_drying_rack", ModBlocks.WARPED_DRYING_RACK);
+    public static final List<DeferredItem<BlockItem>> DRYING_RACK_ITEMS = List.of(
+            DRYING_RACK,
+            SPRUCE_DRYING_RACK,
+            BIRCH_DRYING_RACK,
+            JUNGLE_DRYING_RACK,
+            ACACIA_DRYING_RACK,
+            DARK_OAK_DRYING_RACK,
+            MANGROVE_DRYING_RACK,
+            CHERRY_DRYING_RACK,
+            BAMBOO_DRYING_RACK,
+            CRIMSON_DRYING_RACK,
+            WARPED_DRYING_RACK
+    );
     public static final DeferredItem<BlockItem> HEATING_FORGE = ITEMS.register(
             "heating_forge",
             () -> new BlockItem(ModBlocks.HEATING_FORGE.get(), new Item.Properties())

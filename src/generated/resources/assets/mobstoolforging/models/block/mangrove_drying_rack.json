@@ -1,0 +1,7 @@
+{
+  "parent": "mobstoolforging:block/template_drying_rack",
+  "textures": {
+    "particle": "minecraft:block/mangrove_planks",
+    "planks": "minecraft:block/mangrove_planks"
+  }
+}

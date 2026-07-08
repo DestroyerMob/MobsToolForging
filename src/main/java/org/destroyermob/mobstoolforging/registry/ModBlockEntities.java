@@ -7,6 +7,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.CrucibleBlockEntity;
+import org.destroyermob.mobstoolforging.world.DryingRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlockEntity;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
@@ -44,6 +45,10 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PatternRackBlockEntity>> PATTERN_RACK = BLOCK_ENTITIES.register(
             "pattern_rack",
             () -> BlockEntityType.Builder.of(PatternRackBlockEntity::new, ModBlocks.patternRackBlocks()).build(null)
+    );
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DryingRackBlockEntity>> DRYING_RACK = BLOCK_ENTITIES.register(
+            "drying_rack",
+            () -> BlockEntityType.Builder.of(DryingRackBlockEntity::new, ModBlocks.dryingRackBlocks()).build(null)
     );
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<KnappingFlintBlockEntity>> KNAPPING_FLINT = BLOCK_ENTITIES.register(
             "knapping_flint",

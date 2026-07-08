@@ -105,13 +105,21 @@ public class ModRecipeProvider extends RecipeProvider {
         }
 
         for (ModBlocks.ToolmakerStationVariant variant : ModBlocks.TOOLMAKER_STATION_VARIANTS) {
-            ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, variant.block())
+            ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, variant.block(), 4)
                     .define('S', Items.STICK)
                     .define('P', variant.recipePlanks())
                     .pattern("PPP")
                     .pattern("S S")
                     .pattern("PPP")
                     .unlockedBy("has_" + variant.id(), has(variant.recipePlanks()))
+                    .save(output);
+        }
+
+        for (ModBlocks.DryingRackVariant variant : ModBlocks.DRYING_RACK_VARIANTS) {
+            ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, variant.block(), 4)
+                    .define('S', variant.recipeSlab())
+                    .pattern("SSS")
+                    .unlockedBy("has_" + variant.id(), has(variant.recipeSlab()))
                     .save(output);
         }
 

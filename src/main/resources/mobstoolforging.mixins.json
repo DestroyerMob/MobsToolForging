@@ -8,6 +8,7 @@
     "CampfireBlockEntityAccessor",
     "CampfireBlockEntityMixin",
     "compat.ApotheosisAffixLootModifierMixin",
+    "compat.ApothicStackAttributeModifiersEventMixin",
     "RecipeManagerMixin"
   ],
   "client": [

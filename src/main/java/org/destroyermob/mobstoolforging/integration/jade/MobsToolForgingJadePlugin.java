@@ -8,6 +8,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.mixin.CampfireBlockEntityAccessor;
+import org.destroyermob.mobstoolforging.world.CampfireWorkpieceHeating;
+import org.destroyermob.mobstoolforging.world.DryingRackBlock;
+import org.destroyermob.mobstoolforging.world.DryingRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.HeatingRecipe;
 import org.destroyermob.mobstoolforging.world.HeatingRecipeRegistry;
@@ -33,6 +37,7 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
     private static final HeatingForgeProvider HEATING_FORGE_PROVIDER = new HeatingForgeProvider();
     private static final CampfireHeatingProvider CAMPFIRE_HEATING_PROVIDER = new CampfireHeatingProvider();
     private static final PatternRackProvider PATTERN_RACK_PROVIDER = new PatternRackProvider();
+    private static final DryingRackProvider DRYING_RACK_PROVIDER = new DryingRackProvider();
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
@@ -40,6 +45,7 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(HEATING_FORGE_PROVIDER, HeatingForgeBlock.class);
         registration.registerBlockComponent(CAMPFIRE_HEATING_PROVIDER, CampfireBlock.class);
         registration.registerBlockComponent(PATTERN_RACK_PROVIDER, PatternRackBlock.class);
+        registration.registerBlockComponent(DRYING_RACK_PROVIDER, DryingRackBlock.class);
     }
 
     private static final class WorkstationProvider implements IBlockComponentProvider {
@@ -166,9 +172,32 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
                 if (recipe == null) {
                     continue;
                 }
-                int temperature = Math.round(org.destroyermob.mobstoolforging.world.WorkpieceHeat.temperature(workpiece, accessor.getLevel()) * 100.0F);
-                int target = Math.round(recipe.targetTemperature() * 100.0F);
-                tooltip.add(Component.translatable("jade.mobstoolforging.campfire_workpiece", slot + 1, workpiece.getHoverName(), temperature, target, recipe.ticks()).withStyle(ChatFormatting.GRAY));
+                int timerTicks = campfireTicksRemaining(campfire, slot, recipe.ticks());
+                int heatTicks = CampfireWorkpieceHeating.remainingHeatTicks(workpiece, accessor.getLevel(), recipe);
+                int ticksRemaining = heatTicks > 0 ? Math.min(timerTicks, heatTicks) : timerTicks;
+                tooltip.add(Component.translatable("jade.mobstoolforging.campfire_workpiece", slot + 1, workpiece.getHoverName(), secondsLeft(ticksRemaining)).withStyle(ChatFormatting.GRAY));
+            }
+        }
+    }
+
+    private static final class DryingRackProvider implements IBlockComponentProvider {
+        private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "drying_rack");
+
+        @Override
+        public ResourceLocation getUid() {
+            return UID;
+        }
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            if (!(accessor.getBlockEntity() instanceof DryingRackBlockEntity rack) || !rack.hasItem()) {
+                return;
+            }
+            ItemStack displayStack = rack.displayStack();
+            if (rack.isDrying()) {
+                tooltip.add(Component.translatable("jade.mobstoolforging.drying", displayStack.getHoverName(), secondsLeft(rack.dryingTicksRemaining())).withStyle(ChatFormatting.GRAY));
+            } else {
+                tooltip.add(line("jade.mobstoolforging.drying_ready", displayStack.getHoverName()));
             }
         }
     }
@@ -179,5 +208,21 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
 
     private static Component progressLine(int current, int required) {
         return Component.translatable("jade.mobstoolforging.progress", current, required, Math.round(required <= 0 ? 0.0F : current * 100.0F / required)).withStyle(ChatFormatting.GRAY);
+    }
+
+    private static int campfireTicksRemaining(CampfireBlockEntity campfire, int slot, int defaultDuration) {
+        CampfireBlockEntityAccessor accessor = (CampfireBlockEntityAccessor) campfire;
+        int[] cookingProgress = accessor.mobstoolforging$cookingProgress();
+        int[] cookingTime = accessor.mobstoolforging$cookingTime();
+        int duration = slot < cookingTime.length && cookingTime[slot] > 0 ? cookingTime[slot] : defaultDuration;
+        int progress = slot < cookingProgress.length ? cookingProgress[slot] : 0;
+        return Math.max(0, duration - progress);
+    }
+
+    private static Component secondsLeft(int ticks) {
+        if (ticks <= 0) {
+            return Component.literal("0s");
+        }
+        return Component.literal(Math.max(1, (int) Math.ceil(ticks / 20.0D)) + "s");
     }
 }

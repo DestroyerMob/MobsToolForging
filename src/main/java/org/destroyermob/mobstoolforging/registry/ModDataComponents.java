@@ -5,6 +5,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -62,6 +63,16 @@ public final class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> TOOL_BROKEN = DATA_COMPONENTS.registerComponentType(
             "tool_broken",
             builder -> builder.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL)
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> ARMOR_BROKEN = DATA_COMPONENTS.registerComponentType(
+            "armor_broken",
+            builder -> builder.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL)
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemEnchantments>> DISABLED_ARMOR_ENCHANTMENTS = DATA_COMPONENTS.registerComponentType(
+            "disabled_armor_enchantments",
+            builder -> builder.persistent(ItemEnchantments.CODEC).networkSynchronized(ItemEnchantments.STREAM_CODEC).cacheEncoding()
     );
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<HeatedWorkpieceData>> HEATED_WORKPIECE = DATA_COMPONENTS.registerComponentType(

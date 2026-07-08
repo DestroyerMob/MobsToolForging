@@ -23,6 +23,8 @@ import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
+import org.destroyermob.mobstoolforging.world.DryingRecipe;
+import org.destroyermob.mobstoolforging.world.DryingRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.HeatingDisplayRecipe;
 import org.destroyermob.mobstoolforging.world.HeatingRecipeRegistry;
@@ -42,6 +44,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     public static final RecipeType<StationWorkJeiRecipe> STATION_WORK = RecipeType.create(MobsToolForging.MOD_ID, "station_work", StationWorkJeiRecipe.class);
     public static final RecipeType<PatternCreationJeiRecipe> PATTERN_CREATION = RecipeType.create(MobsToolForging.MOD_ID, "pattern_creation", PatternCreationJeiRecipe.class);
     public static final RecipeType<HeatingJeiRecipe> HEATING = RecipeType.create(MobsToolForging.MOD_ID, "heating", HeatingJeiRecipe.class);
+    public static final RecipeType<DryingJeiRecipe> DRYING = RecipeType.create(MobsToolForging.MOD_ID, "drying", DryingJeiRecipe.class);
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -55,7 +58,8 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 new ForgeShapingCategory(guiHelper),
                 new StationWorkCategory(guiHelper),
                 new PatternCreationCategory(guiHelper),
-                new HeatingCategory(guiHelper)
+                new HeatingCategory(guiHelper),
+                new DryingCategory(guiHelper)
         );
     }
 
@@ -65,6 +69,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         registration.addRecipes(STATION_WORK, stationWorkRecipes());
         registration.addRecipes(PATTERN_CREATION, patternCreationRecipes());
         registration.addRecipes(HEATING, heatingRecipes());
+        registration.addRecipes(DRYING, dryingRecipes());
     }
 
     @Override
@@ -94,6 +99,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(ModItems.HEATING_FORGE.get(), HEATING);
         registration.addRecipeCatalyst(Items.CAMPFIRE, HEATING);
         registration.addRecipeCatalyst(Items.SOUL_CAMPFIRE, HEATING);
+        ModItems.DRYING_RACK_ITEMS.forEach(item -> registration.addRecipeCatalyst(item.get(), DRYING));
     }
 
     private static List<ForgeShapingJeiRecipe> forgeShapingRecipes() {
@@ -171,6 +177,14 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 .toList();
     }
 
+    private static List<DryingJeiRecipe> dryingRecipes() {
+        return DryingRecipeRegistry.recipes().stream()
+                .map(MobsToolForgingJeiPlugin::dryingRecipe)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+    }
+
     private static Optional<PatternCreationJeiRecipe> patternCreationRecipe(ForgeTemplateDefinition template) {
         ItemStack pattern = ToolTemplateItem.createPatternStack(template);
         if (pattern.isEmpty()) {
@@ -215,6 +229,21 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 recipe.output(),
                 recipe.ticks(),
                 recipe.targetTemperature(),
+                recipe
+        ));
+    }
+
+    private static Optional<DryingJeiRecipe> dryingRecipe(DryingRecipe recipe) {
+        List<ItemStack> inputs = DryingRecipeRegistry.inputStacks(recipe.input());
+        if (inputs.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(new DryingJeiRecipe(
+                recipe.id(),
+                new ItemStack(ModItems.DRYING_RACK.get()),
+                inputs,
+                recipe.outputCopy(),
+                recipe.ticks(),
                 recipe
         ));
     }
@@ -283,5 +312,9 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     static ItemStack heatingForgeIcon() {
         return new ItemStack(ModItems.HEATING_FORGE.get());
+    }
+
+    static ItemStack dryingRackIcon() {
+        return new ItemStack(ModItems.DRYING_RACK.get());
     }
 }

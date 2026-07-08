@@ -65,9 +65,11 @@ import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.registry.ModLootModifiers;
 import org.destroyermob.mobstoolforging.world.AnvilForgingEvents;
+import org.destroyermob.mobstoolforging.world.ArmorRepairing;
 import org.destroyermob.mobstoolforging.world.ArmorStandSwapEvents;
 import org.destroyermob.mobstoolforging.world.CampfireWorkpieceHeating;
 import org.destroyermob.mobstoolforging.world.CrucibleContents;
+import org.destroyermob.mobstoolforging.world.DryingRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
 import org.destroyermob.mobstoolforging.world.FlintKnappingEvents;
@@ -162,6 +164,7 @@ public class MobsToolForging {
             ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> event.accept(variant.block()));
             ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> event.accept(variant.block()));
             ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> event.accept(variant.block()));
+            ModBlocks.DRYING_RACK_VARIANTS.forEach(variant -> event.accept(variant.block()));
             event.accept(ModBlocks.HEATING_FORGE);
             event.accept(ModBlocks.CRUCIBLE);
             event.accept(ModBlocks.FOUNDRY_FORGE);
@@ -227,6 +230,11 @@ public class MobsToolForging {
                 Capabilities.ItemHandler.BLOCK,
                 ModBlockEntities.HEATING_FORGE.get(),
                 (forge, side) -> forge.itemHandler(side)
+        );
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ModBlockEntities.DRYING_RACK.get(),
+                (rack, side) -> rack.itemHandler(side)
         );
     }
 
@@ -351,6 +359,7 @@ public class MobsToolForging {
         event.addListener(new ToolStatRuleReloadListener());
         event.addListener(new StationWorkRecipeReloadListener());
         event.addListener(new HeatingRecipeReloadListener());
+        event.addListener(new DryingRecipeReloadListener());
         event.addListener(new GroundAssemblyRecipeReloadListener());
     }
 
@@ -409,7 +418,8 @@ public class MobsToolForging {
     }
 
     private void blockVanillaModularToolRepair(AnvilUpdateEvent event) {
-        if (ToolRepairing.shouldBlockVanillaAnvilRepair(event.getLeft(), event.getRight())) {
+        if (ToolRepairing.shouldBlockVanillaAnvilRepair(event.getLeft(), event.getRight())
+                || ArmorRepairing.shouldBlockVanillaAnvilRepair(event.getLeft(), event.getRight())) {
             event.setCanceled(true);
         }
     }

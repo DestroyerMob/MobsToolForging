@@ -1173,12 +1173,12 @@
     {
       "name": "LeftDisplay",
       "from": [
-        2,
-        13,
+        3.85,
+        14,
         13
       ],
       "to": [
-        16,
+        14.15,
         23,
         14
       ],
@@ -1186,8 +1186,8 @@
         "angle": 0,
         "axis": "y",
         "origin": [
-          2,
-          13,
+          3.85,
+          14,
           12
         ]
       },
@@ -1195,44 +1195,44 @@
         "north": {
           "uv": [
             0,
-            0,
-            14,
-            10
+            1,
+            16,
+            15
           ],
           "texture": "#display_left"
         },
         "east": {
           "uv": [
             0,
-            0,
             1,
-            10
+            1,
+            15
           ],
           "texture": "#display_left"
         },
         "south": {
           "uv": [
             0,
-            0,
-            14,
-            10
+            1,
+            16,
+            15
           ],
           "texture": "#display_left"
         },
         "west": {
           "uv": [
             1,
-            0,
+            1,
             2,
-            10
+            15
           ],
           "texture": "#display_left"
         },
         "up": {
           "uv": [
             0,
-            1,
-            14,
+            0,
+            16,
             2
           ],
           "texture": "#display_left"
@@ -1241,7 +1241,7 @@
           "uv": [
             0,
             0,
-            14,
+            16,
             1
           ],
           "texture": "#display_left"
@@ -1251,12 +1251,12 @@
     {
       "name": "RightDisplay",
       "from": [
-        16,
-        13,
+        17.85,
+        14,
         13
       ],
       "to": [
-        30,
+        28.15,
         23,
         14
       ],
@@ -1264,8 +1264,8 @@
         "angle": 0,
         "axis": "y",
         "origin": [
-          16,
-          13,
+          17.85,
+          14,
           12
         ]
       },
@@ -1273,44 +1273,44 @@
         "north": {
           "uv": [
             0,
-            0,
-            14,
-            10
+            1,
+            16,
+            15
           ],
           "texture": "#display_right"
         },
         "east": {
           "uv": [
             0,
-            0,
             1,
-            10
+            1,
+            15
           ],
           "texture": "#display_right"
         },
         "south": {
           "uv": [
             0,
-            0,
-            14,
-            10
+            1,
+            16,
+            15
           ],
           "texture": "#display_right"
         },
         "west": {
           "uv": [
             1,
-            0,
+            1,
             2,
-            10
+            15
           ],
           "texture": "#display_right"
         },
         "up": {
           "uv": [
             0,
-            1,
-            14,
+            0,
+            16,
             2
           ],
           "texture": "#display_right"
@@ -1319,7 +1319,7 @@
           "uv": [
             0,
             0,
-            14,
+            16,
             1
           ],
           "texture": "#display_right"

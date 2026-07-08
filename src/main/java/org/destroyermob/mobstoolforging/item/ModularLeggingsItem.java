@@ -9,12 +9,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.level.Level;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorStatsCatalog;
@@ -88,7 +90,7 @@ public class ModularLeggingsItem extends ArmorItem implements ModularArmorItem {
     @Override
     public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
         ArmorConstructionData construction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
-        if (construction == null) {
+        if (construction == null || isBrokenArmor(stack)) {
             return ItemAttributeModifiers.EMPTY;
         }
         ItemStack copy = stack.copy();
@@ -108,6 +110,9 @@ public class ModularLeggingsItem extends ArmorItem implements ModularArmorItem {
         if (construction == null || !ArmorConstructionData.LEGGINGS_TYPE.equals(construction.armorType())) {
             return;
         }
+        if (isBrokenArmor(stack)) {
+            tooltip.add(Component.translatable("tooltip.mobstoolforging.broken_armor").withStyle(ChatFormatting.RED));
+        }
         tooltip.add(Component.translatable("tooltip.mobstoolforging.construction").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("tooltip.mobstoolforging.quality")
                 .withStyle(ChatFormatting.DARK_GRAY)
@@ -120,6 +125,12 @@ public class ModularLeggingsItem extends ArmorItem implements ModularArmorItem {
                 "tooltip.mobstoolforging.armor_part.plate",
                 construction.leggingsPlateMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
         ).withStyle(ChatFormatting.DARK_GRAY));
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
+        super.inventoryTick(stack, level, entity, slotId, isSelected);
+        modularArmorInventoryTick(stack, level);
     }
 
     @Override

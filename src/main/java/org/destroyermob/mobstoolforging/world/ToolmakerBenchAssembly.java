@@ -59,7 +59,7 @@ public final class ToolmakerBenchAssembly {
         if (!leatherArmor.isEmpty()) {
             return leatherArmor;
         }
-        ItemStack armor = assembleArmor(stacks);
+        ItemStack armor = assembleArmor(stacks, registries);
         if (!armor.isEmpty()) {
             return armor;
         }
@@ -87,7 +87,7 @@ public final class ToolmakerBenchAssembly {
     public static Optional<List<ItemStack>> disassemble(ItemStack stack) {
         ArmorConstructionData armorConstruction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
         if (armorConstruction != null) {
-            return disassembleArmor(armorConstruction);
+            return disassembleArmor(stack, armorConstruction);
         }
 
         ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
@@ -141,9 +141,20 @@ public final class ToolmakerBenchAssembly {
         return armorConstruction != null && ArmorAssemblyKind.fromArmorType(armorConstruction.armorType()).isPresent();
     }
 
-    private static ItemStack assembleArmor(List<ItemStack> stacks) {
+    private static ItemStack assembleArmor(List<ItemStack> stacks, HolderLookup.Provider registries) {
         ArmorAssemblyParts parts = findArmorParts(stacks);
-        return parts.valid() ? parts.kind().create(parts) : ItemStack.EMPTY;
+        if (!parts.valid()) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack output = parts.kind().create(parts);
+        if (output.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        if (!ToolAssemblyEnchantments.mergeOnto(output, parts.enchantmentSources(), registries)) {
+            return ItemStack.EMPTY;
+        }
+        ArmorExternalComponents.copyArmorPartComponentsToArmor(parts.base(), parts.plate(), output);
+        return output;
     }
 
     private static ArmorAssemblyParts findArmorParts(List<ItemStack> stacks) {
@@ -167,7 +178,7 @@ public final class ToolmakerBenchAssembly {
         return parts;
     }
 
-    private static Optional<List<ItemStack>> disassembleArmor(ArmorConstructionData construction) {
+    private static Optional<List<ItemStack>> disassembleArmor(ItemStack armor, ArmorConstructionData construction) {
         if (construction.hasLeatherBase()) {
             return Optional.empty();
         }
@@ -183,7 +194,11 @@ public final class ToolmakerBenchAssembly {
                     parts.add(plate);
                 }
             });
-            return List.copyOf(parts);
+            List<ItemStack> result = List.copyOf(parts);
+            if (!ToolAssemblyEnchantments.hasEnchantments(result)) {
+                result = ToolAssemblyEnchantments.copyToolEnchantmentsToViableParts(armor, result);
+            }
+            return ArmorExternalComponents.copyArmorComponentsToPrimaryPart(armor, result);
         }).filter(parts -> !parts.isEmpty());
     }
 
@@ -492,6 +507,14 @@ public final class ToolmakerBenchAssembly {
             return kind;
         }
 
+        private ItemStack base() {
+            return base;
+        }
+
+        private ItemStack plate() {
+            return plate;
+        }
+
         private boolean setKind(ArmorAssemblyKind nextKind) {
             if (kind != null && kind != nextKind) {
                 return false;
@@ -521,6 +544,10 @@ public final class ToolmakerBenchAssembly {
             addIfPresent(stacks, base);
             addIfPresent(stacks, plate);
             return stacks;
+        }
+
+        private List<ItemStack> enchantmentSources() {
+            return stacks();
         }
 
         private static void addIfPresent(List<ItemStack> stacks, ItemStack stack) {

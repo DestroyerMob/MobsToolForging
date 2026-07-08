@@ -548,7 +548,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public boolean canPlaceRepairTool(ItemStack stack) {
         return canUseRepairStacks()
                 && benchStacks.isEmpty()
-                && ToolRepairing.isRepairableModularTool(stack);
+                && isRepairableAtThisStation(stack);
     }
 
     public boolean placeRepairTool(ItemStack stack) {
@@ -564,8 +564,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public boolean canPlaceRepairMaterial(ItemStack stack) {
         return canUseRepairStacks()
                 && benchStacks.size() == 1
-                && ToolRepairing.isRepairableModularTool(benchStacks.get(0))
-                && ToolRepairing.isRepairMaterial(benchStacks.get(0), stack);
+                && isRepairMaterialFor(benchStacks.get(0), stack);
     }
 
     public boolean placeRepairMaterial(ItemStack stack) {
@@ -581,15 +580,12 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public boolean hasRepairWork() {
         return canUseRepairStacks()
                 && benchStacks.size() == 2
-                && ToolRepairing.isRepairableModularTool(benchStacks.get(0))
-                && ToolRepairing.isRepairMaterial(benchStacks.get(0), benchStacks.get(1));
+                && isRepairMaterialFor(benchStacks.get(0), benchStacks.get(1));
     }
 
     public boolean hasRepairStacks() {
-        return workstationKind().isSmithingAnvilLike()
-                && !benchStacks.isEmpty()
-                && directOutputStack.isEmpty()
-                && templateId == null;
+        return canUseRepairStacks()
+                && !benchStacks.isEmpty();
     }
 
     public boolean canPlaceArmorAttachmentTarget(ItemStack stack) {
@@ -636,13 +632,16 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (!hasRepairWork()) {
             return ItemStack.EMPTY;
         }
-        ItemStack repaired = ToolRepairing.repairWithOneMaterial(benchStacks.get(0));
+        ItemStack target = benchStacks.get(0);
+        ItemStack repaired = ToolRepairing.isRepairableModularTool(target)
+                ? ToolRepairing.repairWithOneMaterial(target)
+                : ArmorRepairing.repairWithOneMaterial(target);
         if (repaired.isEmpty()) {
             return ItemStack.EMPTY;
         }
         clearWorkState();
         randomizeDisplayRotation();
-        if (ToolRepairing.isRepairableModularTool(repaired)) {
+        if (isRepairableAtThisStation(repaired)) {
             benchStacks.add(repaired.copy());
         } else {
             directOutputStack = repaired.copy();
@@ -652,7 +651,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     private boolean canUseRepairStacks() {
-        return workstationKind().isSmithingAnvilLike()
+        return (workstationKind().isSmithingAnvilLike() || workstationKind() == WorkstationKind.LEATHER_STATION)
                 && directOutputStack.isEmpty()
                 && templateId == null
                 && abrasiveStack.isEmpty()
@@ -663,6 +662,19 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && looseWorkRecipeId == null
                 && materialCount == 0
                 && hitCount == 0;
+    }
+
+    private boolean isRepairableAtThisStation(ItemStack stack) {
+        return workstationKind().isSmithingAnvilLike() && ToolRepairing.isRepairableModularTool(stack)
+                || ArmorRepairing.canRepairAt(stack, workstationKind());
+    }
+
+    private boolean isRepairMaterialFor(ItemStack target, ItemStack candidate) {
+        return workstationKind().isSmithingAnvilLike()
+                && ToolRepairing.isRepairableModularTool(target)
+                && ToolRepairing.isRepairMaterial(target, candidate)
+                || ArmorRepairing.canRepairAt(target, workstationKind())
+                && ArmorRepairing.isRepairMaterial(target, candidate);
     }
 
     public boolean canPlaceToolmakerStack(ItemStack stack) {

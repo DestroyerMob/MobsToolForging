@@ -8,8 +8,6 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
@@ -57,8 +55,8 @@ public class HeatingCategory implements IRecipeCategory<HeatingJeiRecipe> {
 
     @Override
     public void draw(HeatingJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        guiGraphics.drawString(Minecraft.getInstance().font, Component.literal("->").withStyle(ChatFormatting.DARK_GRAY), 76, 22, 0xFF555555, false);
-        Component detail = Component.translatable("jei.mobstoolforging.heating_detail", recipe.ticks(), Math.round(recipe.targetTemperature() * 100.0F));
-        guiGraphics.drawString(Minecraft.getInstance().font, detail, 26, 2, 0xFF606060, false);
+        JeiRecipeVisuals.drawClock(guiGraphics, 46, 2, recipe.ticks());
+        JeiRecipeVisuals.drawHeatTarget(guiGraphics, 88, 0, recipe.targetTemperature());
+        JeiRecipeVisuals.drawArrow(guiGraphics, 72, 22);
     }
 }
