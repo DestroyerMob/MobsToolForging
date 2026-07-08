@@ -1,0 +1,10 @@
+{
+  "parent": "mobstoolforging:block/template_leather_station",
+  "textures": {
+    "display_left": "minecraft:item/leather",
+    "display_right": "mobstoolforging:item/plant_fiber",
+    "log": "minecraft:block/bamboo_block",
+    "particle": "minecraft:block/bamboo_block",
+    "planks": "minecraft:block/bamboo_planks"
+  }
+}

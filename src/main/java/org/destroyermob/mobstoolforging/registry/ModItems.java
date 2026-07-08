@@ -4,11 +4,14 @@ import java.util.List;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.item.FireStickItem;
+import org.destroyermob.mobstoolforging.item.LeatherStationBlockItem;
 import org.destroyermob.mobstoolforging.item.ModularArmorPartItem;
 import org.destroyermob.mobstoolforging.item.ModularBootsItem;
 import org.destroyermob.mobstoolforging.item.ModularChestplateItem;
@@ -99,6 +102,30 @@ public final class ModItems {
             BAMBOO_TOOLMAKERS_BENCH,
             CRIMSON_TOOLMAKERS_BENCH,
             WARPED_TOOLMAKERS_BENCH
+    );
+    public static final DeferredItem<BlockItem> LEATHER_STATION = leatherStationItem("leather_station", ModBlocks.LEATHER_STATION);
+    public static final DeferredItem<BlockItem> SPRUCE_LEATHER_STATION = leatherStationItem("spruce_leather_station", ModBlocks.SPRUCE_LEATHER_STATION);
+    public static final DeferredItem<BlockItem> BIRCH_LEATHER_STATION = leatherStationItem("birch_leather_station", ModBlocks.BIRCH_LEATHER_STATION);
+    public static final DeferredItem<BlockItem> JUNGLE_LEATHER_STATION = leatherStationItem("jungle_leather_station", ModBlocks.JUNGLE_LEATHER_STATION);
+    public static final DeferredItem<BlockItem> ACACIA_LEATHER_STATION = leatherStationItem("acacia_leather_station", ModBlocks.ACACIA_LEATHER_STATION);
+    public static final DeferredItem<BlockItem> DARK_OAK_LEATHER_STATION = leatherStationItem("dark_oak_leather_station", ModBlocks.DARK_OAK_LEATHER_STATION);
+    public static final DeferredItem<BlockItem> MANGROVE_LEATHER_STATION = leatherStationItem("mangrove_leather_station", ModBlocks.MANGROVE_LEATHER_STATION);
+    public static final DeferredItem<BlockItem> CHERRY_LEATHER_STATION = leatherStationItem("cherry_leather_station", ModBlocks.CHERRY_LEATHER_STATION);
+    public static final DeferredItem<BlockItem> BAMBOO_LEATHER_STATION = leatherStationItem("bamboo_leather_station", ModBlocks.BAMBOO_LEATHER_STATION);
+    public static final DeferredItem<BlockItem> CRIMSON_LEATHER_STATION = leatherStationItem("crimson_leather_station", ModBlocks.CRIMSON_LEATHER_STATION);
+    public static final DeferredItem<BlockItem> WARPED_LEATHER_STATION = leatherStationItem("warped_leather_station", ModBlocks.WARPED_LEATHER_STATION);
+    public static final List<DeferredItem<BlockItem>> LEATHER_STATION_ITEMS = List.of(
+            LEATHER_STATION,
+            SPRUCE_LEATHER_STATION,
+            BIRCH_LEATHER_STATION,
+            JUNGLE_LEATHER_STATION,
+            ACACIA_LEATHER_STATION,
+            DARK_OAK_LEATHER_STATION,
+            MANGROVE_LEATHER_STATION,
+            CHERRY_LEATHER_STATION,
+            BAMBOO_LEATHER_STATION,
+            CRIMSON_LEATHER_STATION,
+            WARPED_LEATHER_STATION
     );
     public static final DeferredItem<BlockItem> HEATING_FORGE = ITEMS.register(
             "heating_forge",
@@ -333,8 +360,12 @@ public final class ModItems {
     private ModItems() {
     }
 
-    private static DeferredItem<BlockItem> blockItem(String id, net.neoforged.neoforge.registries.DeferredBlock<? extends net.minecraft.world.level.block.Block> block) {
+    private static DeferredItem<BlockItem> blockItem(String id, DeferredBlock<? extends Block> block) {
         return ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties()));
+    }
+
+    private static DeferredItem<BlockItem> leatherStationItem(String id, DeferredBlock<? extends Block> block) {
+        return ITEMS.register(id, () -> new LeatherStationBlockItem(block.get(), new Item.Properties()));
     }
 
     public static void register(IEventBus eventBus) {

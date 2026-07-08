@@ -2,6 +2,7 @@ package org.destroyermob.mobstoolforging.world;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,8 +18,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
+import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
-import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 
 public class HeatingForgeBlockEntity extends BlockEntity {
@@ -83,14 +84,14 @@ public class HeatingForgeBlockEntity extends BlockEntity {
                 continue;
             }
             WorkpieceHeat.clearIfCooled(workpiece, level);
-            if (canHeat && forge.heatProgress[slot] < HEATED_WORKPIECE_TICKS) {
+            if (canHeat && forge.heatProgress[slot] < forge.requiredHeatTicks(workpiece)) {
                 heatingSlots[heatingSlotCount++] = slot;
             }
         }
         if (canHeat && heatingSlotCount > 0) {
             for (int unit = 0; unit < HEAT_UNITS_PER_TICK; unit++) {
                 int slot = heatingSlots[(int) ((level.getGameTime() + unit) % heatingSlotCount)];
-                if (forge.heatProgress[slot] < HEATED_WORKPIECE_TICKS) {
+                if (forge.heatProgress[slot] < forge.requiredHeatTicks(forge.workpieceStacks[slot])) {
                     forge.heatProgress[slot]++;
                     changed = true;
                 }
@@ -103,14 +104,14 @@ public class HeatingForgeBlockEntity extends BlockEntity {
                 continue;
             }
             if (canHeat) {
-                if (forge.heatProgress[slot] >= HEATED_WORKPIECE_TICKS) {
+                if (forge.heatProgress[slot] >= forge.requiredHeatTicks(workpiece)) {
                     if (!WorkpieceHeat.isHot(workpiece, level) || level.getGameTime() % 20L == 0L) {
-                        WorkpieceHeat.heat(workpiece, level);
+                        forge.applyTargetHeat(slot);
                         changed = true;
                         sync = true;
                     }
                 } else if (sync) {
-                    WorkpieceHeat.setTemperature(workpiece, level, forge.heatProgressFraction(slot), false);
+                    WorkpieceHeat.setTemperature(workpiece, level, forge.progressTemperature(slot), false);
                 }
             } else if (forge.heatProgress[slot] > 0) {
                 int visualProgress = forge.coolingVisualProgress(level, slot);
@@ -209,14 +210,34 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     }
 
     public float heatProgressFraction() {
-        return Math.min(1.0F, heatProgress() / (float) HEATED_WORKPIECE_TICKS);
+        float progress = 0.0F;
+        for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
+            progress = Math.max(progress, heatProgressFraction(slot));
+        }
+        return progress;
     }
 
     public float heatProgressFraction(int slot) {
         if (!validWorkpieceSlot(slot)) {
             return 0.0F;
         }
-        return Math.min(1.0F, heatProgress[slot] / (float) HEATED_WORKPIECE_TICKS);
+        return Math.min(1.0F, heatProgress[slot] / (float) requiredHeatTicks(workpieceStacks[slot]));
+    }
+
+    public int heatProgress(int slot) {
+        return validWorkpieceSlot(slot) ? heatProgress[slot] : 0;
+    }
+
+    public int requiredHeatTicks(int slot) {
+        return validWorkpieceSlot(slot) ? requiredHeatTicks(workpieceStacks[slot]) : configuredHeatTicks();
+    }
+
+    public float workpieceTargetTemperature(int slot) {
+        return validWorkpieceSlot(slot) ? targetTemperature(workpieceStacks[slot]) : 0.0F;
+    }
+
+    public float workpieceProgressTemperature(int slot) {
+        return validWorkpieceSlot(slot) ? progressTemperature(slot) : 0.0F;
     }
 
     public float fuelTemperatureFraction() {
@@ -277,7 +298,7 @@ public class HeatingForgeBlockEntity extends BlockEntity {
             return false;
         }
         workpieceStacks[slot] = stack.split(1);
-        heatProgress[slot] = Math.round(WorkpieceHeat.temperature(workpieceStacks[slot], levelOrThrow()) * HEATED_WORKPIECE_TICKS);
+        heatProgress[slot] = progressForTemperature(workpieceStacks[slot], WorkpieceHeat.temperature(workpieceStacks[slot], levelOrThrow()));
         sync();
         return true;
     }
@@ -376,23 +397,7 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     }
 
     public static boolean isHeatableWorkpiece(ItemStack stack) {
-        ToolPartData partData = stack.get(ModDataComponents.TOOL_PART.get());
-        if (partData != null) {
-            return MaterialCatalog.definition(partData.materialId())
-                    .filter(HeatingForgeBlockEntity::requiresTemperature)
-                    .isPresent()
-                    || partData.coatingBaseMaterial()
-                    .flatMap(MaterialCatalog::definition)
-                    .filter(HeatingForgeBlockEntity::requiresTemperature)
-                    .isPresent();
-        }
-        return MaterialCatalog.resolve(stack)
-                .filter(HeatingForgeBlockEntity::requiresTemperature)
-                .isPresent();
-    }
-
-    private static boolean requiresTemperature(ToolMaterialDefinition definition) {
-        return definition.minimumForgeHeat() != HeatLevel.NONE;
+        return HeatingRecipeRegistry.isHeatable(HeatingSource.FORGE, stack);
     }
 
     public static int fuelBurnTime(ItemStack stack) {
@@ -422,18 +427,65 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     }
 
     private int coolingVisualProgress(Level level, int slot) {
-        return Math.round(WorkpieceHeat.temperature(workpieceStacks[slot], level) * HEATED_WORKPIECE_TICKS);
+        return progressForTemperature(workpieceStacks[slot], WorkpieceHeat.temperature(workpieceStacks[slot], level));
     }
 
     private void applyStoredHeat(int slot) {
         if (level == null || workpieceStacks[slot].isEmpty() || heatProgress[slot] <= 0) {
             return;
         }
-        if (heatProgress[slot] >= HEATED_WORKPIECE_TICKS) {
-            WorkpieceHeat.heat(workpieceStacks[slot], level);
+        if (heatProgress[slot] >= requiredHeatTicks(workpieceStacks[slot])) {
+            applyTargetHeat(slot);
         } else {
-            WorkpieceHeat.setTemperature(workpieceStacks[slot], level, heatProgressFraction(slot), false);
+            WorkpieceHeat.setTemperature(workpieceStacks[slot], level, progressTemperature(slot), false);
         }
+    }
+
+    private void applyTargetHeat(int slot) {
+        if (level == null || workpieceStacks[slot].isEmpty()) {
+            return;
+        }
+        HeatingRecipe recipe = heatingRecipe(workpieceStacks[slot]).orElse(null);
+        if (recipe == null) {
+            WorkpieceHeat.heat(workpieceStacks[slot], level);
+            return;
+        }
+        WorkpieceHeat.setTemperature(workpieceStacks[slot], level, recipe.targetTemperature(), recipe.workable());
+    }
+
+    private float progressTemperature(int slot) {
+        if (!validWorkpieceSlot(slot) || workpieceStacks[slot].isEmpty()) {
+            return 0.0F;
+        }
+        return Math.min(targetTemperature(workpieceStacks[slot]), heatProgressFraction(slot) * targetTemperature(workpieceStacks[slot]));
+    }
+
+    private int progressForTemperature(ItemStack stack, float temperature) {
+        float targetTemperature = targetTemperature(stack);
+        if (targetTemperature <= 0.0F) {
+            return 0;
+        }
+        return Math.min(requiredHeatTicks(stack), Math.round(Math.max(0.0F, temperature) / targetTemperature * requiredHeatTicks(stack)));
+    }
+
+    private int requiredHeatTicks(ItemStack stack) {
+        return heatingRecipe(stack)
+                .map(HeatingRecipe::ticks)
+                .orElse(configuredHeatTicks());
+    }
+
+    private float targetTemperature(ItemStack stack) {
+        return heatingRecipe(stack)
+                .map(HeatingRecipe::targetTemperature)
+                .orElse(1.0F);
+    }
+
+    private Optional<HeatingRecipe> heatingRecipe(ItemStack stack) {
+        return HeatingRecipeRegistry.find(HeatingSource.FORGE, stack);
+    }
+
+    private static int configuredHeatTicks() {
+        return Math.max(1, MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get());
     }
 
     private int firstOccupiedSlot() {
@@ -620,7 +672,7 @@ public class HeatingForgeBlockEntity extends BlockEntity {
             remainder.shrink(1);
             if (!simulate) {
                 workpieceStacks[slot] = stack.copyWithCount(1);
-                heatProgress[slot] = Math.round(WorkpieceHeat.temperature(workpieceStacks[slot], levelOrThrow()) * HEATED_WORKPIECE_TICKS);
+                heatProgress[slot] = progressForTemperature(workpieceStacks[slot], WorkpieceHeat.temperature(workpieceStacks[slot], levelOrThrow()));
                 sync();
             }
             return remainder;

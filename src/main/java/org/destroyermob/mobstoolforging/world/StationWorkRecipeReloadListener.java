@@ -17,6 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.registry.ModItems;
 
 public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = new Gson();
@@ -60,6 +61,9 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
         if (normalized.equals("lapidary_table")) {
             return WorkstationKind.LAPIDARY_TABLE;
         }
+        if (normalized.equals("leather_station") || normalized.equals("leatherworking") || normalized.equals("leather_working_station")) {
+            return WorkstationKind.LEATHER_STATION;
+        }
         if (normalized.equals("toolmakers_bench") || normalized.equals("toolmaker_bench") || normalized.equals("tool_makers_bench")) {
             return WorkstationKind.TOOLMAKERS_BENCH;
         }
@@ -82,22 +86,39 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
     }
 
     private static StationWorkRecipe.Input parseInput(JsonObject input) {
+        int count = Math.max(1, GsonHelper.getAsInt(input, "count", 1));
         if (input.has("item")) {
-            return StationWorkRecipe.Input.item(ResourceLocation.parse(GsonHelper.getAsString(input, "item")));
+            return StationWorkRecipe.Input.item(ResourceLocation.parse(GsonHelper.getAsString(input, "item")), count);
         }
         if (input.has("tag")) {
-            return StationWorkRecipe.Input.tag(ResourceLocation.parse(GsonHelper.getAsString(input, "tag")));
+            return StationWorkRecipe.Input.tag(ResourceLocation.parse(GsonHelper.getAsString(input, "tag")), count);
         }
         throw new IllegalArgumentException("Station work input needs an item or tag");
     }
 
     private static ItemStack parseOutput(JsonObject output) {
+        if (output.has("armor")) {
+            return parseArmorOutput(output);
+        }
         ResourceLocation itemId = ResourceLocation.parse(output.has("id") ? GsonHelper.getAsString(output, "id") : GsonHelper.getAsString(output, "item"));
         Item item = BuiltInRegistries.ITEM.get(itemId);
         if (item == Items.AIR) {
             throw new IllegalArgumentException("Unknown output item " + itemId);
         }
         return new ItemStack(item, Math.max(1, GsonHelper.getAsInt(output, "count", 1)));
+    }
+
+    private static ItemStack parseArmorOutput(JsonObject output) {
+        String armor = GsonHelper.getAsString(output, "armor").toLowerCase(Locale.ROOT);
+        ResourceLocation material = ResourceLocation.parse(GsonHelper.getAsString(output, "material", MaterialCatalog.LEATHER.toString()));
+        int quality = GsonHelper.getAsInt(output, "quality", ArmorConstructionData.DEFAULT_QUALITY);
+        return switch (armor) {
+            case "helmet" -> ModItems.MODULAR_HELMET.get().create(material, Optional.empty(), quality);
+            case "chestplate" -> ModItems.MODULAR_CHESTPLATE.get().createBase(material, quality);
+            case "leggings" -> ModItems.MODULAR_LEGGINGS.get().create(material, Optional.empty(), quality);
+            case "boots" -> ModItems.MODULAR_BOOTS.get().create(material, Optional.empty(), quality);
+            default -> throw new IllegalArgumentException("Unknown station work armor output " + armor);
+        };
     }
 
     private static int parseHammerLevel(JsonObject json, int fallback) {

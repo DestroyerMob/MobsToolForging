@@ -24,6 +24,9 @@ import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
+import org.destroyermob.mobstoolforging.world.HeatingDisplayRecipe;
+import org.destroyermob.mobstoolforging.world.HeatingRecipeRegistry;
+import org.destroyermob.mobstoolforging.world.HeatingSource;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCategory;
 import org.destroyermob.mobstoolforging.world.SmithingHammerLevel;
@@ -38,6 +41,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     public static final RecipeType<ForgeShapingJeiRecipe> FORGE_SHAPING = RecipeType.create(MobsToolForging.MOD_ID, "forge_shaping", ForgeShapingJeiRecipe.class);
     public static final RecipeType<StationWorkJeiRecipe> STATION_WORK = RecipeType.create(MobsToolForging.MOD_ID, "station_work", StationWorkJeiRecipe.class);
     public static final RecipeType<PatternCreationJeiRecipe> PATTERN_CREATION = RecipeType.create(MobsToolForging.MOD_ID, "pattern_creation", PatternCreationJeiRecipe.class);
+    public static final RecipeType<HeatingJeiRecipe> HEATING = RecipeType.create(MobsToolForging.MOD_ID, "heating", HeatingJeiRecipe.class);
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -50,7 +54,8 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         registration.addRecipeCategories(
                 new ForgeShapingCategory(guiHelper),
                 new StationWorkCategory(guiHelper),
-                new PatternCreationCategory(guiHelper)
+                new PatternCreationCategory(guiHelper),
+                new HeatingCategory(guiHelper)
         );
     }
 
@@ -59,6 +64,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         registration.addRecipes(FORGE_SHAPING, forgeShapingRecipes());
         registration.addRecipes(STATION_WORK, stationWorkRecipes());
         registration.addRecipes(PATTERN_CREATION, patternCreationRecipes());
+        registration.addRecipes(HEATING, heatingRecipes());
     }
 
     @Override
@@ -83,7 +89,11 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(ModItems.CRUDE_ANVIL.get(), FORGE_SHAPING);
         registration.addRecipeCatalyst(ModItems.TOOL_FORGE.get(), FORGE_SHAPING, STATION_WORK);
         registration.addRecipeCatalyst(ModItems.LAPIDARY_TABLE.get(), FORGE_SHAPING, STATION_WORK);
+        ModItems.LEATHER_STATION_ITEMS.forEach(item -> registration.addRecipeCatalyst(item.get(), STATION_WORK));
         registration.addRecipeCatalyst(ModItems.PATTERN_CREATION_STATION.get(), PATTERN_CREATION);
+        registration.addRecipeCatalyst(ModItems.HEATING_FORGE.get(), HEATING);
+        registration.addRecipeCatalyst(Items.CAMPFIRE, HEATING);
+        registration.addRecipeCatalyst(Items.SOUL_CAMPFIRE, HEATING);
     }
 
     private static List<ForgeShapingJeiRecipe> forgeShapingRecipes() {
@@ -153,6 +163,14 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 .toList();
     }
 
+    private static List<HeatingJeiRecipe> heatingRecipes() {
+        return HeatingRecipeRegistry.displayRecipes().stream()
+                .map(MobsToolForgingJeiPlugin::heatingRecipe)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+    }
+
     private static Optional<PatternCreationJeiRecipe> patternCreationRecipe(ForgeTemplateDefinition template) {
         ItemStack pattern = ToolTemplateItem.createPatternStack(template);
         if (pattern.isEmpty()) {
@@ -185,10 +203,26 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         ));
     }
 
+    private static Optional<HeatingJeiRecipe> heatingRecipe(HeatingDisplayRecipe recipe) {
+        if (recipe.inputs().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(new HeatingJeiRecipe(
+                recipe.id(),
+                recipe.source(),
+                stationFor(recipe.source()),
+                recipe.inputs(),
+                recipe.output(),
+                recipe.ticks(),
+                recipe.targetTemperature(),
+                recipe
+        ));
+    }
+
     private static List<ItemStack> inputStacks(StationWorkRecipe.Input input) {
         if (input.itemId().isPresent()) {
             Item item = BuiltInRegistries.ITEM.get(input.itemId().get());
-            return item == Items.AIR ? List.of() : List.of(new ItemStack(item));
+            return item == Items.AIR ? List.of() : List.of(new ItemStack(item, input.count()));
         }
         return List.of();
     }
@@ -203,7 +237,14 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         if (workstation == WorkstationKind.TOOLMAKERS_BENCH) {
             return new ItemStack(ModItems.TOOLMAKERS_BENCH.get());
         }
+        if (workstation == WorkstationKind.LEATHER_STATION) {
+            return new ItemStack(ModItems.LEATHER_STATION.get());
+        }
         return new ItemStack(ModItems.TOOL_FORGE.get());
+    }
+
+    private static ItemStack stationFor(HeatingSource source) {
+        return source == HeatingSource.CAMPFIRE ? new ItemStack(Items.CAMPFIRE) : new ItemStack(ModItems.HEATING_FORGE.get());
     }
 
     private static ItemStack patternInput(int count) {
@@ -238,5 +279,9 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     static ItemStack patternCreationStationIcon() {
         return new ItemStack(ModItems.PATTERN_CREATION_STATION.get());
+    }
+
+    static ItemStack heatingForgeIcon() {
+        return new ItemStack(ModItems.HEATING_FORGE.get());
     }
 }

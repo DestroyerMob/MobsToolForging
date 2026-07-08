@@ -1,9 +1,9 @@
 {
   "item_textures": {
-    "boots": "minecraft:item/leather_boots",
-    "chestplate": "minecraft:item/leather_chestplate",
-    "helmet": "minecraft:item/leather_helmet",
-    "leggings": "minecraft:item/leather_leggings"
+    "boots": "mobstoolforging:item/armor/boots",
+    "chestplate": "mobstoolforging:item/armor/chestplate",
+    "helmet": "mobstoolforging:item/armor/helmet",
+    "leggings": "mobstoolforging:item/armor/leggings"
   },
   "material": "mobstoolforging:leather",
   "texture": "minecraft:item/leather",

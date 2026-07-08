@@ -1,0 +1,14 @@
+{
+  "workstation": "leather_station",
+  "input": {
+    "item": "minecraft:leather",
+    "count": 7
+  },
+  "output": {
+    "armor": "leggings",
+    "material": "mobstoolforging:leather"
+  },
+  "pattern": "mobstoolforging:leather_leggings",
+  "required_hits": 5,
+  "minimum_hammer_level": "stone"
+}

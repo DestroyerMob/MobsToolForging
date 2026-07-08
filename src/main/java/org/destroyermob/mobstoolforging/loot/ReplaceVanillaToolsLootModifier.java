@@ -26,8 +26,13 @@ public class ReplaceVanillaToolsLootModifier extends LootModifier {
 
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
+        convertGeneratedLoot(generatedLoot, context);
+        return generatedLoot;
+    }
+
+    public static void convertGeneratedLoot(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
         if (!MobsToolForgingConfig.CONVERT_VANILLA_LOOT_TO_MODULAR_TOOLS.get()) {
-            return generatedLoot;
+            return;
         }
 
         ResourceLocation handleMaterial = handleMaterial(context);
@@ -37,7 +42,6 @@ public class ReplaceVanillaToolsLootModifier extends LootModifier {
                 generatedLoot.set(i, converted);
             }
         }
-        return generatedLoot;
     }
 
     @Override

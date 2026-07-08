@@ -34,6 +34,9 @@ public final class ToolmakerBenchAssembly {
         if (armorPart != null && ArmorAssemblyKind.isKnownPart(stack, armorPart)) {
             return true;
         }
+        if (stack.is(Items.LEATHER)) {
+            return true;
+        }
         ToolPartData partData = stack.get(ModDataComponents.TOOL_PART.get());
         if (partData != null && ToolTypeRegistry.toolTypes().stream().anyMatch(definition -> isKnownAssemblyPart(definition, stack, partData))) {
             return true;
@@ -51,6 +54,10 @@ public final class ToolmakerBenchAssembly {
     public static ItemStack assemble(List<ItemStack> stacks, HolderLookup.Provider registries) {
         if (stacks.isEmpty() || stacks.stream().anyMatch(ToolmakerBenchAssembly::isFinishedTool)) {
             return ItemStack.EMPTY;
+        }
+        ItemStack leatherArmor = assembleLeatherArmor(stacks);
+        if (!leatherArmor.isEmpty()) {
+            return leatherArmor;
         }
         ItemStack armor = assembleArmor(stacks);
         if (!armor.isEmpty()) {
@@ -161,6 +168,9 @@ public final class ToolmakerBenchAssembly {
     }
 
     private static Optional<List<ItemStack>> disassembleArmor(ArmorConstructionData construction) {
+        if (construction.hasLeatherBase()) {
+            return Optional.empty();
+        }
         return ArmorAssemblyKind.fromArmorType(construction.armorType()).map(kind -> {
             List<ItemStack> parts = new ArrayList<>();
             ItemStack base = kind.createBasePart(MaterialCatalog.IRON, construction.quality());
@@ -175,6 +185,26 @@ public final class ToolmakerBenchAssembly {
             });
             return List.copyOf(parts);
         }).filter(parts -> !parts.isEmpty());
+    }
+
+    private static ItemStack assembleLeatherArmor(List<ItemStack> stacks) {
+        int leatherCount = 0;
+        for (ItemStack stack : stacks) {
+            if (stack.isEmpty()) {
+                continue;
+            }
+            if (!stack.is(Items.LEATHER)) {
+                return ItemStack.EMPTY;
+            }
+            leatherCount += stack.getCount();
+        }
+        return switch (leatherCount) {
+            case 4 -> ModItems.MODULAR_BOOTS.get().create(MaterialCatalog.LEATHER, Optional.empty());
+            case 5 -> ModItems.MODULAR_HELMET.get().create(MaterialCatalog.LEATHER, Optional.empty());
+            case 7 -> ModItems.MODULAR_LEGGINGS.get().create(MaterialCatalog.LEATHER, Optional.empty());
+            case 8 -> ModItems.MODULAR_CHESTPLATE.get().createBase(MaterialCatalog.LEATHER);
+            default -> ItemStack.EMPTY;
+        };
     }
 
     private static Parts findParts(List<ItemStack> stacks, ToolTypeDefinition definition) {

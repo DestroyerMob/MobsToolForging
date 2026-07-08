@@ -3,6 +3,27 @@
     "layers=1": {
       "model": "mobstoolforging:block/ash_layer_1"
     },
+    "layers=10": {
+      "model": "mobstoolforging:block/ash_layer_10"
+    },
+    "layers=11": {
+      "model": "mobstoolforging:block/ash_layer_11"
+    },
+    "layers=12": {
+      "model": "mobstoolforging:block/ash_layer_12"
+    },
+    "layers=13": {
+      "model": "mobstoolforging:block/ash_layer_13"
+    },
+    "layers=14": {
+      "model": "mobstoolforging:block/ash_layer_14"
+    },
+    "layers=15": {
+      "model": "mobstoolforging:block/ash_layer_15"
+    },
+    "layers=16": {
+      "model": "mobstoolforging:block/ash_layer_16"
+    },
     "layers=2": {
       "model": "mobstoolforging:block/ash_layer_2"
     },
@@ -26,27 +47,6 @@
     },
     "layers=9": {
       "model": "mobstoolforging:block/ash_layer_9"
-    },
-    "layers=10": {
-      "model": "mobstoolforging:block/ash_layer_10"
-    },
-    "layers=11": {
-      "model": "mobstoolforging:block/ash_layer_11"
-    },
-    "layers=12": {
-      "model": "mobstoolforging:block/ash_layer_12"
-    },
-    "layers=13": {
-      "model": "mobstoolforging:block/ash_layer_13"
-    },
-    "layers=14": {
-      "model": "mobstoolforging:block/ash_layer_14"
-    },
-    "layers=15": {
-      "model": "mobstoolforging:block/ash_layer_15"
-    },
-    "layers=16": {
-      "model": "mobstoolforging:block/ash_layer_16"
     }
   }
 }

@@ -822,19 +822,19 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean placeLooseWork(StationWorkRecipe recipe, ItemStack stack) {
-        if (stack.isEmpty() || !canPlaceLooseWork(recipe, stack)) {
+        if (stack.isEmpty() || stack.getCount() < recipe.input().count() || !canPlaceLooseWork(recipe, stack)) {
             return false;
         }
         looseWorkRecipeId = recipe.id();
         materialItemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        materialCount = 1;
-        stack.shrink(1);
+        materialCount = recipe.input().count();
+        stack.shrink(recipe.input().count());
         sync();
         return true;
     }
 
     public boolean hasLooseWork() {
-        return looseWorkRecipeId != null && directOutputStack.isEmpty() && materialId == null && materialCount == 1 && materialItemId != null;
+        return looseWorkRecipeId != null && directOutputStack.isEmpty() && materialId == null && materialCount > 0 && materialItemId != null;
     }
 
     public boolean hammerLooseWork(StationWorkRecipe recipe) {

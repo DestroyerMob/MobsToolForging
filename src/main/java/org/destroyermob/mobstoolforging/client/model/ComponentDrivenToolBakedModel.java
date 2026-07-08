@@ -230,25 +230,25 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
 
     private BakedModel composeArmor(ArmorVisualKey key) {
         if (ArmorConstructionData.HELMET_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.helmetPlateMaterial(), ArmorPartData.HELMET_PLATE, ArmorPartData.HELMET_CHAINMAIL);
+            return composeArmorItem(key.helmetChainmailMaterial(), key.helmetPlateMaterial(), ArmorPartData.HELMET_PLATE, ArmorPartData.HELMET_CHAINMAIL);
         }
         if (ArmorConstructionData.CHESTPLATE_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.chestplatePlateMaterial(), ArmorPartData.CHESTPLATE_BODY, ArmorPartData.CHESTPLATE_CHAINMAIL);
+            return composeArmorItem(key.chestplateChainmailMaterial(), key.chestplatePlateMaterial(), ArmorPartData.CHESTPLATE_BODY, ArmorPartData.CHESTPLATE_CHAINMAIL);
         }
         if (ArmorConstructionData.LEGGINGS_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.leggingsPlateMaterial(), ArmorPartData.LEGGINGS_PLATE, ArmorPartData.LEGGINGS_CHAINMAIL);
+            return composeArmorItem(key.leggingsChainmailMaterial(), key.leggingsPlateMaterial(), ArmorPartData.LEGGINGS_PLATE, ArmorPartData.LEGGINGS_CHAINMAIL);
         }
         if (ArmorConstructionData.BOOTS_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.bootsPlateMaterial(), ArmorPartData.BOOTS_PLATE, ArmorPartData.BOOTS_CHAINMAIL);
+            return composeArmorItem(key.bootsChainmailMaterial(), key.bootsPlateMaterial(), ArmorPartData.BOOTS_PLATE, ArmorPartData.BOOTS_CHAINMAIL);
         }
         warnOnce("missing_armor_type|" + key.armorType(), "Cannot render MTF armor stack because armor type {} is not loaded on the client.", key.armorType());
         return fallback;
     }
 
-    private BakedModel composeArmorItem(Optional<ResourceLocation> plateMaterial, String platePartType, String chainmailPartType) {
+    private BakedModel composeArmorItem(ResourceLocation baseMaterial, Optional<ResourceLocation> plateMaterial, String platePartType, String chainmailPartType) {
         ArmorMaterialTextureManager.ResolvedArmorTexture texture = plateMaterial
                 .map(material -> ArmorMaterialTextureManager.INSTANCE.itemTexture(material, platePartType))
-                .orElseGet(() -> ArmorMaterialTextureManager.INSTANCE.itemTexture(MaterialCatalog.IRON, chainmailPartType));
+                .orElseGet(() -> ArmorMaterialTextureManager.INSTANCE.itemTexture(baseMaterial, chainmailPartType));
         return new ResolvedPartedItemModel(
                 quadFactory.bakeLayer(0, texture.sprite(), texture.color()),
                 texture.sprite(),

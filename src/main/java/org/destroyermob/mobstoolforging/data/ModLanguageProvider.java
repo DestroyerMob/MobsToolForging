@@ -20,6 +20,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.PATTERN_CREATION_STATION, "Pattern Creation Station");
         ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> addBlock(variant.block(), variant.displayName()));
         ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> addBlock(variant.block(), variant.displayName()));
+        ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> addBlock(variant.block(), variant.displayName()));
         addBlock(ModBlocks.HEATING_FORGE, "Heating Forge");
         addBlock(ModBlocks.CRUCIBLE, "Crucible");
         addBlock(ModBlocks.FOUNDRY_FORGE, "Foundry Forge");
@@ -152,8 +153,11 @@ public class ModLanguageProvider extends LanguageProvider {
         add("jei.mobstoolforging.forge_shaping", "Tool Part Shaping");
         add("jei.mobstoolforging.station_work", "Station Work");
         add("jei.mobstoolforging.pattern_creation", "Pattern Creation");
+        add("jei.mobstoolforging.heating", "Workpiece Heating");
         add("jei.mobstoolforging.station_detail", "%s hits, %s");
+        add("jei.mobstoolforging.heating_detail", "%s ticks, %s%% target heat");
         add("jei.mobstoolforging.catalyst", "Catalyst: %s");
+        add("emi.category.mobstoolforging.heating", "Workpiece Heating");
         add("jade.mobstoolforging.abrasive", "Abrasive: %s");
         add("jade.mobstoolforging.pattern", "Pattern: %s");
         add("jade.mobstoolforging.source", "Source: %s");
@@ -168,7 +172,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("jade.mobstoolforging.unlit", "Unlit");
         add("jade.mobstoolforging.fuel", "Fuel: %s");
         add("jade.mobstoolforging.material_heat", "Heat: %s%%, %s");
-        add("jade.mobstoolforging.workpiece", "Slot %s: %s, %s%%, %s");
+        add("jade.mobstoolforging.workpiece", "Slot %s: %s, %s%%/%s%%, %s");
+        add("jade.mobstoolforging.campfire_workpiece", "Slot %s: %s, %s%%/%s%%, %s ticks");
         add("forge_template.mobstoolforging.sword_blade", "Sword Blade");
         add("forge_template.mobstoolforging.sword_guard", "Sword Guard");
         add("forge_template.mobstoolforging.shovel_head", "Shovel Head");
@@ -186,6 +191,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("forge_template.mobstoolforging.leggings_plate", "Leggings Plate");
         add("forge_template.mobstoolforging.boots_chainmail", "Chainmail Boots");
         add("forge_template.mobstoolforging.boots_plate", "Boots Plate");
+        add("forge_template.mobstoolforging.leather_helmet", "Leather Helmet");
+        add("forge_template.mobstoolforging.leather_chestplate", "Leather Chestplate");
+        add("forge_template.mobstoolforging.leather_leggings", "Leather Leggings");
+        add("forge_template.mobstoolforging.leather_boots", "Leather Boots");
         add("knapping_target.mobstoolforging.sword_blade", "Flint Sword Blade");
         add("knapping_target.mobstoolforging.sword_guard", "Flint Sword Guard");
         add("knapping_target.mobstoolforging.shovel_head", "Flint Shovel Head");
@@ -258,6 +267,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.tool_repair_ready", "Strike the anvil with a Smithing Hammer to repair.");
         add("message.mobstoolforging.tool_repaired", "Tool repaired.");
         add("message.mobstoolforging.use_tool_forge", "Metal parts are forged on a Crude Anvil or Smithing Anvil.");
+        add("message.mobstoolforging.use_leather_station", "Leather armour is worked on a Leather Station.");
         add("message.mobstoolforging.use_toolmakers_bench", "Place parts here, then use an empty hand or Smithing Hammer to assemble.");
         add("message.mobstoolforging.toolmaker_part_placed", "Part placed.");
         add("message.mobstoolforging.toolmaker_needs_parts", "Place a compatible head and handle first.");

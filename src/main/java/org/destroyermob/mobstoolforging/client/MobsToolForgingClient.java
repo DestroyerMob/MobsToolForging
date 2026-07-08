@@ -1,14 +1,19 @@
 package org.destroyermob.mobstoolforging.client;
 
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.BlockHitResult;
@@ -35,6 +40,8 @@ import org.destroyermob.mobstoolforging.client.model.PatternCutoutModelLoader;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
 import org.destroyermob.mobstoolforging.client.model.ToolMaterialVisualManager;
 import org.destroyermob.mobstoolforging.network.CycleKnappingTargetPayload;
+import org.destroyermob.mobstoolforging.item.ModularArmorPartItem;
+import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
@@ -144,16 +151,34 @@ public final class MobsToolForgingClient {
     }
 
     private static void registerItemDecorations(RegisterItemDecorationsEvent event) {
-        event.register(Items.IRON_INGOT, HeatItemDecorator.INSTANCE);
-        event.register(Items.GOLD_INGOT, HeatItemDecorator.INSTANCE);
-        event.register(Items.COPPER_INGOT, HeatItemDecorator.INSTANCE);
-        event.register(Items.NETHERITE_INGOT, HeatItemDecorator.INSTANCE);
-        event.register(ModItems.SWORD_BLADE.get(), HeatItemDecorator.INSTANCE);
-        event.register(ModItems.SWORD_GUARD.get(), HeatItemDecorator.INSTANCE);
-        event.register(ModItems.SHOVEL_HEAD.get(), HeatItemDecorator.INSTANCE);
-        event.register(ModItems.PICKAXE_HEAD.get(), HeatItemDecorator.INSTANCE);
-        event.register(ModItems.AXE_HEAD.get(), HeatItemDecorator.INSTANCE);
-        event.register(ModItems.HOE_HEAD.get(), HeatItemDecorator.INSTANCE);
+        Set<Item> decoratedItems = new LinkedHashSet<>();
+        decoratedItems.add(Items.IRON_INGOT);
+        decoratedItems.add(Items.GOLD_INGOT);
+        decoratedItems.add(Items.COPPER_INGOT);
+        decoratedItems.add(Items.NETHERITE_INGOT);
+        BuiltInRegistries.ITEM.forEach(item -> {
+            if (shouldRegisterHeatDecorator(item)) {
+                decoratedItems.add(item);
+            }
+        });
+        decoratedItems.forEach(item -> event.register(item, HeatItemDecorator.INSTANCE));
+    }
+
+    private static boolean shouldRegisterHeatDecorator(Item item) {
+        if (item instanceof ModularToolPartItem || item instanceof ModularArmorPartItem) {
+            return true;
+        }
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        if (id == null) {
+            return false;
+        }
+        String path = id.getPath().toLowerCase(Locale.ROOT);
+        return path.endsWith("_blade")
+                || path.endsWith("_head")
+                || path.endsWith("_guard")
+                || path.endsWith("_plate")
+                || path.endsWith("_chainmail")
+                || path.endsWith("_body");
     }
 
     private static void registerReloadListeners(RegisterClientReloadListenersEvent event) {

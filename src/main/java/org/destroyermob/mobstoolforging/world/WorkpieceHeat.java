@@ -33,6 +33,23 @@ public final class WorkpieceHeat {
         );
     }
 
+    public static ItemStack displayStack(ItemStack stack, float temperature, boolean workable) {
+        ItemStack copy = stack.copy();
+        if (copy.isEmpty()) {
+            return copy;
+        }
+        float appliedTemperature = clamp(temperature);
+        if (appliedTemperature <= 0.0F) {
+            copy.remove(ModDataComponents.HEATED_WORKPIECE.get());
+            return copy;
+        }
+        copy.set(
+                ModDataComponents.HEATED_WORKPIECE.get(),
+                new HeatedWorkpieceData(Long.MAX_VALUE, appliedTemperature, Long.MAX_VALUE, workable)
+        );
+        return copy;
+    }
+
     public static boolean isHot(ItemStack stack, Level level) {
         return data(stack)
                 .filter(data -> data.workable() && data.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get()) > 0.0F)

@@ -1,11 +1,13 @@
 {
   "required": true,
   "package": "org.destroyermob.mobstoolforging.mixin",
+  "plugin": "org.destroyermob.mobstoolforging.mixin.MobsToolForgingMixinPlugin",
   "refmap": "mobstoolforging.refmap.json",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "CampfireBlockEntityAccessor",
     "CampfireBlockEntityMixin",
+    "compat.ApotheosisAffixLootModifierMixin",
     "RecipeManagerMixin"
   ],
   "client": [

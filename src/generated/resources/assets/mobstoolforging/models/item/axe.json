@@ -5,6 +5,7 @@
   "textures": {
     "layer_axe_head_copper": "mobstoolforging:source/tool_parts/copper/copper_axe_head_tool",
     "layer_axe_head_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_axe_head_tool",
+    "layer_axe_head_emerald": "mobstoolforging:source/tool_parts/emerald/emerald_axe_head_tool",
     "layer_axe_head_gold": "mobstoolforging:source/tool_parts/gold/gold_axe_head_tool",
     "layer_axe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_axe_head_tool",
     "layer_axe_treatment_netherite": "mobstoolforging:source/tool_parts/netherite/netherite_axe_treatment_tool",

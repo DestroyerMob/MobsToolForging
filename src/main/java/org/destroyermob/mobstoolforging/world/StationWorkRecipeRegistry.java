@@ -28,6 +28,12 @@ public final class StationWorkRecipeRegistry {
                 .findFirst();
     }
 
+    public static boolean hasStartRecipe(WorkstationKind kind, ResourceLocation patternId) {
+        return recipes.values().stream()
+                .anyMatch(recipe -> recipe.workstationKind() == kind
+                        && recipe.patternId().filter(patternId::equals).isPresent());
+    }
+
     public static List<StationWorkRecipe> recipes() {
         return List.copyOf(recipes.values());
     }

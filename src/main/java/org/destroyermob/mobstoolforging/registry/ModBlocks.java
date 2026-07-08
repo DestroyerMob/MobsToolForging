@@ -19,6 +19,7 @@ import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.KnappingFlintBlock;
 import org.destroyermob.mobstoolforging.world.LapidaryTableBlock;
+import org.destroyermob.mobstoolforging.world.LeatherStationBlock;
 import org.destroyermob.mobstoolforging.world.PatternCreationStationBlock;
 import org.destroyermob.mobstoolforging.world.PatternRackBlock;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlock;
@@ -94,6 +95,30 @@ public final class ModBlocks {
             toolmakerStationVariant("crimson_toolmakers_bench", "Crimson Toolmaker's Station", CRIMSON_TOOLMAKERS_BENCH, Blocks.CRIMSON_PLANKS, "stripped_crimson_stem", "stripped_crimson_stem_top"),
             toolmakerStationVariant("warped_toolmakers_bench", "Warped Toolmaker's Station", WARPED_TOOLMAKERS_BENCH, Blocks.WARPED_PLANKS, "stripped_warped_stem", "stripped_warped_stem_top")
     );
+    public static final DeferredBlock<LeatherStationBlock> LEATHER_STATION = registerLeatherStation("leather_station", Blocks.OAK_PLANKS);
+    public static final DeferredBlock<LeatherStationBlock> SPRUCE_LEATHER_STATION = registerLeatherStation("spruce_leather_station", Blocks.SPRUCE_PLANKS);
+    public static final DeferredBlock<LeatherStationBlock> BIRCH_LEATHER_STATION = registerLeatherStation("birch_leather_station", Blocks.BIRCH_PLANKS);
+    public static final DeferredBlock<LeatherStationBlock> JUNGLE_LEATHER_STATION = registerLeatherStation("jungle_leather_station", Blocks.JUNGLE_PLANKS);
+    public static final DeferredBlock<LeatherStationBlock> ACACIA_LEATHER_STATION = registerLeatherStation("acacia_leather_station", Blocks.ACACIA_PLANKS);
+    public static final DeferredBlock<LeatherStationBlock> DARK_OAK_LEATHER_STATION = registerLeatherStation("dark_oak_leather_station", Blocks.DARK_OAK_PLANKS);
+    public static final DeferredBlock<LeatherStationBlock> MANGROVE_LEATHER_STATION = registerLeatherStation("mangrove_leather_station", Blocks.MANGROVE_PLANKS);
+    public static final DeferredBlock<LeatherStationBlock> CHERRY_LEATHER_STATION = registerLeatherStation("cherry_leather_station", Blocks.CHERRY_PLANKS);
+    public static final DeferredBlock<LeatherStationBlock> BAMBOO_LEATHER_STATION = registerLeatherStation("bamboo_leather_station", Blocks.BAMBOO_PLANKS);
+    public static final DeferredBlock<LeatherStationBlock> CRIMSON_LEATHER_STATION = registerLeatherStation("crimson_leather_station", Blocks.CRIMSON_PLANKS);
+    public static final DeferredBlock<LeatherStationBlock> WARPED_LEATHER_STATION = registerLeatherStation("warped_leather_station", Blocks.WARPED_PLANKS);
+    public static final List<LeatherStationVariant> LEATHER_STATION_VARIANTS = List.of(
+            leatherStationVariant("leather_station", "Oak Leather Station", LEATHER_STATION, Blocks.OAK_PLANKS, Blocks.OAK_LOG, "oak_log", "oak_planks"),
+            leatherStationVariant("spruce_leather_station", "Spruce Leather Station", SPRUCE_LEATHER_STATION, Blocks.SPRUCE_PLANKS, Blocks.SPRUCE_LOG, "spruce_log", "spruce_planks"),
+            leatherStationVariant("birch_leather_station", "Birch Leather Station", BIRCH_LEATHER_STATION, Blocks.BIRCH_PLANKS, Blocks.BIRCH_LOG, "birch_log", "birch_planks"),
+            leatherStationVariant("jungle_leather_station", "Jungle Leather Station", JUNGLE_LEATHER_STATION, Blocks.JUNGLE_PLANKS, Blocks.JUNGLE_LOG, "jungle_log", "jungle_planks"),
+            leatherStationVariant("acacia_leather_station", "Acacia Leather Station", ACACIA_LEATHER_STATION, Blocks.ACACIA_PLANKS, Blocks.ACACIA_LOG, "acacia_log", "acacia_planks"),
+            leatherStationVariant("dark_oak_leather_station", "Dark Oak Leather Station", DARK_OAK_LEATHER_STATION, Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_LOG, "dark_oak_log", "dark_oak_planks"),
+            leatherStationVariant("mangrove_leather_station", "Mangrove Leather Station", MANGROVE_LEATHER_STATION, Blocks.MANGROVE_PLANKS, Blocks.MANGROVE_LOG, "mangrove_log", "mangrove_planks"),
+            leatherStationVariant("cherry_leather_station", "Cherry Leather Station", CHERRY_LEATHER_STATION, Blocks.CHERRY_PLANKS, Blocks.CHERRY_LOG, "cherry_log", "cherry_planks"),
+            leatherStationVariant("bamboo_leather_station", "Bamboo Leather Station", BAMBOO_LEATHER_STATION, Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_BLOCK, "bamboo_block", "bamboo_planks"),
+            leatherStationVariant("crimson_leather_station", "Crimson Leather Station", CRIMSON_LEATHER_STATION, Blocks.CRIMSON_PLANKS, Blocks.CRIMSON_STEM, "crimson_stem", "crimson_planks"),
+            leatherStationVariant("warped_leather_station", "Warped Leather Station", WARPED_LEATHER_STATION, Blocks.WARPED_PLANKS, Blocks.WARPED_STEM, "warped_stem", "warped_planks")
+    );
     public static final DeferredBlock<HeatingForgeBlock> HEATING_FORGE = BLOCKS.register(
             "heating_forge",
             () -> new HeatingForgeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).noOcclusion())
@@ -136,6 +161,13 @@ public final class ModBlocks {
         );
     }
 
+    private static DeferredBlock<LeatherStationBlock> registerLeatherStation(String id, Block baseBlock) {
+        return BLOCKS.register(
+                id,
+                () -> new LeatherStationBlock(BlockBehaviour.Properties.ofFullCopy(baseBlock).strength(1.5F, 3.0F).noOcclusion())
+        );
+    }
+
     private static PatternRackVariant patternRackVariant(String id, String displayName, DeferredBlock<PatternRackBlock> block, Block recipePlanks, String logTexture, String planksTexture) {
         return new PatternRackVariant(
                 id,
@@ -158,6 +190,18 @@ public final class ModBlocks {
         );
     }
 
+    private static LeatherStationVariant leatherStationVariant(String id, String displayName, DeferredBlock<LeatherStationBlock> block, Block recipePlanks, Block recipeLog, String logTexture, String planksTexture) {
+        return new LeatherStationVariant(
+                id,
+                displayName,
+                block,
+                recipePlanks,
+                recipeLog,
+                ResourceLocation.withDefaultNamespace("block/" + logTexture),
+                ResourceLocation.withDefaultNamespace("block/" + planksTexture)
+        );
+    }
+
     public static Block[] patternRackBlocks() {
         return PATTERN_RACK_VARIANTS.stream()
                 .map(variant -> variant.block().get())
@@ -170,12 +214,19 @@ public final class ModBlocks {
                 .toArray(Block[]::new);
     }
 
+    public static Block[] leatherStationBlocks() {
+        return LEATHER_STATION_VARIANTS.stream()
+                .map(variant -> variant.block().get())
+                .toArray(Block[]::new);
+    }
+
     public static Block[] toolWorkstationBlocks() {
         List<Block> blocks = new ArrayList<>();
         blocks.add(TOOL_FORGE.get());
         blocks.add(CRUDE_ANVIL.get());
         blocks.add(LAPIDARY_TABLE.get());
         TOOLMAKER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
+        LEATHER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         return blocks.toArray(Block[]::new);
     }
 
@@ -200,6 +251,17 @@ public final class ModBlocks {
             Block recipePlanks,
             ResourceLocation sideTexture,
             ResourceLocation topTexture
+    ) {
+    }
+
+    public record LeatherStationVariant(
+            String id,
+            String displayName,
+            DeferredBlock<LeatherStationBlock> block,
+            Block recipePlanks,
+            Block recipeLog,
+            ResourceLocation logTexture,
+            ResourceLocation planksTexture
     ) {
     }
 }

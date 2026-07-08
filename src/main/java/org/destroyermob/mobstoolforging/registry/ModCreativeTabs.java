@@ -13,6 +13,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.item.ModularToolItem;
+import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.world.FlintToolStacks;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
@@ -54,6 +55,7 @@ public final class ModCreativeTabs {
         output.accept(ModItems.PATTERN_CREATION_STATION.get());
         ModItems.PATTERN_RACK_ITEMS.forEach(item -> output.accept(item.get()));
         ModItems.TOOLMAKER_STATION_ITEMS.forEach(item -> output.accept(item.get()));
+        ModItems.LEATHER_STATION_ITEMS.forEach(item -> output.accept(item.get()));
         output.accept(ModItems.HEATING_FORGE.get());
         output.accept(ModItems.CRUCIBLE.get());
         output.accept(ModItems.FOUNDRY_FORGE.get());
@@ -85,6 +87,10 @@ public final class ModCreativeTabs {
         output.accept(ModItems.LEGGINGS_PLATE_PATTERN.get());
         output.accept(ModItems.BOOTS_CHAINMAIL_PATTERN.get());
         output.accept(ModItems.BOOTS_PLATE_PATTERN.get());
+        output.accept(ToolTemplateItem.createPatternStack(ToolTypeRegistry.LEATHER_HELMET_TEMPLATE));
+        output.accept(ToolTemplateItem.createPatternStack(ToolTypeRegistry.LEATHER_CHESTPLATE_TEMPLATE));
+        output.accept(ToolTemplateItem.createPatternStack(ToolTypeRegistry.LEATHER_LEGGINGS_TEMPLATE));
+        output.accept(ToolTemplateItem.createPatternStack(ToolTypeRegistry.LEATHER_BOOTS_TEMPLATE));
         ToolTypeRegistry.templates().stream()
                 .filter(template -> !template.id().getNamespace().equals(MobsToolForging.MOD_ID))
                 .map(ModCreativeTabs::templatePattern)

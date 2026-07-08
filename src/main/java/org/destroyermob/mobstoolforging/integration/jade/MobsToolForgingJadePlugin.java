@@ -1,13 +1,19 @@
 package org.destroyermob.mobstoolforging.integration.jade;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
+import org.destroyermob.mobstoolforging.world.HeatingRecipe;
+import org.destroyermob.mobstoolforging.world.HeatingRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
+import org.destroyermob.mobstoolforging.world.HeatingSource;
 import org.destroyermob.mobstoolforging.world.PatternRackBlock;
 import org.destroyermob.mobstoolforging.world.PatternRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
@@ -25,12 +31,14 @@ import snownee.jade.api.config.IPluginConfig;
 public class MobsToolForgingJadePlugin implements IWailaPlugin {
     private static final WorkstationProvider WORKSTATION_PROVIDER = new WorkstationProvider();
     private static final HeatingForgeProvider HEATING_FORGE_PROVIDER = new HeatingForgeProvider();
+    private static final CampfireHeatingProvider CAMPFIRE_HEATING_PROVIDER = new CampfireHeatingProvider();
     private static final PatternRackProvider PATTERN_RACK_PROVIDER = new PatternRackProvider();
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(WORKSTATION_PROVIDER, ToolWorkstationBlock.class);
         registration.registerBlockComponent(HEATING_FORGE_PROVIDER, HeatingForgeBlock.class);
+        registration.registerBlockComponent(CAMPFIRE_HEATING_PROVIDER, CampfireBlock.class);
         registration.registerBlockComponent(PATTERN_RACK_PROVIDER, PatternRackBlock.class);
     }
 
@@ -125,9 +133,42 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
                 if (workpiece.isEmpty()) {
                     continue;
                 }
-                int temperature = Math.round(forge.heatProgressFraction(slot) * 100.0F);
-                String statusKey = org.destroyermob.mobstoolforging.world.WorkpieceHeat.statusKey(forge.heatProgressFraction(slot), org.destroyermob.mobstoolforging.world.WorkpieceHeat.isWorkable(workpiece), org.destroyermob.mobstoolforging.MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
-                tooltip.add(Component.translatable("jade.mobstoolforging.workpiece", slot + 1, workpiece.getHoverName(), temperature, Component.translatable("tooltip.mobstoolforging.workpiece_status." + statusKey)).withStyle(ChatFormatting.GRAY));
+                float temperatureValue = forge.workpieceProgressTemperature(slot);
+                int temperature = Math.round(temperatureValue * 100.0F);
+                int target = Math.round(forge.workpieceTargetTemperature(slot) * 100.0F);
+                String statusKey = org.destroyermob.mobstoolforging.world.WorkpieceHeat.statusKey(temperatureValue, org.destroyermob.mobstoolforging.world.WorkpieceHeat.isWorkable(workpiece), org.destroyermob.mobstoolforging.MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
+                tooltip.add(Component.translatable("jade.mobstoolforging.workpiece", slot + 1, workpiece.getHoverName(), temperature, target, Component.translatable("tooltip.mobstoolforging.workpiece_status." + statusKey)).withStyle(ChatFormatting.GRAY));
+                tooltip.add(progressLine(forge.heatProgress(slot), forge.requiredHeatTicks(slot)));
+            }
+        }
+    }
+
+    private static final class CampfireHeatingProvider implements IBlockComponentProvider {
+        private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "campfire_heating");
+
+        @Override
+        public ResourceLocation getUid() {
+            return UID;
+        }
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            if (!(accessor.getBlockEntity() instanceof CampfireBlockEntity campfire)) {
+                return;
+            }
+            NonNullList<ItemStack> items = campfire.getItems();
+            for (int slot = 0; slot < items.size(); slot++) {
+                ItemStack workpiece = items.get(slot);
+                if (workpiece.isEmpty()) {
+                    continue;
+                }
+                HeatingRecipe recipe = HeatingRecipeRegistry.find(HeatingSource.CAMPFIRE, workpiece).orElse(null);
+                if (recipe == null) {
+                    continue;
+                }
+                int temperature = Math.round(org.destroyermob.mobstoolforging.world.WorkpieceHeat.temperature(workpiece, accessor.getLevel()) * 100.0F);
+                int target = Math.round(recipe.targetTemperature() * 100.0F);
+                tooltip.add(Component.translatable("jade.mobstoolforging.campfire_workpiece", slot + 1, workpiece.getHoverName(), temperature, target, recipe.ticks()).withStyle(ChatFormatting.GRAY));
             }
         }
     }

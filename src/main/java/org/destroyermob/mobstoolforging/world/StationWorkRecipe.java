@@ -35,7 +35,11 @@ public record StationWorkRecipe(
         return output.copy();
     }
 
-    public record Input(Optional<ResourceLocation> itemId, Optional<TagKey<Item>> tag) {
+    public record Input(Optional<ResourceLocation> itemId, Optional<TagKey<Item>> tag, int count) {
+        public Input {
+            count = Math.max(1, count);
+        }
+
         public boolean matches(ItemStack stack) {
             if (stack.isEmpty()) {
                 return false;
@@ -47,11 +51,19 @@ public record StationWorkRecipe(
         }
 
         public static Input item(ResourceLocation itemId) {
-            return new Input(Optional.of(itemId), Optional.empty());
+            return item(itemId, 1);
+        }
+
+        public static Input item(ResourceLocation itemId, int count) {
+            return new Input(Optional.of(itemId), Optional.empty(), count);
         }
 
         public static Input tag(ResourceLocation tagId) {
-            return new Input(Optional.empty(), Optional.of(TagKey.create(Registries.ITEM, tagId)));
+            return tag(tagId, 1);
+        }
+
+        public static Input tag(ResourceLocation tagId, int count) {
+            return new Input(Optional.empty(), Optional.of(TagKey.create(Registries.ITEM, tagId)), count);
         }
     }
 }

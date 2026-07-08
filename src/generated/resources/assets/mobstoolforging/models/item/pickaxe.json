@@ -8,6 +8,7 @@
     "layer_handle_oak": "mobstoolforging:source/tool_parts/stick/stick_pickaxe_handle_tool",
     "layer_pickaxe_head_copper": "mobstoolforging:source/tool_parts/copper/copper_pickaxe_head_tool",
     "layer_pickaxe_head_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_pickaxe_head_tool",
+    "layer_pickaxe_head_emerald": "mobstoolforging:source/tool_parts/emerald/emerald_pickaxe_head_tool",
     "layer_pickaxe_head_gold": "mobstoolforging:source/tool_parts/gold/gold_pickaxe_head_tool",
     "layer_pickaxe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_pickaxe_head_tool",
     "layer_pickaxe_treatment_netherite": "mobstoolforging:source/tool_parts/netherite/netherite_pickaxe_treatment_tool",

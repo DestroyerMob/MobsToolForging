@@ -6,6 +6,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.properties.BedPart;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 import net.neoforged.neoforge.client.model.generators.CustomLoaderBuilder;
@@ -17,6 +18,7 @@ import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.world.AshBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
+import org.destroyermob.mobstoolforging.world.LeatherStationBlock;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolPartSpriteKey;
 import org.destroyermob.mobstoolforging.world.ToolKind;
@@ -63,6 +65,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
             simpleBlockItem(station, stationModel);
         }
 
+        ModelFile invisibleLeatherStationModel = models().getBuilder("block/invisible_leather_station")
+                .texture("particle", mcLoc("block/oak_planks"));
+        for (ModBlocks.LeatherStationVariant variant : ModBlocks.LEATHER_STATION_VARIANTS) {
+            leatherStationBlock(variant, invisibleLeatherStationModel);
+        }
+
         Block heatingForge = ModBlocks.HEATING_FORGE.get();
         ModelFile heatingForgeModel = new ModelFile.UncheckedModelFile(modLoc("block/heating_forge"));
         heatingForgeBlock(heatingForge, heatingForgeModel);
@@ -83,8 +91,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
         itemModels().withExistingParent("diamond_powder", mcLoc("item/generated")).texture("layer0", modLoc("item/diamond_powder"));
         modularHelmetModel();
         modularChestplateModel();
-        itemModels().withExistingParent("modular_leggings", mcLoc("item/generated")).texture("layer0", mcLoc("item/chainmail_leggings"));
-        itemModels().withExistingParent("modular_boots", mcLoc("item/generated")).texture("layer0", mcLoc("item/chainmail_boots"));
+        itemModels().withExistingParent("modular_leggings", mcLoc("item/generated")).texture("layer0", mcLoc("item/leather_leggings"));
+        itemModels().withExistingParent("modular_boots", mcLoc("item/generated")).texture("layer0", mcLoc("item/leather_boots"));
         patternModel(ModItems.PICKAXE_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.AXE_HEAD_PATTERN.getId().getPath());
         patternModel(ModItems.SHOVEL_HEAD_PATTERN.getId().getPath());
@@ -163,6 +171,30 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .texture("particle", variant.topTexture());
     }
 
+    private void leatherStationBlock(ModBlocks.LeatherStationVariant variant, ModelFile invisibleModel) {
+        Block station = variant.block().get();
+        ModelFile stationModel = leatherStationModel(variant);
+        getVariantBuilder(station).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(state.getValue(LeatherStationBlock.PART) == BedPart.FOOT ? stationModel : invisibleModel)
+                .rotationY(horizontalRotation(state.getValue(LeatherStationBlock.FACING)))
+                .build()
+        );
+        simpleBlockItem(station, stationModel);
+    }
+
+    private ModelFile leatherStationModel(ModBlocks.LeatherStationVariant variant) {
+        return models().withExistingParent("block/" + variant.id(), modLoc("block/template_leather_station"))
+                .texture("log", variant.logTexture())
+                .texture("planks", variant.planksTexture())
+                .texture("display_left", mcLoc("item/leather"))
+                .texture("display_right", modLoc("item/plant_fiber"))
+                .texture("particle", variant.logTexture());
+    }
+
+    private static int horizontalRotation(Direction facing) {
+        return ((int)facing.toYRot() + 180) % 360;
+    }
+
     private void smithingHammerModel() {
         ItemModelBuilder builder = itemModels().getBuilder("smithing_hammer")
                 .texture("0", mcLoc("block/oak_log"))
@@ -199,12 +231,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
     private void modularHelmetModel() {
         itemModels().withExistingParent("modular_helmet", mcLoc("item/generated"))
-                .texture("layer0", mcLoc("item/chainmail_helmet"));
+                .texture("layer0", mcLoc("item/leather_helmet"));
     }
 
     private void modularChestplateModel() {
         itemModels().withExistingParent("modular_chestplate", mcLoc("item/generated"))
-                .texture("layer0", mcLoc("item/chainmail_chestplate"));
+                .texture("layer0", mcLoc("item/leather_chestplate"));
     }
 
     private void patternModel(String name) {

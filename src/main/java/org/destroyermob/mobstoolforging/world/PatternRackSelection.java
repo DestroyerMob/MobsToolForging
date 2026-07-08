@@ -296,6 +296,9 @@ public final class PatternRackSelection {
         if (pattern.getItem() instanceof org.destroyermob.mobstoolforging.item.ToolTemplateItem templateItem && !templateItem.canUseOn(kind)) {
             return false;
         }
+        if (StationWorkRecipeRegistry.hasStartRecipe(kind, template.id())) {
+            return true;
+        }
         MaterialCategory category = kind.materialCategory();
         return MaterialCatalog.starterMaterialIds().stream()
                 .map(MaterialCatalog::definition)
@@ -307,7 +310,7 @@ public final class PatternRackSelection {
 
     public static Component compatibleStations(ItemStack pattern, ForgeTemplateDefinition template) {
         List<Component> stations = new ArrayList<>();
-        for (WorkstationKind kind : List.of(WorkstationKind.CRUDE_ANVIL, WorkstationKind.TOOL_FORGE, WorkstationKind.LAPIDARY_TABLE)) {
+        for (WorkstationKind kind : List.of(WorkstationKind.CRUDE_ANVIL, WorkstationKind.TOOL_FORGE, WorkstationKind.LAPIDARY_TABLE, WorkstationKind.LEATHER_STATION)) {
             if (canAssign(pattern, template, kind)) {
                 stations.add(stationName(kind));
             }
@@ -399,7 +402,8 @@ public final class PatternRackSelection {
     private static boolean isPatternRackSelectable(WorkstationKind kind) {
         return kind == WorkstationKind.CRUDE_ANVIL
                 || kind == WorkstationKind.TOOL_FORGE
-                || kind == WorkstationKind.LAPIDARY_TABLE;
+                || kind == WorkstationKind.LAPIDARY_TABLE
+                || kind == WorkstationKind.LEATHER_STATION;
     }
 
     private static Component stationName(WorkstationKind kind) {
@@ -407,6 +411,7 @@ public final class PatternRackSelection {
             case CRUDE_ANVIL -> new ItemStack(ModBlocks.CRUDE_ANVIL.get()).getHoverName();
             case TOOL_FORGE -> new ItemStack(ModBlocks.TOOL_FORGE.get()).getHoverName();
             case LAPIDARY_TABLE -> new ItemStack(ModBlocks.LAPIDARY_TABLE.get()).getHoverName();
+            case LEATHER_STATION -> new ItemStack(ModBlocks.LEATHER_STATION.get()).getHoverName();
             case TOOLMAKERS_BENCH -> new ItemStack(ModBlocks.TOOLMAKERS_BENCH.get()).getHoverName();
         };
     }

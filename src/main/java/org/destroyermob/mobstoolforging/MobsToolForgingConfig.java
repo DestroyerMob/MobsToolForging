@@ -78,7 +78,7 @@ public final class MobsToolForgingConfig {
                 .define("copperRequiresWoodenTool", true);
         builder.push("progression");
         ENABLE_ANVIL_CRAFTING_RECIPES = builder
-                .comment("When true, anvil crafting recipes are enabled and the sneak-right-click hammer recipes for crude, copper, and iron anvils are disabled.")
+                .comment("When true, mod anvil crafting recipes are enabled and the sneak-right-click hammer recipes for crude, copper, and iron anvils are disabled. Vanilla anvil crafting stays vanilla.")
                 .define("enableAnvilCraftingRecipes", false);
         ENABLE_CRUDE_ANVIL = builder
                 .comment("When true, the cheap Crude Anvil is available as an early, lower-quality shaping station.")

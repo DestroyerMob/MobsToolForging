@@ -7,6 +7,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePrope
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.world.AshBlock;
+import org.destroyermob.mobstoolforging.world.LeatherStationBlock;
 
 public class ModBlockLootProvider extends BlockLootSubProvider {
     public ModBlockLootProvider(HolderLookup.Provider registries) {
@@ -31,6 +33,7 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.PATTERN_CREATION_STATION.get());
         ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> dropSelf(variant.block().get()));
         ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> dropSelf(variant.block().get()));
+        ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> add(variant.block().get(), this::createLeatherStationDrops));
         dropSelf(ModBlocks.HEATING_FORGE.get());
         add(ModBlocks.CRUCIBLE.get(), noDrop());
         dropSelf(ModBlocks.FOUNDRY_FORGE.get());
@@ -55,7 +58,22 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         ));
         ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
+        ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         return blocks;
+    }
+
+    private LootTable.Builder createLeatherStationDrops(Block block) {
+        return LootTable.lootTable()
+                .withPool(
+                        LootPool.lootPool()
+                                .setRolls(ConstantValue.exactly(1.0F))
+                                .add(applyExplosionDecay(
+                                        block,
+                                        LootItem.lootTableItem(block)
+                                                .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+                                                        .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(LeatherStationBlock.PART, BedPart.FOOT)))
+                                ))
+                );
     }
 
     private LootTable.Builder createAshDrops(Block block) {

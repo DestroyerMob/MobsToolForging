@@ -8,6 +8,7 @@
           "type": "minecraft:item",
           "functions": [
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -21,6 +22,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -34,6 +36,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -47,6 +50,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -60,6 +64,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -73,6 +78,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -86,6 +92,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -99,6 +106,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -112,6 +120,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -125,6 +134,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -138,6 +148,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -151,6 +162,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -164,6 +176,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -177,6 +190,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -190,6 +204,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",
@@ -203,6 +218,7 @@
               "function": "minecraft:set_count"
             },
             {
+              "add": false,
               "conditions": [
                 {
                   "block": "mobstoolforging:ash",

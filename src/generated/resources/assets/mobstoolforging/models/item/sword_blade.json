@@ -7,6 +7,7 @@
   "textures": {
     "layer_sword_blade_copper": "mobstoolforging:source/tool_parts/copper/copper_sword_blade_part",
     "layer_sword_blade_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_sword_blade_part",
+    "layer_sword_blade_emerald": "mobstoolforging:source/tool_parts/emerald/emerald_sword_blade_part",
     "layer_sword_blade_gold": "mobstoolforging:source/tool_parts/gold/gold_sword_blade_part",
     "layer_sword_blade_iron": "mobstoolforging:source/tool_parts/iron/iron_sword_blade_part",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_sword_blade_part"

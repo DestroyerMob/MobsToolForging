@@ -1,0 +1,14 @@
+{
+  "workstation": "leather_station",
+  "input": {
+    "item": "minecraft:leather",
+    "count": 8
+  },
+  "output": {
+    "armor": "chestplate",
+    "material": "mobstoolforging:leather"
+  },
+  "pattern": "mobstoolforging:leather_chestplate",
+  "required_hits": 5,
+  "minimum_hammer_level": "stone"
+}

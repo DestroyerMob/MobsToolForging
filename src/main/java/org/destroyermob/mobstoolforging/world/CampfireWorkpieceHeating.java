@@ -1,6 +1,7 @@
 package org.destroyermob.mobstoolforging.world;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
@@ -82,29 +83,25 @@ public final class CampfireWorkpieceHeating {
             return;
         }
 
-        HeatLevel heatLevel = MobsToolForgingConfig.campfireHeatLevel();
-        float targetTemperature = heatLevel.temperature();
-        if (targetTemperature <= 0.0F) {
-            return;
-        }
-
         boolean heated = false;
         boolean released = false;
         NonNullList<ItemStack> items = campfire.getItems();
         for (int slot = 0; slot < items.size(); slot++) {
             ItemStack stack = items.get(slot);
-            if (!canCampfireHeat(stack)) {
+            Optional<HeatingRecipe> recipe = HeatingRecipeRegistry.find(HeatingSource.CAMPFIRE, stack);
+            if (recipe.isEmpty() || recipe.get().targetTemperature() <= 0.0F) {
                 continue;
             }
-            holdVanillaCampfireTimer(campfire, slot);
+            float targetTemperature = recipe.get().targetTemperature();
+            holdVanillaCampfireTimer(campfire, slot, recipe.get().ticks());
             float currentTemperature = WorkpieceHeat.temperature(stack, level);
-            float nextTemperature = Math.min(targetTemperature, currentTemperature + temperatureStep(targetTemperature));
+            float nextTemperature = Math.min(targetTemperature, currentTemperature + temperatureStep(targetTemperature, recipe.get().ticks()));
             boolean reachedCampfireTarget = nextTemperature >= targetTemperature - WORKABLE_EPSILON;
-            boolean workable = reachedCampfireTarget || WorkpieceHeat.isWorkable(stack);
+            boolean workable = WorkpieceHeat.isWorkable(stack) || (reachedCampfireTarget && recipe.get().workable());
             WorkpieceHeat.setTemperature(stack, level, reachedCampfireTarget ? targetTemperature : nextTemperature, workable);
             heated = true;
             if (reachedCampfireTarget) {
-                releaseHeatedWorkpiece(level, pos, campfire, items, slot, stack);
+                releaseHeatedWorkpiece(level, pos, campfire, items, slot, stack, recipe.get());
                 released = true;
             }
         }
@@ -118,7 +115,8 @@ public final class CampfireWorkpieceHeating {
     }
 
     private static boolean insertWorkpiece(CampfireBlockEntity campfire, @Nullable LivingEntity entity, ItemStack stack, Level level, BlockPos pos) {
-        if (campfire.placeFood(entity, stack, campfireHeatTicks())) {
+        Optional<HeatingRecipe> recipe = HeatingRecipeRegistry.find(HeatingSource.CAMPFIRE, stack);
+        if (recipe.isPresent() && campfire.placeFood(entity, stack, recipe.get().ticks())) {
             level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.55F, 1.35F);
             return true;
         }
@@ -128,8 +126,7 @@ public final class CampfireWorkpieceHeating {
     private static boolean canCampfireHeat(ItemStack stack) {
         return MobsToolForgingConfig.ENABLE_FORGE_HEATING.get()
                 && MobsToolForgingConfig.ENABLE_CAMPFIRE_LOW_HEAT.get()
-                && MobsToolForgingConfig.campfireHeatLevel() != HeatLevel.NONE
-                && HeatingForgeBlockEntity.isHeatableWorkpiece(stack);
+                && HeatingRecipeRegistry.isHeatable(HeatingSource.CAMPFIRE, stack);
     }
 
     @Nullable
@@ -161,11 +158,7 @@ public final class CampfireWorkpieceHeating {
                 && state.getValue(CampfireBlock.LIT);
     }
 
-    private static int campfireHeatTicks() {
-        return Math.max(1, Math.round(MobsToolForgingConfig.HEATED_WORKPIECE_TICKS.get() * MobsToolForgingConfig.campfireHeatLevel().temperature()));
-    }
-
-    private static void holdVanillaCampfireTimer(CampfireBlockEntity campfire, int slot) {
+    private static void holdVanillaCampfireTimer(CampfireBlockEntity campfire, int slot, int ticks) {
         CampfireBlockEntityAccessor accessor = (CampfireBlockEntityAccessor) campfire;
         int[] cookingProgress = accessor.mobstoolforging$cookingProgress();
         int[] cookingTime = accessor.mobstoolforging$cookingTime();
@@ -173,7 +166,7 @@ public final class CampfireWorkpieceHeating {
             cookingProgress[slot] = 0;
         }
         if (slot < cookingTime.length) {
-            cookingTime[slot] = campfireHeatTicks();
+            cookingTime[slot] = ticks;
         }
     }
 
@@ -189,8 +182,8 @@ public final class CampfireWorkpieceHeating {
         }
     }
 
-    private static void releaseHeatedWorkpiece(Level level, BlockPos pos, CampfireBlockEntity campfire, NonNullList<ItemStack> items, int slot, ItemStack stack) {
-        WorkpieceHeat.setTemperature(stack, level, MobsToolForgingConfig.campfireHeatLevel().temperature(), true);
+    private static void releaseHeatedWorkpiece(Level level, BlockPos pos, CampfireBlockEntity campfire, NonNullList<ItemStack> items, int slot, ItemStack stack, HeatingRecipe recipe) {
+        WorkpieceHeat.setTemperature(stack, level, recipe.targetTemperature(), recipe.workable());
         ItemStack dropStack = stack.copy();
         items.set(slot, ItemStack.EMPTY);
         resetVanillaCampfireTimer(campfire, slot);
@@ -203,8 +196,7 @@ public final class CampfireWorkpieceHeating {
         level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(state));
     }
 
-    private static float temperatureStep(float targetTemperature) {
-        int ticks = campfireHeatTicks();
+    private static float temperatureStep(float targetTemperature, int ticks) {
         float coolingStep = 1.0F / Math.max(1, MobsToolForgingConfig.COOLING_TICKS.get());
         return targetTemperature / ticks + coolingStep;
     }

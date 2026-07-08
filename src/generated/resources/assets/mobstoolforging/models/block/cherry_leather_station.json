@@ -1,0 +1,10 @@
+{
+  "parent": "mobstoolforging:block/template_leather_station",
+  "textures": {
+    "display_left": "minecraft:item/leather",
+    "display_right": "mobstoolforging:item/plant_fiber",
+    "log": "minecraft:block/cherry_log",
+    "particle": "minecraft:block/cherry_log",
+    "planks": "minecraft:block/cherry_planks"
+  }
+}

@@ -5,6 +5,7 @@
   "textures": {
     "layer_guard_copper": "mobstoolforging:source/tool_parts/copper/copper_sword_guard_tool",
     "layer_guard_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_sword_guard_tool",
+    "layer_guard_emerald": "mobstoolforging:source/tool_parts/emerald/emerald_sword_guard_tool",
     "layer_guard_gold": "mobstoolforging:source/tool_parts/gold/gold_sword_guard_tool",
     "layer_guard_iron": "mobstoolforging:source/tool_parts/iron/iron_sword_guard_tool",
     "layer_handle_blaze": "mobstoolforging:source/tool_parts/blaze_rod/blaze_rod_sword_handle_tool",
@@ -12,6 +13,7 @@
     "layer_handle_oak": "mobstoolforging:source/tool_parts/stick/stick_sword_handle_tool",
     "layer_sword_blade_copper": "mobstoolforging:source/tool_parts/copper/copper_sword_blade_tool",
     "layer_sword_blade_diamond": "mobstoolforging:source/tool_parts/diamond/diamond_sword_blade_tool",
+    "layer_sword_blade_emerald": "mobstoolforging:source/tool_parts/emerald/emerald_sword_blade_tool",
     "layer_sword_blade_gold": "mobstoolforging:source/tool_parts/gold/gold_sword_blade_tool",
     "layer_sword_blade_iron": "mobstoolforging:source/tool_parts/iron/iron_sword_blade_tool",
     "layer_sword_treatment_netherite": "mobstoolforging:source/tool_parts/netherite/netherite_sword_treatment_tool",

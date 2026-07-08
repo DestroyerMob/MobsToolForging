@@ -17,7 +17,7 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModBlocks.CRUDE_ANVIL.get(), ModBlocks.TOOL_FORGE.get(), ModBlocks.LAPIDARY_TABLE.get(), ModBlocks.PATTERN_CREATION_STATION.get(), ModBlocks.HEATING_FORGE.get(), ModBlocks.CRUCIBLE.get(), ModBlocks.FOUNDRY_FORGE.get());
-        tag(BlockTags.MINEABLE_WITH_AXE).add(ModBlocks.toolmakersBenchBlocks()).add(ModBlocks.patternRackBlocks());
+        tag(BlockTags.MINEABLE_WITH_AXE).add(ModBlocks.toolmakersBenchBlocks()).add(ModBlocks.patternRackBlocks()).add(ModBlocks.leatherStationBlocks());
         tag(BlockTags.NEEDS_STONE_TOOL).add(ModBlocks.TOOL_FORGE.get(), ModBlocks.HEATING_FORGE.get(), ModBlocks.CRUCIBLE.get(), ModBlocks.FOUNDRY_FORGE.get());
     }
 }

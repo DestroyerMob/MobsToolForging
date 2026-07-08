@@ -12,7 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
@@ -62,7 +61,7 @@ public final class AnvilForgingEvents {
             return ModBlocks.TOOL_FORGE.get().defaultBlockState().setValue(ToolWorkstationBlock.FACING, facing);
         }
         if (state.is(Blocks.IRON_BLOCK)) {
-            return Blocks.ANVIL.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, facing);
+            return ModBlocks.TOOL_FORGE.get().defaultBlockState().setValue(ToolWorkstationBlock.FACING, facing);
         }
         return null;
     }

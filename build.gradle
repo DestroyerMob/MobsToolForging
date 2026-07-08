@@ -105,6 +105,12 @@ dependencies {
     annotationProcessor "net.fabricmc:sponge-mixin:0.15.2+mixin.0.8.7"
     compileOnly 'mezz.jei:jei-1.21.1-neoforge:19.27.0.340'
     compileOnly 'maven.modrinth:jade:15.10.5+neoforge'
+    compileOnly 'curse.maven:apotheosis-313970:8182695'
+    def localEmiJar = file('/Users/ethanhellyer/Library/Application Support/PrismLauncher/instances/MinecraftBeyond/minecraft/mods/emi-1.1.24+1.21.1+neoforge.jar')
+    if (localEmiJar.exists()) {
+        compileOnly files(localEmiJar)
+        localRuntime files(localEmiJar)
+    }
     localRuntime 'mezz.jei:jei-1.21.1-neoforge:19.27.0.340'
     localRuntime 'maven.modrinth:jade:15.10.5+neoforge'
     localRuntime 'curse.maven:durability-tooltip-511040:6833316'

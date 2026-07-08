@@ -29,6 +29,10 @@ public final class ToolTypeRegistry {
     public static final ResourceLocation LEGGINGS_PLATE_TEMPLATE = modLoc(ArmorPartData.LEGGINGS_PLATE);
     public static final ResourceLocation BOOTS_CHAINMAIL_TEMPLATE = modLoc(ArmorPartData.BOOTS_CHAINMAIL);
     public static final ResourceLocation BOOTS_PLATE_TEMPLATE = modLoc(ArmorPartData.BOOTS_PLATE);
+    public static final ResourceLocation LEATHER_HELMET_TEMPLATE = modLoc("leather_helmet");
+    public static final ResourceLocation LEATHER_CHESTPLATE_TEMPLATE = modLoc("leather_chestplate");
+    public static final ResourceLocation LEATHER_LEGGINGS_TEMPLATE = modLoc("leather_leggings");
+    public static final ResourceLocation LEATHER_BOOTS_TEMPLATE = modLoc("leather_boots");
     private static final Map<ResourceLocation, ToolTypeDefinition> TOOL_TYPES = new LinkedHashMap<>();
     private static final Map<ResourceLocation, ForgeTemplateDefinition> TEMPLATES = new LinkedHashMap<>();
     private static final List<ToolStatModifier> STAT_MODIFIERS = new ArrayList<>();
@@ -128,6 +132,10 @@ public final class ToolTypeRegistry {
         registerArmorTemplate(LEGGINGS_PLATE_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_PLATE, 4, ModItems.LEGGINGS_PLATE.getId());
         registerArmorTemplate(BOOTS_CHAINMAIL_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, ArmorPartData.BOOTS_CHAINMAIL, 1, ModItems.BOOTS_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
         registerArmorTemplate(BOOTS_PLATE_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, ArmorPartData.BOOTS_PLATE, 2, ModItems.BOOTS_PLATE.getId());
+        registerLeatherArmorTemplate(LEATHER_HELMET_TEMPLATE, ArmorConstructionData.HELMET_TYPE, "leather_helmet", 5);
+        registerLeatherArmorTemplate(LEATHER_CHESTPLATE_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, "leather_chestplate", 8);
+        registerLeatherArmorTemplate(LEATHER_LEGGINGS_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, "leather_leggings", 7);
+        registerLeatherArmorTemplate(LEATHER_BOOTS_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, "leather_boots", 4);
     }
 
     private static void registerArmorTemplate(ResourceLocation templateId, ResourceLocation armorType, String partType, int requiredMaterials, ResourceLocation outputItem) {
@@ -148,6 +156,27 @@ public final class ToolTypeRegistry {
                 SmithingHammerLevel.STONE.level(),
                 Map.of(),
                 outputItem,
+                Map.of(),
+                Set.of(armorType),
+                true,
+                1
+        ));
+    }
+
+    private static void registerLeatherArmorTemplate(ResourceLocation templateId, ResourceLocation armorType, String partType, int requiredMaterials) {
+        registerTemplate(new ForgeTemplateDefinition(
+                templateId,
+                armorType,
+                partType,
+                requiredMaterials,
+                5,
+                "forge_template.mobstoolforging." + partType,
+                Float.NaN,
+                Set.of(),
+                Set.of(),
+                SmithingHammerLevel.STONE.level(),
+                Map.of(),
+                null,
                 Map.of(),
                 Set.of(armorType),
                 true,

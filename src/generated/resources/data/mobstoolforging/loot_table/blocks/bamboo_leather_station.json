@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "block": "mobstoolforging:bamboo_leather_station",
+              "condition": "minecraft:block_state_property",
+              "properties": {
+                "part": "foot"
+              }
+            }
+          ],
+          "functions": [
+            {
+              "function": "minecraft:explosion_decay"
+            }
+          ],
+          "name": "mobstoolforging:bamboo_leather_station"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "mobstoolforging:blocks/bamboo_leather_station"
+}

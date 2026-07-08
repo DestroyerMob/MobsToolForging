@@ -34,14 +34,11 @@ public class ModularArmorRecipe extends CustomRecipe {
 
     @Override
     public boolean matches(CraftingInput input, Level level) {
-        return armorKind.matchesLeatherRecipe(input) || findParts(input).isValid();
+        return findParts(input).isValid();
     }
 
     @Override
     public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
-        if (armorKind.matchesLeatherRecipe(input)) {
-            return armorKind.createLeather();
-        }
         Parts parts = findParts(input);
         if (!parts.isValid()) {
             return ItemStack.EMPTY;

@@ -73,6 +73,8 @@ import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
 import org.destroyermob.mobstoolforging.world.FlintKnappingEvents;
 import org.destroyermob.mobstoolforging.world.FlintToolStacks;
 import org.destroyermob.mobstoolforging.world.GroundAssemblyRecipeReloadListener;
+import org.destroyermob.mobstoolforging.world.HeatingRecipeReloadListener;
+import org.destroyermob.mobstoolforging.world.LeatherStationAssemblyEvents;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialDefinitionReloadListener;
 import org.destroyermob.mobstoolforging.world.PatternRackSelection;
@@ -123,6 +125,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::placeGroundAssembly);
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::dropPlantFiber);
         NeoForge.EVENT_BUS.addListener(AnvilForgingEvents::forgeAnvilInWorld);
+        NeoForge.EVENT_BUS.addListener(LeatherStationAssemblyEvents::assembleInWorld);
         NeoForge.EVENT_BUS.addListener(ArmorStandSwapEvents::swapPlayerArmorWithStand);
         NeoForge.EVENT_BUS.addListener(this::lowerCopperHarvestTier);
         NeoForge.EVENT_BUS.addListener(CampfireWorkpieceHeating::placeWorkpiece);
@@ -158,6 +161,7 @@ public class MobsToolForging {
             event.accept(ModBlocks.PATTERN_CREATION_STATION);
             ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> event.accept(variant.block()));
             ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> event.accept(variant.block()));
+            ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> event.accept(variant.block()));
             event.accept(ModBlocks.HEATING_FORGE);
             event.accept(ModBlocks.CRUCIBLE);
             event.accept(ModBlocks.FOUNDRY_FORGE);
@@ -329,7 +333,6 @@ public class MobsToolForging {
         }
         if (!MobsToolForgingConfig.ENABLE_ANVIL_CRAFTING_RECIPES.get()) {
             disabledRecipes.add(modRecipe("tool_forge"));
-            disabledRecipes.add(ResourceLocation.withDefaultNamespace("anvil"));
         }
         if (!MobsToolForgingConfig.ENABLE_ANVIL_CRAFTING_RECIPES.get() || !MobsToolForgingConfig.ENABLE_CRUDE_ANVIL.get()) {
             disabledRecipes.add(modRecipe("crude_anvil"));
@@ -347,6 +350,7 @@ public class MobsToolForging {
         event.addListener(new ForgeTemplateReloadListener());
         event.addListener(new ToolStatRuleReloadListener());
         event.addListener(new StationWorkRecipeReloadListener());
+        event.addListener(new HeatingRecipeReloadListener());
         event.addListener(new GroundAssemblyRecipeReloadListener());
     }
 
