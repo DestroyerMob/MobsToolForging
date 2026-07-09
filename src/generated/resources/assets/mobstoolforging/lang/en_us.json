@@ -359,6 +359,8 @@
   "message.mobstoolforging.toolmaker_disassembled": "Tool separated.",
   "message.mobstoolforging.toolmaker_invalid": "That does not fit this bench.",
   "message.mobstoolforging.toolmaker_needs_parts": "Place a compatible head and handle first.",
+  "message.mobstoolforging.toolmaker_name_tag_applied": "Named %s.",
+  "message.mobstoolforging.toolmaker_name_tag_invalid": "Place one assembled item and use a named name tag.",
   "message.mobstoolforging.toolmaker_no_tool": "Place one assembled tool before separating it.",
   "message.mobstoolforging.toolmaker_part_placed": "Part placed.",
   "message.mobstoolforging.toolmaker_status": "%s item(s) placed.",

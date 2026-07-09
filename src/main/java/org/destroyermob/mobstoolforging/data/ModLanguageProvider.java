@@ -290,6 +290,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.toolmaker_broken_tool", "Repair this item before separating it.");
         add("message.mobstoolforging.toolmaker_no_tool", "Place one assembled tool before separating it.");
         add("message.mobstoolforging.toolmaker_status", "%s item(s) placed.");
+        add("message.mobstoolforging.toolmaker_name_tag_invalid", "Place one assembled item and use a named name tag.");
+        add("message.mobstoolforging.toolmaker_name_tag_applied", "Named %s.");
         add("message.mobstoolforging.part_polished", "Polished %s.");
         add("message.mobstoolforging.knapping_status", "Knapping %s - %s/%s hits");
         add("message.mobstoolforging.knapping_complete", "Knapped %s.");

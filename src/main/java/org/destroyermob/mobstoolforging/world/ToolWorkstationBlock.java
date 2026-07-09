@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -18,6 +19,7 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -654,6 +656,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
             return assembleTool(stack, forge, level, pos, player);
         }
+        if (stack.is(Items.NAME_TAG)) {
+            return applyNameTagToToolmakerItem(stack, forge, level, pos, player);
+        }
         if (forge.canPlaceToolmakerStack(stack)) {
             return placeToolmakerStack(stack, forge, level, pos, player);
         }
@@ -675,6 +680,28 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.7F, 1.0F + level.random.nextFloat() * 0.1F);
         player.awardStat(Stats.ITEM_USED.get(item));
         DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_part_placed"));
+        return ItemInteractionResult.CONSUME;
+    }
+
+    private ItemInteractionResult applyNameTagToToolmakerItem(ItemStack nameTag, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        Component name = nameTag.get(DataComponents.CUSTOM_NAME);
+        List<ItemStack> benchStacks = forge.benchStacks();
+        if (name == null || benchStacks.size() != 1 || !ToolmakerBenchAssembly.isFinishedTool(benchStacks.get(0))) {
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_name_tag_invalid"));
+            return ItemInteractionResult.CONSUME;
+        }
+        ItemStack renamed = benchStacks.get(0).copyWithCount(1);
+        renamed.set(DataComponents.CUSTOM_NAME, name);
+        forge.setToolmakerStacks(List.of(renamed));
+        if (!player.getAbilities().instabuild) {
+            nameTag.shrink(1);
+        }
+        player.awardStat(Stats.ITEM_USED.get(Items.NAME_TAG));
+        level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.45F, 1.35F);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_name_tag_applied", renamed.getHoverName()));
         return ItemInteractionResult.CONSUME;
     }
 
