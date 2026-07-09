@@ -154,6 +154,8 @@ public final class ToolmakerBenchAssembly {
             return ItemStack.EMPTY;
         }
         ArmorExternalComponents.copyArmorPartComponentsToArmor(parts.base(), parts.plate(), output);
+        output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts.stacks()));
+        ToolAssemblyEnchantments.syncRoutedToolEnchantments(output, registries);
         return output;
     }
 
@@ -182,6 +184,13 @@ public final class ToolmakerBenchAssembly {
         if (construction.hasLeatherBase()) {
             return Optional.empty();
         }
+        ToolAssemblyParts storedParts = armor.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
+        if (storedParts != null) {
+            List<ItemStack> parts = storedParts.copyStacks();
+            if (!parts.isEmpty()) {
+                return Optional.of(ArmorExternalComponents.copyArmorComponentsToPrimaryPart(armor, parts));
+            }
+        }
         return ArmorAssemblyKind.fromArmorType(construction.armorType()).map(kind -> {
             List<ItemStack> parts = new ArrayList<>();
             ItemStack base = kind.createBasePart(MaterialCatalog.IRON, construction.quality());
@@ -189,7 +198,7 @@ public final class ToolmakerBenchAssembly {
                 parts.add(base);
             }
             construction.overlayMaterial().ifPresent(material -> {
-                ItemStack plate = kind.createPlatePart(material, construction.quality());
+                ItemStack plate = kind.createPlatePart(material, construction.overlayBaseMaterial(), construction.quality());
                 if (!plate.isEmpty()) {
                     parts.add(plate);
                 }
@@ -433,6 +442,15 @@ public final class ToolmakerBenchAssembly {
 
         private ItemStack createPlatePart(ResourceLocation material, int quality) {
             return plateItem.get().createPart(material, quality);
+        }
+
+        private ItemStack createPlatePart(ResourceLocation material, Optional<ResourceLocation> baseMaterial, int quality) {
+            ItemStack stack = createPlatePart(material, quality);
+            ArmorPartData data = stack.get(ModDataComponents.ARMOR_PART.get());
+            if (data != null && baseMaterial.isPresent()) {
+                stack.set(ModDataComponents.ARMOR_PART.get(), data.withCoatingBaseMaterial(baseMaterial.get()));
+            }
+            return stack;
         }
 
         abstract ItemStack create(ArmorAssemblyParts parts);

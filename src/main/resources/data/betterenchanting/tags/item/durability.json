@@ -1,6 +1,16 @@
 {
   "replace": false,
   "values": [
-    "#mobstoolforging:parts"
+    "#mobstoolforging:parts",
+    "mobstoolforging:sword",
+    "mobstoolforging:shovel",
+    "mobstoolforging:pickaxe",
+    "mobstoolforging:axe",
+    "mobstoolforging:hoe",
+    "mobstoolforging:mattock",
+    "mobstoolforging:modular_helmet",
+    "mobstoolforging:modular_chestplate",
+    "mobstoolforging:modular_leggings",
+    "mobstoolforging:modular_boots"
   ]
 }

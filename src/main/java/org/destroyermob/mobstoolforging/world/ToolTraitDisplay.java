@@ -37,6 +37,7 @@ public final class ToolTraitDisplay {
         return switch (category) {
             case "treatment" -> 0;
             case "structure" -> 10;
+            case "edge" -> 15;
             case "handling", "heat" -> 20;
             case "affinity", "focus" -> 30;
             case "quality" -> 40;

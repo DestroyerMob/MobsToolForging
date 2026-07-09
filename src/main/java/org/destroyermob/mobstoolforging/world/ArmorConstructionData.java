@@ -13,6 +13,7 @@ public record ArmorConstructionData(
         ResourceLocation armorType,
         ResourceLocation skullMaterial,
         Optional<ResourceLocation> combMaterial,
+        Optional<ResourceLocation> overlayBaseMaterial,
         Optional<ResourceLocation> visorMaterial,
         int quality
 ) {
@@ -24,14 +25,20 @@ public record ArmorConstructionData(
 
     public ArmorConstructionData {
         combMaterial = combMaterial == null ? Optional.empty() : combMaterial;
+        overlayBaseMaterial = overlayBaseMaterial == null ? Optional.empty() : overlayBaseMaterial;
         visorMaterial = visorMaterial == null ? Optional.empty() : visorMaterial;
         quality = ForgingQuality.clampScore(quality);
+    }
+
+    public ArmorConstructionData(ResourceLocation armorType, ResourceLocation skullMaterial, Optional<ResourceLocation> combMaterial, Optional<ResourceLocation> visorMaterial, int quality) {
+        this(armorType, skullMaterial, combMaterial, Optional.empty(), visorMaterial, quality);
     }
 
     public static final Codec<ArmorConstructionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("armor_type").forGetter(ArmorConstructionData::armorType),
             ResourceLocation.CODEC.fieldOf("skull_material").forGetter(ArmorConstructionData::skullMaterial),
             ResourceLocation.CODEC.optionalFieldOf("comb_material").forGetter(ArmorConstructionData::combMaterial),
+            ResourceLocation.CODEC.optionalFieldOf("overlay_base_material").forGetter(ArmorConstructionData::overlayBaseMaterial),
             ResourceLocation.CODEC.optionalFieldOf("visor_material").forGetter(ArmorConstructionData::visorMaterial),
             Codec.INT.optionalFieldOf("quality", DEFAULT_QUALITY).forGetter(ArmorConstructionData::quality)
     ).apply(instance, ArmorConstructionData::new));
@@ -180,6 +187,10 @@ public record ArmorConstructionData(
             return visorMaterial;
         }
         return Optional.empty();
+    }
+
+    public ArmorConstructionData withOverlayBaseMaterial(Optional<ResourceLocation> baseMaterial) {
+        return new ArmorConstructionData(armorType, skullMaterial, combMaterial, baseMaterial, visorMaterial, quality);
     }
 
     public boolean hasLeatherBase() {

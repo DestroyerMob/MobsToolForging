@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "#mobstoolforging:parts/shovel_head"
+    "#mobstoolforging:parts/shovel_head",
+    "mobstoolforging:shovel",
+    "mobstoolforging:mattock"
   ]
 }

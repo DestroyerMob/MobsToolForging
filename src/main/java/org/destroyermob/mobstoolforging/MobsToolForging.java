@@ -65,10 +65,12 @@ import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.registry.ModLootModifiers;
 import org.destroyermob.mobstoolforging.world.AnvilForgingEvents;
+import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.ArmorRepairing;
 import org.destroyermob.mobstoolforging.world.ArmorStandSwapEvents;
 import org.destroyermob.mobstoolforging.world.CampfireWorkpieceHeating;
 import org.destroyermob.mobstoolforging.world.CrucibleContents;
+import org.destroyermob.mobstoolforging.world.DebugFeedback;
 import org.destroyermob.mobstoolforging.world.DryingRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
@@ -411,7 +413,7 @@ public class MobsToolForging {
         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
             if (WorkpieceHeat.hasHeat(inventory.getItem(slot))) {
                 event.getCrafting().setCount(0);
-                event.getEntity().displayClientMessage(Component.translatable("message.mobstoolforging.heated_parts_cannot_craft"), true);
+                DebugFeedback.actionBar(event.getEntity(), Component.translatable("message.mobstoolforging.heated_parts_cannot_craft"));
                 return;
             }
         }
@@ -442,7 +444,12 @@ public class MobsToolForging {
 
     private static float heatTooltipMinimumTemperature(ItemStack stack) {
         ToolPartData part = stack.get(ModDataComponents.TOOL_PART.get());
-        Optional<ToolMaterialDefinition> material = part == null ? MaterialCatalog.resolve(stack) : MaterialCatalog.definition(part.materialId());
+        ArmorPartData armorPart = stack.get(ModDataComponents.ARMOR_PART.get());
+        Optional<ToolMaterialDefinition> material = part != null
+                ? MaterialCatalog.definition(part.materialId()).or(() -> part.coatingBaseMaterial().flatMap(MaterialCatalog::definition))
+                : armorPart != null
+                ? MaterialCatalog.definition(armorPart.materialId()).or(() -> armorPart.coatingBaseMaterial().flatMap(MaterialCatalog::definition))
+                : MaterialCatalog.resolve(stack);
         return material
                 .map(definition -> WorkshopHeat.minimumForgeTemperature(definition, null))
                 .orElse(MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
@@ -473,9 +480,6 @@ public class MobsToolForging {
                     .withStyle(ChatFormatting.DARK_GRAY)
                     .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
                     .append(part.finish().displayName()));
-            if (part.needsPolishing()) {
-                event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.unpolished_hint").withStyle(ChatFormatting.GRAY));
-            }
         }
         part.coatingBaseMaterial().ifPresent(baseMaterial -> event.getToolTip().add(Component.translatable(
                 "tooltip.mobstoolforging.coating_base",

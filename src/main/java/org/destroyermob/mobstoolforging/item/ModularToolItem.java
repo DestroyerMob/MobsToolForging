@@ -47,7 +47,7 @@ public interface ModularToolItem extends IItemExtension {
 
     @Override
     default boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
-        return allowsFinishedToolEnchanting(stack, true) && IItemExtension.super.supportsEnchantment(stack, enchantment);
+        return !isBrokenTool(stack) && IItemExtension.super.supportsEnchantment(stack, enchantment);
     }
 
     @Override
@@ -97,6 +97,16 @@ public interface ModularToolItem extends IItemExtension {
         }
     }
 
+    default void refreshToolProfile(ItemStack stack) {
+        if (isBrokenTool(stack)) {
+            return;
+        }
+        ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
+        if (construction != null) {
+            ToolStatBuilder.refreshIfOutdated(stack, toolKind(), construction);
+        }
+    }
+
     default ItemStack create(ResourceLocation headMaterialId, ItemStack handle) {
         ResourceLocation handleMaterial = MaterialCatalog.handleMaterial(handle);
         return create(ToolConstructionData.basic(toolKind(), headMaterialId, handleMaterial));
@@ -133,6 +143,7 @@ public interface ModularToolItem extends IItemExtension {
     default void modularInventoryTick(ItemStack stack, Level level) {
         if (!level.isClientSide) {
             refreshBrokenTool(stack);
+            refreshToolProfile(stack);
         }
     }
 

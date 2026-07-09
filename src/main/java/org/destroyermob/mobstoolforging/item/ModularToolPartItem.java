@@ -77,9 +77,6 @@ public class ModularToolPartItem extends Item {
                         .withStyle(ChatFormatting.DARK_GRAY)
                         .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
                         .append(data.finish().displayName()));
-                if (data.needsPolishing()) {
-                    tooltip.add(Component.translatable("tooltip.mobstoolforging.unpolished_hint").withStyle(ChatFormatting.GRAY));
-                }
             }
             data.coatingBaseMaterial().ifPresent(baseMaterial -> tooltip.add(Component.translatable(
                     "tooltip.mobstoolforging.coating_base",

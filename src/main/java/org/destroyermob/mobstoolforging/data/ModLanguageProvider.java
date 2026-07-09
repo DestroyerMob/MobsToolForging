@@ -156,6 +156,20 @@ public class ModLanguageProvider extends LanguageProvider {
         add("jei.mobstoolforging.pattern_creation", "Pattern Creation");
         add("jei.mobstoolforging.heating", "Workpiece Heating");
         add("jei.mobstoolforging.drying", "Drying");
+        add("jei.mobstoolforging.material_traits", "Material Traits");
+        add("jei.mobstoolforging.material_traits.header", "Traits from this material");
+        add("jei.mobstoolforging.material_traits.level_hint", "Repeated parts raise level");
+        add("jei.mobstoolforging.material_traits.more", "+%s more");
+        add("jei.mobstoolforging.material_traits.source.any_part", "Any tool part");
+        add("jei.mobstoolforging.material_traits.source.binding", "Binding");
+        add("jei.mobstoolforging.material_traits.source.core", "Core");
+        add("jei.mobstoolforging.material_traits.source.guard", "Guard");
+        add("jei.mobstoolforging.material_traits.source.handle", "Handle");
+        add("jei.mobstoolforging.material_traits.source.head", "Head");
+        add("jei.mobstoolforging.material_traits.source.support", "Guard, binding, wrap");
+        add("jei.mobstoolforging.material_traits.source.tool_slot", "%s %s");
+        add("jei.mobstoolforging.material_traits.source.treatment", "Treatment");
+        add("jei.mobstoolforging.material_traits.source.wrap", "Wrap");
         add("jade.mobstoolforging.abrasive", "Abrasive: %s");
         add("jade.mobstoolforging.pattern", "Pattern: %s");
         add("jade.mobstoolforging.source", "Source: %s");
@@ -201,8 +215,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("knapping_target.mobstoolforging.pickaxe_head", "Flint Pickaxe Head");
         add("knapping_target.mobstoolforging.axe_head", "Flint Axe Head");
         add("knapping_target.mobstoolforging.hoe_head", "Flint Hoe Head");
-        add("message.mobstoolforging.select_template", "Use a pattern item on this station.");
-        add("message.mobstoolforging.sneak_hint", "Use a pattern item, or an empty hand to check the station.");
+        add("message.mobstoolforging.select_template", "No pattern selected.");
         add("message.mobstoolforging.template_selected", "Selected %s.");
         add("message.mobstoolforging.template_cleared", "Template cleared.");
         add("message.mobstoolforging.invalid_template_pattern", "This pattern does not point to a known template.");
@@ -268,7 +281,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.tool_repaired", "Item repaired.");
         add("message.mobstoolforging.use_tool_forge", "Metal parts are forged on a Crude Anvil or Smithing Anvil.");
         add("message.mobstoolforging.use_leather_station", "Leather armour is worked on a Leather Station.");
-        add("message.mobstoolforging.use_toolmakers_bench", "Place parts here, then use an empty hand or Smithing Hammer to assemble.");
+        add("message.mobstoolforging.use_toolmakers_bench", "Toolmaker's Bench is empty.");
         add("message.mobstoolforging.toolmaker_part_placed", "Part placed.");
         add("message.mobstoolforging.toolmaker_needs_parts", "Place a compatible head and handle first.");
         add("message.mobstoolforging.toolmaker_invalid", "That does not fit this bench.");
@@ -342,7 +355,6 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.finish", "Finish");
         add("tooltip.mobstoolforging.core_finish", "Core Finish");
         add("tooltip.mobstoolforging.coating_base", "Core: %s");
-        add("tooltip.mobstoolforging.unpolished_hint", "Sneak-use a Grindstone to polish");
         add("tooltip.mobstoolforging.part_durability", "Durability: %s%%");
         add("tooltip.mobstoolforging.armor_part_material", "Material: %s");
         add("tooltip.mobstoolforging.broken_armor", "Broken - repair before wearing");
@@ -352,7 +364,6 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.crucible_contains_molten", "Contains: Molten %s (%s)");
         add("tooltip.mobstoolforging.crucible_heat", "Crucible Heat: %s%%");
         add("tooltip.mobstoolforging.traits", "Traits");
-        add("tooltip.mobstoolforging.hold_shift", "Hold Shift for construction");
         add("tooltip.mobstoolforging.construction", "Construction");
         add("tooltip.mobstoolforging.none", "None");
         add("tooltip.mobstoolforging.part.head", "Head");
@@ -374,6 +385,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.stat.enchant_affinities", "Enchant Affinities");
         add("tooltip.mobstoolforging.stat.traits", "Trait IDs");
         add("tooltip.mobstoolforging.stat.construction", "Construction Data");
+        add("tooltip.mobstoolforging.trait.steady", "Steady");
+        add("tooltip.mobstoolforging.trait.steady.desc", "keeps handling predictable");
         add("tooltip.mobstoolforging.trait.sturdy", "Sturdy");
         add("tooltip.mobstoolforging.trait.sturdy.desc", "adds durability at the cost of speed");
         add("tooltip.mobstoolforging.trait.swift", "Swift");
@@ -394,6 +407,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.trait.nether_forged.desc", "adds fireproof stability with slower handling");
         add("tooltip.mobstoolforging.trait.fortunate", "Fortunate");
         add("tooltip.mobstoolforging.trait.fortunate.desc", "favours luck and fortune");
+        add("tooltip.mobstoolforging.trait.keen", "Keen");
+        add("tooltip.mobstoolforging.trait.keen.desc", "hones the striking edge");
+        add("tooltip.mobstoolforging.trait.jagged", "Jagged");
+        add("tooltip.mobstoolforging.trait.jagged.desc", "hits harder with rougher wear");
         add("tooltip.mobstoolforging.trait.sure_grip", "Sure Grip");
         add("tooltip.mobstoolforging.trait.sure_grip.desc", "improves control and comfort");
         add("tooltip.mobstoolforging.trait.focused", "Focused");

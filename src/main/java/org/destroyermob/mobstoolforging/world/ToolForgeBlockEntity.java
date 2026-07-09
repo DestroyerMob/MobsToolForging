@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
+import org.destroyermob.mobstoolforging.item.ModularArmorPartItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
@@ -877,10 +878,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
         }
         ItemStack baseStack = benchStacks.get(0);
         ToolPartData baseData = baseStack.get(ModDataComponents.TOOL_PART.get());
-        if (baseData == null) {
-            return Optional.empty();
+        if (baseData != null) {
+            return lapidaryCoatingWork(baseStack, baseData);
         }
-        return lapidaryCoatingWork(baseStack, baseData);
+        ArmorPartData armorData = baseStack.get(ModDataComponents.ARMOR_PART.get());
+        return armorData == null ? Optional.empty() : lapidaryCoatingWork(baseStack, armorData);
     }
 
     public static boolean isLapidaryCoatablePart(ItemStack stack) {
@@ -888,7 +890,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
             return false;
         }
         ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
-        return data != null && lapidaryCoatingWork(stack, data).isPresent();
+        if (data != null) {
+            return lapidaryCoatingWork(stack, data).isPresent();
+        }
+        ArmorPartData armorData = stack.get(ModDataComponents.ARMOR_PART.get());
+        return armorData != null && lapidaryCoatingWork(stack, armorData).isPresent();
     }
 
     private static Optional<LapidaryCoatingWork> lapidaryCoatingWork(ItemStack stack, ToolPartData data) {
@@ -905,8 +911,30 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 .filter(template -> isCoatableToolType(template.toolType()))
                 .flatMap(template -> ToolTypeRegistry.toolType(template.toolType())
                         .filter(definition -> definition.matchesPartItem(data.partType(), data.materialId(), stack))
-                        .map(definition -> new LapidaryCoatingWork(stack, data, template, definition))
+                        .map(definition -> LapidaryCoatingWork.tool(stack, data, template, definition))
                         .stream())
+                .min(Comparator
+                        .comparingInt((LapidaryCoatingWork work) -> work.template().requiredMaterials())
+                        .thenComparing(work -> work.template().id().toString()));
+    }
+
+    private static Optional<LapidaryCoatingWork> lapidaryCoatingWork(ItemStack stack, ArmorPartData data) {
+        if (data.coatingBaseMaterial().isPresent() || !isArmorPlatePart(data.partType())) {
+            return Optional.empty();
+        }
+        if (MaterialCatalog.definition(data.materialId())
+                .filter(definition -> definition.category() == MaterialCategory.METAL)
+                .isEmpty()) {
+            return Optional.empty();
+        }
+        return ToolTypeRegistry.templates().stream()
+                .filter(template -> data.partType().equals(template.partType()))
+                .filter(ArmorForgeAttachment::isAttachmentTemplate)
+                .filter(template -> {
+                    ItemStack output = template.outputStack(data.materialId(), data.quality());
+                    return !output.isEmpty() && output.is(stack.getItem());
+                })
+                .map(template -> LapidaryCoatingWork.armor(stack, data, template))
                 .min(Comparator
                         .comparingInt((LapidaryCoatingWork work) -> work.template().requiredMaterials())
                         .thenComparing(work -> work.template().id().toString()));
@@ -918,6 +946,13 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && !ToolTypeRegistry.GEM_CUTTERS_KNIFE_TOOL_TYPE.equals(toolType);
     }
 
+    private static boolean isArmorPlatePart(String partType) {
+        return ArmorPartData.HELMET_PLATE.equals(partType)
+                || ArmorPartData.CHESTPLATE_BODY.equals(partType)
+                || ArmorPartData.LEGGINGS_PLATE.equals(partType)
+                || ArmorPartData.BOOTS_PLATE.equals(partType);
+    }
+
     @Nullable
     private ResourceLocation lapidaryCoatingPreviewMaterial(LapidaryCoatingWork coatingWork) {
         List<ResourceLocation> materials = MaterialCatalog.starterMaterialIds().stream()
@@ -925,7 +960,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 .filter(material -> MaterialCatalog.definition(material)
                         .filter(definition -> definition.category() == MaterialCategory.GEM)
                         .isPresent())
-                .filter(material -> !coatingWork.definition().createPart(coatingWork.baseData().partType(), material).isEmpty())
+                .filter(coatingWork::canCreatePart)
                 .toList();
         if (materials.isEmpty()) {
             return null;
@@ -940,23 +975,31 @@ public class ToolForgeBlockEntity extends BlockEntity {
             return ItemStack.EMPTY;
         }
         int outputQuality = MobsToolForgingConfig.ENABLE_QUALITY.get()
-                ? ForgingQuality.clampScore(Math.round((coatingWork.baseData().quality() + completedQualityScore()) / 2.0F))
+                ? ForgingQuality.clampScore(Math.round((coatingWork.baseQuality() + completedQualityScore()) / 2.0F))
                 : ForgingQuality.DEFAULT_SCORE;
-        ItemStack output = coatingWork.definition().createPart(coatingWork.baseData().partType(), materialId, outputQuality);
+        ItemStack output = coatingWork.createPart(materialId, outputQuality);
         if (output.isEmpty()) {
             output = coatingWork.baseStack().copyWithCount(1);
         }
-        ToolPartData coatedData = coatingWork.baseData().withCoating(materialId, outputQuality);
-        output.set(ModDataComponents.TOOL_PART.get(), coatedData);
+        if (coatingWork.baseToolData() != null) {
+            ToolPartData coatedData = coatingWork.baseToolData().withCoating(materialId, outputQuality);
+            output.set(ModDataComponents.TOOL_PART.get(), coatedData);
+            Integer wear = coatingWork.baseStack().get(ModDataComponents.TOOL_PART_WEAR.get());
+            if (wear != null) {
+                output.set(ModDataComponents.TOOL_PART_WEAR.get(), wear);
+            }
+            if (!(output.getItem() instanceof ModularToolPartItem)) {
+                ToolStackNames.applyCoatedPartName(output, coatedData.partType(), coatingWork.baseMaterial(), materialId);
+            }
+        } else if (coatingWork.baseArmorData() != null) {
+            ArmorPartData coatedData = coatingWork.baseArmorData().withCoating(materialId, outputQuality);
+            output.set(ModDataComponents.ARMOR_PART.get(), coatedData);
+            if (!(output.getItem() instanceof ModularArmorPartItem)) {
+                ToolStackNames.applyCoatedPartName(output, coatedData.partType(), coatingWork.baseMaterial(), materialId);
+            }
+        }
         output.remove(ModDataComponents.HEATED_WORKPIECE.get());
-        Integer wear = coatingWork.baseStack().get(ModDataComponents.TOOL_PART_WEAR.get());
-        if (wear != null) {
-            output.set(ModDataComponents.TOOL_PART_WEAR.get(), wear);
-        }
         ToolExternalComponents.copyCompatibleExternalComponents(coatingWork.baseStack(), output);
-        if (!(output.getItem() instanceof ModularToolPartItem)) {
-            ToolStackNames.applyCoatedPartName(output, coatedData.partType(), coatingWork.baseData().materialId(), materialId);
-        }
         return output;
     }
 
@@ -993,10 +1036,44 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     private record LapidaryCoatingWork(
             ItemStack baseStack,
-            ToolPartData baseData,
+            @Nullable ToolPartData baseToolData,
+            @Nullable ArmorPartData baseArmorData,
             ForgeTemplateDefinition template,
-            ToolTypeDefinition definition
+            @Nullable ToolTypeDefinition definition
     ) {
+        private static LapidaryCoatingWork tool(ItemStack stack, ToolPartData data, ForgeTemplateDefinition template, ToolTypeDefinition definition) {
+            return new LapidaryCoatingWork(stack, data, null, template, definition);
+        }
+
+        private static LapidaryCoatingWork armor(ItemStack stack, ArmorPartData data, ForgeTemplateDefinition template) {
+            return new LapidaryCoatingWork(stack, null, data, template, null);
+        }
+
+        private String partType() {
+            return baseToolData == null ? baseArmorData.partType() : baseToolData.partType();
+        }
+
+        private ResourceLocation baseMaterial() {
+            return baseToolData == null ? baseArmorData.materialId() : baseToolData.materialId();
+        }
+
+        private int baseQuality() {
+            return baseToolData == null ? baseArmorData.quality() : baseToolData.quality();
+        }
+
+        private boolean canCreatePart(ResourceLocation material) {
+            if (definition != null) {
+                return !definition.createPart(partType(), material).isEmpty();
+            }
+            return !template.outputStack(material).isEmpty();
+        }
+
+        private ItemStack createPart(ResourceLocation material, int quality) {
+            if (definition != null) {
+                return definition.createPart(partType(), material, quality);
+            }
+            return template.outputStack(material, quality);
+        }
     }
 
     public boolean materialIsForgeReady() {

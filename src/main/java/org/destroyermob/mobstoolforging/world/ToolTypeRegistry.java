@@ -125,12 +125,12 @@ public final class ToolTypeRegistry {
                 1
         ));
         registerArmorTemplate(HELMET_CHAINMAIL_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_CHAINMAIL, 2, ModItems.HELMET_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
-        registerArmorTemplate(HELMET_PLATE_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_PLATE, 3, ModItems.HELMET_PLATE.getId());
-        registerArmorTemplate(CHESTPLATE_CHAINMAIL_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, ArmorPartData.CHESTPLATE_CHAINMAIL, 3, ModItems.CHESTPLATE_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
-        registerArmorTemplate(CHESTPLATE_BODY_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, ArmorPartData.CHESTPLATE_BODY, 5, ModItems.CHESTPLATE_BODY.getId());
+        registerArmorTemplate(HELMET_PLATE_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_PLATE, 2, ModItems.HELMET_PLATE.getId());
+        registerArmorTemplate(CHESTPLATE_CHAINMAIL_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, ArmorPartData.CHESTPLATE_CHAINMAIL, 4, ModItems.CHESTPLATE_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
+        registerArmorTemplate(CHESTPLATE_BODY_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, ArmorPartData.CHESTPLATE_BODY, 4, ModItems.CHESTPLATE_BODY.getId());
         registerArmorTemplate(LEGGINGS_CHAINMAIL_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_CHAINMAIL, 3, ModItems.LEGGINGS_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
-        registerArmorTemplate(LEGGINGS_PLATE_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_PLATE, 4, ModItems.LEGGINGS_PLATE.getId());
-        registerArmorTemplate(BOOTS_CHAINMAIL_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, ArmorPartData.BOOTS_CHAINMAIL, 1, ModItems.BOOTS_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
+        registerArmorTemplate(LEGGINGS_PLATE_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_PLATE, 3, ModItems.LEGGINGS_PLATE.getId());
+        registerArmorTemplate(BOOTS_CHAINMAIL_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, ArmorPartData.BOOTS_CHAINMAIL, 2, ModItems.BOOTS_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
         registerArmorTemplate(BOOTS_PLATE_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, ArmorPartData.BOOTS_PLATE, 2, ModItems.BOOTS_PLATE.getId());
         registerLeatherArmorTemplate(LEATHER_HELMET_TEMPLATE, ArmorConstructionData.HELMET_TYPE, "leather_helmet", 5);
         registerLeatherArmorTemplate(LEATHER_CHESTPLATE_TEMPLATE, ArmorConstructionData.CHESTPLATE_TYPE, "leather_chestplate", 8);
@@ -237,6 +237,14 @@ public final class ToolTypeRegistry {
         DATAPACK_STAT_MODIFIERS.clear();
     }
 
+    public static List<ToolStatRule> statRules() {
+        bootstrap();
+        List<ToolStatRule> rules = new ArrayList<>();
+        appendStatRules(rules, STAT_MODIFIERS);
+        appendStatRules(rules, DATAPACK_STAT_MODIFIERS);
+        return List.copyOf(rules);
+    }
+
     public static Optional<ToolTypeDefinition> toolType(ResourceLocation id) {
         bootstrap();
         return Optional.ofNullable(TOOL_TYPES.get(id));
@@ -314,6 +322,13 @@ public final class ToolTypeRegistry {
 
     private static ResourceLocation modLoc(String path) {
         return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, path);
+    }
+
+    private static void appendStatRules(List<ToolStatRule> rules, List<ToolStatModifier> modifiers) {
+        modifiers.stream()
+                .filter(ToolStatRule.class::isInstance)
+                .map(ToolStatRule.class::cast)
+                .forEach(rules::add);
     }
 
     @FunctionalInterface

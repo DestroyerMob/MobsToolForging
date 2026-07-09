@@ -1,7 +1,10 @@
 package org.destroyermob.mobstoolforging.integration.jei;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
@@ -36,6 +39,9 @@ import org.destroyermob.mobstoolforging.world.StationWorkRecipe;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolMaterialDefinition;
+import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
+import org.destroyermob.mobstoolforging.world.ToolStatRule;
+import org.destroyermob.mobstoolforging.world.ToolTrait;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
 
 @JeiPlugin
@@ -45,6 +51,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     public static final RecipeType<PatternCreationJeiRecipe> PATTERN_CREATION = RecipeType.create(MobsToolForging.MOD_ID, "pattern_creation", PatternCreationJeiRecipe.class);
     public static final RecipeType<HeatingJeiRecipe> HEATING = RecipeType.create(MobsToolForging.MOD_ID, "heating", HeatingJeiRecipe.class);
     public static final RecipeType<DryingJeiRecipe> DRYING = RecipeType.create(MobsToolForging.MOD_ID, "drying", DryingJeiRecipe.class);
+    public static final RecipeType<MaterialTraitInfoRecipe> MATERIAL_TRAITS = RecipeType.create(MobsToolForging.MOD_ID, "material_traits", MaterialTraitInfoRecipe.class);
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -59,7 +66,8 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 new StationWorkCategory(guiHelper),
                 new PatternCreationCategory(guiHelper),
                 new HeatingCategory(guiHelper),
-                new DryingCategory(guiHelper)
+                new DryingCategory(guiHelper),
+                new MaterialTraitInfoCategory(guiHelper)
         );
     }
 
@@ -70,6 +78,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         registration.addRecipes(PATTERN_CREATION, patternCreationRecipes());
         registration.addRecipes(HEATING, heatingRecipes());
         registration.addRecipes(DRYING, dryingRecipes());
+        registration.addRecipes(MATERIAL_TRAITS, materialTraitRecipes());
     }
 
     @Override
@@ -183,6 +192,104 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
+    }
+
+    private static List<MaterialTraitInfoRecipe> materialTraitRecipes() {
+        List<MaterialTraitInfoRecipe> recipes = new ArrayList<>();
+        for (ResourceLocation materialId : materialTraitMaterials()) {
+            List<ItemStack> inputs = MaterialCatalog.ingredientStacks(materialId);
+            if (inputs.isEmpty()) {
+                continue;
+            }
+            List<MaterialTraitInfoRecipe.TraitEntry> traits = materialTraitEntries(materialId);
+            if (traits.isEmpty()) {
+                continue;
+            }
+            recipes.add(new MaterialTraitInfoRecipe(
+                    recipeId("material_traits/" + idPath(materialId)),
+                    materialId,
+                    MaterialCatalog.displayName(materialId),
+                    inputs,
+                    traits
+            ));
+        }
+        return recipes;
+    }
+
+    private static List<ResourceLocation> materialTraitMaterials() {
+        LinkedHashSet<ResourceLocation> materials = new LinkedHashSet<>();
+        materials.addAll(MaterialCatalog.starterMaterialIds());
+        materials.addAll(MaterialCatalog.visualMaterialIds("headMaterial"));
+        materials.addAll(MaterialCatalog.visualMaterialIds("guardMaterial"));
+        materials.addAll(MaterialCatalog.visualMaterialIds("handleMaterial"));
+        materials.addAll(MaterialCatalog.visualMaterialIds("treatment"));
+        materials.add(MaterialCatalog.FLINT);
+        ToolTypeRegistry.statRules().stream()
+                .filter(rule -> !rule.traits().isEmpty())
+                .filter(MobsToolForgingJeiPlugin::hasSupportedTraitSource)
+                .map(ToolStatRule::material)
+                .forEach(materials::add);
+        return List.copyOf(materials);
+    }
+
+    private static List<MaterialTraitInfoRecipe.TraitEntry> materialTraitEntries(ResourceLocation materialId) {
+        Map<String, MaterialTraitInfoRecipe.TraitEntry> entries = new LinkedHashMap<>();
+        ToolStatBuilder.primaryTraitForMaterial(materialId)
+                .ifPresent(trait -> addTraitEntry(entries, trait.id(), primaryTraitSource(materialId)));
+        ToolStatBuilder.supportTraitsForMaterial(materialId)
+                .forEach(trait -> addTraitEntry(entries, trait.id(), traitSource("support")));
+        ToolTypeRegistry.statRules().stream()
+                .filter(rule -> materialId.equals(rule.material()))
+                .filter(MobsToolForgingJeiPlugin::hasSupportedTraitSource)
+                .forEach(rule -> rule.traits().forEach(trait -> addTraitEntry(entries, trait, statRuleSource(rule))));
+        return List.copyOf(entries.values());
+    }
+
+    private static boolean hasSupportedTraitSource(ToolStatRule rule) {
+        return switch (rule.slot()) {
+            case "head", "headMaterial", "head_base", "headBase", "core", "coreMaterial", "handle", "handleMaterial", "guard", "guardMaterial", "treatment", "any", "anyPart" -> true;
+            default -> false;
+        };
+    }
+
+    private static void addTraitEntry(Map<String, MaterialTraitInfoRecipe.TraitEntry> entries, ResourceLocation traitId, net.minecraft.network.chat.Component source) {
+        entries.putIfAbsent(traitId + "|" + source.getString(), new MaterialTraitInfoRecipe.TraitEntry(traitId, source));
+    }
+
+    private static net.minecraft.network.chat.Component primaryTraitSource(ResourceLocation materialId) {
+        if (MaterialCatalog.visualMaterialIds("handleMaterial").contains(materialId)) {
+            return traitSource("handle");
+        }
+        if (MaterialCatalog.visualMaterialIds("treatment").contains(materialId) && !MaterialCatalog.starterMaterialIds().contains(materialId)) {
+            return traitSource("treatment");
+        }
+        return traitSource("any_part");
+    }
+
+    private static net.minecraft.network.chat.Component statRuleSource(ToolStatRule rule) {
+        net.minecraft.network.chat.Component slot = switch (rule.slot()) {
+            case "head", "headMaterial" -> traitSource("head");
+            case "head_base", "headBase", "core", "coreMaterial" -> traitSource("core");
+            case "handle", "handleMaterial" -> traitSource("handle");
+            case "guard", "guardMaterial" -> traitSource("guard");
+            case "binding", "bindingMaterial" -> traitSource("binding");
+            case "wrap", "wrapMaterial" -> traitSource("wrap");
+            case "treatment" -> traitSource("treatment");
+            case "any", "anyPart" -> traitSource("any_part");
+            default -> net.minecraft.network.chat.Component.literal(rule.slot());
+        };
+        if (rule.toolType().isPresent()) {
+            return net.minecraft.network.chat.Component.translatable(
+                    "jei.mobstoolforging.material_traits.source.tool_slot",
+                    net.minecraft.network.chat.Component.literal(ToolTrait.fallbackName(rule.toolType().get())),
+                    slot
+            );
+        }
+        return slot;
+    }
+
+    private static net.minecraft.network.chat.Component traitSource(String key) {
+        return net.minecraft.network.chat.Component.translatable("jei.mobstoolforging.material_traits.source." + key);
     }
 
     private static Optional<PatternCreationJeiRecipe> patternCreationRecipe(ForgeTemplateDefinition template) {
@@ -316,5 +423,9 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     static ItemStack dryingRackIcon() {
         return new ItemStack(ModItems.DRYING_RACK.get());
+    }
+
+    static ItemStack materialTraitIcon() {
+        return new ItemStack(Items.EMERALD);
     }
 }

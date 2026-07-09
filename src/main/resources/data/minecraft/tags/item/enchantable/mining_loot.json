@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "mobstoolforging:shovel",
+    "mobstoolforging:pickaxe",
+    "mobstoolforging:axe",
+    "mobstoolforging:hoe",
+    "mobstoolforging:mattock"
+  ]
+}

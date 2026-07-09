@@ -80,7 +80,7 @@ public class PatternRackBlock extends BaseEntityBlock {
         if (level.getBlockEntity(pos) instanceof PatternRackBlockEntity rack && SmithingHammerLevel.isHammer(stack)) {
             if (!MobsToolForgingConfig.ENABLE_PATTERN_RACK.get()) {
                 if (!level.isClientSide) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_disabled"), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_disabled"));
                 }
                 return ItemInteractionResult.CONSUME;
             }
@@ -101,7 +101,7 @@ public class PatternRackBlock extends BaseEntityBlock {
         }
         if (!MobsToolForgingConfig.ENABLE_PATTERN_RACK.get()) {
             if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_disabled"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_disabled"));
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -110,11 +110,11 @@ public class PatternRackBlock extends BaseEntityBlock {
         }
         int installedSlot = rack.installPattern(slotFromHit(state, pos, hitResult), stack, player.getAbilities().instabuild);
         if (installedSlot < 0) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_full"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_full"));
             return ItemInteractionResult.CONSUME;
         }
         level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75F, 1.05F);
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_installed", rack.patternStack(installedSlot).getHoverName()), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_installed", rack.patternStack(installedSlot).getHoverName()));
         return ItemInteractionResult.CONSUME;
     }
 
@@ -125,7 +125,7 @@ public class PatternRackBlock extends BaseEntityBlock {
         }
         if (!MobsToolForgingConfig.ENABLE_PATTERN_RACK.get()) {
             if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_disabled"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_disabled"));
             }
             return InteractionResult.CONSUME;
         }
@@ -140,14 +140,14 @@ public class PatternRackBlock extends BaseEntityBlock {
         if (player.isShiftKeyDown()) {
             ItemStack removed = rack.removePattern(slot);
             if (removed.isEmpty()) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.no_pattern_selected"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.no_pattern_selected"));
                 return InteractionResult.CONSUME;
             }
             if (!player.getInventory().add(removed)) {
                 player.drop(removed, false);
             }
             level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.65F, 1.1F);
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_removed"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_removed"));
             return InteractionResult.CONSUME;
         }
         ItemStack pattern = rack.patternStack(slot);
@@ -168,14 +168,14 @@ public class PatternRackBlock extends BaseEntityBlock {
     private static void inspectPattern(Player player, ItemStack pattern) {
         ForgeTemplateDefinition template = PatternRackBlockEntity.template(pattern).orElse(null);
         if (template == null) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.no_pattern_selected"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.no_pattern_selected"));
             return;
         }
-        player.displayClientMessage(Component.translatable(
+        DebugFeedback.actionBar(player, Component.translatable(
                 "message.mobstoolforging.pattern_rack_inspect",
                 template.displayName(),
                 PatternRackSelection.compatibleStations(pattern, template)
-        ), true);
+        ));
     }
 
     static int slotFromHit(BlockState state, BlockPos pos, BlockHitResult hitResult) {

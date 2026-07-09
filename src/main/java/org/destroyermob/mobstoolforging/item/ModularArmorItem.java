@@ -42,7 +42,7 @@ public interface ModularArmorItem extends IItemExtension {
 
     @Override
     default boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
-        return allowsFinishedArmorEnchanting(stack, true) && IItemExtension.super.supportsEnchantment(stack, enchantment);
+        return !isBrokenArmor(stack) && IItemExtension.super.supportsEnchantment(stack, enchantment);
     }
 
     @Override

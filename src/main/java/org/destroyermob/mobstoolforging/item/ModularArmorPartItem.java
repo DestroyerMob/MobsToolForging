@@ -10,6 +10,7 @@ import net.minecraft.world.item.TooltipFlag;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.ToolStackNames;
 
 public class ModularArmorPartItem extends Item {
     private final String partType;
@@ -33,6 +34,9 @@ public class ModularArmorPartItem extends Item {
     public Component getName(ItemStack stack) {
         ArmorPartData data = stack.get(ModDataComponents.ARMOR_PART.get());
         if (data != null && partType.equals(data.partType())) {
+            if (data.coatingBaseMaterial().isPresent()) {
+                return ToolStackNames.coatedPartName(partType, data.coatingBaseMaterial().get(), data.materialId());
+            }
             return Component.translatable("item.mobstoolforging.material_" + partType, MaterialCatalog.displayName(data.materialId()));
         }
         return super.getName(stack);
@@ -61,6 +65,10 @@ public class ModularArmorPartItem extends Item {
         ArmorPartData data = stack.get(ModDataComponents.ARMOR_PART.get());
         if (data != null && partType.equals(data.partType())) {
             tooltip.add(Component.translatable("tooltip.mobstoolforging.armor_part_material", MaterialCatalog.displayName(data.materialId())).withStyle(ChatFormatting.DARK_GRAY));
+            data.coatingBaseMaterial().ifPresent(baseMaterial -> tooltip.add(Component.translatable(
+                    "tooltip.mobstoolforging.coating_base",
+                    MaterialCatalog.displayName(baseMaterial)
+            ).withStyle(ChatFormatting.DARK_GRAY)));
             tooltip.add(Component.translatable("tooltip.mobstoolforging.quality")
                     .withStyle(ChatFormatting.DARK_GRAY)
                     .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))

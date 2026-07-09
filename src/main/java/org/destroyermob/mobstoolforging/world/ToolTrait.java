@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 
 public enum ToolTrait {
+    STEADY("steady", ChatFormatting.DARK_GREEN, "handling"),
     STURDY("sturdy", ChatFormatting.BLUE, "handling"),
     SWIFT("swift", ChatFormatting.AQUA, "handling"),
     KINDLED("kindled", ChatFormatting.GOLD, "handling"),
@@ -24,6 +25,8 @@ public enum ToolTrait {
     STABILIZED("stabilized", ChatFormatting.AQUA, "structure"),
     NETHER_FORGED("nether_forged", ChatFormatting.DARK_RED, "structure"),
     FORTUNATE("fortunate", ChatFormatting.GREEN, "affinity"),
+    KEEN("keen", ChatFormatting.RED, "edge"),
+    JAGGED("jagged", ChatFormatting.DARK_GRAY, "edge"),
     SURE_GRIP("sure_grip", ChatFormatting.DARK_GREEN, "handling"),
     FOCUSED("focused", ChatFormatting.LIGHT_PURPLE, "affinity"),
     NETHER_TREATED("nether_treated", ChatFormatting.RED, "treatment"),

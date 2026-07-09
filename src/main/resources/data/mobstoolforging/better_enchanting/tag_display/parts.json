@@ -14,6 +14,51 @@
       "tag": "mobstoolforging:parts/guards",
       "label": "Guard",
       "color": "#ff6464"
+    },
+    {
+      "tag": "mobstoolforging:parts/armor",
+      "label": "Armor Part",
+      "color": "#8fc7ff"
+    },
+    {
+      "tag": "mobstoolforging:parts/helmet_chainmail",
+      "label": "Helmet Base",
+      "color": "#b9c7d6"
+    },
+    {
+      "tag": "mobstoolforging:parts/helmet_plate",
+      "label": "Helmet Plate",
+      "color": "#7ed7c1"
+    },
+    {
+      "tag": "mobstoolforging:parts/chestplate_chainmail",
+      "label": "Chestplate Base",
+      "color": "#b9c7d6"
+    },
+    {
+      "tag": "mobstoolforging:parts/chestplate_body",
+      "label": "Body Plate",
+      "color": "#7ed7c1"
+    },
+    {
+      "tag": "mobstoolforging:parts/leggings_chainmail",
+      "label": "Leggings Base",
+      "color": "#b9c7d6"
+    },
+    {
+      "tag": "mobstoolforging:parts/leggings_plate",
+      "label": "Leggings Plate",
+      "color": "#7ed7c1"
+    },
+    {
+      "tag": "mobstoolforging:parts/boots_chainmail",
+      "label": "Boots Base",
+      "color": "#b9c7d6"
+    },
+    {
+      "tag": "mobstoolforging:parts/boots_plate",
+      "label": "Boots Plate",
+      "color": "#7ed7c1"
     }
   ]
 }

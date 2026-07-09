@@ -10,6 +10,11 @@ public final class ArmorExternalComponents {
     }
 
     public static void copyArmorPartComponentsToArmor(ItemStack basePart, ItemStack platePart, ItemStack armor) {
+        ArmorConstructionData construction = armor.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
+        ArmorPartData plateData = platePart.get(ModDataComponents.ARMOR_PART.get());
+        if (construction != null && plateData != null && plateData.coatingBaseMaterial().isPresent()) {
+            armor.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction.withOverlayBaseMaterial(plateData.coatingBaseMaterial()));
+        }
         ToolExternalComponents.copyCompatibleExternalComponents(basePart, armor);
         ToolExternalComponents.copyCompatibleExternalComponents(platePart, armor);
     }

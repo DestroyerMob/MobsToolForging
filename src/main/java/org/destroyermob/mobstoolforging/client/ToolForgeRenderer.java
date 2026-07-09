@@ -442,7 +442,7 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
                 CAMPFIRE_ITEM_SCALE * 0.86F,
                 0.24F,
                 SpreadAxis.X,
-                0.5F,
+                -0.5F,
                 0.0F,
                 0.0F,
                 0.0F,

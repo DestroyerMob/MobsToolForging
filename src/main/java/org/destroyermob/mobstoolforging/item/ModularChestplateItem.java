@@ -125,6 +125,10 @@ public class ModularChestplateItem extends ArmorItem implements ModularArmorItem
                 "tooltip.mobstoolforging.armor_part.plate",
                 construction.chestplatePlateMaterial().map(MaterialCatalog::displayName).orElseGet(() -> Component.translatable("tooltip.mobstoolforging.none"))
         ).withStyle(ChatFormatting.DARK_GRAY));
+        construction.overlayBaseMaterial().ifPresent(base -> tooltip.add(Component.translatable(
+                "tooltip.mobstoolforging.coating_base",
+                MaterialCatalog.displayName(base)
+        ).withStyle(ChatFormatting.DARK_GRAY)));
     }
 
     @Override

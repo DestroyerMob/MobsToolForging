@@ -80,7 +80,7 @@ public class DryingRackBlock extends BaseEntityBlock {
         }
         if (rack.hasItem()) {
             if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.drying_rack_busy"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.drying_rack_busy"));
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -92,7 +92,7 @@ public class DryingRackBlock extends BaseEntityBlock {
         }
         if (rack.place(stack, player.getAbilities().instabuild)) {
             level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.65F, 1.0F);
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.drying_rack_started"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.drying_rack_started"));
         }
         return ItemInteractionResult.CONSUME;
     }
@@ -107,7 +107,7 @@ public class DryingRackBlock extends BaseEntityBlock {
         }
         ItemStack removed = rack.removeItem();
         if (removed.isEmpty()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.drying_rack_empty"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.drying_rack_empty"));
             return InteractionResult.CONSUME;
         }
         if (!player.getInventory().add(removed)) {

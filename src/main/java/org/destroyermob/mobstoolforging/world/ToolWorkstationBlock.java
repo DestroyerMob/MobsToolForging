@@ -122,13 +122,13 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (stack.getItem() instanceof ToolTemplateItem templateItem) {
             if (kind == WorkstationKind.LAPIDARY_TABLE) {
                 if (!level.isClientSide) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_use_heated_part"), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.lapidary_use_heated_part"));
                 }
                 return ItemInteractionResult.CONSUME;
             }
             if (!MobsToolForgingConfig.ALLOW_DIRECT_PATTERN_STATION_SELECTION.get()) {
                 if (!level.isClientSide) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_select"), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_select"));
                 }
                 return ItemInteractionResult.CONSUME;
             }
@@ -143,7 +143,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
             if (ArmorForgeAttachment.isArmorStack(stack)) {
                 if (!level.isClientSide) {
-                    player.displayClientMessage(Component.translatable(forge.hasPlacedWork() ? "message.mobstoolforging.forge_busy" : "message.mobstoolforging.armor_attachment_wrong_target"), true);
+                    DebugFeedback.actionBar(player, Component.translatable(forge.hasPlacedWork() ? "message.mobstoolforging.forge_busy" : "message.mobstoolforging.armor_attachment_wrong_target"));
                 }
                 return ItemInteractionResult.CONSUME;
             }
@@ -164,7 +164,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (kind == WorkstationKind.LAPIDARY_TABLE && SmithingHammerLevel.isHammer(stack)) {
             if (MobsToolForgingConfig.GEMCUTTERS_FILE_REQUIRED.get()) {
                 if (!level.isClientSide) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_needs_knife"), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.lapidary_needs_knife"));
                 }
                 return ItemInteractionResult.CONSUME;
             }
@@ -198,9 +198,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                 }
                 if (!level.isClientSide) {
                     if (forge.hasBenchStacks()) {
-                        player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_status", forge.benchStacks().size()), true);
+                        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_status", forge.benchStacks().size()));
                     } else {
-                        player.displayClientMessage(Component.translatable("message.mobstoolforging.use_toolmakers_bench"), true);
+                        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.use_toolmakers_bench"));
                     }
                 }
                 return InteractionResult.CONSUME;
@@ -208,7 +208,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             if (kind == WorkstationKind.LAPIDARY_TABLE && forge.canHammer()) {
                 if (MobsToolForgingConfig.GEMCUTTERS_FILE_REQUIRED.get()) {
                     if (!level.isClientSide) {
-                        player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_needs_knife"), true);
+                        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.lapidary_needs_knife"));
                     }
                     return InteractionResult.CONSUME;
                 }
@@ -217,13 +217,13 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
             if (ArmorForgeAttachment.isAttachmentStation(kind) && forge.hasArmorAttachmentTarget()) {
                 if (!level.isClientSide) {
-                    player.displayClientMessage(ArmorForgeAttachment.statusMessage(forge), true);
+                    DebugFeedback.actionBar(player, ArmorForgeAttachment.statusMessage(forge));
                 }
                 return InteractionResult.CONSUME;
             }
             if (isRepairStation(kind) && forge.hasBenchStacks()) {
                 if (!level.isClientSide) {
-                    player.displayClientMessage(Component.translatable(forge.hasRepairWork() ? "message.mobstoolforging.tool_repair_ready" : "message.mobstoolforging.tool_repair_needs_material"), true);
+                    DebugFeedback.actionBar(player, Component.translatable(forge.hasRepairWork() ? "message.mobstoolforging.tool_repair_ready" : "message.mobstoolforging.tool_repair_needs_material"));
                 }
                 return InteractionResult.CONSUME;
             }
@@ -236,21 +236,21 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             if (!level.isClientSide) {
                 StationWorkRecipe recipe = forge.looseWorkRecipe();
                 if (recipe != null) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.station_status", forge.materialCount(), recipe.input().count(), forge.hitCount(), recipe.requiredHits()), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.station_status", forge.materialCount(), recipe.input().count(), forge.hitCount(), recipe.requiredHits()));
                 } else if (kind == WorkstationKind.LAPIDARY_TABLE && forge.hasLapidaryCoatingBase()) {
-                    player.displayClientMessage(Component.translatable(
+                    DebugFeedback.actionBar(player, Component.translatable(
                             "message.mobstoolforging.lapidary_coating_status",
                             forge.materialCount(),
                             forge.lapidaryCoatingRequiredMaterials(),
                             forge.hitCount(),
                             forge.lapidaryCoatingRequiredHits()
-                    ), true);
+                    ));
                 } else if (kind == WorkstationKind.LAPIDARY_TABLE && forge.template() == null) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_use_heated_part"), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.lapidary_use_heated_part"));
                 } else if (forge.template() == null) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.select_template"), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.select_template"));
                 } else if (forge.hasMaterialHeat()) {
-                    player.displayClientMessage(Component.translatable(
+                    DebugFeedback.actionBar(player, Component.translatable(
                             "message.mobstoolforging.station_heat_status",
                             forge.materialCount(),
                             forge.template().requiredMaterials(),
@@ -258,9 +258,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                             forge.template().requiredHits(),
                             Math.round(forge.materialHeatTemperature() * 100.0F),
                             Component.translatable("tooltip.mobstoolforging.workpiece_status." + forge.materialHeatStatusKey())
-                    ), true);
+                    ));
                 } else {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.station_status", forge.materialCount(), forge.template().requiredMaterials(), forge.hitCount(), forge.template().requiredHits()), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.station_status", forge.materialCount(), forge.template().requiredMaterials(), forge.hitCount(), forge.template().requiredHits()));
                 }
             }
             return InteractionResult.CONSUME;
@@ -327,7 +327,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         if (!level.isClientSide) {
             forge.clearTemplate();
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_missing"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_missing"));
         }
         return true;
     }
@@ -381,7 +381,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         ForgeTemplateDefinition template = templateItem.template(stack).orElse(null);
         if (template == null) {
             if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.invalid_template_pattern"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.invalid_template_pattern"));
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -389,15 +389,15 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return ItemInteractionResult.SUCCESS;
         }
         if (!PatternRackSelection.canAssign(stack, template, kind)) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_wrong_station"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_wrong_station"));
             return ItemInteractionResult.CONSUME;
         }
         if (!forge.setTemplateFromItem(template)) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.forge_busy"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.forge_busy"));
             return ItemInteractionResult.CONSUME;
         }
         level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75F, 1.1F + level.random.nextFloat() * 0.1F);
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.template_selected", template.displayName()), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.template_selected", template.displayName()));
         return ItemInteractionResult.CONSUME;
     }
 
@@ -414,33 +414,33 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return placeLapidaryCoatingMaterial(stack, material, forge, level, pos, player);
         }
         if (template == null) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.select_template"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.select_template"));
             return ItemInteractionResult.CONSUME;
         }
         if (material.category() != kind.materialCategory()) {
-            player.displayClientMessage(Component.translatable(kind.wrongStationMessage()), true);
+            DebugFeedback.actionBar(player, Component.translatable(kind.wrongStationMessage()));
             return ItemInteractionResult.CONSUME;
         }
         if (!template.allowsMaterial(material.id())) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.material_not_allowed"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.material_not_allowed"));
             return ItemInteractionResult.CONSUME;
         }
         ResourceLocation missingAbrasiveTier = kind == WorkstationKind.LAPIDARY_TABLE
                 ? forge.missingRequiredLapidaryAbrasive(material).orElse(null)
                 : null;
         if (missingAbrasiveTier != null) {
-            player.displayClientMessage(lapidaryNeedsAbrasiveMessage(missingAbrasiveTier), true);
+            DebugFeedback.actionBar(player, lapidaryNeedsAbrasiveMessage(missingAbrasiveTier));
             return ItemInteractionResult.CONSUME;
         }
         if (kind.isSmithingAnvilLike()
                 && material.category() == MaterialCategory.METAL
                 && MobsToolForgingConfig.REQUIRE_HEATED_METAL.get()
                 && !forge.canStartMetalWork(stack, material)) {
-            player.displayClientMessage(metalNeedsHeatMessage(template, stack, level), true);
+            DebugFeedback.actionBar(player, metalNeedsHeatMessage(template, stack, level));
             return ItemInteractionResult.CONSUME;
         }
         if (forge.materialId() != null && !forge.materialId().equals(material.id())) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.mixed_materials"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.mixed_materials"));
             return ItemInteractionResult.CONSUME;
         }
         int taken = forge.acceptMaterials(stationInputStack(stack, player, forge.remainingMaterials()), material);
@@ -448,11 +448,11 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.8F, 0.9F + level.random.nextFloat() * 0.15F);
             player.awardStat(Stats.ITEM_USED.get(material.displayItem()));
             if (ArmorForgeAttachment.isAttachmentTemplate(template) && forge.hasArmorAttachmentTarget()) {
-                player.displayClientMessage(ArmorForgeAttachment.statusMessage(forge), true);
+                DebugFeedback.actionBar(player, ArmorForgeAttachment.statusMessage(forge));
             }
             return ItemInteractionResult.CONSUME;
         }
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.materials_full"), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.materials_full"));
         return ItemInteractionResult.CONSUME;
     }
 
@@ -462,50 +462,50 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         if (!forge.canPlaceLapidaryBasePart(stack)) {
             boolean needsHeat = !WorkpieceHeat.isHot(stack, level);
-            player.displayClientMessage(Component.translatable(
+            DebugFeedback.actionBar(player, Component.translatable(
                     needsHeat ? "message.mobstoolforging.lapidary_part_needs_heat" : "message.mobstoolforging.forge_busy"
-            ), true);
+            ));
             return ItemInteractionResult.CONSUME;
         }
         var item = stack.getItem();
         if (forge.placeLapidaryBasePart(stationInputStack(stack, player, 1))) {
             level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.8F, 1.0F + level.random.nextFloat() * 0.15F);
             player.awardStat(Stats.ITEM_USED.get(item));
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_part_placed"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.lapidary_part_placed"));
         }
         return ItemInteractionResult.CONSUME;
     }
 
     private ItemInteractionResult placeLapidaryCoatingMaterial(ItemStack stack, ToolMaterialDefinition material, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
         if (material.category() != MaterialCategory.GEM) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_needs_gem"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.lapidary_needs_gem"));
             return ItemInteractionResult.CONSUME;
         }
         if (!forge.hasLapidaryCoatingBase()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_use_heated_part"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.lapidary_use_heated_part"));
             return ItemInteractionResult.CONSUME;
         }
         ResourceLocation missingAbrasiveTier = forge.missingRequiredLapidaryAbrasive(material).orElse(null);
         if (missingAbrasiveTier != null) {
-            player.displayClientMessage(lapidaryNeedsAbrasiveMessage(missingAbrasiveTier), true);
+            DebugFeedback.actionBar(player, lapidaryNeedsAbrasiveMessage(missingAbrasiveTier));
             return ItemInteractionResult.CONSUME;
         }
         if (forge.materialId() != null && !forge.materialId().equals(material.id())) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.mixed_materials"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.mixed_materials"));
             return ItemInteractionResult.CONSUME;
         }
         int taken = forge.acceptLapidaryCoatingMaterial(stationInputStack(stack, player, forge.remainingMaterials()), material);
         if (taken > 0) {
             level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.8F, 1.15F + level.random.nextFloat() * 0.15F);
             player.awardStat(Stats.ITEM_USED.get(material.displayItem()));
-            player.displayClientMessage(Component.translatable(
+            DebugFeedback.actionBar(player, Component.translatable(
                     "message.mobstoolforging.lapidary_shell_material_placed",
                     forge.materialCount(),
                     forge.lapidaryCoatingRequiredMaterials()
-            ), true);
+            ));
             return ItemInteractionResult.CONSUME;
         }
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.materials_full"), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.materials_full"));
         return ItemInteractionResult.CONSUME;
     }
 
@@ -523,12 +523,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             if (forge.canChangeTemplate()) {
                 if (!level.isClientSide && forge.clearTemplate()) {
                     level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.6F, 1.15F);
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.template_cleared"), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.template_cleared"));
                 }
                 return InteractionResult.sidedSuccess(level.isClientSide);
             }
             if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.forge_busy"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.forge_busy"));
             }
             return InteractionResult.CONSUME;
         }
@@ -538,12 +538,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         if (isPatternRackSelectable(kind)) {
             if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.no_pattern_selected"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.no_pattern_selected"));
             }
             return InteractionResult.CONSUME;
         }
         if (!level.isClientSide) {
-            player.displayClientMessage(Component.translatable(kind == WorkstationKind.TOOLMAKERS_BENCH ? "message.mobstoolforging.use_toolmakers_bench" : "message.mobstoolforging.sneak_hint"), true);
+            DebugFeedback.actionBar(player, Component.translatable(kind == WorkstationKind.TOOLMAKERS_BENCH ? "message.mobstoolforging.use_toolmakers_bench" : "message.mobstoolforging.no_pattern_selected"));
         }
         return InteractionResult.CONSUME;
     }
@@ -558,12 +558,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         var item = stack.getItem();
         if (!forge.placeAbrasive(stationInputStack(stack, player, 1))) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_abrasive_present"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.lapidary_abrasive_present"));
             return ItemInteractionResult.CONSUME;
         }
         level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.65F, 1.35F);
         player.awardStat(Stats.ITEM_USED.get(item));
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.lapidary_abrasive_placed"), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.lapidary_abrasive_placed"));
         return ItemInteractionResult.CONSUME;
     }
 
@@ -573,12 +573,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         var item = stack.getItem();
         if (!forge.placeArmorAttachmentTarget(stationInputStack(stack, player, 1))) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.armor_attachment_wrong_target"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.armor_attachment_wrong_target"));
             return ItemInteractionResult.CONSUME;
         }
         level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75F, 1.05F);
         player.awardStat(Stats.ITEM_USED.get(item));
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.armor_attachment_target_placed"), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.armor_attachment_target_placed"));
         return ItemInteractionResult.CONSUME;
     }
 
@@ -596,7 +596,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
             level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.7F, 1.0F + level.random.nextFloat() * 0.1F);
             player.awardStat(Stats.ITEM_USED.get(item));
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.tool_repair_tool_placed"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.tool_repair_tool_placed"));
             return ItemInteractionResult.CONSUME;
         }
         if (forge.canPlaceRepairMaterial(stack)) {
@@ -609,7 +609,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
             level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.7F, 1.0F + level.random.nextFloat() * 0.1F);
             player.awardStat(Stats.ITEM_USED.get(item));
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.tool_repair_material_placed"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.tool_repair_material_placed"));
             return ItemInteractionResult.CONSUME;
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -623,9 +623,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (forge.placeLooseWork(recipe, stationInputStack(stack, player, recipe.input().count()))) {
             level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75F, 1.05F);
             player.awardStat(Stats.ITEM_USED.get(item));
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.station_work_placed"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.station_work_placed"));
         } else {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.need_materials"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.need_materials"));
         }
         return ItemInteractionResult.CONSUME;
     }
@@ -640,9 +640,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
             if (!level.isClientSide) {
                 if (forge.hasBenchStacks()) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_status", forge.benchStacks().size()), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_status", forge.benchStacks().size()));
                 } else {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.use_toolmakers_bench"), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.use_toolmakers_bench"));
                 }
             }
             return ItemInteractionResult.CONSUME;
@@ -658,7 +658,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return placeToolmakerStack(stack, forge, level, pos, player);
         }
         if (!level.isClientSide) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_invalid"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_invalid"));
         }
         return ItemInteractionResult.CONSUME;
     }
@@ -669,12 +669,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         var item = stack.getItem();
         if (!forge.placeToolmakerStack(stationInputStack(stack, player, 1))) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_invalid"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_invalid"));
             return ItemInteractionResult.CONSUME;
         }
         level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.7F, 1.0F + level.random.nextFloat() * 0.1F);
         player.awardStat(Stats.ITEM_USED.get(item));
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_part_placed"), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_part_placed"));
         return ItemInteractionResult.CONSUME;
     }
 
@@ -684,12 +684,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         ItemStack output = ToolmakerBenchAssembly.assemble(forge.benchStacks(), level.registryAccess());
         if (output.isEmpty()) {
-            player.displayClientMessage(Component.translatable(forge.hasBenchStacks() ? "message.mobstoolforging.toolmaker_invalid" : "message.mobstoolforging.toolmaker_needs_parts"), true);
+            DebugFeedback.actionBar(player, Component.translatable(forge.hasBenchStacks() ? "message.mobstoolforging.toolmaker_invalid" : "message.mobstoolforging.toolmaker_needs_parts"));
             return ItemInteractionResult.CONSUME;
         }
         forge.setToolmakerStacks(List.of(output));
         playWorkEffects(tool, level, pos, player);
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_assembled"), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_assembled"));
         return ItemInteractionResult.CONSUME;
     }
 
@@ -699,18 +699,18 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         List<ItemStack> benchStacks = forge.benchStacks();
         if (benchStacks.size() != 1 || !ToolmakerBenchAssembly.isFinishedTool(benchStacks.get(0))) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_no_tool"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_no_tool"));
             return ItemInteractionResult.CONSUME;
         }
         ItemStack benchTool = benchStacks.get(0);
         if (Boolean.TRUE.equals(benchTool.get(ModDataComponents.TOOL_BROKEN.get()))
                 || Boolean.TRUE.equals(benchTool.get(ModDataComponents.ARMOR_BROKEN.get()))) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_broken_tool"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_broken_tool"));
             return ItemInteractionResult.CONSUME;
         }
         List<ItemStack> parts = ToolmakerBenchAssembly.disassemble(benchTool).orElse(List.of());
         if (parts.isEmpty()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_invalid"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_invalid"));
             return ItemInteractionResult.CONSUME;
         }
         forge.setToolmakerStacks(parts);
@@ -723,7 +723,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
         }
         playWorkEffects(tool, level, pos, player);
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.toolmaker_disassembled"), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_disassembled"));
         return ItemInteractionResult.CONSUME;
     }
 
@@ -741,7 +741,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             forge.clearToolmakerStacks();
             level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.0F);
         } else {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.inventory_full"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.inventory_full"));
         }
         return true;
     }
@@ -760,25 +760,25 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return workStationRecipe(stack, hammerLevel, forge, level, pos, player);
         }
         if (!forge.canHammer()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.need_materials"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.need_materials"));
             return ItemInteractionResult.CONSUME;
         }
         ForgeTemplateDefinition template = forge.template();
         int requiredHammerLevel = template == null || forge.materialId() == null ? SmithingHammerLevel.STONE.level() : template.minimumHammerLevel(forge.materialId());
         if (hammerLevel < requiredHammerLevel) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.hammer_too_weak", SmithingHammerLevel.displayName(requiredHammerLevel)), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.hammer_too_weak", SmithingHammerLevel.displayName(requiredHammerLevel)));
             return ItemInteractionResult.CONSUME;
         }
         if (kind.isSmithingAnvilLike() && MobsToolForgingConfig.REQUIRE_HEATED_METAL.get() && !forge.materialIsForgeReady()) {
             if (template == null || !forge.hasMaterialHeat()) {
-                player.displayClientMessage(template == null ? Component.translatable("message.mobstoolforging.metal_needs_heat") : metalNeedsHeatMessage(template), true);
+                DebugFeedback.actionBar(player, template == null ? Component.translatable("message.mobstoolforging.metal_needs_heat") : metalNeedsHeatMessage(template));
             } else {
-                player.displayClientMessage(Component.translatable(
+                DebugFeedback.actionBar(player, Component.translatable(
                         "message.mobstoolforging.metal_needs_heat_current",
                         Math.round(forge.materialHeatTemperature() * 100.0F),
                         Math.round(template.minimumTemperature() * 100.0F),
                         Component.translatable("tooltip.mobstoolforging.workpiece_status." + forge.materialHeatStatusKey())
-                ), true);
+                ));
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -792,7 +792,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                         : kind == WorkstationKind.LAPIDARY_TABLE && forge.hasLapidaryCoatingBase()
                         ? "message.mobstoolforging.lapidary_coating_complete"
                         : "message.mobstoolforging.complete";
-                player.displayClientMessage(Component.translatable(completeKey), true);
+                DebugFeedback.actionBar(player, Component.translatable(completeKey));
             }
         }
         return ItemInteractionResult.CONSUME;
@@ -801,28 +801,28 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
     private ItemInteractionResult repairTool(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
         ItemStack output = forge.repairToolWithPlacedMaterial();
         if (output.isEmpty()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.need_materials"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.need_materials"));
             return ItemInteractionResult.CONSUME;
         }
         playWorkEffects(stack, level, pos, player);
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.tool_repaired"), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.tool_repaired"));
         return ItemInteractionResult.CONSUME;
     }
 
     private ItemInteractionResult workStationRecipe(ItemStack stack, int hammerLevel, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
         StationWorkRecipe recipe = forge.looseWorkRecipe();
         if (recipe == null) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.station_work_missing"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.station_work_missing"));
             return ItemInteractionResult.CONSUME;
         }
         if (hammerLevel < recipe.minimumHammerLevel()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.hammer_too_weak", SmithingHammerLevel.displayName(recipe.minimumHammerLevel())), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.hammer_too_weak", SmithingHammerLevel.displayName(recipe.minimumHammerLevel())));
             return ItemInteractionResult.CONSUME;
         }
         if (forge.hammerLooseWork(recipe)) {
             playWorkEffects(stack, level, pos, player);
             if (forge.isComplete()) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.station_work_ready"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.station_work_ready"));
             }
         }
         return ItemInteractionResult.CONSUME;
@@ -854,7 +854,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             }
         }
         level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.55F, 1.05F);
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.station_cleared"), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.station_cleared"));
         return true;
     }
 
@@ -870,7 +870,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             forge.removeOutput();
             player.level().playSound(null, forge.getBlockPos(), net.minecraft.sounds.SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.0F);
         } else {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.inventory_full"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.inventory_full"));
         }
         return true;
     }

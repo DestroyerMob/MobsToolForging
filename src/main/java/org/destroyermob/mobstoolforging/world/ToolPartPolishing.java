@@ -53,6 +53,6 @@ public final class ToolPartPolishing {
                     0.02D
             );
         }
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.part_polished", stack.getHoverName()), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.part_polished", stack.getHoverName()));
     }
 }

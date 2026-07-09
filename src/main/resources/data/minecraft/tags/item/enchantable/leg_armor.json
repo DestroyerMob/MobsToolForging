@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "mobstoolforging:modular_leggings",
+    "#mobstoolforging:parts/leggings_chainmail",
+    "#mobstoolforging:parts/leggings_plate"
+  ]
+}

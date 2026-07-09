@@ -24,6 +24,7 @@ import org.destroyermob.mobstoolforging.world.ArmorStatsCatalog;
 import org.destroyermob.mobstoolforging.world.ForgingQuality;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolAssemblyEnchantments;
+import org.destroyermob.mobstoolforging.world.ToolAssemblyParts;
 import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 public class ModularArmorRecipe extends CustomRecipe {
@@ -53,6 +54,8 @@ public class ModularArmorRecipe extends CustomRecipe {
             return ItemStack.EMPTY;
         }
         ArmorExternalComponents.copyArmorPartComponentsToArmor(parts.base, parts.plate, output);
+        output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts.stacks()));
+        ToolAssemblyEnchantments.syncRoutedToolEnchantments(output, registries);
         return output;
     }
 

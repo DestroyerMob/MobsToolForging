@@ -44,9 +44,9 @@ public final class CampfireWorkpieceHeating {
 
         if (insertWorkpiece(campfire, event.getEntity(), stack, level, event.getPos())) {
             event.getEntity().setItemInHand(event.getHand(), stack);
-            event.getEntity().displayClientMessage(Component.translatable("message.mobstoolforging.campfire_workpiece_placed"), true);
+            DebugFeedback.actionBar(event.getEntity(), Component.translatable("message.mobstoolforging.campfire_workpiece_placed"));
         } else {
-            event.getEntity().displayClientMessage(Component.translatable("message.mobstoolforging.campfire_workpiece_full"), true);
+            DebugFeedback.actionBar(event.getEntity(), Component.translatable("message.mobstoolforging.campfire_workpiece_full"));
         }
     }
 
@@ -109,6 +109,9 @@ public final class CampfireWorkpieceHeating {
         if (heated) {
             campfire.setChanged();
             campfireHeatEffects(level, pos);
+            if (!released && level.getGameTime() % 20L == 0L) {
+                syncCampfireTimerToClients(level, pos, state);
+            }
         }
         if (released) {
             markCampfireUpdated(level, pos, state, campfire);
@@ -220,6 +223,10 @@ public final class CampfireWorkpieceHeating {
         campfire.setChanged();
         level.sendBlockUpdated(pos, state, state, 3);
         level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(state));
+    }
+
+    private static void syncCampfireTimerToClients(Level level, BlockPos pos, BlockState state) {
+        level.sendBlockUpdated(pos, state, state, 3);
     }
 
     private static float temperatureStep(float targetTemperature, int ticks) {

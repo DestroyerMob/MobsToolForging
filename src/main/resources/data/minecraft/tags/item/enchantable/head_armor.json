@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "mobstoolforging:modular_helmet",
+    "#mobstoolforging:parts/helmet_chainmail",
+    "#mobstoolforging:parts/helmet_plate"
+  ]
+}

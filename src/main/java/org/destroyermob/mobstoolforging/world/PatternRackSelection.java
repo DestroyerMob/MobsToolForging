@@ -36,7 +36,7 @@ public final class PatternRackSelection {
                 kind,
                 player.level().getGameTime() + PENDING_TICKS
         ));
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_select"), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_select"));
     }
 
     public static void beginRackLink(Player player, Level level, BlockPos rackPos) {
@@ -46,7 +46,7 @@ public final class PatternRackSelection {
                 level.getGameTime() + PENDING_TICKS
         ));
         if (!level.isClientSide) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_link_select_station"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_link_select_station"));
         }
     }
 
@@ -68,35 +68,35 @@ public final class PatternRackSelection {
             return false;
         }
         if (!isPatternRackSelectable(kind)) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_wrong_station"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_wrong_station"));
             return true;
         }
         if (!(level.getBlockEntity(link.rackPos()) instanceof PatternRackBlockEntity)) {
             PENDING_RACK_LINKS.remove(player.getUUID());
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_missing"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_missing"));
             return true;
         }
         if (!isInRange(stationPos, link.rackPos())) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_too_far"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_too_far"));
             return true;
         }
         ToolForgeBlockEntity.PatternRackLinkResult result = forge.linkPatternRack(link.rackPos());
         if (result == ToolForgeBlockEntity.PatternRackLinkResult.FULL) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_link_station_full", ToolForgeBlockEntity.maxLinkedPatternRacks()), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_link_station_full", ToolForgeBlockEntity.maxLinkedPatternRacks()));
             return true;
         }
         PENDING_RACK_LINKS.remove(player.getUUID());
         if (result == ToolForgeBlockEntity.PatternRackLinkResult.ALREADY_LINKED) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_already_linked"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_already_linked"));
             return true;
         }
         level.playSound(null, stationPos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75F, 1.15F);
-        player.displayClientMessage(Component.translatable(
+        DebugFeedback.actionBar(player, Component.translatable(
                 "message.mobstoolforging.pattern_rack_linked",
                 stationName(kind),
                 forge.linkedRackCount(),
                 ToolForgeBlockEntity.maxLinkedPatternRacks()
-        ), true);
+        ));
         return true;
     }
 
@@ -115,7 +115,7 @@ public final class PatternRackSelection {
             if (!MobsToolForgingConfig.ENABLE_PATTERN_RACK.get()) {
                 consume(event);
                 if (!level.isClientSide) {
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_disabled"), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_disabled"));
                 }
                 return;
             }
@@ -170,7 +170,7 @@ public final class PatternRackSelection {
         event.setCanceled(true);
         if (!MobsToolForgingConfig.ENABLE_PATTERN_RACK.get()) {
             if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_disabled"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_disabled"));
             }
             return;
         }
@@ -189,36 +189,36 @@ public final class PatternRackSelection {
             return false;
         }
         if (slot < 0 || pattern.isEmpty()) {
-            serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.no_pattern_selected"), true);
+            DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.no_pattern_selected"));
             return true;
         }
         if (!isInRange(selection.stationPos(), rackPos)) {
-            serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_too_far"), true);
+            DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.pattern_rack_too_far"));
             return true;
         }
         if (!(level.getBlockEntity(selection.stationPos()) instanceof ToolForgeBlockEntity forge)
                 || !(level.getBlockState(selection.stationPos()).getBlock() instanceof ToolWorkstationBlock workstation)
                 || workstation.kind() != selection.kind()) {
             PENDING.remove(serverPlayer.getUUID());
-            serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.no_pattern_selected"), true);
+            DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.no_pattern_selected"));
             return true;
         }
         ForgeTemplateDefinition template = PatternRackBlockEntity.template(pattern).orElse(null);
         if (template == null || !canAssign(pattern, template, selection.kind())) {
-            serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_wrong_station"), true);
+            DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.pattern_wrong_station"));
             return true;
         }
         if (!forge.setTemplateFromRack(template, rackPos, slot)) {
-            serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.forge_busy"), true);
+            DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.forge_busy"));
             return true;
         }
         PENDING.remove(serverPlayer.getUUID());
         level.playSound(null, selection.stationPos(), SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75F, 1.1F);
-        serverPlayer.displayClientMessage(Component.translatable(
+        DebugFeedback.actionBar(serverPlayer, Component.translatable(
                 "message.mobstoolforging.station_pattern_set",
                 stationName(selection.kind()),
                 template.displayName()
-        ), true);
+        ));
         return true;
     }
 
@@ -227,12 +227,12 @@ public final class PatternRackSelection {
             return false;
         }
         if (slot < 0 || pattern.isEmpty()) {
-            serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.no_pattern_selected"), true);
+            DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.no_pattern_selected"));
             return true;
         }
         ForgeTemplateDefinition template = PatternRackBlockEntity.template(pattern).orElse(null);
         if (template == null) {
-            serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.invalid_template_pattern"), true);
+            DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.invalid_template_pattern"));
             return true;
         }
 
@@ -271,21 +271,21 @@ public final class PatternRackSelection {
         }
         if (changedStations > 0) {
             if (busyStations > 0) {
-                serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_linked_set_some", template.displayName(), changedStations, busyStations), true);
+                DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.pattern_rack_linked_set_some", template.displayName(), changedStations, busyStations));
             } else {
-                serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_linked_set", template.displayName(), changedStations), true);
+                DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.pattern_rack_linked_set", template.displayName(), changedStations));
             }
             return true;
         }
         if (busyStations > 0) {
-            serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_linked_busy"), true);
+            DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.pattern_rack_linked_busy"));
             return true;
         }
         if (incompatibleStations > 0) {
-            serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_linked_wrong_station"), true);
+            DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.pattern_rack_linked_wrong_station"));
             return true;
         }
-        serverPlayer.displayClientMessage(Component.translatable("message.mobstoolforging.pattern_rack_linked_none"), true);
+        DebugFeedback.actionBar(serverPlayer, Component.translatable("message.mobstoolforging.pattern_rack_linked_none"));
         return true;
     }
 
@@ -331,14 +331,14 @@ public final class PatternRackSelection {
     private static void inspectPattern(Player player, ItemStack pattern) {
         ForgeTemplateDefinition template = PatternRackBlockEntity.template(pattern).orElse(null);
         if (template == null) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.no_pattern_selected"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.no_pattern_selected"));
             return;
         }
-        player.displayClientMessage(Component.translatable(
+        DebugFeedback.actionBar(player, Component.translatable(
                 "message.mobstoolforging.pattern_rack_inspect",
                 template.displayName(),
                 compatibleStations(pattern, template)
-        ), true);
+        ));
     }
 
     private static void consume(PlayerInteractEvent.RightClickBlock event) {

@@ -107,6 +107,17 @@ public final class HeatingRecipeRegistry {
                     .flatMap(MaterialCatalog::definition)
                     .filter(HeatingRecipeRegistry::requiresTemperature);
         }
+        ArmorPartData armorPartData = stack.get(ModDataComponents.ARMOR_PART.get());
+        if (armorPartData != null) {
+            Optional<ToolMaterialDefinition> partMaterial = MaterialCatalog.definition(armorPartData.materialId())
+                    .filter(HeatingRecipeRegistry::requiresTemperature);
+            if (partMaterial.isPresent()) {
+                return partMaterial;
+            }
+            return armorPartData.coatingBaseMaterial()
+                    .flatMap(MaterialCatalog::definition)
+                    .filter(HeatingRecipeRegistry::requiresTemperature);
+        }
         return MaterialCatalog.resolve(stack)
                 .filter(HeatingRecipeRegistry::requiresTemperature);
     }

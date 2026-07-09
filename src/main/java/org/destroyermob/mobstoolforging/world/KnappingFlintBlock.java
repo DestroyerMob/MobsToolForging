@@ -73,7 +73,7 @@ public class KnappingFlintBlock extends BaseEntityBlock {
         if (complete) {
             finishKnapping(level, pos, player, knapping);
         } else {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.knapping_status", knapping.target().displayName(), knapping.hitCount(), KnappingFlintBlockEntity.REQUIRED_HITS), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.knapping_status", knapping.target().displayName(), knapping.hitCount(), KnappingFlintBlockEntity.REQUIRED_HITS));
         }
         return ItemInteractionResult.CONSUME;
     }
@@ -82,14 +82,14 @@ public class KnappingFlintBlock extends BaseEntityBlock {
         ItemStack output = knapping.outputStack();
         if (output.isEmpty()) {
             knapping.resetProgress();
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.knapping_failed", knapping.target().displayName()), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.knapping_failed", knapping.target().displayName()));
             return;
         }
 
         knapping.markCompleted();
         level.removeBlock(pos, false);
         Block.popResource(level, pos, output);
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.knapping_complete_drop", output.getHoverName()), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.knapping_complete_drop", output.getHoverName()));
         level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.6F, 1.15F);
     }
 

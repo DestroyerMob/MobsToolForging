@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "mobstoolforging:modular_boots",
+    "#mobstoolforging:parts/boots_chainmail",
+    "#mobstoolforging:parts/boots_plate"
+  ]
+}

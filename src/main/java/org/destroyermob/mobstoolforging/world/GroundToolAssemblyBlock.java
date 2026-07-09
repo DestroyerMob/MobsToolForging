@@ -66,7 +66,7 @@ public class GroundToolAssemblyBlock extends BaseEntityBlock {
                     finishAssembly(output, assembly, level, pos, player);
                 } else {
                     level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.55F, 1.05F + level.random.nextFloat() * 0.1F);
-                    player.displayClientMessage(Component.translatable("message.mobstoolforging.ground_assembly_part_placed"), true);
+                    DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.ground_assembly_part_placed"));
                 }
             }
             return ItemInteractionResult.CONSUME;
@@ -98,7 +98,7 @@ public class GroundToolAssemblyBlock extends BaseEntityBlock {
             player.drop(output, false);
         }
         level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.6F, 1.15F);
-        player.displayClientMessage(Component.translatable("message.mobstoolforging.ground_assembly_complete", output.getHoverName()), true);
+        DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.ground_assembly_complete", output.getHoverName()));
     }
 
     private static ItemInteractionResult pickUpWork(Level level, BlockPos pos) {

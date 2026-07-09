@@ -119,6 +119,46 @@
     {
       "item_tag": "mobstoolforging:parts/gem_cutters_blade",
       "enchantment_tag": "betterenchanting:targets/durability"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/armor",
+      "enchantment_tag": "betterenchanting:targets/durability"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/armor",
+      "enchantment_tag": "betterenchanting:targets/armor"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/helmet_chainmail",
+      "enchantment_tag": "betterenchanting:targets/armor/helmets"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/helmet_plate",
+      "enchantment_tag": "betterenchanting:targets/armor/helmets"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/chestplate_chainmail",
+      "enchantment_tag": "betterenchanting:targets/armor/body_armor"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/chestplate_body",
+      "enchantment_tag": "betterenchanting:targets/armor/body_armor"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/leggings_chainmail",
+      "enchantment_tag": "betterenchanting:targets/armor/leggings"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/leggings_plate",
+      "enchantment_tag": "betterenchanting:targets/armor/leggings"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/boots_chainmail",
+      "enchantment_tag": "betterenchanting:targets/armor/boots"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/boots_plate",
+      "enchantment_tag": "betterenchanting:targets/armor/boots"
     }
   ]
 }

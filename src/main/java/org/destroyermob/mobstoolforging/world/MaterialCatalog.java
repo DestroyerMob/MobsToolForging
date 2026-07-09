@@ -261,6 +261,27 @@ public final class MaterialCatalog {
         return new ItemStack(definition(materialId).orElseThrow().displayItem());
     }
 
+    public static List<ItemStack> ingredientStacks(ResourceLocation materialId) {
+        LinkedHashMap<Item, ItemStack> stacks = new LinkedHashMap<>();
+        addBuiltInHandleIngredients(stacks, materialId);
+        definition(materialId).ifPresent(definition -> addIngredientStack(stacks, definition.displayItem()));
+        MATERIAL_ITEM_IDS.entrySet().stream()
+                .filter(entry -> materialId.equals(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .forEach(item -> addIngredientStack(stacks, item));
+        CUSTOM_HANDLE_MATERIALS.entrySet().stream()
+                .filter(entry -> materialId.equals(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .forEach(item -> addIngredientStack(stacks, item));
+        MATERIAL_TAG_IDS.entrySet().stream()
+                .filter(entry -> materialId.equals(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .forEach(tag -> addIngredientStacks(stacks, tag));
+        MATERIAL_DISPLAY_TAGS.getOrDefault(materialId, new LinkedList<>())
+                .forEach(tag -> addIngredientStacks(stacks, tag));
+        return List.copyOf(stacks.values());
+    }
+
     public static ResourceLocation handleMaterial(ItemStack handle) {
         if (handle.is(Items.STICK) || handle.is(Tags.Items.RODS_WOODEN)) {
             return OAK;
@@ -386,6 +407,31 @@ public final class MaterialCatalog {
 
     private static void registerVirtual(ResourceLocation id, MaterialCategory category, Item displayItem, Tier tier) {
         DEFINITIONS.put(id, new ToolMaterialDefinition(id, category, displayItem, tier));
+    }
+
+    private static void addBuiltInHandleIngredients(Map<Item, ItemStack> stacks, ResourceLocation materialId) {
+        if (OAK.equals(materialId)) {
+            addIngredientStack(stacks, Items.STICK);
+            addIngredientStacks(stacks, Tags.Items.RODS_WOODEN);
+        } else if (BLAZE.equals(materialId)) {
+            addIngredientStack(stacks, Items.BLAZE_ROD);
+            addIngredientStacks(stacks, Tags.Items.RODS_BLAZE);
+        } else if (BREEZE.equals(materialId)) {
+            addIngredientStack(stacks, Items.BREEZE_ROD);
+            addIngredientStacks(stacks, Tags.Items.RODS_BREEZE);
+        }
+    }
+
+    private static void addIngredientStacks(Map<Item, ItemStack> stacks, TagKey<Item> tag) {
+        for (var holder : BuiltInRegistries.ITEM.getTagOrEmpty(tag)) {
+            addIngredientStack(stacks, holder.value());
+        }
+    }
+
+    private static void addIngredientStack(Map<Item, ItemStack> stacks, Item item) {
+        if (item != Items.AIR) {
+            stacks.putIfAbsent(item, new ItemStack(item));
+        }
     }
 
     private static void putDefinition(ToolMaterialDefinition definition) {

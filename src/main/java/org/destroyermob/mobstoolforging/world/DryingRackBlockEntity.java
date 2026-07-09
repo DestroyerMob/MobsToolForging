@@ -58,6 +58,8 @@ public class DryingRackBlockEntity extends BlockEntity {
             rack.dryingTime = 0;
             rack.dryingDuration = 0;
             rack.sync();
+        } else if (level.getGameTime() % 20L == 0L) {
+            rack.sync();
         } else {
             rack.setChanged();
         }

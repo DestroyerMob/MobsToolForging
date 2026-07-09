@@ -128,7 +128,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
         }
         if (!MobsToolForgingConfig.ENABLE_FORGE_HEATING.get()) {
             if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_disabled"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_disabled"));
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -147,9 +147,9 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             }
             if (forge.acceptFuel(stack)) {
                 level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 0.5F, 0.85F);
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_fuel_added"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_fuel_added"));
             } else {
-                player.displayClientMessage(heatingFuelRejectedMessage(forge), true);
+                DebugFeedback.actionBar(player, heatingFuelRejectedMessage(forge));
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -160,15 +160,15 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             int slot = workpieceSlotFromHit(state, pos, hitResult);
             if (forge.acceptWorkpiece(stack, slot)) {
                 level.playSound(null, pos, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 0.5F, 1.1F);
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_workpiece_added"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_workpiece_added"));
             } else {
-                player.displayClientMessage(heatingWorkpieceRejectedMessage(forge, slot), true);
+                DebugFeedback.actionBar(player, heatingWorkpieceRejectedMessage(forge, slot));
             }
             return ItemInteractionResult.CONSUME;
         }
         if (MaterialCatalog.isMaterial(stack)) {
             if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_gems_rejected"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_gems_rejected"));
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -196,7 +196,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
         if (residueResult.consumesAction()) {
             return residueResult;
         }
-        player.displayClientMessage(Component.translatable(forge.isLit() ? "message.mobstoolforging.heating_lit" : "message.mobstoolforging.heating_status"), true);
+        DebugFeedback.actionBar(player, Component.translatable(forge.isLit() ? "message.mobstoolforging.heating_lit" : "message.mobstoolforging.heating_status"));
         return InteractionResult.CONSUME;
     }
 
@@ -249,15 +249,15 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             return ItemInteractionResult.SUCCESS;
         }
         if (forge.hasSpentFuelBed()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_clear_embers"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_clear_embers"));
             return ItemInteractionResult.CONSUME;
         }
         if (forge.ashTrayFull()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_ash_full"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_ash_full"));
             return ItemInteractionResult.CONSUME;
         }
         if (!forge.isFuelBedFull() && !forge.isLit()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_needs_full_fuel_bed"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_needs_full_fuel_bed"));
             return ItemInteractionResult.CONSUME;
         }
         if (forge.ignite()) {
@@ -271,7 +271,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
                 }
             }
             level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 0.8F, 1.0F);
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_ignited"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_ignited"));
         }
         return ItemInteractionResult.CONSUME;
     }
@@ -342,7 +342,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
                 return InteractionResult.CONSUME;
             }
             if (requireSelection || forge.hasSpentFuelBed() || forge.hasFuel()) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_no_ash"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_no_ash"));
                 return InteractionResult.CONSUME;
             }
             return InteractionResult.PASS;
@@ -350,12 +350,12 @@ public class HeatingForgeBlock extends BaseEntityBlock {
         if (forge.hasSpentFuelBed()) {
             forge.clearSpentFuelBed();
             level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.45F, 0.65F);
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_embers_cleared"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_embers_cleared"));
             return InteractionResult.CONSUME;
         }
         if (forge.hasFuel()) {
             if (forge.isLit()) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_fuel_burning"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_fuel_burning"));
                 return InteractionResult.CONSUME;
             }
             giveOrDrop(player, forge.removeFuel());
@@ -363,7 +363,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             return InteractionResult.CONSUME;
         }
         if (requireSelection || forge.hasAsh()) {
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.heating_no_cinder"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_no_cinder"));
             return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;

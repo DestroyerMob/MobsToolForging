@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#mobstoolforging:parts/pickaxe_head"
+    "#mobstoolforging:parts/pickaxe_head",
+    "mobstoolforging:pickaxe"
   ]
 }

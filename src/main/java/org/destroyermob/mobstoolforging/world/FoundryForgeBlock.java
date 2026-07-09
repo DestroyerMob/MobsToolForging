@@ -114,7 +114,7 @@ public class FoundryForgeBlock extends BaseEntityBlock {
             forge.acceptLavaFuel();
             consumeLavaBucket(player, hand, stack);
             level.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 0.8F, 1.0F);
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.foundry_lava_added"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_lava_added"));
             return ItemInteractionResult.CONSUME;
         }
         if (stack.is(ModItems.CRUCIBLE.get())) {
@@ -123,9 +123,9 @@ public class FoundryForgeBlock extends BaseEntityBlock {
             }
             if (forge.acceptCrucible(stack)) {
                 level.playSound(null, pos, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 0.55F, 0.9F);
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.foundry_crucible_added"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_crucible_added"));
             } else {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.foundry_crucible_busy"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_crucible_busy"));
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -148,7 +148,7 @@ public class FoundryForgeBlock extends BaseEntityBlock {
             level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.0F);
             return InteractionResult.CONSUME;
         }
-        player.displayClientMessage(Component.translatable(forge.isLit() ? "message.mobstoolforging.foundry_lit" : "message.mobstoolforging.foundry_status"), true);
+        DebugFeedback.actionBar(player, Component.translatable(forge.isLit() ? "message.mobstoolforging.foundry_lit" : "message.mobstoolforging.foundry_status"));
         return InteractionResult.CONSUME;
     }
 

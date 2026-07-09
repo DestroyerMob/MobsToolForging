@@ -115,7 +115,7 @@ public class CrucibleBlock extends BaseEntityBlock {
                 crucible.setContents(contents.consumeMoltenUnit());
             }
             level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 1.4F);
-            player.displayClientMessage(Component.translatable("message.mobstoolforging.crucible_part_tipped"), true);
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.crucible_part_tipped"));
             return ItemInteractionResult.CONSUME;
         }
 
@@ -125,14 +125,14 @@ public class CrucibleBlock extends BaseEntityBlock {
             }
             if (crucible.acceptItem(stack)) {
                 level.playSound(null, pos, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 0.5F, 1.15F);
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.crucible_item_inserted"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.crucible_item_inserted"));
             }
             return ItemInteractionResult.CONSUME;
         }
 
         if (!stack.isEmpty() && contents.hasMoltenMaterial()) {
             if (!level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.crucible_molten_not_usable"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.crucible_molten_not_usable"));
             }
             return ItemInteractionResult.CONSUME;
         }
@@ -156,7 +156,7 @@ public class CrucibleBlock extends BaseEntityBlock {
             level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.0F);
             return InteractionResult.CONSUME;
         }
-        player.displayClientMessage(Component.translatable(statusKey(crucible.contents())), true);
+        DebugFeedback.actionBar(player, Component.translatable(statusKey(crucible.contents())));
         return InteractionResult.CONSUME;
     }
 

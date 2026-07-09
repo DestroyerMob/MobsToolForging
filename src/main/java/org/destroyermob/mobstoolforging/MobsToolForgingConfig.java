@@ -7,6 +7,7 @@ import org.destroyermob.mobstoolforging.world.HeatLevel;
 public final class MobsToolForgingConfig {
     public static final ModConfigSpec COMMON_SPEC;
     public static final ModConfigSpec.BooleanValue DEBUG_TEMPLATE_SELECTOR;
+    public static final ModConfigSpec.BooleanValue DEBUG_ACTIONBAR_FEEDBACK;
     public static final ModConfigSpec.BooleanValue ENABLE_VANILLA_TOOL_RECIPES;
     public static final ModConfigSpec.BooleanValue ENABLE_CRUDE_FLINT_TOOLS;
     public static final ModConfigSpec.BooleanValue ENABLE_PLANT_FIBER_DROPS;
@@ -58,6 +59,9 @@ public final class MobsToolForgingConfig {
         DEBUG_TEMPLATE_SELECTOR = builder
                 .comment("When true, sneak-right-clicking a workstation can open the old template selector GUI for debugging.")
                 .define("debugTemplateSelector", false);
+        DEBUG_ACTIONBAR_FEEDBACK = builder
+                .comment("When true, development-only workstation and status actionbar feedback is shown to players.")
+                .define("debugActionbarFeedback", false);
         ENABLE_VANILLA_TOOL_RECIPES = builder
                 .comment("When true, vanilla sword, shovel, pickaxe, axe, and hoe recipes remain enabled. When false, vanilla material tool recipes are removed so Mobs Tool Forging owns tool progression.")
                 .define("enableVanillaToolRecipes", false);

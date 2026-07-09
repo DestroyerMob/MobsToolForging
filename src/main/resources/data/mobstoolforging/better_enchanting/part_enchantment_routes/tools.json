@@ -85,6 +85,58 @@
           "limit": 1
         }
       ]
+    },
+    {
+      "item": "mobstoolforging:modular_helmet",
+      "parts": [
+        {
+          "part_type": "helmet_chainmail",
+          "limit": 2
+        },
+        {
+          "part_type": "helmet_plate",
+          "limit": 2
+        }
+      ]
+    },
+    {
+      "item": "mobstoolforging:modular_chestplate",
+      "parts": [
+        {
+          "part_type": "chestplate_chainmail",
+          "limit": 2
+        },
+        {
+          "part_type": "chestplate_body",
+          "limit": 2
+        }
+      ]
+    },
+    {
+      "item": "mobstoolforging:modular_leggings",
+      "parts": [
+        {
+          "part_type": "leggings_chainmail",
+          "limit": 2
+        },
+        {
+          "part_type": "leggings_plate",
+          "limit": 2
+        }
+      ]
+    },
+    {
+      "item": "mobstoolforging:modular_boots",
+      "parts": [
+        {
+          "part_type": "boots_chainmail",
+          "limit": 2
+        },
+        {
+          "part_type": "boots_plate",
+          "limit": 2
+        }
+      ]
     }
   ]
 }

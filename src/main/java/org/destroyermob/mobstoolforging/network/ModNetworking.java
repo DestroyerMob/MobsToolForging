@@ -12,6 +12,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.destroyermob.mobstoolforging.client.MobsToolForgingClient;
 import org.destroyermob.mobstoolforging.registry.ModTags;
+import org.destroyermob.mobstoolforging.world.DebugFeedback;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.KnappingFlintBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
@@ -57,9 +58,9 @@ public final class ModNetworking {
         }
         if (player.level().getBlockEntity(payload.pos()) instanceof ToolForgeBlockEntity forge) {
             if (forge.selectTemplate(template)) {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.template_selected", template.displayName()), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.template_selected", template.displayName()));
             } else {
-                player.displayClientMessage(Component.translatable("message.mobstoolforging.forge_busy"), true);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.forge_busy"));
             }
         }
     }

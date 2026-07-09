@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "mobstoolforging:modular_helmet",
+    "mobstoolforging:modular_chestplate",
+    "mobstoolforging:modular_leggings",
+    "mobstoolforging:modular_boots"
+  ]
+}
