@@ -15,11 +15,19 @@ public final class ArmorExternalComponents {
         if (construction != null && plateData != null && plateData.coatingBaseMaterial().isPresent()) {
             armor.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), construction.withOverlayBaseMaterial(plateData.coatingBaseMaterial()));
         }
-        ToolExternalComponents.copyCompatibleExternalComponents(basePart, armor);
-        ToolExternalComponents.copyCompatibleExternalComponents(platePart, armor);
+        ToolExternalComponents.copyCompatibleExternalComponentsWithoutAffixes(basePart, armor);
+        ToolExternalComponents.copyCompatibleExternalComponentsWithoutAffixes(platePart, armor);
     }
 
     public static List<ItemStack> copyArmorComponentsToPrimaryPart(ItemStack armor, List<ItemStack> parts) {
+        return copyArmorComponentsToPrimaryPart(armor, parts, true);
+    }
+
+    public static List<ItemStack> copyArmorComponentsToPrimaryPartWithoutAffixes(ItemStack armor, List<ItemStack> parts) {
+        return copyArmorComponentsToPrimaryPart(armor, parts, false);
+    }
+
+    private static List<ItemStack> copyArmorComponentsToPrimaryPart(ItemStack armor, List<ItemStack> parts, boolean includeAffixes) {
         if (armor.isEmpty() || parts.isEmpty()) {
             return List.copyOf(parts);
         }
@@ -33,7 +41,11 @@ public final class ArmorExternalComponents {
         for (int index = 0; index < parts.size(); index++) {
             ItemStack copy = parts.get(index).copy();
             if (index == targetIndex) {
-                ToolExternalComponents.copyCompatibleExternalComponents(armor, copy);
+                if (includeAffixes) {
+                    ToolExternalComponents.copyCompatibleExternalComponents(armor, copy);
+                } else {
+                    ToolExternalComponents.copyCompatibleExternalComponentsWithoutAffixes(armor, copy);
+                }
             }
             result.add(copy);
         }

@@ -7,7 +7,10 @@
   "mixins": [
     "CampfireBlockEntityAccessor",
     "CampfireBlockEntityMixin",
+    "compat.ApotheosisAffixHelperMixin",
     "compat.ApotheosisAffixLootModifierMixin",
+    "compat.ApotheosisReforgingResultSlotMixin",
+    "compat.ApotheosisSalvagingMenuMixin",
     "compat.ApothicStackAttributeModifiersEventMixin",
     "RecipeManagerMixin"
   ],

@@ -12,6 +12,11 @@ import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 
 public final class ToolExternalComponents {
     private static final ResourceLocation MINECRAFT_CUSTOM_DATA = ResourceLocation.withDefaultNamespace("custom_data");
+    private static final Set<ResourceLocation> APOTHEOSIS_AFFIX_COMPONENTS = Set.of(
+            ResourceLocation.fromNamespaceAndPath("apotheosis", "affixes"),
+            ResourceLocation.fromNamespaceAndPath("apotheosis", "rarity"),
+            ResourceLocation.fromNamespaceAndPath("apotheosis", "affix_name")
+    );
     private static final List<ResourceLocation> PRIMARY_HEAD_COMPONENTS = List.of(
             ResourceLocation.fromNamespaceAndPath("auric", "imbue")
     );
@@ -23,23 +28,56 @@ public final class ToolExternalComponents {
     }
 
     public static void copyPrimaryHeadComponentsToTool(ItemStack primaryHead, ItemStack tool) {
-        copyCompatibleExternalComponents(primaryHead, tool);
+        copyCompatibleExternalComponentsWithoutAffixes(primaryHead, tool);
     }
 
     public static void copyCompatibleExternalComponents(ItemStack source, ItemStack target) {
+        copyCompatibleExternalComponents(source, target, true);
+    }
+
+    public static void copyCompatibleExternalComponentsWithoutAffixes(ItemStack source, ItemStack target) {
+        copyCompatibleExternalComponents(source, target, false);
+    }
+
+    public static void removeApotheosisAffixComponents(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return;
+        }
+        for (DataComponentType<?> component : List.copyOf(stack.getComponents().keySet())) {
+            ResourceLocation componentId = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component);
+            if (componentId != null && isApotheosisAffixComponent(componentId)) {
+                stack.remove(component);
+            }
+        }
+    }
+
+    private static void copyCompatibleExternalComponents(ItemStack source, ItemStack target, boolean includeAffixes) {
         if (source.isEmpty() || target.isEmpty()) {
             return;
         }
         for (DataComponentType<?> component : source.getComponents().keySet()) {
             ResourceLocation componentId = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component);
-            if (componentId != null && shouldCopy(componentId)) {
+            if (componentId != null && shouldCopy(componentId) && (includeAffixes || !isApotheosisAffixComponent(componentId))) {
                 copyComponent(source, target, component);
             }
         }
     }
 
     public static List<ItemStack> copyToolComponentsToPrimaryHead(ToolTypeDefinition definition, ItemStack tool, List<ItemStack> parts) {
-        if (!hasAnyCompatibleExternalComponent(tool)) {
+        return copyToolComponentsToPrimaryHead(definition, tool, parts, true);
+    }
+
+    public static List<ItemStack> copyToolComponentsToPrimaryHeadWithoutAffixes(ToolTypeDefinition definition, ItemStack tool, List<ItemStack> parts) {
+        return copyToolComponentsToPrimaryHead(definition, tool, parts, false);
+    }
+
+    private static List<ItemStack> copyToolComponentsToPrimaryHead(
+            ToolTypeDefinition definition,
+            ItemStack tool,
+            List<ItemStack> parts,
+            boolean includeAffixes
+    ) {
+        if (!hasAnyCompatibleExternalComponent(tool, includeAffixes)) {
             return List.copyOf(parts);
         }
 
@@ -48,7 +86,7 @@ public final class ToolExternalComponents {
         for (ItemStack part : parts) {
             ItemStack copy = part.copy();
             if (!copied && isPrimaryHead(definition, copy)) {
-                copyCompatibleExternalComponents(tool, copy);
+                copyCompatibleExternalComponents(tool, copy, includeAffixes);
                 copied = true;
             }
             result.add(copy);
@@ -56,13 +94,13 @@ public final class ToolExternalComponents {
         return List.copyOf(result);
     }
 
-    private static boolean hasAnyCompatibleExternalComponent(ItemStack stack) {
+    private static boolean hasAnyCompatibleExternalComponent(ItemStack stack, boolean includeAffixes) {
         if (stack.isEmpty()) {
             return false;
         }
         for (DataComponentType<?> component : stack.getComponents().keySet()) {
             ResourceLocation componentId = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component);
-            if (componentId != null && shouldCopy(componentId)) {
+            if (componentId != null && shouldCopy(componentId) && (includeAffixes || !isApotheosisAffixComponent(componentId))) {
                 return true;
             }
         }
@@ -75,6 +113,10 @@ public final class ToolExternalComponents {
         }
         return !MobsToolForging.MOD_ID.equals(componentId.getNamespace())
                 && !"minecraft".equals(componentId.getNamespace());
+    }
+
+    private static boolean isApotheosisAffixComponent(ResourceLocation componentId) {
+        return APOTHEOSIS_AFFIX_COMPONENTS.contains(componentId);
     }
 
     private static <T> void copyComponent(ItemStack source, ItemStack target, DataComponentType<T> component) {

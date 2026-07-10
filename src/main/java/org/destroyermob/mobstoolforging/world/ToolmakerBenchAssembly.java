@@ -105,7 +105,7 @@ public final class ToolmakerBenchAssembly {
                 parts = ToolAssemblyEnchantments.copyToolEnchantmentsToViableParts(stack, parts);
             }
             parts = normalizedDisassemblyParts(definition, construction, parts);
-            return Optional.of(ToolExternalComponents.copyToolComponentsToPrimaryHead(definition, stack, parts));
+            return Optional.of(ToolExternalComponents.copyToolComponentsToPrimaryHeadWithoutAffixes(definition, stack, parts));
         }
 
         List<ItemStack> parts = new ArrayList<>();
@@ -188,7 +188,7 @@ public final class ToolmakerBenchAssembly {
         if (storedParts != null) {
             List<ItemStack> parts = storedParts.copyStacks();
             if (!parts.isEmpty()) {
-                return Optional.of(ArmorExternalComponents.copyArmorComponentsToPrimaryPart(armor, parts));
+                return Optional.of(ArmorExternalComponents.copyArmorComponentsToPrimaryPartWithoutAffixes(armor, parts));
             }
         }
         return ArmorAssemblyKind.fromArmorType(construction.armorType()).map(kind -> {

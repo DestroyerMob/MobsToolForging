@@ -69,6 +69,7 @@ import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.ArmorRepairing;
 import org.destroyermob.mobstoolforging.world.ArmorStandSwapEvents;
 import org.destroyermob.mobstoolforging.world.CampfireWorkpieceHeating;
+import org.destroyermob.mobstoolforging.world.CompositeAffixCompatibility;
 import org.destroyermob.mobstoolforging.world.CrucibleContents;
 import org.destroyermob.mobstoolforging.world.DebugFeedback;
 import org.destroyermob.mobstoolforging.world.DryingRecipeReloadListener;
@@ -465,6 +466,21 @@ public class MobsToolForging {
                 }
                 event.getToolTip().addAll(ToolTooltipBuilder.tooltip(stack, definition, event.getFlags()));
             });
+        }
+
+        List<ItemStack> affixedParts = CompositeAffixCompatibility.affixedParts(stack);
+        if (!affixedParts.isEmpty()) {
+            Component partNames = Component.empty();
+            for (int index = 0; index < affixedParts.size(); index++) {
+                if (index > 0) {
+                    partNames = partNames.copy().append(", ");
+                }
+                partNames = partNames.copy().append(affixedParts.get(index).getHoverName());
+            }
+            event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.component_affixes", partNames)
+                    .withStyle(ChatFormatting.DARK_GRAY));
+            event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.component_affixes_rework")
+                    .withStyle(ChatFormatting.DARK_GRAY));
         }
 
         ToolPartData part = stack.get(ModDataComponents.TOOL_PART.get());

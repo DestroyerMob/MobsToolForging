@@ -35,8 +35,7 @@ public final class VanillaToolConverter {
             return ItemStack.EMPTY;
         }
         copyConvertedStackData(original, converted);
-        ToolmakerBenchAssembly.disassemble(converted)
-                .ifPresent(parts -> converted.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts)));
+        establishAssemblyParts(converted);
         return converted;
     }
 
@@ -55,7 +54,15 @@ public final class VanillaToolConverter {
             return ItemStack.EMPTY;
         }
         copyConvertedStackData(original, converted);
+        establishAssemblyParts(converted);
         return converted;
+    }
+
+    private static void establishAssemblyParts(ItemStack converted) {
+        ToolmakerBenchAssembly.disassemble(converted).ifPresent(parts -> {
+            converted.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts));
+            ToolExternalComponents.removeApotheosisAffixComponents(converted);
+        });
     }
 
     private static ToolConversion conversion(Item item, ResourceLocation handleMaterial) {

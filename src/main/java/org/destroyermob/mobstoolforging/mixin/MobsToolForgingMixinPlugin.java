@@ -10,6 +10,12 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 public final class MobsToolForgingMixinPlugin implements IMixinConfigPlugin {
     private static final String APOTHEOSIS_AFFIX_LOOT_MIXIN =
             "org.destroyermob.mobstoolforging.mixin.compat.ApotheosisAffixLootModifierMixin";
+    private static final String APOTHEOSIS_AFFIX_HELPER_MIXIN =
+            "org.destroyermob.mobstoolforging.mixin.compat.ApotheosisAffixHelperMixin";
+    private static final String APOTHEOSIS_REFORGING_RESULT_SLOT_MIXIN =
+            "org.destroyermob.mobstoolforging.mixin.compat.ApotheosisReforgingResultSlotMixin";
+    private static final String APOTHEOSIS_SALVAGING_MENU_MIXIN =
+            "org.destroyermob.mobstoolforging.mixin.compat.ApotheosisSalvagingMenuMixin";
     private static final String APOTHIC_STACK_ATTRIBUTE_MODIFIERS_EVENT_MIXIN =
             "org.destroyermob.mobstoolforging.mixin.compat.ApothicStackAttributeModifiersEventMixin";
     private static final String APOTHEOSIS_MOD_ID = "apotheosis";
@@ -26,7 +32,10 @@ public final class MobsToolForgingMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (APOTHEOSIS_AFFIX_LOOT_MIXIN.equals(mixinClassName)) {
+        if (APOTHEOSIS_AFFIX_LOOT_MIXIN.equals(mixinClassName)
+                || APOTHEOSIS_AFFIX_HELPER_MIXIN.equals(mixinClassName)
+                || APOTHEOSIS_REFORGING_RESULT_SLOT_MIXIN.equals(mixinClassName)
+                || APOTHEOSIS_SALVAGING_MENU_MIXIN.equals(mixinClassName)) {
             return isModPresent(APOTHEOSIS_MOD_ID);
         }
         if (APOTHIC_STACK_ATTRIBUTE_MODIFIERS_EVENT_MIXIN.equals(mixinClassName)) {

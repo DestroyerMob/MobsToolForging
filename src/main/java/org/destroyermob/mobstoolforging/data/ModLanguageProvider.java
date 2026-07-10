@@ -357,6 +357,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.finish", "Finish");
         add("tooltip.mobstoolforging.core_finish", "Core Finish");
         add("tooltip.mobstoolforging.coating_base", "Core: %s");
+        add("tooltip.mobstoolforging.component_affixes", "Component Affixes: %s");
+        add("tooltip.mobstoolforging.component_affixes_rework", "Disassemble before reforging or salvaging these parts.");
         add("tooltip.mobstoolforging.part_durability", "Durability: %s%%");
         add("tooltip.mobstoolforging.armor_part_material", "Material: %s");
         add("tooltip.mobstoolforging.broken_armor", "Broken - repair before wearing");

@@ -382,6 +382,8 @@
   "tooltip.mobstoolforging.broken_armor": "Broken - repair before wearing",
   "tooltip.mobstoolforging.broken_tool": "Broken - repair before use",
   "tooltip.mobstoolforging.coating_base": "Core: %s",
+  "tooltip.mobstoolforging.component_affixes": "Component Affixes: %s",
+  "tooltip.mobstoolforging.component_affixes_rework": "Disassemble before reforging or salvaging these parts.",
   "tooltip.mobstoolforging.construction": "Construction",
   "tooltip.mobstoolforging.core_finish": "Core Finish",
   "tooltip.mobstoolforging.crucible_contains_item": "Contains: %s",
