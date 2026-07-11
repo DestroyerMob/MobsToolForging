@@ -49,15 +49,18 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.destroyermob.mobstoolforging.client.MobsToolForgingClient;
 import org.destroyermob.mobstoolforging.command.ModCommands;
 import org.destroyermob.mobstoolforging.data.ModDataGenerators;
+import org.destroyermob.mobstoolforging.integration.CarryOnCompatibility;
 import org.destroyermob.mobstoolforging.item.ModularToolItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.network.ModNetworking;
 import org.destroyermob.mobstoolforging.integration.everycomp.MobsToolForgingEveryCompat;
+import org.destroyermob.mobstoolforging.integration.everycomp.EveryCompatDropFallback;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModCreativeTabs;
@@ -134,6 +137,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::placeKnappingFlint);
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::placeGroundAssembly);
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::dropPlantFiber);
+        NeoForge.EVENT_BUS.addListener(EveryCompatDropFallback::addMissingSelfDrop);
         NeoForge.EVENT_BUS.addListener(AnvilForgingEvents::forgeAnvilInWorld);
         NeoForge.EVENT_BUS.addListener(LeatherStationAssemblyEvents::assembleInWorld);
         NeoForge.EVENT_BUS.addListener(ArmorStandSwapEvents::swapPlayerArmorWithStand);
@@ -146,6 +150,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(PatternRackSelection::playerChangedDimension);
         NeoForge.EVENT_BUS.addListener(this::quenchInWaterCauldron);
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
+        NeoForge.EVENT_BUS.addListener(this::blacklistToolmakersStationsFromCarryOn);
         NeoForge.EVENT_BUS.addListener(this::coolPlayerWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::coolDroppedWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::blockHeatedCrafting);
@@ -375,6 +380,10 @@ public class MobsToolForging {
         event.addListener(new HeatingRecipeReloadListener());
         event.addListener(new DryingRecipeReloadListener());
         event.addListener(new GroundAssemblyRecipeReloadListener());
+    }
+
+    private void blacklistToolmakersStationsFromCarryOn(ServerStartedEvent event) {
+        CarryOnCompatibility.blacklistToolmakersStations();
     }
 
     private void coolPlayerWorkpieces(PlayerTickEvent.Post event) {

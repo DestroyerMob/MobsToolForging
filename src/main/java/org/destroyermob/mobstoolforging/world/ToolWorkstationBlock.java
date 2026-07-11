@@ -313,7 +313,14 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (kind == WorkstationKind.LAPIDARY_TABLE) {
             return stack.is(ModItems.GEM_CUTTERS_KNIFE.get()) || !MobsToolForgingConfig.GEMCUTTERS_FILE_REQUIRED.get() && SmithingHammerLevel.isHammer(stack);
         }
-        return SmithingHammerLevel.isHammer(stack);
+        return canUseHammer(stack, forge);
+    }
+
+    private boolean canUseHammer(ItemStack stack, ToolForgeBlockEntity forge) {
+        if (!SmithingHammerLevel.isHammer(stack)) {
+            return false;
+        }
+        return forge.hasRepairWork() || forge.hasLooseWork() || forge.canHammer();
     }
 
     private boolean canApplyTemplate(ItemStack stack, ToolTemplateItem templateItem, ToolForgeBlockEntity forge) {

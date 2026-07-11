@@ -16,6 +16,10 @@ public final class ModTags {
                 Registries.BLOCK,
                 ResourceLocation.fromNamespaceAndPath("carryon", "block_blacklist")
         );
+        public static final TagKey<Block> RELOCATION_NOT_SUPPORTED = TagKey.create(
+                Registries.BLOCK,
+                ResourceLocation.fromNamespaceAndPath("neoforge", "relocation_not_supported")
+        );
 
         private Blocks() {
         }

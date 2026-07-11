@@ -2,7 +2,7 @@
   "type": "mobstoolforging:tool_visual",
   "canvas": 16,
   "large_canvas": 32,
-  "large_in_hand": true,
+  "large_in_hand": false,
   "layers": [
     {
       "emissive_allowed": false,

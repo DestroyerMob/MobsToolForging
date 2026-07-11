@@ -15,10 +15,12 @@ import net.mehvahdjukaar.every_compat.modules.EveryCompatModule;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
+import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
 import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceSink;
 import net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodTypes;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +31,12 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.BedPart;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.item.LeatherStationBlockItem;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
@@ -71,6 +79,7 @@ public final class MobsToolForgingEveryCompat {
                             CompatWorkstationRegistry.Kind.PATTERN_RACK,
                             new BlockItem(block, properties)))
                     .addTag(BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK)
+                    .addTag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST, Registries.BLOCK)
                     .setTabKey(ModCreativeTabs.MOBS_TOOL_FORGING.getKey())
                     .copyParentDrop()
                     .build();
@@ -107,6 +116,7 @@ public final class MobsToolForgingEveryCompat {
                             CompatWorkstationRegistry.Kind.LEATHER_STATION,
                             new LeatherStationBlockItem(block, properties)))
                     .addTag(BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK)
+                    .addTag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST, Registries.BLOCK)
                     .setTabKey(ModCreativeTabs.MOBS_TOOL_FORGING.getKey())
                     .copyParentDrop()
                     .build();
@@ -124,6 +134,7 @@ public final class MobsToolForgingEveryCompat {
                             CompatWorkstationRegistry.Kind.DRYING_RACK,
                             new BlockItem(block, properties)))
                     .addTag(BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK)
+                    .addTag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST, Registries.BLOCK)
                     .setTabKey(ModCreativeTabs.MOBS_TOOL_FORGING.getKey())
                     .copyParentDrop()
                     .build();
@@ -134,12 +145,26 @@ public final class MobsToolForgingEveryCompat {
         public void addDynamicServerResources(Consumer<ResourceGenTask> consumer) {
             super.addDynamicServerResources(consumer);
             consumer.accept((resourceManager, sink) -> {
-                patternRacks.blocks.forEach((wood, block) -> addRecipe(
-                        sink, block, 1, List.of("PPP", "S S", "PPP"), Map.of('P', wood.planks, 'S', Items.STICK)));
-                toolmakersBenches.blocks.forEach((wood, block) -> addRecipe(
-                        sink, block, 4, List.of("PPP", "S S", "S S"), Map.of('P', wood.planks, 'S', Items.STICK)));
-                dryingRacks.blocks.forEach((wood, block) -> addRecipe(
-                        sink, block, 4, List.of("SSS"), Map.of('S', wood.getBlockOfThis("slab"))));
+                patternRacks.blocks.forEach((wood, block) -> {
+                    addRecipe(sink, block, 1, List.of("PPP", "S S", "PPP"), Map.of('P', wood.planks, 'S', Items.STICK));
+                    sink.addSimpleBlockLootTable(block);
+                });
+                toolmakersBenches.blocks.forEach((wood, block) -> {
+                    addRecipe(sink, block, 1, List.of("PPP", "S S", "S S"), Map.of('P', wood.planks, 'S', Items.STICK));
+                    sink.addSimpleBlockLootTable(block);
+                });
+                leatherStations.blocks.forEach((wood, block) -> sink.addLootTable(block, leatherStationDrops(block)));
+                dryingRacks.blocks.forEach((wood, block) -> {
+                    addRecipe(sink, block, 4, List.of("SSS"), Map.of('S', wood.getBlockOfThis("slab")));
+                    sink.addSimpleBlockLootTable(block);
+                });
+
+                SimpleTagBuilder carryOnBlacklist = SimpleTagBuilder.of(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST);
+                patternRacks.blocks.values().forEach(block -> carryOnBlacklist.add(BuiltInRegistries.BLOCK.getKey(block)));
+                toolmakersBenches.blocks.values().forEach(block -> carryOnBlacklist.add(BuiltInRegistries.BLOCK.getKey(block)));
+                leatherStations.blocks.values().forEach(block -> carryOnBlacklist.add(BuiltInRegistries.BLOCK.getKey(block)));
+                dryingRacks.blocks.values().forEach(block -> carryOnBlacklist.add(BuiltInRegistries.BLOCK.getKey(block)));
+                sink.addTag(carryOnBlacklist, Registries.BLOCK);
             });
         }
 
@@ -245,6 +270,18 @@ public final class MobsToolForgingEveryCompat {
             result.addProperty("count", count);
             recipe.add("result", result);
             sink.addJson(outputId, recipe, ResType.RECIPES);
+        }
+
+        private static LootTable.Builder leatherStationDrops(Block block) {
+            return LootTable.lootTable()
+                    .withPool(
+                            LootPool.lootPool()
+                                    .setRolls(ConstantValue.exactly(1.0F))
+                                    .add(LootItem.lootTableItem(block)
+                                            .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+                                                    .setProperties(StatePropertiesPredicate.Builder.properties()
+                                                            .hasProperty(LeatherStationBlock.PART, BedPart.FOOT))))
+                    );
         }
 
         private static void addClientResources(

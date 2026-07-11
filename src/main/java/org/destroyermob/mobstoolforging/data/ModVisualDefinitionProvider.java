@@ -83,7 +83,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
         json.addProperty("type", modLoc("tool_visual").toString());
         json.addProperty("canvas", 16);
         json.addProperty("large_canvas", 32);
-        json.addProperty("large_in_hand", true);
+        json.addProperty("large_in_hand", false);
         JsonArray layers = new JsonArray();
         layers.add(layer(toolKind, "handle", "handleMaterial", 1, true, false));
         layers.add(layer(toolKind, toolKind.partType(), "headMaterial", 2, true, false));
@@ -100,7 +100,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
         json.addProperty("type", modLoc("tool_visual").toString());
         json.addProperty("canvas", 16);
         json.addProperty("large_canvas", 32);
-        json.addProperty("large_in_hand", true);
+        json.addProperty("large_in_hand", false);
         JsonArray layers = new JsonArray();
         layers.add(layer(ToolKind.MATTOCK, "handle", "handleMaterial", 1, true, false));
         layers.add(layer(ToolKind.MATTOCK, "mattock_tool_axe", "headMaterial", 2, false, false));

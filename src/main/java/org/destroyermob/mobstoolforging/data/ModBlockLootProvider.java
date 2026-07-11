@@ -36,7 +36,7 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> add(variant.block().get(), this::createLeatherStationDrops));
         ModBlocks.DRYING_RACK_VARIANTS.forEach(variant -> dropSelf(variant.block().get()));
         dropSelf(ModBlocks.HEATING_FORGE.get());
-        add(ModBlocks.CRUCIBLE.get(), noDrop());
+        dropSelf(ModBlocks.CRUCIBLE.get());
         dropSelf(ModBlocks.FOUNDRY_FORGE.get());
         add(ModBlocks.KNAPPING_FLINT.get(), noDrop());
         add(ModBlocks.GROUND_TOOL_ASSEMBLY.get(), noDrop());

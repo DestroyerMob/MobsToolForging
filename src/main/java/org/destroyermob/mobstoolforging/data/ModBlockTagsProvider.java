@@ -20,6 +20,12 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModBlocks.CRUDE_ANVIL.get(), ModBlocks.TOOL_FORGE.get(), ModBlocks.LAPIDARY_TABLE.get(), ModBlocks.PATTERN_CREATION_STATION.get(), ModBlocks.HEATING_FORGE.get(), ModBlocks.CRUCIBLE.get(), ModBlocks.FOUNDRY_FORGE.get());
         tag(BlockTags.MINEABLE_WITH_AXE).add(ModBlocks.toolmakersBenchBlocks()).add(ModBlocks.patternRackBlocks()).add(ModBlocks.leatherStationBlocks()).add(ModBlocks.dryingRackBlocks());
         tag(BlockTags.NEEDS_STONE_TOOL).add(ModBlocks.TOOL_FORGE.get(), ModBlocks.HEATING_FORGE.get(), ModBlocks.CRUCIBLE.get(), ModBlocks.FOUNDRY_FORGE.get());
-        tag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST).add(ModBlocks.toolmakersBenchBlocks());
+        tag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST)
+                .add(ModBlocks.toolmakersBenchBlocks())
+                .add(ModBlocks.patternRackBlocks())
+                .add(ModBlocks.leatherStationBlocks())
+                .add(ModBlocks.dryingRackBlocks());
+        tag(ModTags.Blocks.RELOCATION_NOT_SUPPORTED)
+                .addTag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST);
     }
 }

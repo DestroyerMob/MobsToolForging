@@ -95,7 +95,7 @@ public class ModRecipeProvider extends RecipeProvider {
         }
 
         for (ModBlocks.ToolmakerStationVariant variant : ModBlocks.TOOLMAKER_STATION_VARIANTS) {
-            ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, variant.block(), 4)
+            ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, variant.block())
                     .define('S', Items.STICK)
                     .define('P', variant.recipePlanks())
                     .pattern("PPP")
