@@ -26,12 +26,15 @@ import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
+import org.destroyermob.mobstoolforging.integration.everycomp.CompatWorkstationRegistry;
+import org.destroyermob.mobstoolforging.world.ArmorForgeAttachment;
 import org.destroyermob.mobstoolforging.world.DryingRecipe;
 import org.destroyermob.mobstoolforging.world.DryingRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.HeatingDisplayRecipe;
 import org.destroyermob.mobstoolforging.world.HeatingRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.HeatingSource;
+import org.destroyermob.mobstoolforging.world.LapidaryAbrasives;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCategory;
 import org.destroyermob.mobstoolforging.world.SmithingHammerLevel;
@@ -39,6 +42,7 @@ import org.destroyermob.mobstoolforging.world.StationWorkRecipe;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolMaterialDefinition;
+import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
 import org.destroyermob.mobstoolforging.world.ToolStatRule;
 import org.destroyermob.mobstoolforging.world.ToolTrait;
@@ -47,6 +51,7 @@ import org.destroyermob.mobstoolforging.world.WorkstationKind;
 @JeiPlugin
 public class MobsToolForgingJeiPlugin implements IModPlugin {
     public static final RecipeType<ForgeShapingJeiRecipe> FORGE_SHAPING = RecipeType.create(MobsToolForging.MOD_ID, "forge_shaping", ForgeShapingJeiRecipe.class);
+    public static final RecipeType<LapidaryCoatingJeiRecipe> LAPIDARY_COATING = RecipeType.create(MobsToolForging.MOD_ID, "lapidary_coating", LapidaryCoatingJeiRecipe.class);
     public static final RecipeType<StationWorkJeiRecipe> STATION_WORK = RecipeType.create(MobsToolForging.MOD_ID, "station_work", StationWorkJeiRecipe.class);
     public static final RecipeType<PatternCreationJeiRecipe> PATTERN_CREATION = RecipeType.create(MobsToolForging.MOD_ID, "pattern_creation", PatternCreationJeiRecipe.class);
     public static final RecipeType<HeatingJeiRecipe> HEATING = RecipeType.create(MobsToolForging.MOD_ID, "heating", HeatingJeiRecipe.class);
@@ -63,6 +68,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         var guiHelper = registration.getJeiHelpers().getGuiHelper();
         registration.addRecipeCategories(
                 new ForgeShapingCategory(guiHelper),
+                new LapidaryCoatingCategory(guiHelper),
                 new StationWorkCategory(guiHelper),
                 new PatternCreationCategory(guiHelper),
                 new HeatingCategory(guiHelper),
@@ -74,6 +80,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
         registration.addRecipes(FORGE_SHAPING, forgeShapingRecipes());
+        registration.addRecipes(LAPIDARY_COATING, lapidaryCoatingRecipes());
         registration.addRecipes(STATION_WORK, stationWorkRecipes());
         registration.addRecipes(PATTERN_CREATION, patternCreationRecipes());
         registration.addRecipes(HEATING, heatingRecipes());
@@ -102,48 +109,110 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(ModItems.CRUDE_ANVIL.get(), FORGE_SHAPING);
         registration.addRecipeCatalyst(ModItems.TOOL_FORGE.get(), FORGE_SHAPING, STATION_WORK);
-        registration.addRecipeCatalyst(ModItems.LAPIDARY_TABLE.get(), FORGE_SHAPING, STATION_WORK);
+        registration.addRecipeCatalyst(ModItems.LAPIDARY_TABLE.get(), FORGE_SHAPING, LAPIDARY_COATING, STATION_WORK);
         ModItems.LEATHER_STATION_ITEMS.forEach(item -> registration.addRecipeCatalyst(item.get(), STATION_WORK));
+        CompatWorkstationRegistry.items(CompatWorkstationRegistry.Kind.LEATHER_STATION)
+                .forEach(item -> registration.addRecipeCatalyst(item, STATION_WORK));
         registration.addRecipeCatalyst(ModItems.PATTERN_CREATION_STATION.get(), PATTERN_CREATION);
         registration.addRecipeCatalyst(ModItems.HEATING_FORGE.get(), HEATING);
         registration.addRecipeCatalyst(Items.CAMPFIRE, HEATING);
         registration.addRecipeCatalyst(Items.SOUL_CAMPFIRE, HEATING);
         ModItems.DRYING_RACK_ITEMS.forEach(item -> registration.addRecipeCatalyst(item.get(), DRYING));
+        CompatWorkstationRegistry.items(CompatWorkstationRegistry.Kind.DRYING_RACK)
+                .forEach(item -> registration.addRecipeCatalyst(item, DRYING));
     }
 
     private static List<ForgeShapingJeiRecipe> forgeShapingRecipes() {
         List<ForgeShapingJeiRecipe> recipes = new ArrayList<>();
         for (ForgeTemplateDefinition template : ToolTypeRegistry.templates()) {
+            if (!isActiveTemplate(template)) {
+                continue;
+            }
             for (ResourceLocation materialId : MaterialCatalog.starterMaterialIds()) {
                 Optional<ToolMaterialDefinition> material = MaterialCatalog.definition(materialId);
-                if (material.isEmpty() || !template.allowsMaterial(materialId)) {
+                boolean attachment = ArmorForgeAttachment.isAttachmentTemplate(template);
+                if (material.isEmpty()
+                        || !template.allowsMaterial(materialId)
+                        || (material.get().category() != MaterialCategory.METAL && material.get().category() != MaterialCategory.GEM)
+                        || (material.get().category() == MaterialCategory.GEM && !attachment)) {
                     continue;
                 }
-                WorkstationKind workstation = material.get().category() == MaterialCategory.GEM ? WorkstationKind.LAPIDARY_TABLE : WorkstationKind.TOOL_FORGE;
                 ItemStack pattern = patternFor(template);
                 if (pattern.isEmpty()) {
                     continue;
                 }
-                ItemStack target = ItemStack.EMPTY;
-                ItemStack output = template.outputStack(materialId);
+                ItemStack target = armorAttachmentTarget(template).orElse(ItemStack.EMPTY);
+                ItemStack output = target.isEmpty()
+                        ? template.outputStack(materialId)
+                        : ArmorForgeAttachment.apply(target, template.id(), materialId);
                 if (output.isEmpty()) {
                     continue;
                 }
                 ItemStack materialStack = new ItemStack(material.get().displayItem(), template.requiredMaterials());
+                boolean gemAttachment = attachment && material.get().category() == MaterialCategory.GEM;
+                List<ItemStack> stations = gemAttachment
+                        ? List.of(new ItemStack(ModItems.LAPIDARY_TABLE.get()))
+                        : attachment
+                        ? List.of(new ItemStack(ModItems.TOOL_FORGE.get()))
+                        : List.of(new ItemStack(ModItems.CRUDE_ANVIL.get()), new ItemStack(ModItems.TOOL_FORGE.get()));
                 recipes.add(new ForgeShapingJeiRecipe(
                         recipeId("forge_shaping/" + idPath(template.id()) + "/" + idPath(materialId)),
-                        workstation,
                         template,
                         materialId,
-                        stationFor(workstation),
+                        stations,
                         pattern,
                         materialStack,
                         target,
-                        workstation == WorkstationKind.LAPIDARY_TABLE ? new ItemStack(ModItems.DIAMOND_POWDER.get()) : ItemStack.EMPTY,
-                        workToolFor(workstation, template.minimumHammerLevel(materialId)),
+                        material.get().requiredLapidaryAbrasiveTier().map(MobsToolForgingJeiPlugin::abrasiveFor).orElse(ItemStack.EMPTY),
+                        gemAttachment ? new ItemStack(ModItems.GEM_CUTTERS_KNIFE.get()) : hammerFor(template.minimumHammerLevel(materialId)),
                         output,
                         template.requiredHits(),
                         template.minimumHammerLevel(materialId)
+                ));
+            }
+        }
+        return recipes;
+    }
+
+    private static List<LapidaryCoatingJeiRecipe> lapidaryCoatingRecipes() {
+        List<LapidaryCoatingJeiRecipe> recipes = new ArrayList<>();
+        for (ForgeTemplateDefinition template : ToolTypeRegistry.templates()) {
+            if (!isActiveTemplate(template)) {
+                continue;
+            }
+            for (ResourceLocation coatingId : MaterialCatalog.starterMaterialIds()) {
+                Optional<ToolMaterialDefinition> coating = MaterialCatalog.definition(coatingId);
+                if (coating.isEmpty() || coating.get().category() != MaterialCategory.GEM || !template.allowsMaterial(coatingId)) {
+                    continue;
+                }
+                List<ItemStack> bases = new ArrayList<>();
+                List<ItemStack> outputs = new ArrayList<>();
+                for (ResourceLocation baseMaterialId : MaterialCatalog.starterMaterialIds()) {
+                    Optional<ToolMaterialDefinition> baseMaterial = MaterialCatalog.definition(baseMaterialId);
+                    if (baseMaterial.isEmpty() || baseMaterial.get().category() != MaterialCategory.METAL || !template.allowsMaterial(baseMaterialId)) {
+                        continue;
+                    }
+                    ItemStack base = template.outputStack(baseMaterialId);
+                    ItemStack output = ToolForgeBlockEntity.lapidaryCoatingPreview(base, coatingId);
+                    if (!base.isEmpty() && !output.isEmpty()) {
+                        bases.add(base);
+                        outputs.add(output);
+                    }
+                }
+                if (bases.isEmpty()) {
+                    continue;
+                }
+                recipes.add(new LapidaryCoatingJeiRecipe(
+                        recipeId("lapidary_coating/" + idPath(template.id()) + "/" + idPath(coatingId)),
+                        template,
+                        coatingId,
+                        new ItemStack(ModItems.LAPIDARY_TABLE.get()),
+                        bases,
+                        new ItemStack(coating.get().displayItem(), template.requiredMaterials()),
+                        coating.get().requiredLapidaryAbrasiveTier().map(MobsToolForgingJeiPlugin::abrasiveFor).orElse(ItemStack.EMPTY),
+                        new ItemStack(ModItems.GEM_CUTTERS_KNIFE.get()),
+                        outputs,
+                        template.requiredHits()
                 ));
             }
         }
@@ -172,6 +241,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     private static List<PatternCreationJeiRecipe> patternCreationRecipes() {
         return ToolTypeRegistry.patternStationTemplates().stream()
+                .filter(MobsToolForgingJeiPlugin::isActiveTemplate)
                 .map(MobsToolForgingJeiPlugin::patternCreationRecipe)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -360,7 +430,43 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
             Item item = BuiltInRegistries.ITEM.get(input.itemId().get());
             return item == Items.AIR ? List.of() : List.of(new ItemStack(item, input.count()));
         }
+        if (input.tag().isPresent()) {
+            List<ItemStack> stacks = new ArrayList<>();
+            BuiltInRegistries.ITEM.getTagOrEmpty(input.tag().get())
+                    .forEach(holder -> stacks.add(new ItemStack(holder.value(), input.count())));
+            return stacks;
+        }
         return List.of();
+    }
+
+    private static Optional<ItemStack> armorAttachmentTarget(ForgeTemplateDefinition template) {
+        if (ToolTypeRegistry.HELMET_PLATE_TEMPLATE.equals(template.id())) {
+            return Optional.of(ModItems.MODULAR_HELMET.get().createChainmail());
+        }
+        if (ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(template.id())) {
+            return Optional.of(ModItems.MODULAR_CHESTPLATE.get().createChainmail());
+        }
+        if (ToolTypeRegistry.LEGGINGS_PLATE_TEMPLATE.equals(template.id())) {
+            return Optional.of(ModItems.MODULAR_LEGGINGS.get().createChainmail());
+        }
+        if (ToolTypeRegistry.BOOTS_PLATE_TEMPLATE.equals(template.id())) {
+            return Optional.of(ModItems.MODULAR_BOOTS.get().createChainmail());
+        }
+        return Optional.empty();
+    }
+
+    private static ItemStack abrasiveFor(ResourceLocation tier) {
+        if (LapidaryAbrasives.DIAMOND_TIER.equals(tier)) {
+            return new ItemStack(ModItems.DIAMOND_POWDER.get());
+        }
+        for (var holder : BuiltInRegistries.ITEM.getTagOrEmpty(LapidaryAbrasives.tierTag(tier))) {
+            return new ItemStack(holder.value());
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static boolean isActiveTemplate(ForgeTemplateDefinition template) {
+        return !ToolTypeRegistry.SCREWDRIVER_HEAD_TEMPLATE.equals(template.id());
     }
 
     private static ItemStack stationFor(WorkstationKind workstation) {
@@ -423,6 +529,10 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     static ItemStack dryingRackIcon() {
         return new ItemStack(ModItems.DRYING_RACK.get());
+    }
+
+    static ItemStack lapidaryTableIcon() {
+        return new ItemStack(ModItems.LAPIDARY_TABLE.get());
     }
 
     static ItemStack materialTraitIcon() {

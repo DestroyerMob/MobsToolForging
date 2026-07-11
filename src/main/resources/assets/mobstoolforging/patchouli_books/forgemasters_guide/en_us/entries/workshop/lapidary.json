@@ -1,0 +1,18 @@
+{
+  "name": "Lapidary Coating",
+  "icon": "mobstoolforging:lapidary_table",
+  "category": "mobstoolforging:workshop",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Coating, Not Forging",
+      "text": "The Lapidary Table coats an existing part; it does not forge a standalone gem part from a pattern.$(p)$(bold)Coating order:$()$(li)Forge the metal part$(li)Heat that part$(li)Place it as the base$(li)Add the required gems$(li)Work it with the Gem Cutter's Knife"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Abrasives and Output",
+      "text": "$(bold)Abrasives$()$(br)Some gems require an abrasive tier. Diamond Powder satisfies the built-in diamond tier and can improve quality.$(p)$(bold)Finished part$()$(br)The part keeps its metal base internally and gains a gem coating. Both materials remain part of the calculated result."
+    }
+  ]
+}

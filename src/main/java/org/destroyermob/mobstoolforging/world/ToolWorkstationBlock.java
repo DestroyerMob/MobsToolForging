@@ -863,6 +863,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (level instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(kind.workParticle(), pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5, 8, 0.18, 0.05, 0.18, 0.02);
         }
+        if (kind.isSmithingAnvilLike() && level.getBlockEntity(pos) instanceof ToolForgeBlockEntity forge) {
+            HeatingInteractionEffects.hammerStrike(level, pos, forge.materialHeatTemperature());
+        }
     }
 
     private static boolean tryClearPlacedWork(ToolForgeBlockEntity forge, Player player, Level level, BlockPos pos) {
@@ -933,8 +936,8 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         float minimumTemperature = material == null ? template.minimumTemperature() : WorkshopHeat.minimumForgeTemperature(material, template);
         return Component.translatable(
                 "message.mobstoolforging.metal_needs_heat_current",
-                Math.round(temperature * 100.0F),
-                Math.round(minimumTemperature * 100.0F),
+                WorkpieceHeat.displayPercent(temperature),
+                WorkpieceHeat.displayPercent(minimumTemperature),
                 Component.translatable("tooltip.mobstoolforging.workpiece_status." + WorkpieceHeat.statusKey(temperature, WorkpieceHeat.isWorkable(stack), minimumTemperature))
         );
     }

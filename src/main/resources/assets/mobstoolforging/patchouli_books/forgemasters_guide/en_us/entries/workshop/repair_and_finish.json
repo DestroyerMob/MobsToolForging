@@ -1,0 +1,18 @@
+{
+  "name": "Repair, Finish, and Names",
+  "icon": "minecraft:grindstone",
+  "category": "mobstoolforging:workshop",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Workshop Repair",
+      "text": "Modular equipment uses component-aware repair rules.$(p)$(bold)Important:$()$(li)Vanilla combine-two-items repair is filtered$(li)Use a compatible repair material$(li)Use the supported repair interaction$(p)This preserves the item's construction data."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Finishing",
+      "text": "$(bold)Finishing$()$(br)Unpolished parts can be finished on a grindstone. Finish is stored separately from material and workmanship.$(p)$(bold)Renaming$()$(br)Personal names preserve construction data and survive normal stat recalculation and repair."
+    }
+  ]
+}

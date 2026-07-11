@@ -1,0 +1,38 @@
+{
+  "name": "Traits: Common Materials",
+  "icon": "minecraft:iron_ingot",
+  "category": "mobstoolforging:equipment",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "How Trait Levels Work",
+      "text": "Use the named material in an eligible component.$(p)$(bold)For each occurrence:$()$(li)Add one trait level$(li)Apply numeric effects once$(li)Compound multiplicative values$(p)Guard, binding, and wrap are support slots. They may grant an additional support trait."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Wood and Breeze",
+      "text": "$(bold)Steady$()$(br)Source: oak or dark oak$(li)×1.02 durability per level$(p)$(bold)Swift$()$(br)Source: breeze rod$(li)+0.12 attack speed$(li)×1.02 mining speed$(li)×0.94 durability per level"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Blaze Handles",
+      "text": "$(bold)Kindled$()$(br)Source: blaze rod$(p)Per level:$(li)Dropped item is fireproof$(li)×0.97 durability$(li)Records fire affinity$(li)Records nether affinity"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Iron and Copper",
+      "text": "$(bold)Reinforced$()$(br)Source: iron$(li)×1.06 durability per level$(p)$(bold)Conductive$()$(br)Source: copper$(li)×0.99 durability per level$(li)Enchanting affinity$(li)Resonance affinity"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Gold",
+      "text": "$(bold)Gilded$()$(br)Source: gold$(p)Effect: +25% XP, rounded up with a minimum bonus of +1.$(li)Non-weapons boost block XP$(li)Weapons boost mob XP$(p)Extra Gilded levels do not raise the XP bonus."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Support Traits",
+      "text": "$(bold)Copper support part$()$(li)Also grants Resonant$(li)×1.005 mining speed$(li)Enchanting/resonance affinity$(p)$(bold)Gold support part$()$(li)Also grants Conductive$(p)Primary and support effects can coexist on the same material component."
+    }
+  ]
+}

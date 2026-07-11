@@ -1,0 +1,16 @@
+{
+  "tag": "mobstoolforging:heating_visuals/gold",
+  "priority": 100,
+  "colors": ["#321003", "#713006", "#ad5708", "#df7b0c", "#fca617", "#ffc43a", "#ffdc68", "#ffea94", "#fff2b9", "#fff8d8", "#fffdf0"],
+  "visible_threshold": 0.08,
+  "color_curve_exponent": 1.02,
+  "surface_tint_strength": 0.36,
+  "emission_start": 0.12,
+  "emission_strength": 0.66,
+  "halo_start": 0.28,
+  "halo_alpha": 0.06,
+  "halo_base_scale": 1.015,
+  "halo_extra_scale": 0.011,
+  "light_start": 0.18,
+  "maximum_block_light": 13
+}

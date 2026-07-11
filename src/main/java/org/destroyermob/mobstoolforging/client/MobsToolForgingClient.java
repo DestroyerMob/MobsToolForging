@@ -1,20 +1,15 @@
 package org.destroyermob.mobstoolforging.client;
 
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -25,14 +20,16 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
-import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.client.model.ArmorMaterialTextureManager;
 import org.destroyermob.mobstoolforging.client.model.ComponentDrivenToolBakedModel;
+import org.destroyermob.mobstoolforging.client.model.HeatAwareItemBakedModel;
 import org.destroyermob.mobstoolforging.client.model.ModularBodyArmourModel;
 import org.destroyermob.mobstoolforging.client.model.ModularHelmetModel;
 import org.destroyermob.mobstoolforging.client.model.ModularLowerArmourModel;
@@ -40,8 +37,6 @@ import org.destroyermob.mobstoolforging.client.model.PatternCutoutModelLoader;
 import org.destroyermob.mobstoolforging.client.model.PartedToolModelLoader;
 import org.destroyermob.mobstoolforging.client.model.ToolMaterialVisualManager;
 import org.destroyermob.mobstoolforging.network.CycleKnappingTargetPayload;
-import org.destroyermob.mobstoolforging.item.ModularArmorPartItem;
-import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModMenuTypes;
@@ -61,9 +56,10 @@ public final class MobsToolForgingClient {
         eventBus.addListener(MobsToolForgingClient::registerClientExtensions);
         eventBus.addListener(MobsToolForgingClient::registerGeometryLoaders);
         eventBus.addListener(MobsToolForgingClient::wrapComponentDrivenItemModels);
-        eventBus.addListener(MobsToolForgingClient::registerItemDecorations);
         eventBus.addListener(MobsToolForgingClient::registerReloadListeners);
         eventBus.addListener(MobsToolForgingClient::registerMenuScreens);
+        eventBus.addListener(MobsToolForgingClient::registerShaders);
+        eventBus.addListener(MobsToolForgingClient::registerRenderBuffers);
         NeoForge.EVENT_BUS.addListener(MobsToolForgingClient::handleKnappingScroll);
         NeoForge.EVENT_BUS.addListener(MobsToolForgingClient::showKnappingActionbar);
     }
@@ -144,52 +140,34 @@ public final class MobsToolForgingClient {
 
     private static void wrapComponentDrivenItemModels(ModelEvent.ModifyBakingResult event) {
         event.getModels().replaceAll((location, model) -> {
-            if (!ModelResourceLocation.INVENTORY_VARIANT.equals(location.variant()) || !ComponentDrivenToolBakedModel.shouldWrap(model)) {
+            if (!ModelResourceLocation.INVENTORY_VARIANT.equals(location.variant())) {
                 return model;
             }
-            return new ComponentDrivenToolBakedModel(model);
+            BakedModel resolved = ComponentDrivenToolBakedModel.shouldWrap(model)
+                    ? new ComponentDrivenToolBakedModel(model)
+                    : model;
+            return new HeatAwareItemBakedModel(resolved);
         });
-    }
-
-    private static void registerItemDecorations(RegisterItemDecorationsEvent event) {
-        Set<Item> decoratedItems = new LinkedHashSet<>();
-        decoratedItems.add(Items.IRON_INGOT);
-        decoratedItems.add(Items.GOLD_INGOT);
-        decoratedItems.add(Items.COPPER_INGOT);
-        decoratedItems.add(Items.NETHERITE_INGOT);
-        BuiltInRegistries.ITEM.forEach(item -> {
-            if (shouldRegisterHeatDecorator(item)) {
-                decoratedItems.add(item);
-            }
-        });
-        decoratedItems.forEach(item -> event.register(item, HeatItemDecorator.INSTANCE));
-    }
-
-    private static boolean shouldRegisterHeatDecorator(Item item) {
-        if (item instanceof ModularToolPartItem || item instanceof ModularArmorPartItem) {
-            return true;
-        }
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
-        if (id == null) {
-            return false;
-        }
-        String path = id.getPath().toLowerCase(Locale.ROOT);
-        return path.endsWith("_blade")
-                || path.endsWith("_head")
-                || path.endsWith("_guard")
-                || path.endsWith("_plate")
-                || path.endsWith("_chainmail")
-                || path.endsWith("_body");
     }
 
     private static void registerReloadListeners(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener(HeatingForgeInsertVisualManager.INSTANCE);
+        event.registerReloadListener(HeatVisualProfileManager.INSTANCE);
         event.registerReloadListener(ToolMaterialVisualManager.INSTANCE);
         event.registerReloadListener(ArmorMaterialTextureManager.INSTANCE);
     }
 
     private static void registerMenuScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenuTypes.PATTERN_CREATION_STATION.get(), PatternCreationStationScreen::new);
+    }
+
+    private static void registerShaders(RegisterShadersEvent event) {
+        HeatRenderTypes.registerShader(event);
+    }
+
+    private static void registerRenderBuffers(RegisterRenderBuffersEvent event) {
+        event.registerRenderBuffer(HeatRenderTypes.heatMask());
+        event.registerRenderBuffer(HeatRenderTypes.heatShimmer());
     }
 
     private static void handleKnappingScroll(InputEvent.MouseScrollingEvent event) {
@@ -222,6 +200,7 @@ public final class MobsToolForgingClient {
             ), true);
         }
     }
+
 
     private static KnappingLookTarget knappingLookTarget(boolean requireSneaking) {
         if (!MobsToolForgingConfig.crudeFlintToolsEnabled()) {

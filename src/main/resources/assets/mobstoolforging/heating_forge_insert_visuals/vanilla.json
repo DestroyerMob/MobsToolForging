@@ -5,9 +5,7 @@
   },
   "fallback_workpiece": {
     "model": "mobstoolforging:block/heating_forge/billet",
-    "billet_texture": "minecraft:block/iron_block",
-    "hot_texture": "mobstoolforging:block/heating_forge/white_hot_billet",
-    "glow_texture": "mobstoolforging:block/heating_forge/billet_glow"
+    "billet_texture": "minecraft:block/iron_block"
   },
   "entries": [
     {

@@ -7,6 +7,8 @@ import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 
 public final class WorkpieceHeat {
+    public static final float WHITE_HOT_TEMPERATURE = 0.9F;
+
     private WorkpieceHeat() {
     }
 
@@ -82,6 +84,11 @@ public final class WorkpieceHeat {
         return data(stack).map(HeatedWorkpieceData::temperature).orElse(0.0F);
     }
 
+    /** Keeps player-facing heat readouts stable while the underlying value updates every tick. */
+    public static int displayPercent(float temperature) {
+        return Math.round(clamp(temperature) * 20.0F) * 5;
+    }
+
     public static boolean isWorkable(ItemStack stack) {
         return data(stack).map(HeatedWorkpieceData::workable).orElse(false);
     }
@@ -92,7 +99,7 @@ public final class WorkpieceHeat {
 
     public static String statusKey(float temperature, boolean workable, float minimumTemperature) {
         float minimum = clamp(minimumTemperature);
-        if (temperature >= 0.98F) {
+        if (temperature >= WHITE_HOT_TEMPERATURE) {
             return "white_hot";
         }
         if (temperature >= minimum) {

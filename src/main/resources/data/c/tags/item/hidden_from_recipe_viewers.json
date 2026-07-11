@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "mobstoolforging:flint_shard",
+    "mobstoolforging:plant_fiber",
+    "mobstoolforging:screwdriver",
+    "mobstoolforging:screwdriver_head",
+    "mobstoolforging:screwdriver_head_pattern",
+    "mobstoolforging:crucible",
+    "mobstoolforging:foundry_forge"
+  ]
+}

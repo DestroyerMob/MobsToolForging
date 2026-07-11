@@ -1,0 +1,18 @@
+{
+  "name": "Current Scope",
+  "icon": "minecraft:barrier",
+  "category": "mobstoolforging:equipment",
+  "sortnum": 5,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Active Workshop",
+      "text": "$(bold)Maintained progression:$()$(li)Knapping and patterns$(li)Heating and metal shaping$(li)Tool and armour assembly$(li)Leatherworking and drying$(li)Lapidary coating$(li)Repair and finishing$(p)JEI/EMI is limited to entries describing these live mechanics."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Reserved Systems",
+      "text": "$(bold)Reserved scaffolding:$()$(li)Crucible$(li)Foundry$(li)Casting$(li)Screwdriver$(p)Their normal recipes and viewer entries are hidden while disabled.$(p)A configuration or datapack that enables these systems should provide matching guide information."
+    }
+  ]
+}

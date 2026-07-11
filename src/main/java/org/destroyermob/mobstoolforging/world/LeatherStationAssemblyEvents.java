@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import org.destroyermob.mobstoolforging.integration.everycomp.CompatWorkstationRegistry;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 
 public final class LeatherStationAssemblyEvents {
@@ -33,7 +34,7 @@ public final class LeatherStationAssemblyEvents {
         BlockPos footPos = event.getPos();
         Direction facing = player.getDirection().getOpposite();
         Direction otherDirection = LeatherStationBlock.otherHalfDirection(facing);
-        ModBlocks.LeatherStationVariant variant = matchingVariant(level, footPos, otherDirection).orElse(null);
+        LeatherStationAssembly variant = matchingVariant(level, footPos, otherDirection).orElse(null);
         if (variant == null) {
             return;
         }
@@ -45,7 +46,7 @@ public final class LeatherStationAssemblyEvents {
         }
 
         BlockPos headPos = footPos.relative(otherDirection);
-        BlockState footState = variant.block().get().defaultBlockState()
+        BlockState footState = variant.block().defaultBlockState()
                 .setValue(LeatherStationBlock.FACING, facing)
                 .setValue(LeatherStationBlock.PART, BedPart.FOOT);
         BlockState headState = footState.setValue(LeatherStationBlock.PART, BedPart.HEAD);
@@ -60,18 +61,29 @@ public final class LeatherStationAssemblyEvents {
         }
     }
 
-    private static Optional<ModBlocks.LeatherStationVariant> matchingVariant(Level level, BlockPos footPos, Direction otherDirection) {
+    private static Optional<LeatherStationAssembly> matchingVariant(Level level, BlockPos footPos, Direction otherDirection) {
         BlockPos headPos = footPos.relative(otherDirection);
         BlockState footPlanks = level.getBlockState(footPos);
         BlockState headPlanks = level.getBlockState(headPos);
         BlockState footLog = level.getBlockState(footPos.above());
         BlockState headLog = level.getBlockState(headPos.above());
-        return ModBlocks.LEATHER_STATION_VARIANTS.stream()
+        Optional<LeatherStationAssembly> builtIn = ModBlocks.LEATHER_STATION_VARIANTS.stream()
                 .filter(variant -> footPlanks.is(variant.recipePlanks())
                         && headPlanks.is(variant.recipePlanks())
                         && footLog.is(variant.recipeLog())
                         && headLog.is(variant.recipeLog()))
+                .map(variant -> new LeatherStationAssembly(variant.block().get()))
                 .findFirst();
+        return builtIn.or(() -> CompatWorkstationRegistry.leatherStations().stream()
+                .filter(variant -> footPlanks.is(variant.planks())
+                        && headPlanks.is(variant.planks())
+                        && footLog.is(variant.log())
+                        && headLog.is(variant.log()))
+                .map(variant -> new LeatherStationAssembly(variant.station()))
+                .findFirst());
+    }
+
+    private record LeatherStationAssembly(LeatherStationBlock block) {
     }
 
     private static EquipmentSlot slotFor(InteractionHand hand) {

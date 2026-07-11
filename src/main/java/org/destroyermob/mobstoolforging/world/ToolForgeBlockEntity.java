@@ -897,6 +897,34 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return armorData != null && lapidaryCoatingWork(stack, armorData).isPresent();
     }
 
+    public static ItemStack lapidaryCoatingPreview(ItemStack baseStack, ResourceLocation coatingMaterial) {
+        if (baseStack.isEmpty() || coatingMaterial == null) {
+            return ItemStack.EMPTY;
+        }
+        if (MaterialCatalog.definition(coatingMaterial)
+                .filter(definition -> definition.category() == MaterialCategory.GEM)
+                .isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        LapidaryCoatingWork coatingWork;
+        ToolPartData toolData = baseStack.get(ModDataComponents.TOOL_PART.get());
+        if (toolData != null) {
+            coatingWork = lapidaryCoatingWork(baseStack, toolData).orElse(null);
+        } else {
+            ArmorPartData armorData = baseStack.get(ModDataComponents.ARMOR_PART.get());
+            coatingWork = armorData == null ? null : lapidaryCoatingWork(baseStack, armorData).orElse(null);
+        }
+        if (coatingWork == null
+                || !coatingWork.template().allowsMaterial(coatingMaterial)
+                || !coatingWork.canCreatePart(coatingMaterial)) {
+            return ItemStack.EMPTY;
+        }
+        int quality = MobsToolForgingConfig.ENABLE_QUALITY.get()
+                ? ForgingQuality.clampScore(Math.round((coatingWork.baseQuality() + ForgingQuality.DEFAULT_SCORE) / 2.0F))
+                : ForgingQuality.DEFAULT_SCORE;
+        return createLapidaryCoatingOutput(coatingWork, coatingMaterial, quality);
+    }
+
     private static Optional<LapidaryCoatingWork> lapidaryCoatingWork(ItemStack stack, ToolPartData data) {
         if (data.coatingBaseMaterial().isPresent()) {
             return Optional.empty();
@@ -977,6 +1005,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
         int outputQuality = MobsToolForgingConfig.ENABLE_QUALITY.get()
                 ? ForgingQuality.clampScore(Math.round((coatingWork.baseQuality() + completedQualityScore()) / 2.0F))
                 : ForgingQuality.DEFAULT_SCORE;
+        return createLapidaryCoatingOutput(coatingWork, materialId, outputQuality);
+    }
+
+    private static ItemStack createLapidaryCoatingOutput(LapidaryCoatingWork coatingWork, ResourceLocation materialId, int outputQuality) {
         ItemStack output = coatingWork.createPart(materialId, outputQuality);
         if (output.isEmpty()) {
             output = coatingWork.baseStack().copyWithCount(1);

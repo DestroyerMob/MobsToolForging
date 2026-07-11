@@ -1,0 +1,18 @@
+{
+  "name": "Modular Armour",
+  "icon": "mobstoolforging:modular_chestplate",
+  "category": "mobstoolforging:equipment",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Armour Construction",
+      "text": "$(bold)Leather armour$()$(br)Assembled through leatherworking.$(p)$(bold)Plated armour$()$(br)Begins as finished modular chainmail.$(p)For a plate attachment:$(li)Choose the matching plate pattern$(li)Place matching chainmail as the target$(li)Work the plate material onto it"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Metal and Gem Plates",
+      "text": "$(bold)Metal plate$()$(br)Hammer it at the Tool Forge.$(p)$(bold)Gem plate$()$(br)Use the Gem Cutter's Knife at the Lapidary Table.$(p)A forged metal plate can also be gem-coated before assembly.$(p)Replacing a plate combines quality and preserves current armour damage."
+    }
+  ]
+}

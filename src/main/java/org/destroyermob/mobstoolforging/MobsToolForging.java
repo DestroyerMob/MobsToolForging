@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -56,6 +57,7 @@ import org.destroyermob.mobstoolforging.data.ModDataGenerators;
 import org.destroyermob.mobstoolforging.item.ModularToolItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.network.ModNetworking;
+import org.destroyermob.mobstoolforging.integration.everycomp.MobsToolForgingEveryCompat;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModCreativeTabs;
@@ -120,6 +122,9 @@ public class MobsToolForging {
         ModNetworking.register(modEventBus);
         ModDataGenerators.register(modEventBus);
         ModLootModifiers.register(modEventBus);
+        if (ModList.get().isLoaded("everycomp")) {
+            MobsToolForgingEveryCompat.register();
+        }
         ToolTypeRegistry.bootstrap();
         ToolStatBuilder.validateStarterMaterialAttributes();
         modContainer.registerConfig(ModConfig.Type.COMMON, MobsToolForgingConfig.COMMON_SPEC);
@@ -169,8 +174,10 @@ public class MobsToolForging {
             ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> event.accept(variant.block()));
             ModBlocks.DRYING_RACK_VARIANTS.forEach(variant -> event.accept(variant.block()));
             event.accept(ModBlocks.HEATING_FORGE);
-            event.accept(ModBlocks.CRUCIBLE);
-            event.accept(ModBlocks.FOUNDRY_FORGE);
+            if (MobsToolForgingConfig.ENABLE_CRUCIBLE.get()) {
+                event.accept(ModBlocks.CRUCIBLE);
+                event.accept(ModBlocks.FOUNDRY_FORGE);
+            }
             event.accept(ModBlocks.ASH);
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
@@ -351,6 +358,10 @@ public class MobsToolForging {
         if (!MobsToolForgingConfig.ENABLE_PATTERN_RACK.get()) {
             ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> disabledRecipes.add(modRecipe(variant.id())));
         }
+        if (!MobsToolForgingConfig.ENABLE_CRUCIBLE.get()) {
+            disabledRecipes.add(modRecipe("crucible"));
+            disabledRecipes.add(modRecipe("foundry_forge"));
+        }
         return disabledRecipes;
     }
 
@@ -381,9 +392,10 @@ public class MobsToolForging {
         }
         ItemStack stack = itemEntity.getItem();
         if (WorkpieceHeat.hasHeat(stack) && isQuenching(itemEntity)) {
+            float temperature = WorkpieceHeat.temperature(stack, itemEntity.level());
             if (WorkpieceHeat.quench(stack)) {
                 itemEntity.setItem(stack);
-                playQuenchEffects(itemEntity.level(), itemEntity.blockPosition());
+                playQuenchEffects(itemEntity.level(), itemEntity.blockPosition(), temperature);
             }
             return;
         }
@@ -404,9 +416,10 @@ public class MobsToolForging {
         if (event.getLevel().isClientSide) {
             return;
         }
+        float temperature = WorkpieceHeat.temperature(stack, event.getLevel());
         WorkpieceHeat.quench(stack);
         event.getEntity().setItemInHand(event.getHand(), stack);
-        playQuenchEffects(event.getLevel(), event.getPos());
+        playQuenchEffects(event.getLevel(), event.getPos(), temperature);
     }
 
     private void blockHeatedCrafting(PlayerEvent.ItemCraftedEvent event) {
@@ -437,7 +450,7 @@ public class MobsToolForging {
         boolean forgeReady = event.getEntity() == null
                 ? WorkpieceHeat.data(stack).map(data -> data.temperature() >= minimumTemperature).orElse(false)
                 : WorkpieceHeat.isForgeReady(stack, event.getEntity().level(), minimumTemperature);
-        event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.workpiece_temperature", Math.round(temperature * 100.0F)).withStyle(forgeReady ? ChatFormatting.GOLD : ChatFormatting.RED));
+        event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.workpiece_temperature", WorkpieceHeat.displayPercent(temperature)).withStyle(forgeReady ? ChatFormatting.GOLD : ChatFormatting.RED));
         String statusKey = WorkpieceHeat.statusKey(temperature, WorkpieceHeat.isWorkable(stack), minimumTemperature);
         event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.workpiece_status." + statusKey).withStyle(forgeReady ? ChatFormatting.YELLOW : ChatFormatting.DARK_GRAY));
         event.getToolTip().add(Component.translatable(forgeReady ? "tooltip.mobstoolforging.workpiece_ready" : "tooltip.mobstoolforging.workpiece_not_ready").withStyle(ChatFormatting.DARK_GRAY));
@@ -558,10 +571,17 @@ public class MobsToolForging {
         return state.is(BlockTags.COPPER_ORES) || state.is(Blocks.COPPER_BLOCK) || state.is(Blocks.RAW_COPPER_BLOCK);
     }
 
-    private static void playQuenchEffects(Level level, BlockPos pos) {
-        level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.55F, 1.45F);
+    private static void playQuenchEffects(Level level, BlockPos pos, float temperature) {
+        float strength = Math.max(0.2F, Math.min(1.0F, temperature));
+        level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F + strength * 0.35F, 1.25F + strength * 0.25F);
         if (level instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(ParticleTypes.CLOUD, pos.getX() + 0.5D, pos.getY() + 0.8D, pos.getZ() + 0.5D, 12, 0.18D, 0.12D, 0.18D, 0.02D);
+            double x = pos.getX() + 0.5D;
+            double y = pos.getY() + 0.72D;
+            double z = pos.getZ() + 0.5D;
+            serverLevel.sendParticles(ParticleTypes.CLOUD, x, y, z, 10 + Math.round(strength * 18.0F), 0.20D, 0.16D, 0.20D, 0.035D);
+            serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE, x, y + 0.08D, z, 3 + Math.round(strength * 7.0F), 0.16D, 0.12D, 0.16D, 0.025D);
+            serverLevel.sendParticles(ParticleTypes.SPLASH, x, y - 0.18D, z, 6 + Math.round(strength * 10.0F), 0.22D, 0.04D, 0.22D, 0.12D);
+            serverLevel.sendParticles(ParticleTypes.BUBBLE_POP, x, y - 0.12D, z, 4 + Math.round(strength * 6.0F), 0.16D, 0.04D, 0.16D, 0.035D);
         }
     }
 

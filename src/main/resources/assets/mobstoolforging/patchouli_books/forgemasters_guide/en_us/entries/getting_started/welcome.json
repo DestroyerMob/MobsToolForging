@@ -1,0 +1,18 @@
+{
+  "name": "The Forging Path",
+  "icon": "mobstoolforging:pattern_board",
+  "category": "mobstoolforging:getting_started",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "The Forging Path",
+      "text": "MTF replaces the one-grid tool recipe with a workshop chain.$(p)$(bold)The basic path:$()$(li)Knap flint$(li)Prepare handles$(li)Make patterns$(li)Heat and shape parts$(li)Assemble the finished tool$(p)JEI or EMI shows the inputs. This book explains the actions and resulting stats."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "mobstoolforging:forgemasters_guide",
+      "text": "$(bold)Need another copy?$()$(p)Combine a Book with a Pattern Board.$(p)This recipe exists only while Patchouli is installed."
+    }
+  ]
+}

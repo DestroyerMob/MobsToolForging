@@ -12,10 +12,10 @@
   "pattern": [
     "PPP",
     "S S",
-    "PPP"
+    "S S"
   ],
   "result": {
-    "count": 1,
+    "count": 4,
     "id": "mobstoolforging:birch_toolmakers_bench"
   }
 }

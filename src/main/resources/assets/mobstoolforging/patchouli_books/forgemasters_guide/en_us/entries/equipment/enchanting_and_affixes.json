@@ -1,0 +1,23 @@
+{
+  "name": "Enchanting and Affixes",
+  "icon": "minecraft:enchanting_table",
+  "category": "mobstoolforging:equipment",
+  "sortnum": 4,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Affinity Is Metadata",
+      "text": "MTF records affinities such as:$(li)Enchanting$(li)Resonance$(li)Fortune$(li)Fire$(li)Echo$(p)Affinity is metadata. MTF does not turn it into stronger enchantments or extra loot by itself. Without another integration, only the numeric effects printed here apply."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Better Enchanting",
+      "text": "Better Enchanting reads construction materials through its own rules.$(p)$(bold)Each gold component:$()$(br)+1 enchantment capacity$(p)This is separate from:$(li)Conductive affinity$(li)Gilded's XP bonus$(p)The three mechanics are not interchangeable."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Apotheosis Affixes",
+      "text": "Apotheosis affixes and socketed gems are external equipment layers.$(p)MTF preserves compatible components during:$(li)Stat recalculation$(li)Repair$(li)Renaming$(li)Modular updates$(p)Their exact effects remain governed by Apotheosis, not MTF traits."
+    }
+  ]
+}

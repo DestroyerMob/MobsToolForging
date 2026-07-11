@@ -25,3 +25,17 @@ type = "required"
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "patchouli"
+type = "optional"
+versionRange = "[1.21.1-93,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "everycomp"
+type = "optional"
+versionRange = "[1.21-2.11.46,)"
+ordering = "AFTER"
+side = "BOTH"

@@ -1,0 +1,18 @@
+{
+  "name": "Flint Knapping",
+  "icon": "minecraft:flint",
+  "category": "mobstoolforging:getting_started",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Flint Knapping",
+      "text": "$(bold)To begin:$()$(li)Place flint on a suitable block$(li)Work it in-world$(li)Use the knapped piece as your crude cutting edge$(p)Plant Fibre and the old Flint Shard item are compatibility remnants, not separate progression steps."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "First Assembly",
+      "text": "Use the $(bold)Toolmaker's Station$() to combine prepared parts.$(p)Final statistics come from:$(li)Component materials$(li)Workmanship quality$(li)Finish$(li)Traits$(p)The displayed name or model alone never determines the stats."
+    }
+  ]
+}

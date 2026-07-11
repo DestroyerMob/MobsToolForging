@@ -1,0 +1,28 @@
+{
+  "name": "Traits: Gems and Flint",
+  "icon": "minecraft:diamond",
+  "category": "mobstoolforging:equipment",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Gem Coatings",
+      "text": "Gem traits come from $(bold)lapidary-coated parts$(), not from forging raw gems against a pattern.$(p)Ruby and sapphire accept the pack's common gem tags.$(p)This allows compatible gems from another mod to resolve to the correct MTF material identity."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Diamond and Emerald",
+      "text": "$(bold)Stabilized — diamond$()$(li)×1.08 durability$(li)×1.01 mining speed$(p)$(bold)Fortunate — emerald$()$(li)Luck affinity$(li)Trade affinity$(li)Fortune affinity$(p)MTF applies no direct loot or Fortune increase."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Ruby and Sapphire",
+      "text": "$(bold)Keen — ruby$()$(li)+0.15 attack damage$(li)Support slot also grants Fortunate$(p)$(bold)Focused — sapphire$()$(li)+0.03 attack speed$(li)Enchanting/resonance affinity$(li)Support slot also grants Resonant$(li)Resonant adds ×1.005 mining speed"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Flint",
+      "text": "$(bold)Jagged — flint$()$(li)+0.10 attack damage$(li)×0.96 durability$(p)Jagged belongs to crude flint construction.$(p)The hidden legacy Flint Shard item is $(bold)not$() required to obtain this trait."
+    }
+  ]
+}

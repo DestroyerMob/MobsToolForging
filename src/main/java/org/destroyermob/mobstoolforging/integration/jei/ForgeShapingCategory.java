@@ -44,7 +44,7 @@ public class ForgeShapingCategory implements IRecipeCategory<ForgeShapingJeiReci
     public void setRecipe(IRecipeLayoutBuilder builder, ForgeShapingJeiRecipe recipe, IFocusGroup focuses) {
         builder.addSlot(RecipeIngredientRole.CATALYST, 2, 21)
                 .setStandardSlotBackground()
-                .addItemStack(recipe.station());
+                .addItemStacks(recipe.stations());
         builder.addInputSlot(28, 12)
                 .setStandardSlotBackground()
                 .addItemStack(recipe.pattern());

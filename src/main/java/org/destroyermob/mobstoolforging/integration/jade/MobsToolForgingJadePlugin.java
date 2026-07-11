@@ -8,6 +8,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
+import org.destroyermob.mobstoolforging.client.HeatVisuals;
 import org.destroyermob.mobstoolforging.mixin.CampfireBlockEntityAccessor;
 import org.destroyermob.mobstoolforging.world.CampfireWorkpieceHeating;
 import org.destroyermob.mobstoolforging.world.DryingRackBlock;
@@ -23,6 +25,7 @@ import org.destroyermob.mobstoolforging.world.PatternRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
+import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
@@ -90,11 +93,9 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
             if (template != null) {
                 tooltip.add(Component.translatable("jade.mobstoolforging.materials", forge.materialCount(), template.requiredMaterials()).withStyle(ChatFormatting.GRAY));
                 if (forge.hasMaterialHeat()) {
-                    tooltip.add(Component.translatable(
-                            "jade.mobstoolforging.material_heat",
-                            Math.round(forge.materialHeatTemperature() * 100.0F),
-                            Component.translatable("tooltip.mobstoolforging.workpiece_status." + forge.materialHeatStatusKey())
-                    ).withStyle(forge.materialIsForgeReady() ? ChatFormatting.GOLD : ChatFormatting.DARK_GRAY));
+                    Component heat = heatValue(forge.materialHeatTemperature());
+                    Component status = heatStatus(forge.materialHeatTemperature(), forge.materialHeatStatusKey());
+                    tooltip.add(Component.translatable("jade.mobstoolforging.material_heat_compact", heat, status).withStyle(ChatFormatting.GRAY));
                 }
                 tooltip.add(progressLine(forge.hitCount(), template.requiredHits()));
             }
@@ -140,11 +141,10 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
                     continue;
                 }
                 float temperatureValue = forge.workpieceProgressTemperature(slot);
-                int temperature = Math.round(temperatureValue * 100.0F);
-                int target = Math.round(forge.workpieceTargetTemperature(slot) * 100.0F);
-                String statusKey = org.destroyermob.mobstoolforging.world.WorkpieceHeat.statusKey(temperatureValue, org.destroyermob.mobstoolforging.world.WorkpieceHeat.isWorkable(workpiece), org.destroyermob.mobstoolforging.MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
-                tooltip.add(Component.translatable("jade.mobstoolforging.workpiece", slot + 1, workpiece.getHoverName(), temperature, target, Component.translatable("tooltip.mobstoolforging.workpiece_status." + statusKey)).withStyle(ChatFormatting.GRAY));
-                tooltip.add(progressLine(forge.heatProgress(slot), forge.requiredHeatTicks(slot)));
+                float target = forge.workpieceTargetTemperature(slot);
+                float readyTemperature = Math.min(target, MobsToolForgingConfig.MINIMUM_FORGE_TEMPERATURE.get().floatValue());
+                String statusKey = WorkpieceHeat.statusKey(temperatureValue, WorkpieceHeat.isWorkable(workpiece), readyTemperature);
+                addWorkpieceHeatLine(tooltip, slot, workpiece, temperatureValue, statusKey, null);
             }
         }
     }
@@ -175,7 +175,10 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
                 int timerTicks = campfireTicksRemaining(campfire, slot, recipe.ticks());
                 int heatTicks = CampfireWorkpieceHeating.remainingHeatTicks(workpiece, accessor.getLevel(), recipe);
                 int ticksRemaining = heatTicks > 0 ? Math.min(timerTicks, heatTicks) : timerTicks;
-                tooltip.add(Component.translatable("jade.mobstoolforging.campfire_workpiece", slot + 1, workpiece.getHoverName(), secondsLeft(ticksRemaining)).withStyle(ChatFormatting.GRAY));
+                float temperature = WorkpieceHeat.temperature(workpiece, accessor.getLevel());
+                float target = recipe.targetTemperature();
+                String statusKey = WorkpieceHeat.statusKey(temperature, WorkpieceHeat.isWorkable(workpiece), target);
+                addWorkpieceHeatLine(tooltip, slot, workpiece, temperature, statusKey, secondsLeft(ticksRemaining));
             }
         }
     }
@@ -208,6 +211,29 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
 
     private static Component progressLine(int current, int required) {
         return Component.translatable("jade.mobstoolforging.progress", current, required, Math.round(required <= 0 ? 0.0F : current * 100.0F / required)).withStyle(ChatFormatting.GRAY);
+    }
+
+    private static void addWorkpieceHeatLine(ITooltip tooltip, int slot, ItemStack workpiece, float temperature, String statusKey, Component timeRemaining) {
+        Component heat = heatValue(temperature);
+        Component status = heatStatus(temperature, statusKey);
+        Component line = timeRemaining == null
+                ? Component.translatable("jade.mobstoolforging.workpiece_heat_compact", slot + 1, workpiece.getHoverName(), heat, status)
+                : Component.translatable("jade.mobstoolforging.workpiece_heat_compact_timed", slot + 1, workpiece.getHoverName(), heat, status, timeRemaining);
+        tooltip.add(line.copy().withStyle(ChatFormatting.GRAY));
+    }
+
+    private static Component heatValue(float temperature) {
+        float clampedTemperature = HeatVisuals.clamp(temperature);
+        int color = HeatVisuals.interfaceColor(clampedTemperature);
+        int temperaturePercent = WorkpieceHeat.displayPercent(clampedTemperature);
+        return Component.translatable("jade.mobstoolforging.heat_value", temperaturePercent)
+                .withStyle(style -> style.withColor(color & 0x00FFFFFF));
+    }
+
+    private static Component heatStatus(float temperature, String statusKey) {
+        int color = HeatVisuals.interfaceColor(temperature);
+        return Component.translatable("tooltip.mobstoolforging.workpiece_status." + statusKey)
+                .withStyle(style -> style.withColor(color & 0x00FFFFFF));
     }
 
     private static int campfireTicksRemaining(CampfireBlockEntity campfire, int slot, int defaultDuration) {

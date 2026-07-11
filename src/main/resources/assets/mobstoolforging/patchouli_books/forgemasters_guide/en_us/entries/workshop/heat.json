@@ -1,0 +1,18 @@
+{
+  "name": "Heat and Quenching",
+  "icon": "mobstoolforging:heating_forge",
+  "category": "mobstoolforging:workshop",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Heating Workpieces",
+      "text": "$(bold)Campfire$()$(br)Suitable for crude early work.$(p)$(bold)Heating Forge$()$(br)Provides controlled workshop heat.$(p)Before shaping, the workpiece must reach its material's required heat. Heat decays after removal; tooltips and workstation visuals show the current state."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Quenching",
+      "text": "Use a $(bold)water cauldron$() to cool a hot workpiece quickly.$(p)Quenching:$(li)Removes stored heat$(li)Makes the part safe to carry$(li)Allows use where hot parts are rejected$(p)It does $(bold)not$() reroll material or quality."
+    }
+  ]
+}

@@ -110,7 +110,7 @@ public class ModRecipeProvider extends RecipeProvider {
                     .define('P', variant.recipePlanks())
                     .pattern("PPP")
                     .pattern("S S")
-                    .pattern("PPP")
+                    .pattern("S S")
                     .unlockedBy("has_" + variant.id(), has(variant.recipePlanks()))
                     .save(output);
         }

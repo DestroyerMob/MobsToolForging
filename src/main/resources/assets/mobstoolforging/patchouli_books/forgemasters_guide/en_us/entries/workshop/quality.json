@@ -1,0 +1,23 @@
+{
+  "name": "Forging Quality",
+  "icon": "mobstoolforging:iron_smithing_hammer",
+  "category": "mobstoolforging:workshop",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Early Quality",
+      "text": "$(bold)Crude$()$(br)Score: below 60$(li)×0.82 durability$(li)×0.97 mining speed$(p)$(bold)Worked$()$(br)Score: 60–89$(li)×0.94 durability$(li)×0.99 mining speed"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "High Quality",
+      "text": "$(bold)Well Forged$()$(br)Score: 90–119$(li)Baseline statistics$(p)$(bold)Fine$()$(br)Score: 120–144$(li)×1.08 durability$(li)×1.02 mining speed$(li)+0.05 attack damage$(p)Ordinary workstation production currently caps at Fine."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Masterwork",
+      "text": "$(bold)Masterwork$()$(br)Score: 145 or higher$(p)Effects:$(li)×1.18 durability$(li)×1.03 mining speed$(li)+0.10 attack damage$(p)Masterwork exists in the stat system, but ordinary workstation production does not currently reach it."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "book.mobstoolforging.name",
+  "landing_text": "book.mobstoolforging.landing",
+  "subtitle": "book.mobstoolforging.subtitle",
+  "book_texture": "patchouli:textures/gui/book_brown.png",
+  "model": "patchouli:guide_book",
+  "show_progress": false,
+  "creative_tab": "tools_and_utilities",
+  "use_blocky_font": true,
+  "use_resource_pack": true
+}

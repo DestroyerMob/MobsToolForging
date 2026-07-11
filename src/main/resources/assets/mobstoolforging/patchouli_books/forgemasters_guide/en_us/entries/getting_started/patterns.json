@@ -1,0 +1,18 @@
+{
+  "name": "Patterns and Racks",
+  "icon": "mobstoolforging:pickaxe_head_pattern",
+  "category": "mobstoolforging:getting_started",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Making Patterns",
+      "text": "$(bold)Making a pattern:$()$(li)Create a Pattern Board$(li)Use the Pattern Creation Station$(li)Choose the required part design$(p)The station consumes the configured pattern material and returns that pattern.$(p)The screwdriver design is reserved compatibility content."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Pattern Racks",
+      "text": "Pattern Racks store designs beside the workshop.$(p)$(bold)At the forge:$()$(li)Select a stored pattern$(li)Supply its material$(li)Heat it when required$(li)Strike with a sufficient hammer$(p)JEI lists material count, hit count, and minimum hammer tier."
+    }
+  ]
+}

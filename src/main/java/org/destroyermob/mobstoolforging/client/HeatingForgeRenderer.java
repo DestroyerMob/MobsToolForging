@@ -41,14 +41,15 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
             }
             Placement placement = WORKPIECE_PLACEMENTS[Math.min(slot, WORKPIECE_PLACEMENTS.length - 1)];
             float heat = heatAmount(forge, slot, workpiece);
-            renderInsert(forge, HeatingForgeInsertVisualManager.workpiece(workpiece), poseStack, bufferSource, packedLight, packedOverlay, placement, heat);
+            HeatVisualProfile profile = HeatVisualProfileManager.INSTANCE.resolve(workpiece);
+            renderInsert(forge, HeatingForgeInsertVisualManager.workpiece(workpiece), poseStack, bufferSource, packedLight, packedOverlay, placement, heat, profile, true);
         }
     }
 
     private void renderAsh(HeatingForgeBlockEntity forge, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         HeatingForgeInsertVisualManager.ResolvedInsert ash = HeatingForgeInsertVisualManager.ash();
         for (int layer = 0; layer < forge.ashLayers(); layer++) {
-            renderInsert(forge, ash, poseStack, bufferSource, packedLight, packedOverlay, new Placement(0.0F, 0.0F, 1.0F, (2.0F + layer) / 16.0F, 0.0F), 0.0F);
+            renderInsert(forge, ash, poseStack, bufferSource, packedLight, packedOverlay, new Placement(0.0F, 0.0F, 1.0F, (2.0F + layer) / 16.0F, 0.0F), 0.0F, HeatVisualProfile.GENERIC, false);
         }
     }
 
@@ -62,18 +63,21 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
                 ? HeatingForgeInsertVisualManager.spentFuel()
                 : HeatingForgeInsertVisualManager.fuel(fuel.isEmpty() ? new ItemStack(Items.COAL) : fuel);
         for (int index = 0; index < visibleFuel; index++) {
-            renderInsert(forge, visual, poseStack, bufferSource, packedLight, packedOverlay, FUEL_PLACEMENTS[index], forge.hasSpentFuelBed() ? 0.0F : fuelHeat(forge, partialTick, index));
+            renderInsert(forge, visual, poseStack, bufferSource, packedLight, packedOverlay, FUEL_PLACEMENTS[index], forge.hasSpentFuelBed() ? 0.0F : fuelHeat(forge, partialTick, index), HeatVisualProfile.GENERIC, false);
         }
     }
 
-    private void renderInsert(HeatingForgeBlockEntity forge, HeatingForgeInsertVisualManager.ResolvedInsert visual, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, Placement placement, float heat) {
+    private void renderInsert(HeatingForgeBlockEntity forge, HeatingForgeInsertVisualManager.ResolvedInsert visual, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, Placement placement, float heat, HeatVisualProfile profile, boolean shimmer) {
         poseStack.pushPose();
         poseStack.translate(0.5F, placement.surfaceY(), 0.5F);
         poseStack.mulPose(Axis.YP.rotationDegrees(facingRotation(forge.getBlockState().getValue(HeatingForgeBlock.FACING))));
         poseStack.translate(placement.localX(), 0.0F, placement.localZ());
         poseStack.mulPose(Axis.YP.rotationDegrees(placement.rotation()));
         poseStack.scale(placement.scale(), placement.scale(), placement.scale());
-        HeatingForgeVoxelRenderer.render(visual.model(), visual.visual(), poseStack, bufferSource, packedLight, packedOverlay, heat);
+        HeatingForgeVoxelRenderer.render(visual.model(), visual.visual(), poseStack, bufferSource, packedLight, packedOverlay, heat, profile);
+        if (shimmer) {
+            HeatingForgeVoxelRenderer.renderShimmer(poseStack, bufferSource, heat, profile);
+        }
         poseStack.popPose();
     }
 

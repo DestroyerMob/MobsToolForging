@@ -1,0 +1,18 @@
+{
+  "name": "Shape and Assemble",
+  "icon": "mobstoolforging:crude_anvil",
+  "category": "mobstoolforging:getting_started",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Metal Shaping",
+      "text": "The Crude Anvil and Tool Forge shape metal.$(p)$(bold)Shaping order:$()$(li)Place the pattern$(li)Add the required ingots$(li)Heat to minimum forge heat$(li)Hammer to the shown hit count$(p)Armour plate patterns also need the matching finished chainmail armour as a target."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Assembly",
+      "text": "Bring compatible finished parts to the Toolmaker's Station.$(p)The assembled tool records:$(li)Head$(li)Handle$(li)Guard$(li)Binding or wrap$(li)Treatment$(li)Quality$(p)Changing any recorded component can change the calculated result."
+    }
+  ]
+}

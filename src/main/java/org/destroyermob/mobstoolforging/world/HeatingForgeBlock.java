@@ -158,8 +158,10 @@ public class HeatingForgeBlock extends BaseEntityBlock {
                 return ItemInteractionResult.SUCCESS;
             }
             int slot = workpieceSlotFromHit(state, pos, hitResult);
+            float temperature = WorkpieceHeat.temperature(stack, level);
             if (forge.acceptWorkpiece(stack, slot)) {
                 level.playSound(null, pos, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 0.5F, 1.1F);
+                HeatingInteractionEffects.movedHotMetal(level, pos, temperature);
                 DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_workpiece_added"));
             } else {
                 DebugFeedback.actionBar(player, heatingWorkpieceRejectedMessage(forge, slot));
@@ -188,8 +190,11 @@ public class HeatingForgeBlock extends BaseEntityBlock {
         }
         int slot = workpieceSlotFromHit(state, pos, hitResult);
         if (!forge.workpieceStack(slot).isEmpty()) {
-            giveOrDrop(player, forge.removeWorkpiece(slot));
+            ItemStack removed = forge.removeWorkpiece(slot);
+            float temperature = WorkpieceHeat.temperature(removed, level);
+            giveOrDrop(player, removed);
             level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.0F);
+            HeatingInteractionEffects.movedHotMetal(level, pos, temperature);
             return InteractionResult.CONSUME;
         }
         InteractionResult residueResult = clearSelectedResidue(forge, level, pos, player, cleanupTargetFromHit(pos, hitResult), false);

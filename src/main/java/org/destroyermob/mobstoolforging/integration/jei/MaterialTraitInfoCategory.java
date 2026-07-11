@@ -1,11 +1,11 @@
 package org.destroyermob.mobstoolforging.integration.jei;
 
+import java.util.List;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
-import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.ChatFormatting;
@@ -14,16 +14,18 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import org.destroyermob.mobstoolforging.world.ToolTrait;
 import org.destroyermob.mobstoolforging.world.ToolTraitRegistry;
 
 public class MaterialTraitInfoCategory implements IRecipeCategory<MaterialTraitInfoRecipe> {
-    private static final int WIDTH = 172;
-    private static final int HEIGHT = 106;
+    private static final int WIDTH = 220;
+    private static final int HEIGHT = 132;
     private static final int TEXT = 0xFF404040;
     private static final int MUTED = 0xFF707070;
     private static final int LINE = 0xFFB7B7B7;
     private static final int MAX_ROWS = 3;
+    private static final int ROW_HEIGHT = 28;
 
     private final IDrawable background;
     private final IDrawable icon;
@@ -74,9 +76,9 @@ public class MaterialTraitInfoCategory implements IRecipeCategory<MaterialTraitI
 
         int rows = Math.min(MAX_ROWS, recipe.traits().size());
         for (int index = 0; index < rows; index++) {
-            drawTrait(font, guiGraphics, recipe.traits().get(index), 7, 30 + index * 20);
+            drawTrait(font, guiGraphics, recipe.traits().get(index), 7, 30 + index * ROW_HEIGHT);
         }
-        int footerY = 30 + rows * 20 + 4;
+        int footerY = 30 + rows * ROW_HEIGHT + 3;
         if (recipe.traits().size() > MAX_ROWS) {
             guiGraphics.drawString(font, Component.translatable("jei.mobstoolforging.material_traits.more", recipe.traits().size() - MAX_ROWS), 7, footerY, MUTED, false);
         } else {
@@ -86,10 +88,13 @@ public class MaterialTraitInfoCategory implements IRecipeCategory<MaterialTraitI
 
     private static void drawTrait(Font font, GuiGraphics guiGraphics, MaterialTraitInfoRecipe.TraitEntry entry, int x, int y) {
         Component name = traitName(entry.traitId());
-        String source = trim(font, entry.source(), 74);
+        String source = trim(font, entry.source(), 92);
         guiGraphics.drawString(font, name, x, y, TEXT, false);
         guiGraphics.drawString(font, source, WIDTH - 8 - font.width(source), y, MUTED, false);
-        guiGraphics.drawString(font, trim(font, traitDescription(entry.traitId()), WIDTH - 14), x, y + 10, MUTED, false);
+        List<FormattedCharSequence> lines = font.split(traitEffect(entry.traitId()), WIDTH - 14);
+        for (int index = 0; index < Math.min(2, lines.size()); index++) {
+            guiGraphics.drawString(font, lines.get(index), x, y + 10 + index * 9, MUTED, false);
+        }
     }
 
     private static Component traitName(ResourceLocation traitId) {
@@ -98,10 +103,15 @@ public class MaterialTraitInfoCategory implements IRecipeCategory<MaterialTraitI
                 .orElseGet(() -> Component.literal(ToolTrait.fallbackName(traitId)).withStyle(ChatFormatting.GRAY));
     }
 
-    private static Component traitDescription(ResourceLocation traitId) {
+    private static Component traitEffect(ResourceLocation traitId) {
+        for (ToolTrait trait : ToolTrait.values()) {
+            if (trait.id().equals(traitId)) {
+                return Component.translatable("jei.mobstoolforging.material_traits.effect." + trait.id().getPath());
+            }
+        }
         return ToolTraitRegistry.definition(traitId)
                 .map(definition -> (Component) definition.description())
-                .orElseGet(() -> Component.empty());
+                .orElseGet(Component::empty);
     }
 
     private static String trim(Font font, Component text, int width) {
