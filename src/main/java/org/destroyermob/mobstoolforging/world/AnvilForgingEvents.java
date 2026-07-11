@@ -57,9 +57,6 @@ public final class AnvilForgingEvents {
         if (MobsToolForgingConfig.ENABLE_CRUDE_ANVIL.get() && isCrudeAnvilBase(state)) {
             return ModBlocks.CRUDE_ANVIL.get().defaultBlockState().setValue(ToolWorkstationBlock.FACING, facing);
         }
-        if (state.is(Blocks.COPPER_BLOCK)) {
-            return ModBlocks.TOOL_FORGE.get().defaultBlockState().setValue(ToolWorkstationBlock.FACING, facing);
-        }
         if (state.is(Blocks.IRON_BLOCK)) {
             return ModBlocks.TOOL_FORGE.get().defaultBlockState().setValue(ToolWorkstationBlock.FACING, facing);
         }

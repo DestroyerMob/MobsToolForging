@@ -97,6 +97,9 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
     }
 
     private static ItemStack parseOutput(JsonObject output) {
+        if (output.has("armor_part")) {
+            return parseArmorPartOutput(output);
+        }
         if (output.has("armor")) {
             return parseArmorOutput(output);
         }
@@ -106,6 +109,19 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
             throw new IllegalArgumentException("Unknown output item " + itemId);
         }
         return new ItemStack(item, Math.max(1, GsonHelper.getAsInt(output, "count", 1)));
+    }
+
+    private static ItemStack parseArmorPartOutput(JsonObject output) {
+        String part = GsonHelper.getAsString(output, "armor_part").toLowerCase(Locale.ROOT);
+        ResourceLocation material = ResourceLocation.parse(GsonHelper.getAsString(output, "material", MaterialCatalog.LEATHER.toString()));
+        int quality = GsonHelper.getAsInt(output, "quality", ArmorPartData.DEFAULT_QUALITY);
+        return switch (part) {
+            case ArmorPartData.HELMET_CHAINMAIL -> ModItems.HELMET_CHAINMAIL.get().createPart(material, quality);
+            case ArmorPartData.CHESTPLATE_CHAINMAIL -> ModItems.CHESTPLATE_CHAINMAIL.get().createPart(material, quality);
+            case ArmorPartData.LEGGINGS_CHAINMAIL -> ModItems.LEGGINGS_CHAINMAIL.get().createPart(material, quality);
+            case ArmorPartData.BOOTS_CHAINMAIL -> ModItems.BOOTS_CHAINMAIL.get().createPart(material, quality);
+            default -> throw new IllegalArgumentException("Unknown station work armor part output " + part);
+        };
     }
 
     private static ItemStack parseArmorOutput(JsonObject output) {

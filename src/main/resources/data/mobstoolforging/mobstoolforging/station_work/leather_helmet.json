@@ -5,10 +5,10 @@
     "count": 5
   },
   "output": {
-    "armor": "helmet",
+    "armor_part": "helmet_chainmail",
     "material": "mobstoolforging:leather"
   },
-  "pattern": "mobstoolforging:leather_helmet",
+  "pattern": "mobstoolforging:helmet_chainmail",
   "required_hits": 5,
   "minimum_hammer_level": "stone"
 }

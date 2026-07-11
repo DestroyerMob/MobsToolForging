@@ -7,12 +7,12 @@
     {
       "type": "patchouli:text",
       "title": "Metal Shaping",
-      "text": "The Crude Anvil and Tool Forge shape metal.$(p)$(bold)Shaping order:$()$(li)Place the pattern$(li)Add the required ingots$(li)Heat to minimum forge heat$(li)Hammer to the shown hit count$(p)Armour plate patterns also need the matching finished chainmail armour as a target."
+      "text": "The Crude Anvil and Smithing Anvil shape metal.$(p)$(bold)Shaping order:$()$(li)Place the pattern$(li)Add the required ingots$(li)Heat to minimum forge heat$(li)Hammer to the shown hit count$(p)Tool heads, armour bases, and armour plates are all finished as separate parts before assembly."
     },
     {
       "type": "patchouli:text",
       "title": "Assembly",
-      "text": "Bring compatible finished parts to the Toolmaker's Station.$(p)The assembled tool records:$(li)Head$(li)Handle$(li)Guard$(li)Binding or wrap$(li)Treatment$(li)Quality$(p)Changing any recorded component can change the calculated result."
+      "text": "Bring compatible finished parts to the Toolmaker's Station.$(p)$(bold)Tools$() use a head, handle, and any required support parts.$(p)$(bold)Armour$() uses a leather or chainmail base plus an optional plate.$(p)Changing any recorded component can change the calculated result."
     }
   ]
 }

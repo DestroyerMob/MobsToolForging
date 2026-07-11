@@ -7,7 +7,7 @@
     {
       "type": "patchouli:text",
       "title": "Workshop Repair",
-      "text": "Modular equipment uses component-aware repair rules.$(p)$(bold)Important:$()$(li)Vanilla combine-two-items repair is filtered$(li)Use a compatible repair material$(li)Use the supported repair interaction$(p)This preserves the item's construction data."
+      "text": "Modular equipment cannot be used in vanilla anvils.$(p)$(bold)Instead:$()$(li)Repair it at the supported MTF workstation$(li)Manage enchantments through Better Enchanting$(li)Apply a renamed Name Tag at the Toolmaker's Station$(p)This preserves its construction data."
     },
     {
       "type": "patchouli:text",

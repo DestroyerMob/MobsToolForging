@@ -841,7 +841,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
         looseWorkRecipeId = recipe.id();
         materialItemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
         materialCount = recipe.input().count();
+        qualityScore = ForgingQuality.DEFAULT_SCORE;
         stack.shrink(recipe.input().count());
+        if (workstationKind() == WorkstationKind.LEATHER_STATION) {
+            scheduleFirstGoodHitIfReady();
+        }
         sync();
         return true;
     }
@@ -855,11 +859,15 @@ public class ToolForgeBlockEntity extends BlockEntity {
             return false;
         }
         hitCount++;
+        if (workstationKind() == WorkstationKind.LEATHER_STATION) {
+            applyTimingQuality(false);
+        }
         randomizeDisplayRotation();
         if (hitCount < recipe.requiredHits()) {
             sync();
             return true;
         }
+        ItemStack output = applyLooseWorkQuality(recipe.outputCopy());
         materialId = null;
         materialItemId = null;
         materialHeatData = null;
@@ -867,9 +875,37 @@ public class ToolForgeBlockEntity extends BlockEntity {
         materialCount = 0;
         hitCount = 0;
         displayRotationDegrees = 0.0F;
-        directOutputStack = recipe.outputCopy();
+        directOutputStack = output;
         sync();
         return true;
+    }
+
+    private ItemStack applyLooseWorkQuality(ItemStack output) {
+        if (output.isEmpty() || workstationKind() != WorkstationKind.LEATHER_STATION) {
+            return output;
+        }
+        int quality = completedQualityScore();
+        ArmorPartData partData = output.get(ModDataComponents.ARMOR_PART.get());
+        if (partData != null) {
+            output.set(ModDataComponents.ARMOR_PART.get(), new ArmorPartData(
+                    partData.partType(),
+                    partData.materialId(),
+                    quality,
+                    partData.coatingBaseMaterial()
+            ));
+        }
+        ArmorConstructionData armorData = output.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
+        if (armorData != null) {
+            output.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), new ArmorConstructionData(
+                    armorData.armorType(),
+                    armorData.skullMaterial(),
+                    armorData.combMaterial(),
+                    armorData.overlayBaseMaterial(),
+                    armorData.visorMaterial(),
+                    quality
+            ));
+        }
+        return output;
     }
 
     private Optional<LapidaryCoatingWork> lapidaryCoatingWork() {
@@ -1244,7 +1280,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (nextGoodHitGameTime >= 0L
                 || !MobsToolForgingConfig.ENABLE_QUALITY.get()
                 || !MobsToolForgingConfig.ENABLE_TIMING_QUALITY.get()
-                || !canHammer()) {
+                || !canHammer() && !hasLooseWork()) {
             return;
         }
         scheduleNextGoodHit();

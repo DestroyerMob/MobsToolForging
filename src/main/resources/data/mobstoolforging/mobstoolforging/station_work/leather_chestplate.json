@@ -5,10 +5,10 @@
     "count": 8
   },
   "output": {
-    "armor": "chestplate",
+    "armor_part": "chestplate_chainmail",
     "material": "mobstoolforging:leather"
   },
-  "pattern": "mobstoolforging:leather_chestplate",
+  "pattern": "mobstoolforging:chestplate_chainmail",
   "required_hits": 5,
   "minimum_hammer_level": "stone"
 }

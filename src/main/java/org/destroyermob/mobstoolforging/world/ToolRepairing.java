@@ -38,11 +38,8 @@ public final class ToolRepairing {
                 .orElse(false);
     }
 
-    public static boolean shouldBlockVanillaAnvilRepair(ItemStack left, ItemStack right) {
-        if (!isModularTool(left) || right.isEmpty()) {
-            return false;
-        }
-        return isModularTool(right) || isRepairMaterial(left, right);
+    public static boolean shouldBlockVanillaAnvilUse(ItemStack left) {
+        return isModularTool(left);
     }
 
     public static ItemStack repairWithOneMaterial(ItemStack stack) {

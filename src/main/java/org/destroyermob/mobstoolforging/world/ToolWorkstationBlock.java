@@ -109,7 +109,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (!(stack.getItem() instanceof ToolTemplateItem) && !isRepairStack(stack, forge, kind) && handleMissingPattern(forge, level, player)) {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
-        if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand) && !canUseItem(stack, forge, level)) {
+        if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand) && !canHandleItem(stack, forge, level)) {
             return EmptyMainHandInteractions.itemResult(useWithoutItem(state, level, pos, player, hitResult), level);
         }
         if (kind == WorkstationKind.TOOLMAKERS_BENCH) {
@@ -181,6 +181,12 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (level.getBlockEntity(pos) instanceof ToolForgeBlockEntity forge) {
+            if (!player.isShiftKeyDown() && EmptyMainHandInteractions.shouldDeferToOffhand(
+                    player,
+                    stack -> canHandleItem(stack, forge, level)
+            )) {
+                return InteractionResult.PASS;
+            }
             if (player.isShiftKeyDown()) {
                 return handleSneakUse(forge, level, pos, player, kind);
             }
@@ -270,9 +276,10 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         return InteractionResult.PASS;
     }
 
-    private boolean canUseItem(ItemStack stack, ToolForgeBlockEntity forge, Level level) {
+    private boolean canHandleItem(ItemStack stack, ToolForgeBlockEntity forge, Level level) {
         if (kind == WorkstationKind.TOOLMAKERS_BENCH) {
             return SmithingHammerLevel.isHammer(stack)
+                    || stack.is(Items.NAME_TAG)
                     || forge.canPlaceToolmakerStack(stack);
         }
         if (isRepairStack(stack, forge, kind)) {
@@ -284,10 +291,8 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return true;
         }
         if (stack.getItem() instanceof ToolTemplateItem templateItem) {
-            if (kind == WorkstationKind.LAPIDARY_TABLE) {
-                return false;
-            }
-            if (!MobsToolForgingConfig.ALLOW_DIRECT_PATTERN_STATION_SELECTION.get()) {
+            if (kind == WorkstationKind.LAPIDARY_TABLE
+                    || !MobsToolForgingConfig.ALLOW_DIRECT_PATTERN_STATION_SELECTION.get()) {
                 return false;
             }
             return canApplyTemplate(stack, templateItem, forge);
@@ -323,32 +328,6 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
                 && (template.id().equals(forge.templateId()) || forge.canChangeTemplate());
     }
 
-    private static boolean handleMissingPattern(ToolForgeBlockEntity forge, Level level, Player player) {
-        if (!forge.selectedPatternMissing()) {
-            return false;
-        }
-        if (!level.isClientSide) {
-            forge.clearTemplate();
-            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_missing"));
-        }
-        return true;
-    }
-
-    private static boolean isRepairStation(WorkstationKind kind) {
-        return kind.isSmithingAnvilLike() || kind == WorkstationKind.LEATHER_STATION;
-    }
-
-    private static boolean isRepairStack(ItemStack stack, ToolForgeBlockEntity forge, WorkstationKind kind) {
-        return isRepairStation(kind)
-                && (forge.canPlaceRepairTool(stack) || forge.canPlaceRepairMaterial(stack));
-    }
-
-    private static boolean isPatternRackSelectable(WorkstationKind kind) {
-        return kind == WorkstationKind.CRUDE_ANVIL
-                || kind == WorkstationKind.TOOL_FORGE
-                || kind == WorkstationKind.LEATHER_STATION;
-    }
-
     private boolean canPlaceMaterial(ItemStack stack, ToolForgeBlockEntity forge, Level level) {
         ForgeTemplateDefinition template = forge.template();
         ToolMaterialDefinition material = MaterialCatalog.resolve(stack).orElse(null);
@@ -374,6 +353,32 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return false;
         }
         return forge.materialId() == null || forge.materialId().equals(material.id());
+    }
+
+    private static boolean handleMissingPattern(ToolForgeBlockEntity forge, Level level, Player player) {
+        if (!forge.selectedPatternMissing()) {
+            return false;
+        }
+        if (!level.isClientSide) {
+            forge.clearTemplate();
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_missing"));
+        }
+        return true;
+    }
+
+    private static boolean isRepairStation(WorkstationKind kind) {
+        return kind.isSmithingAnvilLike() || kind == WorkstationKind.LEATHER_STATION;
+    }
+
+    private static boolean isRepairStack(ItemStack stack, ToolForgeBlockEntity forge, WorkstationKind kind) {
+        return isRepairStation(kind)
+                && (forge.canPlaceRepairTool(stack) || forge.canPlaceRepairMaterial(stack));
+    }
+
+    private static boolean isPatternRackSelectable(WorkstationKind kind) {
+        return kind == WorkstationKind.CRUDE_ANVIL
+                || kind == WorkstationKind.TOOL_FORGE
+                || kind == WorkstationKind.LEATHER_STATION;
     }
 
     private ItemInteractionResult applyTemplateItem(ItemStack stack, ToolTemplateItem templateItem, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
@@ -665,7 +670,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (!level.isClientSide) {
             DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.toolmaker_invalid"));
         }
-        return ItemInteractionResult.CONSUME;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     private ItemInteractionResult placeToolmakerStack(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
@@ -861,7 +866,19 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         level.playSound(null, pos, kind.workSound(), SoundSource.BLOCKS, 0.45F, 1.1F + level.random.nextFloat() * 0.2F);
         if (level instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(kind.workParticle(), pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5, 8, 0.18, 0.05, 0.18, 0.02);
+            int count = kind.isSmithingAnvilLike() ? 14 : kind == WorkstationKind.LAPIDARY_TABLE ? 10 : 8;
+            double speed = kind.isSmithingAnvilLike() ? 0.09D : kind == WorkstationKind.LAPIDARY_TABLE ? 0.055D : 0.02D;
+            serverLevel.sendParticles(kind.workParticle(), pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5,
+                    count, 0.18, 0.05, 0.18, speed);
+            if (kind.isSmithingAnvilLike()) {
+                serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA,
+                        pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5,
+                        2, 0.12, 0.025, 0.12, 0.015);
+            } else if (kind == WorkstationKind.LAPIDARY_TABLE) {
+                serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                        pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5,
+                        3, 0.12, 0.035, 0.12, 0.015);
+            }
         }
         if (kind.isSmithingAnvilLike() && level.getBlockEntity(pos) instanceof ToolForgeBlockEntity forge) {
             HeatingInteractionEffects.hammerStrike(level, pos, forge.materialHeatTemperature());

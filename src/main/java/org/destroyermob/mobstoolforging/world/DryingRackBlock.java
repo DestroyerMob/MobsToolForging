@@ -79,10 +79,7 @@ public class DryingRackBlock extends BaseEntityBlock {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         if (rack.hasItem()) {
-            if (!level.isClientSide) {
-                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.drying_rack_busy"));
-            }
-            return ItemInteractionResult.CONSUME;
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         if (!rack.canPlace(stack)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -100,6 +97,12 @@ public class DryingRackBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!(level.getBlockEntity(pos) instanceof DryingRackBlockEntity rack)) {
+            return InteractionResult.PASS;
+        }
+        if (EmptyMainHandInteractions.shouldDeferToOffhand(
+                player,
+                stack -> !rack.hasItem() && rack.canPlace(stack)
+        )) {
             return InteractionResult.PASS;
         }
         if (level.isClientSide) {

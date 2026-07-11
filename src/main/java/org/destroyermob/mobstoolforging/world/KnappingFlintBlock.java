@@ -95,6 +95,13 @@ public class KnappingFlintBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (EmptyMainHandInteractions.shouldDeferToOffhand(
+                player,
+                stack -> MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()
+                        && stack.is(ModTags.Items.KNAPPING_TOOLS)
+        )) {
+            return InteractionResult.PASS;
+        }
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }

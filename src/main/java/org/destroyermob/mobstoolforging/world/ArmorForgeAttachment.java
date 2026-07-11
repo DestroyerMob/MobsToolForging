@@ -13,10 +13,18 @@ public final class ArmorForgeAttachment {
     }
 
     public static boolean isAttachmentTemplate(@Nullable ForgeTemplateDefinition template) {
-        return template != null && isAttachmentTemplate(template.id());
+        return false;
     }
 
     public static boolean isAttachmentTemplate(@Nullable ResourceLocation templateId) {
+        return false;
+    }
+
+    public static boolean isPlateTemplate(@Nullable ForgeTemplateDefinition template) {
+        return template != null && isPlateTemplate(template.id());
+    }
+
+    public static boolean isPlateTemplate(@Nullable ResourceLocation templateId) {
         return ToolTypeRegistry.HELMET_PLATE_TEMPLATE.equals(templateId)
                 || ToolTypeRegistry.CHESTPLATE_BODY_TEMPLATE.equals(templateId)
                 || ToolTypeRegistry.LEGGINGS_PLATE_TEMPLATE.equals(templateId)

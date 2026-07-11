@@ -147,8 +147,6 @@ public final class ToolAssemblyEnchantments {
 
         int mergedLevel = existingLevel <= 0
                 ? level
-                : BetterEnchantingBridge.usesAdditiveMerge()
-                ? existingLevel + level
                 : vanillaMergedLevel(existingLevel, level, enchantment.value().getMaxLevel());
         merged.set(enchantment, BetterEnchantingBridge.clampLevel(enchantment, mergedLevel));
         return true;
@@ -185,7 +183,6 @@ public final class ToolAssemblyEnchantments {
     }
 
     private static final class BetterEnchantingBridge {
-        private static final String EFFECTIVE_BALANCE = "com.betterenchanting.config.EffectiveBalance";
         private static final String LEVEL_RULES = "com.betterenchanting.data.EnchantmentLevelRules";
         private static final String FUSION_RECIPES = "com.betterenchanting.data.EnchantmentFusionRecipes";
         private static final String LIMIT_RULES = "com.betterenchanting.data.EnchantmentLimitRules";
@@ -193,7 +190,6 @@ public final class ToolAssemblyEnchantments {
         private static final String BETTER_ENCHANTING_NAMESPACE = "betterenchanting";
         private static final String TARGET_TAG_PREFIX = "targets/";
 
-        private static Boolean additiveMerge;
         private static Method clampLevel;
         private static Method clampEnchantments;
         private static Method applyFusion;
@@ -204,19 +200,6 @@ public final class ToolAssemblyEnchantments {
         private static Method syncRoutedToolEnchantments;
 
         private BetterEnchantingBridge() {
-        }
-
-        private static boolean usesAdditiveMerge() {
-            if (additiveMerge != null) {
-                return additiveMerge;
-            }
-            try {
-                Method method = Class.forName(EFFECTIVE_BALANCE).getMethod("usesAdditiveAnvilLevelMerging");
-                additiveMerge = (Boolean) method.invoke(null);
-            } catch (ReflectiveOperationException | LinkageError | RuntimeException exception) {
-                additiveMerge = false;
-            }
-            return additiveMerge;
         }
 
         private static int clampLevel(Holder<Enchantment> enchantment, int level) {

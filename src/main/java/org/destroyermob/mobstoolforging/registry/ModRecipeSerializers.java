@@ -7,7 +7,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
-import org.destroyermob.mobstoolforging.recipe.ModularArmorRecipe;
 import org.destroyermob.mobstoolforging.recipe.ModularToolRecipe;
 import org.destroyermob.mobstoolforging.recipe.ToolConversionRecipe;
 import org.destroyermob.mobstoolforging.world.ToolKind;
@@ -58,27 +57,6 @@ public final class ModRecipeSerializers {
                     "crafting_special_tool_conversion",
                     () -> new SimpleCraftingRecipeSerializer<>(ToolConversionRecipe::new)
             );
-    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<ModularArmorRecipe>> MODULAR_HELMET =
-            RECIPE_SERIALIZERS.register(
-                    "crafting_special_modular_helmet",
-                    () -> new SimpleCraftingRecipeSerializer<>(category -> new ModularArmorRecipe(category, ModularArmorRecipe.ArmorKind.HELMET))
-            );
-    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<ModularArmorRecipe>> MODULAR_CHESTPLATE =
-            RECIPE_SERIALIZERS.register(
-                    "crafting_special_modular_chestplate",
-                    () -> new SimpleCraftingRecipeSerializer<>(category -> new ModularArmorRecipe(category, ModularArmorRecipe.ArmorKind.CHESTPLATE))
-            );
-    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<ModularArmorRecipe>> MODULAR_LEGGINGS =
-            RECIPE_SERIALIZERS.register(
-                    "crafting_special_modular_leggings",
-                    () -> new SimpleCraftingRecipeSerializer<>(category -> new ModularArmorRecipe(category, ModularArmorRecipe.ArmorKind.LEGGINGS))
-            );
-    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<ModularArmorRecipe>> MODULAR_BOOTS =
-            RECIPE_SERIALIZERS.register(
-                    "crafting_special_modular_boots",
-                    () -> new SimpleCraftingRecipeSerializer<>(category -> new ModularArmorRecipe(category, ModularArmorRecipe.ArmorKind.BOOTS))
-            );
-
     private ModRecipeSerializers() {
     }
 

@@ -34,6 +34,7 @@ import org.destroyermob.mobstoolforging.item.LeatherStationBlockItem;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModCreativeTabs;
+import org.destroyermob.mobstoolforging.registry.ModTags;
 import org.destroyermob.mobstoolforging.world.DryingRackBlock;
 import org.destroyermob.mobstoolforging.world.LeatherStationBlock;
 import org.destroyermob.mobstoolforging.world.PatternRackBlock;
@@ -86,6 +87,7 @@ public final class MobsToolForgingEveryCompat {
                             CompatWorkstationRegistry.Kind.TOOLMAKERS_BENCH,
                             new BlockItem(block, properties)))
                     .addTag(BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK)
+                    .addTag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST, Registries.BLOCK)
                     .setTabKey(ModCreativeTabs.MOBS_TOOL_FORGING.getKey())
                     .copyParentDrop()
                     .build();

@@ -123,6 +123,13 @@ public class PatternRackBlock extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof PatternRackBlockEntity rack)) {
             return InteractionResult.PASS;
         }
+        if (!player.isShiftKeyDown() && EmptyMainHandInteractions.shouldDeferToOffhand(
+                player,
+                stack -> MobsToolForgingConfig.ENABLE_PATTERN_RACK.get()
+                        && (SmithingHammerLevel.isHammer(stack) || PatternRackBlockEntity.isValidPattern(stack))
+        )) {
+            return InteractionResult.PASS;
+        }
         if (!MobsToolForgingConfig.ENABLE_PATTERN_RACK.get()) {
             if (!level.isClientSide) {
                 DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.pattern_rack_disabled"));

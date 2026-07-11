@@ -7,9 +7,9 @@ import net.minecraft.sounds.SoundEvents;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 
 public enum WorkstationKind {
-    CRUDE_ANVIL(MaterialCategory.METAL, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.ANVIL_LAND, ParticleTypes.CRIT, "message.mobstoolforging.use_lapidary_table"),
-    TOOL_FORGE(MaterialCategory.METAL, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.ANVIL_LAND, ParticleTypes.CRIT, "message.mobstoolforging.use_lapidary_table"),
-    LAPIDARY_TABLE(MaterialCategory.GEM, SoundEvents.AMETHYST_BLOCK_CHIME, SoundEvents.GRINDSTONE_USE, ParticleTypes.CRIT, "message.mobstoolforging.use_tool_forge"),
+    CRUDE_ANVIL(MaterialCategory.METAL, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.ANVIL_LAND, ParticleTypes.ELECTRIC_SPARK, "message.mobstoolforging.use_lapidary_table"),
+    TOOL_FORGE(MaterialCategory.METAL, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.ANVIL_LAND, ParticleTypes.ELECTRIC_SPARK, "message.mobstoolforging.use_lapidary_table"),
+    LAPIDARY_TABLE(MaterialCategory.GEM, SoundEvents.AMETHYST_BLOCK_CHIME, SoundEvents.GRINDSTONE_USE, ParticleTypes.ELECTRIC_SPARK, "message.mobstoolforging.use_tool_forge"),
     LEATHER_STATION(MaterialCategory.ORGANIC, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.UI_STONECUTTER_SELECT_RECIPE, ParticleTypes.CRIT, "message.mobstoolforging.use_leather_station"),
     TOOLMAKERS_BENCH(MaterialCategory.METAL, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.UI_STONECUTTER_SELECT_RECIPE, ParticleTypes.CRIT, "message.mobstoolforging.use_toolmakers_bench");
 
@@ -55,7 +55,8 @@ public enum WorkstationKind {
         return switch (this) {
             case CRUDE_ANVIL -> MobsToolForgingConfig.crudeAnvilMaxQuality();
             case LAPIDARY_TABLE -> MobsToolForgingConfig.lapidaryTableMaxQuality();
-            case TOOL_FORGE, LEATHER_STATION, TOOLMAKERS_BENCH -> MobsToolForgingConfig.smithingAnvilMaxQuality();
+            case TOOL_FORGE, TOOLMAKERS_BENCH -> MobsToolForgingConfig.smithingAnvilMaxQuality();
+            case LEATHER_STATION -> MobsToolForgingConfig.leatherStationMaxQuality();
         };
     }
 

@@ -34,9 +34,6 @@ public final class ToolmakerBenchAssembly {
         if (armorPart != null && ArmorAssemblyKind.isKnownPart(stack, armorPart)) {
             return true;
         }
-        if (stack.is(Items.LEATHER)) {
-            return true;
-        }
         ToolPartData partData = stack.get(ModDataComponents.TOOL_PART.get());
         if (partData != null && ToolTypeRegistry.toolTypes().stream().anyMatch(definition -> isKnownAssemblyPart(definition, stack, partData))) {
             return true;
@@ -54,10 +51,6 @@ public final class ToolmakerBenchAssembly {
     public static ItemStack assemble(List<ItemStack> stacks, HolderLookup.Provider registries) {
         if (stacks.isEmpty() || stacks.stream().anyMatch(ToolmakerBenchAssembly::isFinishedTool)) {
             return ItemStack.EMPTY;
-        }
-        ItemStack leatherArmor = assembleLeatherArmor(stacks);
-        if (!leatherArmor.isEmpty()) {
-            return leatherArmor;
         }
         ItemStack armor = assembleArmor(stacks, registries);
         if (!armor.isEmpty()) {
@@ -181,9 +174,6 @@ public final class ToolmakerBenchAssembly {
     }
 
     private static Optional<List<ItemStack>> disassembleArmor(ItemStack armor, ArmorConstructionData construction) {
-        if (construction.hasLeatherBase()) {
-            return Optional.empty();
-        }
         ToolAssemblyParts storedParts = armor.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
         if (storedParts != null) {
             List<ItemStack> parts = storedParts.copyStacks();
@@ -193,7 +183,7 @@ public final class ToolmakerBenchAssembly {
         }
         return ArmorAssemblyKind.fromArmorType(construction.armorType()).map(kind -> {
             List<ItemStack> parts = new ArrayList<>();
-            ItemStack base = kind.createBasePart(MaterialCatalog.IRON, construction.quality());
+            ItemStack base = kind.createBasePart(construction.chainmailMaterial(), construction.quality());
             if (!base.isEmpty()) {
                 parts.add(base);
             }
@@ -209,26 +199,6 @@ public final class ToolmakerBenchAssembly {
             }
             return ArmorExternalComponents.copyArmorComponentsToPrimaryPart(armor, result);
         }).filter(parts -> !parts.isEmpty());
-    }
-
-    private static ItemStack assembleLeatherArmor(List<ItemStack> stacks) {
-        int leatherCount = 0;
-        for (ItemStack stack : stacks) {
-            if (stack.isEmpty()) {
-                continue;
-            }
-            if (!stack.is(Items.LEATHER)) {
-                return ItemStack.EMPTY;
-            }
-            leatherCount += stack.getCount();
-        }
-        return switch (leatherCount) {
-            case 4 -> ModItems.MODULAR_BOOTS.get().create(MaterialCatalog.LEATHER, Optional.empty());
-            case 5 -> ModItems.MODULAR_HELMET.get().create(MaterialCatalog.LEATHER, Optional.empty());
-            case 7 -> ModItems.MODULAR_LEGGINGS.get().create(MaterialCatalog.LEATHER, Optional.empty());
-            case 8 -> ModItems.MODULAR_CHESTPLATE.get().createBase(MaterialCatalog.LEATHER);
-            default -> ItemStack.EMPTY;
-        };
     }
 
     private static Parts findParts(List<ItemStack> stacks, ToolTypeDefinition definition) {
@@ -356,9 +326,11 @@ public final class ToolmakerBenchAssembly {
         ) {
             @Override
             ItemStack create(ArmorAssemblyParts parts) {
-                return optionalMaterial(parts.plate)
-                        .map(material -> ModItems.MODULAR_HELMET.get().create(material, quality(parts)))
-                        .orElseGet(() -> ModItems.MODULAR_HELMET.get().createChainmail(quality(parts)));
+                return ModItems.MODULAR_HELMET.get().create(
+                        requiredMaterial(parts.base),
+                        optionalMaterial(parts.plate),
+                        quality(parts)
+                );
             }
         },
         CHESTPLATE(
@@ -372,7 +344,7 @@ public final class ToolmakerBenchAssembly {
             ItemStack create(ArmorAssemblyParts parts) {
                 return optionalMaterial(parts.plate)
                         .map(material -> ModItems.MODULAR_CHESTPLATE.get().create(material, quality(parts)))
-                        .orElseGet(() -> ModItems.MODULAR_CHESTPLATE.get().createChainmail(quality(parts)));
+                        .orElseGet(() -> ModItems.MODULAR_CHESTPLATE.get().createBase(requiredMaterial(parts.base), quality(parts)));
             }
         },
         LEGGINGS(
@@ -384,9 +356,11 @@ public final class ToolmakerBenchAssembly {
         ) {
             @Override
             ItemStack create(ArmorAssemblyParts parts) {
-                return optionalMaterial(parts.plate)
-                        .map(material -> ModItems.MODULAR_LEGGINGS.get().create(material, quality(parts)))
-                        .orElseGet(() -> ModItems.MODULAR_LEGGINGS.get().createChainmail(quality(parts)));
+                return ModItems.MODULAR_LEGGINGS.get().create(
+                        requiredMaterial(parts.base),
+                        optionalMaterial(parts.plate),
+                        quality(parts)
+                );
             }
         },
         BOOTS(
@@ -398,9 +372,11 @@ public final class ToolmakerBenchAssembly {
         ) {
             @Override
             ItemStack create(ArmorAssemblyParts parts) {
-                return optionalMaterial(parts.plate)
-                        .map(material -> ModItems.MODULAR_BOOTS.get().create(material, quality(parts)))
-                        .orElseGet(() -> ModItems.MODULAR_BOOTS.get().createChainmail(quality(parts)));
+                return ModItems.MODULAR_BOOTS.get().create(
+                        requiredMaterial(parts.base),
+                        optionalMaterial(parts.plate),
+                        quality(parts)
+                );
             }
         };
 
@@ -486,6 +462,10 @@ public final class ToolmakerBenchAssembly {
             return data == null ? Optional.empty() : Optional.of(data.materialId());
         }
 
+        private static ResourceLocation requiredMaterial(ItemStack stack) {
+            return optionalMaterial(stack).orElse(MaterialCatalog.IRON);
+        }
+
         private static int quality(ArmorAssemblyParts parts) {
             if (!MobsToolForgingConfig.ENABLE_QUALITY.get()) {
                 return ArmorPartData.DEFAULT_QUALITY;
@@ -518,7 +498,11 @@ public final class ToolmakerBenchAssembly {
         }
 
         private boolean valid() {
-            return !invalid && kind != null && !base.isEmpty();
+            ArmorPartData baseData = base.get(ModDataComponents.ARMOR_PART.get());
+            return !invalid
+                    && kind != null
+                    && baseData != null
+                    && (plate.isEmpty() || !MaterialCatalog.LEATHER.equals(baseData.materialId()));
         }
 
         private ArmorAssemblyKind kind() {

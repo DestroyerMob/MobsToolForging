@@ -43,6 +43,7 @@ public final class MobsToolForgingConfig {
     public static final ModConfigSpec.ConfigValue<String> CRUDE_ANVIL_MAX_QUALITY;
     public static final ModConfigSpec.ConfigValue<String> SMITHING_ANVIL_MAX_QUALITY;
     public static final ModConfigSpec.ConfigValue<String> LAPIDARY_TABLE_MAX_QUALITY;
+    public static final ModConfigSpec.ConfigValue<String> LEATHER_STATION_MAX_QUALITY;
     public static final ModConfigSpec.BooleanValue GEMCUTTERS_FILE_REQUIRED;
     public static final ModConfigSpec.BooleanValue DIAMOND_REQUIRES_ABRASIVE;
     public static final ModConfigSpec.ConfigValue<String> DIAMOND_ABRASIVE_ITEM;
@@ -82,7 +83,7 @@ public final class MobsToolForgingConfig {
                 .define("copperRequiresWoodenTool", true);
         builder.push("progression");
         ENABLE_ANVIL_CRAFTING_RECIPES = builder
-                .comment("When true, mod anvil crafting recipes are enabled and the sneak-right-click hammer recipes for crude, copper, and iron anvils are disabled. Vanilla anvil crafting stays vanilla.")
+                .comment("When true, mod anvil crafting recipes are enabled and the sneak-right-click hammer recipes for crude and iron anvils are disabled. Vanilla anvil crafting stays vanilla.")
                 .define("enableAnvilCraftingRecipes", false);
         ENABLE_CRUDE_ANVIL = builder
                 .comment("When true, the cheap Crude Anvil is available as an early, lower-quality shaping station.")
@@ -166,6 +167,9 @@ public final class MobsToolForgingConfig {
         LAPIDARY_TABLE_MAX_QUALITY = builder
                 .comment("Maximum quality from the Lapidary Table.")
                 .define("lapidaryTableMaxQuality", "FINE");
+        LEATHER_STATION_MAX_QUALITY = builder
+                .comment("Maximum quality from Leather Station timing-quality work.")
+                .define("leatherStationMaxQuality", "FINE");
         builder.pop();
         builder.push("lapidary");
         GEMCUTTERS_FILE_REQUIRED = builder
@@ -227,6 +231,10 @@ public final class MobsToolForgingConfig {
 
     public static ForgingQuality lapidaryTableMaxQuality() {
         return ForgingQuality.parse(LAPIDARY_TABLE_MAX_QUALITY.get(), ForgingQuality.FINE);
+    }
+
+    public static ForgingQuality leatherStationMaxQuality() {
+        return ForgingQuality.parse(LEATHER_STATION_MAX_QUALITY.get(), ForgingQuality.FINE);
     }
 
     public static final class FinishedToolEnchantingCompatValue {

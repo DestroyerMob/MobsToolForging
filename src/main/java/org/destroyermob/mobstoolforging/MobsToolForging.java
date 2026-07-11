@@ -149,7 +149,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(this::coolPlayerWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::coolDroppedWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::blockHeatedCrafting);
-        NeoForge.EVENT_BUS.addListener(this::blockVanillaModularToolRepair);
+        NeoForge.EVENT_BUS.addListener(this::blockVanillaModularEquipmentAnvilUse);
         NeoForge.EVENT_BUS.addListener(this::addExternalModularToolTooltip);
         NeoForge.EVENT_BUS.addListener(this::addHeatTooltip);
         NeoForge.EVENT_BUS.addListener(this::addCrucibleTooltip);
@@ -433,9 +433,9 @@ public class MobsToolForging {
         }
     }
 
-    private void blockVanillaModularToolRepair(AnvilUpdateEvent event) {
-        if (ToolRepairing.shouldBlockVanillaAnvilRepair(event.getLeft(), event.getRight())
-                || ArmorRepairing.shouldBlockVanillaAnvilRepair(event.getLeft(), event.getRight())) {
+    private void blockVanillaModularEquipmentAnvilUse(AnvilUpdateEvent event) {
+        if (ToolRepairing.shouldBlockVanillaAnvilUse(event.getLeft())
+                || ArmorRepairing.shouldBlockVanillaAnvilUse(event.getLeft())) {
             event.setCanceled(true);
         }
     }

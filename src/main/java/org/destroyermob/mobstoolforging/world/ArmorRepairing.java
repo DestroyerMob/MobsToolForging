@@ -44,11 +44,8 @@ public final class ArmorRepairing {
                 .orElse(false);
     }
 
-    public static boolean shouldBlockVanillaAnvilRepair(ItemStack left, ItemStack right) {
-        if (!isModularArmor(left) || right.isEmpty()) {
-            return false;
-        }
-        return isModularArmor(right) || isRepairMaterial(left, right);
+    public static boolean shouldBlockVanillaAnvilUse(ItemStack left) {
+        return isModularArmor(left);
     }
 
     public static ItemStack repairWithOneMaterial(ItemStack stack) {

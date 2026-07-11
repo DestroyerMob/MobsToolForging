@@ -7,12 +7,12 @@
     {
       "type": "patchouli:text",
       "title": "Armour Construction",
-      "text": "$(bold)Leather armour$()$(br)Assembled through leatherworking.$(p)$(bold)Plated armour$()$(br)Begins as finished modular chainmail.$(p)For a plate attachment:$(li)Choose the matching plate pattern$(li)Place matching chainmail as the target$(li)Work the plate material onto it"
+      "text": "Armour follows the same part-based loop as tools.$(p)$(bold)Base parts$()$(li)Use the slot's Base Pattern at a Leather Station for leather$(li)Use the same pattern at a Smithing Anvil for chainmail$(p)Bring the finished base to the Toolmaker's Station to assemble wearable armour."
     },
     {
       "type": "patchouli:text",
       "title": "Metal and Gem Plates",
-      "text": "$(bold)Metal plate$()$(br)Hammer it at the Tool Forge.$(p)$(bold)Gem plate$()$(br)Use the Gem Cutter's Knife at the Lapidary Table.$(p)A forged metal plate can also be gem-coated before assembly.$(p)Replacing a plate combines quality and preserves current armour damage."
+      "text": "$(bold)Plated armour$()$(br)Forge the matching plate as a separate part, then combine base and plate at the Toolmaker's Station.$(p)A hot metal plate can be gem-coated at the Lapidary Table before assembly.$(p)To replace a component, separate the armour at the Toolmaker's Station and assemble it again."
     }
   ]
 }

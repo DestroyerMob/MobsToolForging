@@ -104,7 +104,7 @@ public class FoundryForgeBlock extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof FoundryForgeBlockEntity forge)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand) && !canUseItem(stack, forge)) {
+        if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand) && !canHandleItem(stack, forge)) {
             return EmptyMainHandInteractions.itemResult(useWithoutItem(state, level, pos, player, hitResult), level);
         }
         if (stack.is(Items.LAVA_BUCKET)) {
@@ -135,6 +135,9 @@ public class FoundryForgeBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!(level.getBlockEntity(pos) instanceof FoundryForgeBlockEntity forge)) {
+            return InteractionResult.PASS;
+        }
+        if (EmptyMainHandInteractions.shouldDeferToOffhand(player, stack -> canHandleItem(stack, forge))) {
             return InteractionResult.PASS;
         }
         if (level.isClientSide) {
@@ -178,7 +181,7 @@ public class FoundryForgeBlock extends BaseEntityBlock {
         builder.add(FACING);
     }
 
-    private static boolean canUseItem(ItemStack stack, FoundryForgeBlockEntity forge) {
+    private static boolean canHandleItem(ItemStack stack, FoundryForgeBlockEntity forge) {
         return stack.is(Items.LAVA_BUCKET) || forge.canAcceptCrucible(stack);
     }
 

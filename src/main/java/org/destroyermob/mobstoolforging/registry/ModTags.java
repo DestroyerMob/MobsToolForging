@@ -4,10 +4,21 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 
 public final class ModTags {
     private ModTags() {
+    }
+
+    public static final class Blocks {
+        public static final TagKey<Block> CARRY_ON_BLOCK_BLACKLIST = TagKey.create(
+                Registries.BLOCK,
+                ResourceLocation.fromNamespaceAndPath("carryon", "block_blacklist")
+        );
+
+        private Blocks() {
+        }
     }
 
     public static final class Items {

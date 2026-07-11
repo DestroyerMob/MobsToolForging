@@ -88,10 +88,6 @@ public final class ModCreativeTabs {
         output.accept(ModItems.LEGGINGS_PLATE_PATTERN.get());
         output.accept(ModItems.BOOTS_CHAINMAIL_PATTERN.get());
         output.accept(ModItems.BOOTS_PLATE_PATTERN.get());
-        output.accept(ToolTemplateItem.createPatternStack(ToolTypeRegistry.LEATHER_HELMET_TEMPLATE));
-        output.accept(ToolTemplateItem.createPatternStack(ToolTypeRegistry.LEATHER_CHESTPLATE_TEMPLATE));
-        output.accept(ToolTemplateItem.createPatternStack(ToolTypeRegistry.LEATHER_LEGGINGS_TEMPLATE));
-        output.accept(ToolTemplateItem.createPatternStack(ToolTypeRegistry.LEATHER_BOOTS_TEMPLATE));
         ToolTypeRegistry.templates().stream()
                 .filter(template -> !template.id().getNamespace().equals(MobsToolForging.MOD_ID))
                 .map(ModCreativeTabs::templatePattern)

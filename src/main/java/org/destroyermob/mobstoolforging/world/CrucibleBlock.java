@@ -145,6 +145,12 @@ public class CrucibleBlock extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof CrucibleBlockEntity crucible)) {
             return InteractionResult.PASS;
         }
+        if (EmptyMainHandInteractions.shouldDeferToOffhand(
+                player,
+                stack -> canUseItem(stack, crucible, crucible.contents())
+        )) {
+            return InteractionResult.PASS;
+        }
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }

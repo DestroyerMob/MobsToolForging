@@ -76,6 +76,10 @@ public class GroundToolAssemblyBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (level.getBlockEntity(pos) instanceof GroundToolAssemblyBlockEntity assembly
+                && EmptyMainHandInteractions.shouldDeferToOffhand(player, assembly::canAdd)) {
+            return InteractionResult.PASS;
+        }
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }

@@ -132,7 +132,8 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             }
             return ItemInteractionResult.CONSUME;
         }
-        if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand) && !canUseItem(stack, forge, player)) {
+        if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand)
+                && !canHandleItem(stack, forge, player, state, pos, hitResult)) {
             return EmptyMainHandInteractions.itemResult(useWithoutItem(state, level, pos, player, hitResult), level);
         }
         if (isFireStick(stack)) {
@@ -169,10 +170,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             return ItemInteractionResult.CONSUME;
         }
         if (MaterialCatalog.isMaterial(stack)) {
-            if (!level.isClientSide) {
-                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_gems_rejected"));
-            }
-            return ItemInteractionResult.CONSUME;
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
@@ -180,6 +178,12 @@ public class HeatingForgeBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!(level.getBlockEntity(pos) instanceof HeatingForgeBlockEntity forge)) {
+            return InteractionResult.PASS;
+        }
+        if (!player.isShiftKeyDown() && EmptyMainHandInteractions.shouldDeferToOffhand(
+                player,
+                stack -> canHandleItem(stack, forge, player, state, pos, hitResult)
+        )) {
             return InteractionResult.PASS;
         }
         if (level.isClientSide) {
@@ -401,7 +405,8 @@ public class HeatingForgeBlock extends BaseEntityBlock {
         return stack.is(ModItems.FIRE_STICK.get());
     }
 
-    private static boolean canUseItem(ItemStack stack, HeatingForgeBlockEntity forge, Player player) {
+    private static boolean canHandleItem(ItemStack stack, HeatingForgeBlockEntity forge, Player player,
+                                         BlockState state, BlockPos pos, BlockHitResult hitResult) {
         if (isFireStick(stack)) {
             return hasFireSticksInBothHands(player);
         }
@@ -412,7 +417,7 @@ public class HeatingForgeBlock extends BaseEntityBlock {
             return forge.canAcceptFuel(stack);
         }
         return HeatingForgeBlockEntity.isHeatableWorkpiece(stack)
-                && forge.canAcceptWorkpiece(stack);
+                && forge.canAcceptWorkpiece(stack, workpieceSlotFromHit(state, pos, hitResult));
     }
 
     private static boolean hasFireSticksInBothHands(Player player) {

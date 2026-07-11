@@ -161,7 +161,8 @@ public final class PatternRackSelection {
         BlockPos pos = event.getPos();
         if (event.getAction() != PlayerInteractEvent.LeftClickBlock.Action.START
                 || !player.isShiftKeyDown()
-                || !SmithingHammerLevel.isHammer(player.getMainHandItem())
+                || (!SmithingHammerLevel.isHammer(player.getMainHandItem())
+                && !SmithingHammerLevel.isHammer(player.getOffhandItem()))
                 || !(level.getBlockState(pos).getBlock() instanceof PatternRackBlock)
                 || !(level.getBlockEntity(pos) instanceof PatternRackBlockEntity)) {
             return;
