@@ -55,6 +55,10 @@ public record ToolVisualLayer(
         return handleTemplate.or(this::templateIdString).map(ResourceLocation::parse);
     }
 
+    public Optional<ResourceLocation> largeTemplateId() {
+        return largeTemplate.map(ResourceLocation::parse);
+    }
+
     public Optional<ResourceLocation> templateId(boolean partTemplate) {
         if (partTemplate) {
             return partTemplateId();

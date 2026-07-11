@@ -59,6 +59,11 @@ public class ToolTypeReloadListener extends SimpleJsonResourceReloadListener {
             Item toolItem = parseItem(GsonHelper.getAsString(json, "tool_item"), "tool_item");
             builder.toolItem(() -> toolItem);
         }
+        Map<ResourceLocation, Float> materialDamage = materialFloats(json, "material_base_attack_damage_bonuses");
+        Map<ResourceLocation, Float> materialSpeed = materialFloats(json, "material_base_attack_speed_bonuses");
+        java.util.LinkedHashSet<ResourceLocation> statMaterials = new java.util.LinkedHashSet<>(materialDamage.keySet());
+        statMaterials.addAll(materialSpeed.keySet());
+        statMaterials.forEach(materialId -> builder.materialBaseStats(materialId, materialDamage.get(materialId), materialSpeed.get(materialId)));
         if (json.has("tool_items")) {
             JsonObject toolItems = GsonHelper.getAsJsonObject(json, "tool_items");
             toolItems.entrySet().forEach(entry -> {
@@ -111,6 +116,16 @@ public class ToolTypeReloadListener extends SimpleJsonResourceReloadListener {
         }
 
         return builder.build();
+    }
+
+    private static Map<ResourceLocation, Float> materialFloats(JsonObject json, String field) {
+        if (!json.has(field)) {
+            return Map.of();
+        }
+        Map<ResourceLocation, Float> values = new LinkedHashMap<>();
+        GsonHelper.getAsJsonObject(json, field).entrySet().forEach(entry ->
+                values.put(ResourceLocation.parse(entry.getKey()), entry.getValue().getAsFloat()));
+        return values;
     }
 
     private static ParsedPartItems partItems(JsonObject json) {

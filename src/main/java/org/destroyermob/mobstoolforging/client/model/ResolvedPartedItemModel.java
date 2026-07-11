@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.client.model;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -10,17 +11,28 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class ResolvedPartedItemModel implements BakedModel {
     private final List<BakedQuad> quads;
     private final TextureAtlasSprite particle;
     private final ItemTransforms transforms;
+    @Nullable
+    private final BakedModel transformSource;
 
     public ResolvedPartedItemModel(List<BakedQuad> quads, TextureAtlasSprite particle, ItemTransforms transforms) {
         this.quads = quads;
         this.particle = particle;
         this.transforms = transforms;
+        this.transformSource = null;
+    }
+
+    public ResolvedPartedItemModel(List<BakedQuad> quads, TextureAtlasSprite particle, BakedModel transformSource) {
+        this.quads = quads;
+        this.particle = particle;
+        this.transforms = transformSource.getTransforms();
+        this.transformSource = transformSource;
     }
 
     @Override
@@ -59,6 +71,16 @@ public final class ResolvedPartedItemModel implements BakedModel {
     }
 
     @Override
+    public BakedModel applyTransform(ItemDisplayContext context, PoseStack poseStack, boolean leftHand) {
+        if (transformSource != null) {
+            transformSource.applyTransform(context, poseStack, leftHand);
+        } else {
+            transforms.getTransform(context).apply(leftHand, poseStack);
+        }
+        return this;
+    }
+
+    @Override
     public ItemOverrides getOverrides() {
         return ItemOverrides.EMPTY;
     }
@@ -74,5 +96,13 @@ public final class ResolvedPartedItemModel implements BakedModel {
                 .flatMap(entry -> entry.getValue().stream())
                 .toList();
         return new ResolvedPartedItemModel(quads, particle, transforms);
+    }
+
+    public static ResolvedPartedItemModel compose(Map<Integer, List<BakedQuad>> layers, TextureAtlasSprite particle, BakedModel transformSource) {
+        List<BakedQuad> quads = layers.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .flatMap(entry -> entry.getValue().stream())
+                .toList();
+        return new ResolvedPartedItemModel(quads, particle, transformSource);
     }
 }

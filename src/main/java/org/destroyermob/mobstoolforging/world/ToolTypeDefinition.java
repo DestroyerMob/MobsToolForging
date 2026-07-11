@@ -31,6 +31,8 @@ public final class ToolTypeDefinition {
     private final boolean averageRequiredHeadDurability;
     private final float baseAttackDamageBonus;
     private final float baseAttackSpeedBonus;
+    private final Map<ResourceLocation, Float> materialBaseAttackDamageBonuses;
+    private final Map<ResourceLocation, Float> materialBaseAttackSpeedBonuses;
     private final double entityInteractionRangeBonus;
     private final double blockInteractionRangeBonus;
     private final boolean swordLike;
@@ -55,6 +57,8 @@ public final class ToolTypeDefinition {
         this.averageRequiredHeadDurability = builder.averageRequiredHeadDurability;
         this.baseAttackDamageBonus = builder.baseAttackDamageBonus;
         this.baseAttackSpeedBonus = builder.baseAttackSpeedBonus;
+        this.materialBaseAttackDamageBonuses = Map.copyOf(builder.materialBaseAttackDamageBonuses);
+        this.materialBaseAttackSpeedBonuses = Map.copyOf(builder.materialBaseAttackSpeedBonuses);
         this.entityInteractionRangeBonus = builder.entityInteractionRangeBonus;
         this.blockInteractionRangeBonus = builder.blockInteractionRangeBonus;
         this.swordLike = builder.swordLike;
@@ -160,11 +164,13 @@ public final class ToolTypeDefinition {
     }
 
     public float baseAttackDamageBonus(ResourceLocation materialId) {
-        return builtInKind.map(kind -> ToolStatBuilder.builtInBaseAttackDamageBonus(kind, materialId)).orElse(baseAttackDamageBonus);
+        Float materialValue = materialBaseAttackDamageBonuses.get(materialId);
+        return materialValue != null ? materialValue : builtInKind.map(kind -> ToolStatBuilder.builtInBaseAttackDamageBonus(kind, materialId)).orElse(baseAttackDamageBonus);
     }
 
     public float baseAttackSpeedBonus(ResourceLocation materialId) {
-        return builtInKind.map(kind -> ToolStatBuilder.builtInBaseAttackSpeedBonus(kind, materialId)).orElse(baseAttackSpeedBonus);
+        Float materialValue = materialBaseAttackSpeedBonuses.get(materialId);
+        return materialValue != null ? materialValue : builtInKind.map(kind -> ToolStatBuilder.builtInBaseAttackSpeedBonus(kind, materialId)).orElse(baseAttackSpeedBonus);
     }
 
     public double entityInteractionRangeBonus() {
@@ -278,6 +284,8 @@ public final class ToolTypeDefinition {
         private boolean averageRequiredHeadDurability;
         private float baseAttackDamageBonus = 1.0F;
         private float baseAttackSpeedBonus = -2.8F;
+        private final Map<ResourceLocation, Float> materialBaseAttackDamageBonuses = new LinkedHashMap<>();
+        private final Map<ResourceLocation, Float> materialBaseAttackSpeedBonuses = new LinkedHashMap<>();
         private double entityInteractionRangeBonus;
         private double blockInteractionRangeBonus;
         private boolean swordLike;
@@ -352,6 +360,16 @@ public final class ToolTypeDefinition {
         public Builder baseStats(float attackDamageBonus, float attackSpeedBonus) {
             this.baseAttackDamageBonus = attackDamageBonus;
             this.baseAttackSpeedBonus = attackSpeedBonus;
+            return this;
+        }
+
+        public Builder materialBaseStats(ResourceLocation materialId, Float attackDamageBonus, Float attackSpeedBonus) {
+            if (attackDamageBonus != null) {
+                this.materialBaseAttackDamageBonuses.put(materialId, attackDamageBonus);
+            }
+            if (attackSpeedBonus != null) {
+                this.materialBaseAttackSpeedBonuses.put(materialId, attackSpeedBonus);
+            }
             return this;
         }
 
