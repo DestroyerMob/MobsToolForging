@@ -183,6 +183,14 @@ public final class MaterialCatalog {
         return !NETHERITE.equals(materialId) && !LEATHER.equals(materialId);
     }
 
+    public static boolean isKnappableMaterial(ResourceLocation materialId) {
+        return FLINT.equals(materialId);
+    }
+
+    public static boolean supportsTreatment(ResourceLocation materialId) {
+        return !isKnappableMaterial(materialId);
+    }
+
     public static List<ResourceLocation> handleMaterialIds() {
         return HANDLE_MATERIALS;
     }

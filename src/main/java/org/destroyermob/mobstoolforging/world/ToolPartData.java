@@ -23,6 +23,7 @@ public record ToolPartData(
     public static final String PICKAXE_HEAD = "pickaxe_head";
     public static final String AXE_HEAD = "axe_head";
     public static final String HOE_HEAD = "hoe_head";
+    public static final String COOKING_KNIFE_HEAD = "cooking_knife_head";
     public static final String SMITHING_HAMMER_HEAD = "smithing_hammer_head";
     public static final String SCREWDRIVER_HEAD = "screwdriver_head";
     public static final String GEM_CUTTERS_BLADE = "gem_cutters_blade";
@@ -59,10 +60,17 @@ public record ToolPartData(
         treatment = treatment == null ? Optional.empty() : treatment;
         finish = finish == null ? ToolPartFinish.POLISHED : finish;
         coatingBaseMaterial = coatingBaseMaterial == null ? Optional.empty() : coatingBaseMaterial;
+        if (!MaterialCatalog.supportsTreatment(coatingBaseMaterial.orElse(materialId))) {
+            treatment = Optional.empty();
+        }
     }
 
     public ToolPartData withTreatment(ResourceLocation treatment) {
         return new ToolPartData(partType, materialId, quality, Optional.of(treatment), finish, coatingBaseMaterial);
+    }
+
+    public boolean supportsTreatment() {
+        return MaterialCatalog.supportsTreatment(coatingBaseMaterial.orElse(materialId));
     }
 
     public ToolPartData withFinish(ToolPartFinish finish) {

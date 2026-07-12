@@ -193,7 +193,9 @@ public class CrucibleBlock extends BaseEntityBlock {
         ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
         return data != null
                 && data.treatment().isEmpty()
-                && java.util.Arrays.stream(ToolKind.values()).anyMatch(toolKind -> toolKind.partType().equals(data.partType()));
+                && data.supportsTreatment()
+                && ToolTypeRegistry.toolTypes().stream()
+                .anyMatch(toolType -> toolType.primaryPartType().equals(data.partType()));
     }
 
     private static ItemStack tippedCopy(ItemStack stack) {

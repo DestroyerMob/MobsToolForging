@@ -51,6 +51,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .addTag(ModTags.Items.PART_PICKAXE_HEADS)
                 .addTag(ModTags.Items.PART_AXE_HEADS)
                 .addTag(ModTags.Items.PART_HOE_HEADS)
+                .addTag(ModTags.Items.PART_COOKING_KNIFE_HEADS)
                 .addTag(ModTags.Items.PART_SCREWDRIVER_HEADS)
                 .addTag(ModTags.Items.PART_GEM_CUTTERS_BLADES);
         tag(ModTags.Items.PART_GUARDS)
@@ -78,6 +79,8 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .add(ModItems.AXE_HEAD.get());
         tag(ModTags.Items.PART_HOE_HEADS)
                 .add(ModItems.HOE_HEAD.get());
+        tag(ModTags.Items.PART_COOKING_KNIFE_HEADS)
+                .add(ModItems.COOKING_KNIFE_HEAD.get());
         tag(ModTags.Items.PART_SCREWDRIVER_HEADS)
                 .add(ModItems.SCREWDRIVER_HEAD.get());
         tag(ModTags.Items.PART_GEM_CUTTERS_BLADES)

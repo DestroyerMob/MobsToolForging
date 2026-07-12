@@ -1,6 +1,7 @@
 package org.destroyermob.mobstoolforging;
 
 import com.mojang.logging.LogUtils;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,6 +33,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ModConfig;
@@ -43,13 +45,13 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.destroyermob.mobstoolforging.client.MobsToolForgingClient;
@@ -78,6 +80,7 @@ import org.destroyermob.mobstoolforging.world.CompositeAffixCompatibility;
 import org.destroyermob.mobstoolforging.world.CrucibleContents;
 import org.destroyermob.mobstoolforging.world.DebugFeedback;
 import org.destroyermob.mobstoolforging.world.DryingRecipeReloadListener;
+import org.destroyermob.mobstoolforging.world.ExternalToolTooltipOrder;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
 import org.destroyermob.mobstoolforging.world.FlintKnappingEvents;
@@ -85,6 +88,7 @@ import org.destroyermob.mobstoolforging.world.FlintToolStacks;
 import org.destroyermob.mobstoolforging.world.GroundAssemblyRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.HeatingRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.LeatherStationAssemblyEvents;
+import org.destroyermob.mobstoolforging.world.LapidaryTableAssemblyEvents;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialDefinitionReloadListener;
 import org.destroyermob.mobstoolforging.world.PatternRackSelection;
@@ -138,8 +142,9 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::placeGroundAssembly);
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::dropPlantFiber);
         NeoForge.EVENT_BUS.addListener(EveryCompatDropFallback::addMissingSelfDrop);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, LeatherStationAssemblyEvents::assembleInWorld);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, LapidaryTableAssemblyEvents::assembleInWorld);
         NeoForge.EVENT_BUS.addListener(AnvilForgingEvents::forgeAnvilInWorld);
-        NeoForge.EVENT_BUS.addListener(LeatherStationAssemblyEvents::assembleInWorld);
         NeoForge.EVENT_BUS.addListener(ArmorStandSwapEvents::swapPlayerArmorWithStand);
         NeoForge.EVENT_BUS.addListener(this::lowerCopperHarvestTier);
         NeoForge.EVENT_BUS.addListener(CampfireWorkpieceHeating::placeWorkpiece);
@@ -150,7 +155,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(PatternRackSelection::playerChangedDimension);
         NeoForge.EVENT_BUS.addListener(this::quenchInWaterCauldron);
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
-        NeoForge.EVENT_BUS.addListener(this::blacklistToolmakersStationsFromCarryOn);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::blacklistStationsFromCarryOn);
         NeoForge.EVENT_BUS.addListener(this::coolPlayerWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::coolDroppedWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::blockHeatedCrafting);
@@ -236,6 +241,9 @@ public class MobsToolForging {
             event.accept(ModItems.ASH);
             event.accept(ModItems.SMITHING_HAMMER_HEAD);
             event.accept(ModItems.GEM_CUTTERS_BLADE);
+            if (ModList.get().isLoaded("farmersdelight")) {
+                event.accept(ModItems.COOKING_KNIFE_HEAD.get().createPart(MaterialCatalog.IRON));
+            }
             event.accept(ModItems.DIAMOND_POWDER);
         }
     }
@@ -382,8 +390,8 @@ public class MobsToolForging {
         event.addListener(new GroundAssemblyRecipeReloadListener());
     }
 
-    private void blacklistToolmakersStationsFromCarryOn(ServerStartedEvent event) {
-        CarryOnCompatibility.blacklistToolmakersStations();
+    private void blacklistStationsFromCarryOn(TagsUpdatedEvent event) {
+        CarryOnCompatibility.blacklistStations();
     }
 
     private void coolPlayerWorkpieces(PlayerTickEvent.Post event) {
@@ -483,10 +491,16 @@ public class MobsToolForging {
         ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
         if (construction != null && !(stack.getItem() instanceof ModularToolItem)) {
             ToolTypeRegistry.toolType(construction.toolType()).ifPresent(definition -> {
+                List<Component> toolDetails = new ArrayList<>();
                 if (Boolean.TRUE.equals(stack.get(ModDataComponents.TOOL_BROKEN.get()))) {
-                    event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.broken_tool").withStyle(ChatFormatting.RED));
+                    toolDetails.add(Component.translatable("tooltip.mobstoolforging.broken_tool").withStyle(ChatFormatting.RED));
                 }
-                event.getToolTip().addAll(ToolTooltipBuilder.tooltip(stack, definition, event.getFlags()));
+                toolDetails.addAll(ToolTooltipBuilder.tooltip(stack, definition, event.getFlags()));
+                ExternalToolTooltipOrder.insertBeforeEnchantments(
+                        stack,
+                        event.getToolTip(),
+                        toolDetails
+                );
             });
         }
 

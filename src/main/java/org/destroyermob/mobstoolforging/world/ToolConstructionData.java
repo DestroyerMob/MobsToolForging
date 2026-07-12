@@ -30,6 +30,9 @@ public record ToolConstructionData(
         wrapMaterial = wrapMaterial == null ? Optional.empty() : wrapMaterial;
         focusMaterial = focusMaterial == null ? Optional.empty() : focusMaterial;
         treatment = treatment == null ? Optional.empty() : treatment;
+        if (!MaterialCatalog.supportsTreatment(headBaseMaterial.orElse(headMaterial))) {
+            treatment = Optional.empty();
+        }
         if (guardMaterial.isEmpty()
                 && bindingMaterial.isPresent()
                 && toolType(ToolKind.SWORD).equals(toolType)) {

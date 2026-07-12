@@ -8,6 +8,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
@@ -102,6 +103,9 @@ public final class ModCreativeTabs {
         output.accept(ModItems.PICKAXE_HEAD.get().createPart(MaterialCatalog.IRON));
         output.accept(ModItems.AXE_HEAD.get().createPart(MaterialCatalog.IRON));
         output.accept(ModItems.HOE_HEAD.get().createPart(MaterialCatalog.IRON));
+        if (ModList.get().isLoaded("farmersdelight")) {
+            output.accept(ModItems.COOKING_KNIFE_HEAD.get().createPart(MaterialCatalog.IRON));
+        }
         output.accept(ModItems.HELMET_CHAINMAIL.get().createPart(MaterialCatalog.IRON));
         output.accept(ModItems.HELMET_PLATE.get().createPart(MaterialCatalog.IRON));
         output.accept(ModItems.CHESTPLATE_CHAINMAIL.get().createPart(MaterialCatalog.IRON));

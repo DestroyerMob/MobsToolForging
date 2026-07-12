@@ -423,6 +423,15 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
             ));
         }
 
+        recipes.add(new WorldAssemblyJeiRecipe(
+                recipeId("world_assembly/lapidary_table"),
+                WorldAssemblyJeiRecipe.Kind.LAPIDARY_TABLE,
+                List.of(new ItemStack(Items.IRON_BLOCK), new ItemStack(Items.IRON_BLOCK)),
+                List.of(new ItemStack(Items.DIAMOND_BLOCK), new ItemStack(Items.LAPIS_BLOCK)),
+                hammers,
+                new ItemStack(ModBlocks.LAPIDARY_TABLE.get())
+        ));
+
         ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> recipes.add(leatherStationAssembly(
                 recipeId("world_assembly/leather_station/" + variant.id()),
                 variant.recipePlanks(),

@@ -1,0 +1,44 @@
+{
+  "type": "mobstoolforging:tool_visual",
+  "canvas": 16,
+  "large_canvas": 32,
+  "large_in_hand": false,
+  "layers": [
+    {
+      "slot": "handle",
+      "material_from": "handleMaterial",
+      "handle_strategy": "masked_handle",
+      "z": 1,
+      "optional": false,
+      "emissive_allowed": false
+    },
+    {
+      "slot": "cooking_knife_head",
+      "material_from": "headMaterial",
+      "materials": [
+        "mobstoolforging:flint",
+        "mobstoolforging:iron",
+        "mobstoolforging:gold",
+        "mobstoolforging:diamond"
+      ],
+      "tool_template": "mobstoolforging:tool_templates/cooking_knife/cooking_knife_head",
+      "part_template": "mobstoolforging:tool_templates/cooking_knife/cooking_knife_head",
+      "template": "mobstoolforging:tool_templates/cooking_knife/cooking_knife_head",
+      "texture_namespace": "mobstoolforging",
+      "texture_pattern": "source/tool_parts/{material}/{material}_cooking_knife_head",
+      "z": 2,
+      "optional": false,
+      "emissive_allowed": false
+    },
+    {
+      "slot": "cooking_knife_treatment",
+      "material_from": "treatment",
+      "tool_template": "mobstoolforging:tool_templates/cooking_knife/cooking_knife_head",
+      "part_template": "mobstoolforging:tool_templates/cooking_knife/cooking_knife_head",
+      "template": "mobstoolforging:tool_templates/cooking_knife/cooking_knife_head",
+      "z": 3,
+      "optional": true,
+      "emissive_allowed": true
+    }
+  ]
+}

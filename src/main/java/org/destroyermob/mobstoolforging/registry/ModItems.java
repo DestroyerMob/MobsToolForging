@@ -12,6 +12,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.item.FireStickItem;
 import org.destroyermob.mobstoolforging.item.LeatherStationBlockItem;
+import org.destroyermob.mobstoolforging.item.LapidaryTableBlockItem;
 import org.destroyermob.mobstoolforging.item.ModularArmorPartItem;
 import org.destroyermob.mobstoolforging.item.ModularBootsItem;
 import org.destroyermob.mobstoolforging.item.ModularChestplateItem;
@@ -46,7 +47,7 @@ public final class ModItems {
     );
     public static final DeferredItem<BlockItem> LAPIDARY_TABLE = ITEMS.register(
             "lapidary_table",
-            () -> new BlockItem(ModBlocks.LAPIDARY_TABLE.get(), new Item.Properties())
+            () -> new LapidaryTableBlockItem(ModBlocks.LAPIDARY_TABLE.get(), new Item.Properties())
     );
     public static final DeferredItem<BlockItem> PATTERN_CREATION_STATION = ITEMS.register(
             "pattern_creation_station",
@@ -307,6 +308,10 @@ public final class ModItems {
     public static final DeferredItem<ModularToolPartItem> HOE_HEAD = ITEMS.register(
             "hoe_head",
             () -> new ModularToolPartItem(ToolKind.HOE, new Item.Properties())
+    );
+    public static final DeferredItem<ModularToolPartItem> COOKING_KNIFE_HEAD = ITEMS.register(
+            "cooking_knife_head",
+            () -> new ModularToolPartItem(ToolPartData.COOKING_KNIFE_HEAD, new Item.Properties())
     );
     public static final DeferredItem<ModularArmorPartItem> HELMET_CHAINMAIL = ITEMS.register(
             ArmorPartData.HELMET_CHAINMAIL,

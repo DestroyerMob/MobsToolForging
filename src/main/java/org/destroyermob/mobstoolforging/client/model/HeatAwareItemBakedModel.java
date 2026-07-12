@@ -101,7 +101,7 @@ public final class HeatAwareItemBakedModel extends ForwardingBakedModel {
             this.pass = pass;
             this.tint = switch (pass) {
                 case BASE -> HeatVisuals.surfaceTint(profile, heat);
-                case HALO -> HeatVisuals.heatColor(profile, Math.max(0.62F, heat));
+                case HALO -> HeatVisuals.heatColor(profile, Math.min(0.78F, Math.max(0.62F, heat)));
                 case MASK -> HeatVisuals.heatColor(profile, heat);
             };
             this.alpha = switch (pass) {

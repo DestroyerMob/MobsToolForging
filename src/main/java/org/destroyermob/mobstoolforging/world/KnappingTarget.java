@@ -13,7 +13,13 @@ public enum KnappingTarget {
     SHOVEL_HEAD("shovel_head", ToolConstructionData.toolType(ToolKind.SHOVEL), ToolPartData.SHOVEL_HEAD, true),
     PICKAXE_HEAD("pickaxe_head", ToolConstructionData.toolType(ToolKind.PICKAXE), ToolPartData.PICKAXE_HEAD, true),
     AXE_HEAD("axe_head", ToolConstructionData.toolType(ToolKind.AXE), ToolPartData.AXE_HEAD, true),
-    HOE_HEAD("hoe_head", ToolConstructionData.toolType(ToolKind.HOE), ToolPartData.HOE_HEAD, true);
+    HOE_HEAD("hoe_head", ToolConstructionData.toolType(ToolKind.HOE), ToolPartData.HOE_HEAD, true),
+    COOKING_KNIFE_HEAD(
+            "cooking_knife_head",
+            ResourceLocation.fromNamespaceAndPath("farmersdelight", "cooking_knife"),
+            ToolPartData.COOKING_KNIFE_HEAD,
+            true
+    );
 
     private static final List<KnappingTarget> VALUES = List.of(values());
 
@@ -51,15 +57,24 @@ public enum KnappingTarget {
                 .orElse(ItemStack.EMPTY);
     }
 
+    public boolean available() {
+        return ToolTypeRegistry.toolType(toolType).isPresent();
+    }
+
     public KnappingTarget cycle(int delta) {
-        int index = VALUES.indexOf(this);
-        int next = Math.floorMod(index + delta, VALUES.size());
-        return VALUES.get(next);
+        List<KnappingTarget> available = VALUES.stream().filter(KnappingTarget::available).toList();
+        if (available.isEmpty()) {
+            return SWORD_BLADE;
+        }
+        int index = available.indexOf(this);
+        int next = Math.floorMod((index < 0 ? 0 : index) + delta, available.size());
+        return available.get(next);
     }
 
     public static KnappingTarget byId(String id) {
         return Arrays.stream(values())
                 .filter(target -> target.id.equals(id))
+                .filter(KnappingTarget::available)
                 .findFirst()
                 .orElse(SWORD_BLADE);
     }
@@ -70,6 +85,7 @@ public enum KnappingTarget {
         }
         return Arrays.stream(values())
                 .filter(target -> target.partType.equals(data.partType()))
+                .filter(KnappingTarget::available)
                 .findFirst();
     }
 }

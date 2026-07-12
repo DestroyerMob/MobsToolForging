@@ -85,6 +85,10 @@ public record ToolVisualLayer(
         return materialFrom.filter("handleMaterial"::equals).isPresent() && handleStrategy.compositesExactAndTemplate();
     }
 
+    public boolean masksHandleTexture() {
+        return materialFrom.filter("handleMaterial"::equals).isPresent() && handleStrategy.usesShapeMask();
+    }
+
     public Optional<ResourceLocation> textureFromPattern(ResourceLocation material, String usage) {
         if (texturePattern.isEmpty()) {
             return Optional.empty();

@@ -1,6 +1,7 @@
 package org.destroyermob.mobstoolforging.client.model;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -14,7 +15,7 @@ import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
 import net.neoforged.neoforge.client.model.geometry.UnbakedGeometryHelper;
 import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
 
-public record PartedToolGeometry(ToolTypeDefinition definition, ResourceLocation visualId, boolean partModel, String partType, String partSlot, Map<String, ResourceLocation> textureOverrides) implements IUnbakedGeometry<PartedToolGeometry> {
+public record PartedToolGeometry(Optional<ToolTypeDefinition> definition, ResourceLocation visualId, boolean partModel, String partType, String partSlot, Map<String, ResourceLocation> textureOverrides) implements IUnbakedGeometry<PartedToolGeometry> {
     @Override
     public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides) {
         var rootTransform = context.getRootTransform();
@@ -22,12 +23,14 @@ public record PartedToolGeometry(ToolTypeDefinition definition, ResourceLocation
             modelState = UnbakedGeometryHelper.composeRootTransformIntoModelState(modelState, rootTransform);
         }
 
-        ToolVisualDefinition visual = ToolVisualManager.resolve(visualId, definition);
+        ToolVisualDefinition visual = definition
+                .map(value -> ToolVisualManager.resolve(visualId, value))
+                .orElseGet(() -> ToolVisualManager.resolve(visualId, partType));
         PartedToolSpriteSet sprites = PartedToolSpriteSet.from(context, spriteGetter, visual, textureOverrides, partModel);
         PartedToolQuadFactory quadFactory = new PartedToolQuadFactory(modelState);
         if (partModel) {
             return new PartedToolPartBakedModel(visual, partType, partSlot, sprites, quadFactory, context.getTransforms());
         }
-        return new PartedToolBakedModel(definition, visual, sprites, quadFactory, context.getTransforms());
+        return new PartedToolBakedModel(definition.orElseThrow(), visual, sprites, quadFactory, context.getTransforms());
     }
 }

@@ -1,16 +1,16 @@
 {
   "tag": "mobstoolforging:heating_visuals/iron",
   "priority": 100,
-  "colors": ["#240301", "#5b0803", "#991306", "#d12a0b", "#f24c14", "#ff7625", "#ffa440", "#ffcb63", "#ffe595", "#fff3ca", "#fffcf2"],
-  "visible_threshold": 0.1,
-  "color_curve_exponent": 1.28,
-  "surface_tint_strength": 0.48,
-  "emission_start": 0.14,
-  "emission_strength": 0.72,
-  "halo_start": 0.32,
-  "halo_alpha": 0.07,
-  "halo_base_scale": 1.016,
-  "halo_extra_scale": 0.012,
-  "light_start": 0.22,
-  "maximum_block_light": 13
+  "colors": ["#240301", "#5b0803", "#991306", "#d12a0b", "#f24c14", "#ff6520", "#ff7d27", "#ff962f", "#ffad3a", "#ffc24e", "#ffd46b"],
+  "visible_threshold": 0.08,
+  "color_curve_exponent": 1.12,
+  "surface_tint_strength": 0.62,
+  "emission_start": 0.1,
+  "emission_strength": 0.86,
+  "halo_start": 0.16,
+  "halo_alpha": 0.18,
+  "halo_base_scale": 1.05,
+  "halo_extra_scale": 0.04,
+  "light_start": 0.14,
+  "maximum_block_light": 15
 }

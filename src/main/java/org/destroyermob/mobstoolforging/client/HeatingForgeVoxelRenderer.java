@@ -43,11 +43,12 @@ public final class HeatingForgeVoxelRenderer {
         renderModel(model, sprite, centerSample(texture), poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)), heatedLight, packedOverlay, HeatVisuals.surfaceTint(profile, clampedHeat));
 
         ResourceLocation hotTexture = visual.hotTexture();
-        float hotBlend = hotTexture == null ? 0.0F : HeatVisuals.smoothstep(0.9F, 1.0F, clampedHeat) * 0.28F;
+        float hotBlend = hotTexture == null ? 0.0F : HeatVisuals.smoothstep(0.9F, 1.0F, clampedHeat) * 0.12F;
         if (hotTexture != null && hotBlend > 0.01F) {
             TextureAtlasSprite hotSprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(hotTexture);
             warnIfMissing(hotTexture, hotSprite);
-            renderModel(model, hotSprite, centerSample(hotTexture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), heatedLight, packedOverlay, HeatVisuals.withAlpha(0xFFFFFFFF, hotBlend));
+            int hotColor = HeatVisuals.withAlpha(HeatVisuals.heatColor(profile, Math.min(0.86F, clampedHeat)), hotBlend);
+            renderModel(model, hotSprite, centerSample(hotTexture), poseStack, bufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)), heatedLight, packedOverlay, hotColor);
         }
 
         float overlayAlpha = HeatVisuals.overlayAlpha(profile, clampedHeat);

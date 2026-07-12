@@ -145,14 +145,5 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_stick", has(Items.STICK))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.LAPIDARY_TABLE)
-                .define('D', Items.DIAMOND)
-                .define('C', Items.CRAFTING_TABLE)
-                .define('S', Items.SMOOTH_STONE)
-                .pattern(" D ")
-                .pattern("SCS")
-                .pattern("SSS")
-                .unlockedBy("has_diamond", has(Items.DIAMOND))
-                .save(output);
     }
 }

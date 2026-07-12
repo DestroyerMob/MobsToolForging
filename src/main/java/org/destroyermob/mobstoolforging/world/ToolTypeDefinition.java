@@ -24,6 +24,7 @@ public final class ToolTypeDefinition {
     private final Optional<ToolKind> builtInKind;
     private final Supplier<? extends Item> toolItem;
     private final Map<ResourceLocation, Supplier<? extends Item>> materialToolItems;
+    private final Map<ResourceLocation, Supplier<? extends Item>> treatmentToolItems;
     private final Map<String, Supplier<? extends Item>> partItems;
     private final Map<String, Map<ResourceLocation, Supplier<? extends Item>>> materialPartItems;
     private final List<String> requiredAssemblyParts;
@@ -48,6 +49,7 @@ public final class ToolTypeDefinition {
         this.builtInKind = Optional.ofNullable(builder.builtInKind);
         this.toolItem = builder.toolItem;
         this.materialToolItems = Map.copyOf(builder.materialToolItems);
+        this.treatmentToolItems = Map.copyOf(builder.treatmentToolItems);
         this.partItems = Map.copyOf(builder.partItems);
         Map<String, Map<ResourceLocation, Supplier<? extends Item>>> materialParts = new LinkedHashMap<>();
         builder.materialPartItems.forEach((partType, items) -> materialParts.put(partType, Map.copyOf(items)));
@@ -95,6 +97,19 @@ public final class ToolTypeDefinition {
 
     public Set<ResourceLocation> toolItemMaterials() {
         return materialToolItems.keySet();
+    }
+
+    public Optional<Item> treatmentToolItem(ResourceLocation treatmentId) {
+        Supplier<? extends Item> supplier = treatmentToolItems.get(treatmentId);
+        return supplier == null ? Optional.empty() : Optional.of(supplier.get());
+    }
+
+    public Set<ResourceLocation> toolItemTreatments() {
+        return treatmentToolItems.keySet();
+    }
+
+    public Optional<Item> toolItem(ResourceLocation materialId, Optional<ResourceLocation> treatment) {
+        return treatment.flatMap(this::treatmentToolItem).or(() -> toolItem(materialId));
     }
 
     public Optional<Item> partItem(String partType) {
@@ -216,7 +231,7 @@ public final class ToolTypeDefinition {
                 || construction.guardMaterial().filter(material -> !MaterialCatalog.isNormalForgingMaterial(material)).isPresent()) {
             return false;
         }
-        if (!customToolFactory && toolItem(construction.headMaterial()).isEmpty()) {
+        if (!customToolFactory && toolItem(construction.headMaterial(), construction.treatment()).isEmpty()) {
             return false;
         }
         ToolPartData primary = parts.get(primaryPartType);
@@ -235,7 +250,7 @@ public final class ToolTypeDefinition {
     }
 
     private static ItemStack defaultToolStack(ToolTypeDefinition definition, ToolConstructionData construction) {
-        Optional<Item> item = definition.toolItem(construction.headMaterial());
+        Optional<Item> item = definition.toolItem(construction.headMaterial(), construction.treatment());
         if (item.isEmpty()) {
             return ItemStack.EMPTY;
         }
@@ -277,6 +292,7 @@ public final class ToolTypeDefinition {
         private ToolKind builtInKind;
         private Supplier<? extends Item> toolItem;
         private final Map<ResourceLocation, Supplier<? extends Item>> materialToolItems = new LinkedHashMap<>();
+        private final Map<ResourceLocation, Supplier<? extends Item>> treatmentToolItems = new LinkedHashMap<>();
         private final Map<String, Supplier<? extends Item>> partItems = new LinkedHashMap<>();
         private final Map<String, Map<ResourceLocation, Supplier<? extends Item>>> materialPartItems = new LinkedHashMap<>();
         private final java.util.ArrayList<String> requiredAssemblyParts = new java.util.ArrayList<>();
@@ -324,6 +340,11 @@ public final class ToolTypeDefinition {
 
         public Builder toolItem(ResourceLocation materialId, Supplier<? extends Item> toolItem) {
             this.materialToolItems.put(materialId, toolItem);
+            return this;
+        }
+
+        public Builder treatmentToolItem(ResourceLocation treatmentId, Supplier<? extends Item> toolItem) {
+            this.treatmentToolItems.put(treatmentId, toolItem);
             return this;
         }
 

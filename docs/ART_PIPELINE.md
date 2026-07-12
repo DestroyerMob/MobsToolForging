@@ -46,6 +46,19 @@ material-specific nub. Tools whose handle shape cannot be expressed with the
 shared handle plus a mask can provide a grayscale template and set
 `handle_strategy: "template_handle"` on the handle layer.
 
+Cooking knives use `masked_handle`. At model-composition time, the mask becomes
+the final handle geometry and location. Its RGB is ignored, and the selected
+handle material's ordinary handle sprite is scaled and sampled through every
+opaque mask pixel. The composed quads are cached with the finished tool model;
+there are no generated per-handle cooking-knife textures.
+
+Addon handle materials work automatically when they register the
+`handleMaterial` visual slot and provide their ordinary source sprite at:
+
+```text
+assets/<namespace>/textures/source/tool_parts/<material>/<material>_handle_tool.png
+```
+
 If a grayscale fallback template is not present, the renderer uses the missing
 texture and logs once. Missing art should be visible and diagnosable, never a
 client crash.

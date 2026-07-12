@@ -72,6 +72,14 @@ public class ToolTypeReloadListener extends SimpleJsonResourceReloadListener {
                 builder.toolItem(materialId, () -> item);
             });
         }
+        if (json.has("treatment_tool_items")) {
+            JsonObject treatmentToolItems = GsonHelper.getAsJsonObject(json, "treatment_tool_items");
+            treatmentToolItems.entrySet().forEach(entry -> {
+                ResourceLocation treatmentId = ResourceLocation.parse(entry.getKey());
+                Item item = parseItem(entry.getValue().getAsString(), "treatment_tool_items." + entry.getKey());
+                builder.treatmentToolItem(treatmentId, () -> item);
+            });
+        }
 
         boolean swordLike = GsonHelper.getAsBoolean(json, "sword_like", false);
         if (swordLike) {

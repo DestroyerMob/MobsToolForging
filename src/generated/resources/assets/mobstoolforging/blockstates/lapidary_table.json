@@ -1,18 +1,33 @@
 {
   "variants": {
-    "facing=east": {
+    "facing=east,part=foot": {
       "model": "mobstoolforging:block/lapidary_table",
       "y": 90
     },
-    "facing=north": {
+    "facing=east,part=head": {
+      "model": "mobstoolforging:block/invisible_lapidary_table",
+      "y": 90
+    },
+    "facing=north,part=foot": {
       "model": "mobstoolforging:block/lapidary_table"
     },
-    "facing=south": {
+    "facing=north,part=head": {
+      "model": "mobstoolforging:block/invisible_lapidary_table"
+    },
+    "facing=south,part=foot": {
       "model": "mobstoolforging:block/lapidary_table",
       "y": 180
     },
-    "facing=west": {
+    "facing=south,part=head": {
+      "model": "mobstoolforging:block/invisible_lapidary_table",
+      "y": 180
+    },
+    "facing=west,part=foot": {
       "model": "mobstoolforging:block/lapidary_table",
+      "y": 270
+    },
+    "facing=west,part=head": {
+      "model": "mobstoolforging:block/invisible_lapidary_table",
       "y": 270
     }
   }

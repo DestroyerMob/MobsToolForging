@@ -19,6 +19,7 @@ import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.world.AshBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.LeatherStationBlock;
+import org.destroyermob.mobstoolforging.world.LapidaryTableBlock;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolPartSpriteKey;
 import org.destroyermob.mobstoolforging.world.ToolKind;
@@ -43,7 +44,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         Block lapidaryTable = ModBlocks.LAPIDARY_TABLE.get();
         ModelFile lapidaryModel = new ModelFile.UncheckedModelFile(modLoc("block/lapidary_table"));
-        horizontalBlock(lapidaryTable, lapidaryModel);
+        ModelFile invisibleLapidaryModel = models().getBuilder("block/invisible_lapidary_table")
+                .texture("particle", mcLoc("block/iron_block"));
+        getVariantBuilder(lapidaryTable).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(state.getValue(LapidaryTableBlock.PART) == BedPart.FOOT ? lapidaryModel : invisibleLapidaryModel)
+                .rotationY(horizontalRotation(state.getValue(LapidaryTableBlock.FACING)))
+                .build()
+        );
         simpleBlockItem(lapidaryTable, lapidaryModel);
 
         Block patternCreationStation = ModBlocks.PATTERN_CREATION_STATION.get();
@@ -96,6 +103,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         itemModels().withExistingParent("plant_fiber", mcLoc("item/generated")).texture("layer0", modLoc("item/plant_fiber"));
         itemModels().withExistingParent("fire_stick", mcLoc("item/handheld")).texture("layer0", mcLoc("item/stick"));
         itemModels().withExistingParent("diamond_powder", mcLoc("item/generated")).texture("layer0", modLoc("item/diamond_powder"));
+        cookingKnifeHeadModel();
         modularHelmetModel();
         modularChestplateModel();
         itemModels().withExistingParent("modular_leggings", mcLoc("item/generated")).texture("layer0", mcLoc("item/leather_leggings"));
@@ -272,6 +280,21 @@ public class ModBlockStateProvider extends BlockStateProvider {
         partModel(ToolKind.SWORD, ToolPartData.SWORD_GUARD, ToolPartData.SWORD_GUARD, "guard", "guardMaterial", ToolPartData.SWORD_GUARD);
     }
 
+    private void cookingKnifeHeadModel() {
+        ResourceLocation visualId = modLoc("cooking_knife");
+        ItemModelBuilder builder = itemModels().withExistingParent("cooking_knife_head", mcLoc("item/generated"));
+        builder.texture("particle", modLoc("tool_templates/cooking_knife/cooking_knife_head"));
+        builder.customLoader((modelBuilder, helper) -> new PartedItemModelBuilder(
+                modelBuilder,
+                helper,
+                java.util.Optional.empty(),
+                visualId,
+                true,
+                ToolPartData.COOKING_KNIFE_HEAD,
+                ToolPartData.COOKING_KNIFE_HEAD
+        )).end();
+    }
+
     private void partModel(ToolKind toolKind, String itemModelName, String partType, String partSlot, String materialFrom, String textureName) {
         ItemModelBuilder builder = itemModels().withExistingParent(itemModelName, mcLoc("item/generated"));
         builder.texture("particle", sourceTexture(MaterialCatalog.IRON, partTextureName(MaterialCatalog.IRON, textureName)));
@@ -441,19 +464,33 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private static class PartedItemModelBuilder extends CustomLoaderBuilder<ItemModelBuilder> {
-        private final ToolKind toolKind;
+        private final java.util.Optional<ResourceLocation> toolTypeId;
+        private final ResourceLocation visualId;
         private final boolean partModel;
         private final String partType;
         private final String partSlot;
 
         private PartedItemModelBuilder(ItemModelBuilder parent, ExistingFileHelper existingFileHelper, ToolKind toolKind, boolean partModel, String partType, String partSlot) {
+            this(
+                    parent,
+                    existingFileHelper,
+                    java.util.Optional.of(ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, toolKind.id())),
+                    ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, toolKind.id()),
+                    partModel,
+                    partType,
+                    partSlot
+            );
+        }
+
+        private PartedItemModelBuilder(ItemModelBuilder parent, ExistingFileHelper existingFileHelper, java.util.Optional<ResourceLocation> toolTypeId, ResourceLocation visualId, boolean partModel, String partType, String partSlot) {
             super(
                     ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, partModel ? "parted_tool_part" : "parted_tool"),
                     parent,
                     existingFileHelper,
                     false
             );
-            this.toolKind = toolKind;
+            this.toolTypeId = toolTypeId;
+            this.visualId = visualId;
             this.partModel = partModel;
             this.partType = partType;
             this.partSlot = partSlot;
@@ -462,8 +499,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
         @Override
         public com.google.gson.JsonObject toJson(com.google.gson.JsonObject json) {
             json = super.toJson(json);
-            json.addProperty("tool", toolKind.id());
-            json.addProperty("visual", ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, toolKind.id()).toString());
+            if (toolTypeId.isPresent()) {
+                json.addProperty("tool", toolTypeId.get().toString());
+            }
+            json.addProperty("visual", visualId.toString());
             json.addProperty("part_model", partModel);
             if (partModel) {
                 json.addProperty("part_type", partType);

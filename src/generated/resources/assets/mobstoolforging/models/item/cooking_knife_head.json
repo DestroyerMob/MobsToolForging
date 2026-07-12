@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:item/generated",
+  "loader": "mobstoolforging:parted_tool_part",
+  "part_model": true,
+  "part_slot": "cooking_knife_head",
+  "part_type": "cooking_knife_head",
+  "textures": {
+    "particle": "mobstoolforging:tool_templates/cooking_knife/cooking_knife_head"
+  },
+  "visual": "mobstoolforging:cooking_knife"
+}

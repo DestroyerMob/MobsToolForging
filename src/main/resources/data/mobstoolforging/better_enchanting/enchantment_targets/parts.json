@@ -109,6 +109,14 @@
       "enchantment_tag": "betterenchanting:targets/tools/hoes"
     },
     {
+      "item_tag": "mobstoolforging:parts/cooking_knife_head",
+      "enchantment_tag": "betterenchanting:targets/weapons"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/cooking_knife_head",
+      "enchantment_tag": "betterenchanting:targets/weapons/melee"
+    },
+    {
       "item_tag": "mobstoolforging:parts/handle",
       "enchantment_tag": "betterenchanting:targets/durability"
     },

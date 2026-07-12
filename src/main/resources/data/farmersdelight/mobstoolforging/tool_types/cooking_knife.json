@@ -1,0 +1,26 @@
+{
+  "primary_part_type": "cooking_knife_head",
+  "tool_items": {
+    "mobstoolforging:flint": "farmersdelight:flint_knife",
+    "mobstoolforging:iron": "farmersdelight:iron_knife",
+    "mobstoolforging:gold": "farmersdelight:golden_knife",
+    "mobstoolforging:diamond": "farmersdelight:diamond_knife"
+  },
+  "treatment_tool_items": {
+    "mobstoolforging:netherite": "farmersdelight:netherite_knife"
+  },
+  "part_items": {
+    "cooking_knife_head": "mobstoolforging:cooking_knife_head"
+  },
+  "visual": "mobstoolforging:cooking_knife",
+  "base_attack_damage_bonus": 0.5,
+  "base_attack_speed_bonus": -2.0,
+  "sword_like": true,
+  "tool_item": "farmersdelight:iron_knife",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "farmersdelight"
+    }
+  ]
+}

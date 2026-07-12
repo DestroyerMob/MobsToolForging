@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.integration.jei;
 
+import java.util.List;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -44,7 +45,12 @@ public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRe
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, WorldAssemblyJeiRecipe recipe, IFocusGroup focuses) {
-        if (recipe.kind() == WorldAssemblyJeiRecipe.Kind.LEATHER_STATION) {
+        if (recipe.kind() == WorldAssemblyJeiRecipe.Kind.LAPIDARY_TABLE) {
+            addInput(builder, 5, 7, List.of(recipe.upperBlocks().get(0)));
+            addInput(builder, 25, 7, List.of(recipe.upperBlocks().get(1)));
+            addInput(builder, 5, 27, List.of(recipe.lowerBlocks().get(0)));
+            addInput(builder, 25, 27, List.of(recipe.lowerBlocks().get(1)));
+        } else if (recipe.kind() == WorldAssemblyJeiRecipe.Kind.LEATHER_STATION) {
             addInput(builder, 5, 7, recipe.upperBlocks());
             addInput(builder, 25, 7, recipe.upperBlocks());
             addInput(builder, 5, 27, recipe.lowerBlocks());
@@ -70,9 +76,11 @@ public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRe
     @Override
     public void draw(WorldAssemblyJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
         var font = Minecraft.getInstance().font;
-        Component arrangement = recipe.kind() == WorldAssemblyJeiRecipe.Kind.LEATHER_STATION
-                ? Component.translatable("jei.mobstoolforging.world_assembly.side_view")
-                : Component.translatable("jei.mobstoolforging.world_assembly.place_block");
+        Component arrangement = switch (recipe.kind()) {
+            case LEATHER_STATION -> Component.translatable("jei.mobstoolforging.world_assembly.side_view");
+            case LAPIDARY_TABLE -> Component.translatable("jei.mobstoolforging.world_assembly.front_view");
+            case ANVIL -> Component.translatable("jei.mobstoolforging.world_assembly.place_block");
+        };
         guiGraphics.drawString(font, arrangement, 3, 51, TEXT, false);
         guiGraphics.drawString(font, Component.translatable("jei.mobstoolforging.world_assembly.sneak_use"), 3, 62, TEXT, false);
         JeiRecipeVisuals.drawArrow(guiGraphics, 94, 22);

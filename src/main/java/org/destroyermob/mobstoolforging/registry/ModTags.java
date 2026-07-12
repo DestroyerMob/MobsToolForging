@@ -43,6 +43,7 @@ public final class ModTags {
         public static final TagKey<Item> PART_PICKAXE_HEADS = itemTag("parts/pickaxe_head");
         public static final TagKey<Item> PART_AXE_HEADS = itemTag("parts/axe_head");
         public static final TagKey<Item> PART_HOE_HEADS = itemTag("parts/hoe_head");
+        public static final TagKey<Item> PART_COOKING_KNIFE_HEADS = itemTag("parts/cooking_knife_head");
         public static final TagKey<Item> PART_SCREWDRIVER_HEADS = itemTag("parts/screwdriver_head");
         public static final TagKey<Item> PART_GEM_CUTTERS_BLADES = itemTag("parts/gem_cutters_blade");
         public static final TagKey<Item> ARMOR_PARTS = itemTag("parts/armor");

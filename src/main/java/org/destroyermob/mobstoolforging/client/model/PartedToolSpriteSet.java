@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.client.model;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,14 +26,16 @@ public final class PartedToolSpriteSet {
 
     private final Map<ToolPartSpriteKey, ResolvedToolLayerSprite> sprites;
     private final Map<ToolPartSpriteKey, ResolvedToolLayerSprite> handleBodySprites;
+    private final Map<String, TextureAtlasSprite> handleMaskSprites;
     private final Map<TemplateKey, TextureAtlasSprite> templateSprites;
     private final Map<TemplateKey, ResourceLocation> templateTextures;
     private final TextureAtlasSprite particle;
     private final TextureAtlasSprite missing;
 
-    private PartedToolSpriteSet(Map<ToolPartSpriteKey, ResolvedToolLayerSprite> sprites, Map<ToolPartSpriteKey, ResolvedToolLayerSprite> handleBodySprites, Map<TemplateKey, TextureAtlasSprite> templateSprites, Map<TemplateKey, ResourceLocation> templateTextures, TextureAtlasSprite particle, TextureAtlasSprite missing) {
+    private PartedToolSpriteSet(Map<ToolPartSpriteKey, ResolvedToolLayerSprite> sprites, Map<ToolPartSpriteKey, ResolvedToolLayerSprite> handleBodySprites, Map<String, TextureAtlasSprite> handleMaskSprites, Map<TemplateKey, TextureAtlasSprite> templateSprites, Map<TemplateKey, ResourceLocation> templateTextures, TextureAtlasSprite particle, TextureAtlasSprite missing) {
         this.sprites = sprites;
         this.handleBodySprites = handleBodySprites;
+        this.handleMaskSprites = handleMaskSprites;
         this.templateSprites = templateSprites;
         this.templateTextures = templateTextures;
         this.particle = particle;
@@ -42,10 +45,14 @@ public final class PartedToolSpriteSet {
     public static PartedToolSpriteSet from(IGeometryBakingContext context, Function<Material, TextureAtlasSprite> spriteGetter, ToolVisualDefinition visual, Map<String, ResourceLocation> textureOverrides, boolean partModel) {
         Map<ToolPartSpriteKey, ResolvedToolLayerSprite> sprites = new LinkedHashMap<>();
         Map<ToolPartSpriteKey, ResolvedToolLayerSprite> handleBodySprites = new LinkedHashMap<>();
+        Map<String, TextureAtlasSprite> handleMaskSprites = new LinkedHashMap<>();
         Map<TemplateKey, TextureAtlasSprite> templateSprites = new LinkedHashMap<>();
         Map<TemplateKey, ResourceLocation> templateTextures = new LinkedHashMap<>();
         TextureAtlasSprite missing = spriteGetter.apply(new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation()));
         for (ToolVisualLayer layer : visual.layers()) {
+            handleMaskId(visual, layer)
+                    .flatMap(texture -> readDirectSprite(spriteGetter, texture))
+                    .ifPresent(mask -> handleMaskSprites.put(layer.slot(), mask.sprite()));
             Optional<String> materialFrom = layer.materialFrom();
             Set<ResourceLocation> materialIds = materialFrom
                     .map(value -> {
@@ -57,15 +64,19 @@ public final class PartedToolSpriteSet {
             if (shouldLoadTemplates(context, textureOverrides, layer, materialIds)) {
                 loadTemplate(spriteGetter, templateSprites, templateTextures, layer.slot(), false, layer.templateId(false));
                 loadTemplate(spriteGetter, templateSprites, templateTextures, layer.slot(), true, layer.templateId(true));
-                loadTemplate(spriteGetter, templateSprites, templateTextures, layer.slot(), false, handleMaskId(visual, layer));
             }
             if (materialFrom.isEmpty()) {
                 continue;
             }
             for (ResourceLocation material : materialIds) {
                 ToolPartSpriteKey key = new ToolPartSpriteKey(visual.id(), layer.slot(), material);
-                readSprite(context, spriteGetter, textureOverrides, key.modelTextureKey())
-                        .or(() -> readPatternSprite(spriteGetter, layer, material, spriteUsage(layer, partModel)))
+                Optional<ResolvedToolLayerSprite> resolved = readSprite(context, spriteGetter, textureOverrides, key.modelTextureKey());
+                if (resolved.isEmpty()) {
+                    resolved = layer.masksHandleTexture()
+                            ? readMaskedHandleSourceSprite(spriteGetter, layer, material, spriteUsage(layer, partModel))
+                            : readPatternSprite(spriteGetter, layer, material, spriteUsage(layer, partModel));
+                }
+                resolved
                         .ifPresent(sprite -> sprites.put(key, ResolvedToolLayerSprite.exact(sprite.sprite(), sprite.texture())));
                 if (layer.compositesExactAndTemplate()) {
                     readSprite(context, spriteGetter, textureOverrides, ToolPartSpriteKey.handleBodyTextureKey(material))
@@ -78,7 +89,7 @@ public final class PartedToolSpriteSet {
         TextureAtlasSprite particle = readSprite(context, spriteGetter, textureOverrides, "particle")
                 .map(ResolvedToolLayerSprite::sprite)
                 .orElseGet(() -> firstOrFallback(visual, sprites, missing));
-        return new PartedToolSpriteSet(sprites, Map.copyOf(handleBodySprites), Map.copyOf(templateSprites), Map.copyOf(templateTextures), particle, missing);
+        return new PartedToolSpriteSet(sprites, Map.copyOf(handleBodySprites), Map.copyOf(handleMaskSprites), Map.copyOf(templateSprites), Map.copyOf(templateTextures), particle, missing);
     }
 
     public Optional<TextureAtlasSprite> resolve(ResourceLocation toolType, String slot, ResourceLocation material) {
@@ -105,6 +116,10 @@ public final class PartedToolSpriteSet {
 
     public Optional<ResolvedToolLayerSprite> resolvePartLayer(ResourceLocation toolType, ToolVisualLayer layer, ResourceLocation material) {
         return resolveLayer(toolType, layer, material, true);
+    }
+
+    public Optional<TextureAtlasSprite> resolveHandleMask(ToolVisualLayer layer) {
+        return Optional.ofNullable(handleMaskSprites.get(layer.slot()));
     }
 
     private Optional<ResolvedToolLayerSprite> resolveExactHandleBody(ResourceLocation toolType, ToolVisualLayer layer, ResourceLocation material) {
@@ -198,6 +213,48 @@ public final class PartedToolSpriteSet {
                 .flatMap(texture -> readDirectSprite(spriteGetter, texture));
     }
 
+    private static Optional<ResolvedToolLayerSprite> readMaskedHandleSourceSprite(Function<Material, TextureAtlasSprite> spriteGetter, ToolVisualLayer layer, ResourceLocation material, String usage) {
+        List<ResourceLocation> candidates = new ArrayList<>();
+        layer.textureFromPattern(material, usage).ifPresent(candidates::add);
+        addCandidate(candidates, conventionalHandleTexture(material, usage));
+        baseHandleTexture(material, usage).ifPresent(texture -> addCandidate(candidates, texture));
+        for (ResourceLocation texture : candidates) {
+            Optional<ResolvedToolLayerSprite> sprite = readDirectSprite(spriteGetter, texture);
+            if (sprite.isPresent()) {
+                return sprite;
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static ResourceLocation conventionalHandleTexture(ResourceLocation material, String usage) {
+        return ResourceLocation.fromNamespaceAndPath(material.getNamespace(), "source/tool_parts/" + material.getPath() + "/" + material.getPath() + "_handle_" + usage);
+    }
+
+    private static Optional<ResourceLocation> baseHandleTexture(ResourceLocation material, String usage) {
+        String directory;
+        String prefix;
+        if (MaterialCatalog.BLAZE.equals(material)) {
+            directory = "blaze_rod";
+            prefix = "blaze_rod";
+        } else if (MaterialCatalog.BREEZE.equals(material)) {
+            directory = "breeze_rod";
+            prefix = "breeze_rod";
+        } else if (MaterialCatalog.OAK.equals(material) || MaterialCatalog.DARK_OAK.equals(material)) {
+            directory = "stick";
+            prefix = "stick";
+        } else {
+            return Optional.empty();
+        }
+        return Optional.of(ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "source/tool_parts/" + directory + "/" + prefix + "_handle_" + usage));
+    }
+
+    private static void addCandidate(List<ResourceLocation> candidates, ResourceLocation texture) {
+        if (!candidates.contains(texture)) {
+            candidates.add(texture);
+        }
+    }
+
     private static void loadTemplate(
             Function<Material, TextureAtlasSprite> spriteGetter,
             Map<TemplateKey, TextureAtlasSprite> templateSprites,
@@ -217,13 +274,16 @@ public final class PartedToolSpriteSet {
     }
 
     private static Optional<ResourceLocation> handleMaskId(ToolVisualDefinition visual, ToolVisualLayer layer) {
-        if (!layer.compositesExactAndTemplate()) {
+        if (!layer.masksHandleTexture()) {
             return Optional.empty();
         }
         return Optional.of(ResourceLocation.fromNamespaceAndPath(visual.id().getNamespace(), "source/tool_parts/handle_masks/" + handleShape(visual.id()) + "_handle_mask"));
     }
 
     private static String spriteUsage(ToolVisualLayer layer, boolean partModel) {
+        if (layer.masksHandleTexture()) {
+            return "tool";
+        }
         return partModel && !isTreatmentLayer(layer) ? "part" : "tool";
     }
 

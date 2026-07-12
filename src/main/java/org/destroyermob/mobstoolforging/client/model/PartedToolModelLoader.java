@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
@@ -30,14 +31,23 @@ public final class PartedToolModelLoader implements IGeometryLoader<PartedToolGe
         ResourceLocation visualId = visual == null
                 ? ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, toolId)
                 : ResourceLocation.parse(visual);
-        ResourceLocation toolTypeId = toolId == null
-                ? visualId
-                : toolId.contains(":")
-                ? ResourceLocation.parse(toolId)
-                : ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, toolId);
-        ToolTypeDefinition definition = ToolTypeRegistry.toolType(toolTypeId)
-                .orElseThrow(() -> new JsonParseException("Unknown tool type for parted tool model: " + toolTypeId));
-        String partType = GsonHelper.getAsString(jsonObject, "part_type", definition.primaryPartType());
+        Optional<ToolTypeDefinition> definition;
+        if (toolId == null && partModel) {
+            definition = Optional.empty();
+        } else {
+            ResourceLocation toolTypeId = toolId == null
+                    ? visualId
+                    : toolId.contains(":")
+                    ? ResourceLocation.parse(toolId)
+                    : ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, toolId);
+            definition = Optional.of(ToolTypeRegistry.toolType(toolTypeId)
+                    .orElseThrow(() -> new JsonParseException("Unknown tool type for parted tool model: " + toolTypeId)));
+        }
+        String defaultPartType = definition.map(ToolTypeDefinition::primaryPartType).orElse(null);
+        String partType = GsonHelper.getAsString(jsonObject, "part_type", defaultPartType);
+        if (partType == null) {
+            throw new JsonParseException("Parted tool part model without a tool needs a 'part_type' property");
+        }
         String partSlot = GsonHelper.getAsString(jsonObject, "part_slot", partType);
         return new PartedToolGeometry(definition, visualId, partModel, partType, partSlot, readTextures(jsonObject));
     }

@@ -7,11 +7,13 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 
 public final class ToolTooltipBuilder {
@@ -39,6 +41,7 @@ public final class ToolTooltipBuilder {
         if (flag.hasShiftDown()) {
             addConstructionTooltip(lines, stack, definition, construction);
             addDetailedTraits(lines, profile);
+            addEnchantmentHeading(lines, stack);
         } else {
             addNormalTooltip(lines, profile);
         }
@@ -107,6 +110,15 @@ public final class ToolTooltipBuilder {
                 lines.add(traitDescriptionLine(profile, traitId));
             }
         }
+    }
+
+    private static void addEnchantmentHeading(List<Component> lines, ItemStack stack) {
+        if (stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty()
+                && stack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty()) {
+            return;
+        }
+        addBlankIfNeeded(lines);
+        lines.add(Component.translatable("tooltip.mobstoolforging.enchantments").withStyle(ChatFormatting.GRAY));
     }
 
     private static void addAdvancedTooltip(List<Component> lines, ToolConstructionData construction, ToolStatProfile profile) {

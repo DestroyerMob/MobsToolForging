@@ -418,20 +418,20 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
                 0.0F
         );
         private static final DisplayLayout LAPIDARY = new DisplayLayout(
-                0.770F,
-                0.758F,
-                CAMPFIRE_ITEM_SCALE,
-                CAMPFIRE_ITEM_SCALE,
-                CAMPFIRE_ITEM_SCALE,
-                CAMPFIRE_ITEM_SCALE,
-                0.20F,
+                0.828F,
+                0.820F,
+                CAMPFIRE_ITEM_SCALE * 0.92F,
+                CAMPFIRE_ITEM_SCALE * 0.88F,
+                CAMPFIRE_ITEM_SCALE * 0.92F,
+                CAMPFIRE_ITEM_SCALE * 0.92F,
+                0.18F,
                 SpreadAxis.X,
                 0.0F,
                 0.0F,
-                0.775F,
-                CAMPFIRE_ITEM_SCALE,
+                0.830F,
+                CAMPFIRE_ITEM_SCALE * 0.82F,
                 0.0F,
-                -0.28F
+                -0.31F
         );
         private static final DisplayLayout LEATHER_STATION = new DisplayLayout(
                 0.822F,
@@ -450,8 +450,8 @@ public class ToolForgeRenderer implements BlockEntityRenderer<ToolForgeBlockEnti
                 0.0F
         );
         private static final DisplayLayout TOOLMAKERS_BENCH = new DisplayLayout(
-                0.770F,
-                0.770F,
+                0.828F,
+                0.820F,
                 CAMPFIRE_ITEM_SCALE,
                 CAMPFIRE_ITEM_SCALE,
                 CAMPFIRE_ITEM_SCALE,

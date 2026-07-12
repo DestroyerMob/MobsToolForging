@@ -164,6 +164,21 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
                 return fallback;
             }
 
+            if (layer.masksHandleTexture()) {
+                ResolvedToolLayerSprite handleSource = resolveMaskedHandleSource(layer, material.get(), large);
+                ResourceLocation maskTexture = handleMaskTexture(definition, large);
+                TextureAtlasSprite maskSprite = sprite(maskTexture);
+                if (isMissing(handleSource.sprite()) || isMissing(maskSprite)) {
+                    warnMissingLayer("masked handle missing source or mask", visual, layer, material, isMissing(handleSource.sprite()) ? handleSource.texture() : maskTexture);
+                    if (layer.optional()) {
+                        continue;
+                    }
+                    return fallback;
+                }
+                addLayer(layers, layer.z(), quadFactory.bakeMaskedLayer(layer.z(), handleSource.sprite(), maskSprite, handleSource.color()));
+                continue;
+            }
+
             List<ResolvedToolLayerSprite> resolvedLayers = resolveToolLayers(definition, layer, material.get(), large);
             if (resolvedLayers.isEmpty()) {
                 warnMissingLayer(layer.optional() ? "optional layer has material but missing sprite" : "required layer missing sprite", visual, layer, material, null);
@@ -346,11 +361,6 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
     }
 
     private Optional<ResolvedToolLayerSprite> resolveHandleTemplate(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material, boolean large) {
-        ResourceLocation maskTexture = handleMaskTexture(definition, large);
-        TextureAtlasSprite maskSprite = sprite(maskTexture);
-        if (!isMissing(maskSprite)) {
-            return Optional.of(ResolvedToolLayerSprite.generated(maskSprite, ToolMaterialVisualManager.INSTANCE.tintColor(material), maskTexture));
-        }
         return resolveTemplateFallback(layer, material, false, large);
     }
 
@@ -379,6 +389,20 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
 
     private ResolvedToolLayerSprite resolveExactToolLayer(ToolTypeDefinition definition, ToolVisualLayer layer, ResourceLocation material, boolean large) {
         return resolveExactTexture(textureCandidatesForToolLayer(definition, layer, material, large ? "in_hand" : "tool"));
+    }
+
+    private ResolvedToolLayerSprite resolveMaskedHandleSource(ToolVisualLayer layer, ResourceLocation material, boolean large) {
+        String usage = large ? "in_hand" : "tool";
+        List<ResourceLocation> candidates = new ArrayList<>();
+        addCandidate(candidates, layer.textureFromPattern(material, usage));
+        addCandidate(candidates, conventionalToolTexture("handle", material, usage));
+        addCandidate(candidates, baseHandleTexture(material, usage));
+        if (large) {
+            addCandidate(candidates, layer.textureFromPattern(material, "tool"));
+            addCandidate(candidates, conventionalToolTexture("handle", material, "tool"));
+            addCandidate(candidates, baseHandleTexture(material, "tool"));
+        }
+        return resolveExactTexture(candidates);
     }
 
     private ResolvedToolLayerSprite resolveExactPart(ToolTypeDefinition definition, ToolVisualLayer layer, String partType, ResourceLocation material) {
@@ -498,6 +522,24 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "source/tool_parts/" + directory + "/" + prefix + "_" + handleShape(definition) + "_handle_body_" + usage);
     }
 
+    private Optional<ResourceLocation> baseHandleTexture(ResourceLocation material, String usage) {
+        String directory;
+        String prefix;
+        if (MaterialCatalog.BLAZE.equals(material)) {
+            directory = "blaze_rod";
+            prefix = "blaze_rod";
+        } else if (MaterialCatalog.BREEZE.equals(material)) {
+            directory = "breeze_rod";
+            prefix = "breeze_rod";
+        } else if (MaterialCatalog.OAK.equals(material) || MaterialCatalog.DARK_OAK.equals(material)) {
+            directory = "stick";
+            prefix = "stick";
+        } else {
+            return Optional.empty();
+        }
+        return Optional.of(ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "source/tool_parts/" + directory + "/" + prefix + "_handle_" + usage));
+    }
+
     private ResourceLocation handleMaskTexture(ToolTypeDefinition definition, boolean large) {
         String suffix = large ? "_handle_mask_in_hand" : "_handle_mask";
         return ResourceLocation.fromNamespaceAndPath(definition.visualId().getNamespace(), "source/tool_parts/handle_masks/" + handleShape(definition) + suffix);
@@ -523,6 +565,9 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         }
         if (path.contains("axe")) {
             return "axe";
+        }
+        if (path.contains("cooking_knife")) {
+            return "cooking_knife";
         }
         return definition.swordLike() ? "sword" : "handle";
     }

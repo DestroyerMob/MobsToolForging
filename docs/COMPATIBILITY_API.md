@@ -319,6 +319,10 @@ Handle layers can choose rendering priority:
 - `template_first` or `template_handle`: grayscale template first, then exact texture.
 - `template_only`: grayscale template only.
 - `explicit_only` or `explicit_handle`: exact texture only.
+- `masked_handle`: reshape the material's ordinary handle source texture through
+  `assets/<visual_namespace>/textures/source/tool_parts/handle_masks/<visual>_handle_mask.png`
+  at runtime. Addon materials use
+  `assets/<material_namespace>/textures/source/tool_parts/<material>/<material>_handle_tool.png`.
 
 This lets a weapon add-on decide whether a custom handle silhouette should override MTF's built-in stick/blaze/breeze handle art.
 

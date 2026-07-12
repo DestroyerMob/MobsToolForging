@@ -36,6 +36,9 @@ public final class ToolStackNames {
     }
 
     public static Component toolName(ToolTypeDefinition definition, ToolConstructionData construction) {
+        if (construction.treatment().filter(MaterialCatalog.NETHERITE::equals).isPresent()) {
+            return materialPrefix(MaterialCatalog.NETHERITE, titleCase(definition.id().getPath()));
+        }
         return construction.headBaseMaterial()
                 .map(baseMaterial -> materialPairPrefix(baseMaterial, construction.headMaterial(), titleCase(definition.id().getPath())))
                 .orElseGet(() -> toolName(definition, construction.headMaterial()));

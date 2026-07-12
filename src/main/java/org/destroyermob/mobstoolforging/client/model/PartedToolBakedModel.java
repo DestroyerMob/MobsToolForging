@@ -143,6 +143,22 @@ public final class PartedToolBakedModel implements BakedModel {
                         .map(ResolvedToolLayerSprite::sprite)
                         .orElse(resolvedLayers.getFirst().sprite());
             }
+            if (layer.masksHandleTexture()) {
+                TextureAtlasSprite mask = sprites.resolveHandleMask(layer).orElse(null);
+                if (mask == null || isMissing(mask)) {
+                    warnMissingLayer("masked handle missing shape mask", layer, material);
+                    if (layer.optional()) {
+                        continue;
+                    }
+                    return Optional.empty();
+                }
+                for (ResolvedToolLayerSprite resolvedLayer : resolvedLayers) {
+                    if (!isMissing(resolvedLayer.sprite())) {
+                        addLayer(layers, layer.z(), quadFactory.bakeMaskedLayer(layer.z(), resolvedLayer.sprite(), mask, resolvedLayer.color()));
+                    }
+                }
+                continue;
+            }
             for (ResolvedToolLayerSprite resolvedLayer : resolvedLayers) {
                 if (hasVisibleLayer && isMissing(resolvedLayer.sprite())) {
                     continue;

@@ -12,8 +12,8 @@ public class ToolmakersBenchBlock extends ToolWorkstationBlock {
     public static final MapCodec<ToolmakersBenchBlock> CODEC = simpleCodec(ToolmakersBenchBlock::new);
     private static final VoxelShape SHAPE = Shapes.or(
             Block.box(3.0, 0.0, 3.0, 13.0, 2.0, 13.0),
-            Block.box(6.0, 1.0, 6.0, 10.0, 10.0, 10.0),
-            Block.box(0.0, 10.0, 0.0, 16.0, 12.0, 16.0)
+            Block.box(6.0, 1.0, 6.0, 10.0, 11.0, 10.0),
+            Block.box(0.0, 11.0, 0.0, 16.0, 13.0, 16.0)
     ).optimize();
 
     public ToolmakersBenchBlock(BlockBehaviour.Properties properties) {

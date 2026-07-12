@@ -1,16 +1,16 @@
 {
   "tag": "mobstoolforging:heating_visuals/netherite",
   "priority": 120,
-  "colors": ["#160201", "#310402", "#570803", "#821305", "#ad2508", "#d7430d", "#ef6818", "#fb9230", "#ffbd5a", "#ffe39a", "#fff5d6"],
-  "visible_threshold": 0.14,
-  "color_curve_exponent": 1.42,
-  "surface_tint_strength": 0.32,
-  "emission_start": 0.2,
-  "emission_strength": 0.64,
-  "halo_start": 0.46,
-  "halo_alpha": 0.055,
-  "halo_base_scale": 1.014,
-  "halo_extra_scale": 0.01,
-  "light_start": 0.3,
-  "maximum_block_light": 12
+  "colors": ["#160201", "#310402", "#570803", "#821305", "#ad2508", "#d7430d", "#ef5a14", "#f9731d", "#ff8e2b", "#ffab43", "#ffc663"],
+  "visible_threshold": 0.1,
+  "color_curve_exponent": 1.2,
+  "surface_tint_strength": 0.5,
+  "emission_start": 0.14,
+  "emission_strength": 0.78,
+  "halo_start": 0.22,
+  "halo_alpha": 0.15,
+  "halo_base_scale": 1.045,
+  "halo_extra_scale": 0.035,
+  "light_start": 0.18,
+  "maximum_block_light": 14
 }

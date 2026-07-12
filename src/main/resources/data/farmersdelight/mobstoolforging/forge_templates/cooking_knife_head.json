@@ -1,0 +1,19 @@
+{
+  "tool_type": "farmersdelight:cooking_knife",
+  "part_type": "cooking_knife_head",
+  "required_materials": 1,
+  "required_hits": 3,
+  "translation_key": "forge_template.farmersdelight.cooking_knife_head",
+  "minimum_hammer_level": "stone",
+  "compatible_tool_types": [
+    "farmersdelight:cooking_knife"
+  ],
+  "pattern_station_enabled": true,
+  "pattern_station_paper_cost": 1,
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "farmersdelight"
+    }
+  ]
+}

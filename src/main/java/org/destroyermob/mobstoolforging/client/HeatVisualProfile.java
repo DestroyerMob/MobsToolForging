@@ -29,11 +29,11 @@ public record HeatVisualProfile(
 ) {
     private static final List<Integer> GENERIC_COLORS = List.of(
             0xFF240301, 0xFF5B0803, 0xFF991306, 0xFFD12A0B, 0xFFF24C14,
-            0xFFFF7625, 0xFFFFA440, 0xFFFFCB63, 0xFFFFE595, 0xFFFFF3CA, 0xFFFFFCF2
+            0xFFFF6520, 0xFFFF7D27, 0xFFFF962F, 0xFFFFAD3A, 0xFFFFC24E, 0xFFFFD46B
     );
     public static final HeatVisualProfile GENERIC = new HeatVisualProfile(
-            null, Integer.MIN_VALUE, GENERIC_COLORS, 0.10F, 1.28F, 0.48F,
-            0.14F, 0.72F, 0.34F, 0.065F, 1.016F, 0.012F, 0.22F, 13
+            null, Integer.MIN_VALUE, GENERIC_COLORS, 0.08F, 1.12F, 0.62F,
+            0.10F, 0.86F, 0.16F, 0.18F, 1.05F, 0.04F, 0.14F, 15
     );
 
     public HeatVisualProfile {

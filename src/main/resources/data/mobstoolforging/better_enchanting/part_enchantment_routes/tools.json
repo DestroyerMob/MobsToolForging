@@ -87,6 +87,19 @@
       ]
     },
     {
+      "item_tag": "farmersdelight:tools/knives",
+      "parts": [
+        {
+          "part_type": "cooking_knife_head",
+          "limit": 2
+        },
+        {
+          "item_tag": "mobstoolforging:parts/handle",
+          "limit": 1
+        }
+      ]
+    },
+    {
       "item": "mobstoolforging:modular_helmet",
       "parts": [
         {

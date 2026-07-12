@@ -68,6 +68,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.PICKAXE_HEAD, "Pickaxe Head");
         addItem(ModItems.AXE_HEAD, "Axe Head");
         addItem(ModItems.HOE_HEAD, "Hoe Head");
+        addItem(ModItems.COOKING_KNIFE_HEAD, "Cooking Knife Head");
         addItem(ModItems.HELMET_CHAINMAIL, "Helmet Base");
         addItem(ModItems.HELMET_PLATE, "Helmet Plate");
         addItem(ModItems.CHESTPLATE_CHAINMAIL, "Body Armour Base");
@@ -92,11 +93,13 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.mobstoolforging.material_pickaxe_head", "%s Pickaxe Head");
         add("item.mobstoolforging.material_axe_head", "%s Axe Head");
         add("item.mobstoolforging.material_hoe_head", "%s Hoe Head");
+        add("item.mobstoolforging.material_cooking_knife_head", "%s Cooking Knife Head");
         add("item.mobstoolforging.coated_material_sword_blade", "%s-%s Sword Blade");
         add("item.mobstoolforging.coated_material_shovel_head", "%s-%s Shovel Head");
         add("item.mobstoolforging.coated_material_pickaxe_head", "%s-%s Pickaxe Head");
         add("item.mobstoolforging.coated_material_axe_head", "%s-%s Axe Head");
         add("item.mobstoolforging.coated_material_hoe_head", "%s-%s Hoe Head");
+        add("item.mobstoolforging.coated_material_cooking_knife_head", "%s-%s Cooking Knife Head");
         add("item.mobstoolforging.material_helmet_chainmail", "%s Helmet Base");
         add("item.mobstoolforging.material_helmet_plate", "%s Helmet Plate");
         add("item.mobstoolforging.material_chestplate_chainmail", "%s Body Armour Base");
@@ -159,6 +162,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("jei.mobstoolforging.drying", "Drying");
         add("jei.mobstoolforging.world_assembly", "World Assembly");
         add("jei.mobstoolforging.world_assembly.side_view", "Place as shown (side view)");
+        add("jei.mobstoolforging.world_assembly.front_view", "Place as shown (front view)");
         add("jei.mobstoolforging.world_assembly.place_block", "Place this block in the world");
         add("jei.mobstoolforging.world_assembly.sneak_use", "Then sneak + use the hammer");
         add("book.mobstoolforging.name", "The Forgemaster's Guide");
@@ -232,6 +236,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("forge_template.mobstoolforging.smithing_hammer_head", "Smithing Hammer Head");
         add("forge_template.mobstoolforging.screwdriver_head", "Screwdriver Head");
         add("forge_template.mobstoolforging.gem_cutters_blade", "Gem Cutter's Blade");
+        add("forge_template.farmersdelight.cooking_knife_head", "Cooking Knife Head");
         add("forge_template.mobstoolforging.helmet_chainmail", "Helmet Base");
         add("forge_template.mobstoolforging.helmet_plate", "Helmet Plate");
         add("forge_template.mobstoolforging.chestplate_chainmail", "Body Armour Base");
@@ -246,6 +251,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("knapping_target.mobstoolforging.pickaxe_head", "Flint Pickaxe Head");
         add("knapping_target.mobstoolforging.axe_head", "Flint Axe Head");
         add("knapping_target.mobstoolforging.hoe_head", "Flint Hoe Head");
+        add("knapping_target.mobstoolforging.cooking_knife_head", "Flint Cooking Knife Head");
         add("message.mobstoolforging.select_template", "No pattern selected.");
         add("message.mobstoolforging.template_selected", "Selected %s.");
         add("message.mobstoolforging.template_cleared", "Template cleared.");
@@ -399,6 +405,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.crucible_contains_molten", "Contains: Molten %s (%s)");
         add("tooltip.mobstoolforging.crucible_heat", "Crucible Heat: %s%%");
         add("tooltip.mobstoolforging.traits", "Traits");
+        add("tooltip.mobstoolforging.enchantments", "Enchantments");
         add("tooltip.mobstoolforging.construction", "Construction");
         add("tooltip.mobstoolforging.none", "None");
         add("tooltip.mobstoolforging.part.head", "Head");

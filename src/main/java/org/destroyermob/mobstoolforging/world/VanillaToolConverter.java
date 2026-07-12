@@ -102,6 +102,18 @@ public final class VanillaToolConverter {
                     return Optional.of(new ToolConversion(definition, construction(definition, headMaterial, handleMaterial)));
                 }
             }
+            for (ResourceLocation treatment : definition.toolItemTreatments()) {
+                Optional<Item> candidate = definition.treatmentToolItem(treatment);
+                if (candidate.isPresent() && candidate.get() == item) {
+                    ResourceLocation baseMaterial = MaterialCatalog.NETHERITE.equals(treatment)
+                            ? MaterialCatalog.DIAMOND
+                            : MaterialCatalog.IRON;
+                    return Optional.of(new ToolConversion(
+                            definition,
+                            construction(definition, baseMaterial, handleMaterial, Optional.of(treatment))
+                    ));
+                }
+            }
             Optional<Item> defaultItem = definition.toolItem();
             if (defaultItem.isPresent() && defaultItem.get() == item) {
                 return Optional.of(new ToolConversion(definition, construction(definition, MaterialCatalog.IRON, handleMaterial)));

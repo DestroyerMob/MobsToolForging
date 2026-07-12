@@ -21,6 +21,7 @@ public record WorldAssemblyJeiRecipe(
 
     public enum Kind {
         ANVIL,
-        LEATHER_STATION
+        LEATHER_STATION,
+        LAPIDARY_TABLE
     }
 }

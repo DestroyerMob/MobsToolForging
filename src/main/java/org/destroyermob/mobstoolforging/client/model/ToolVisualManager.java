@@ -15,6 +15,10 @@ public final class ToolVisualManager {
     }
 
     public static ToolVisualDefinition resolve(ResourceLocation visualId, ToolTypeDefinition definition) {
+        return resolve(visualId, definition.primaryPartType());
+    }
+
+    public static ToolVisualDefinition resolve(ResourceLocation visualId, String fallbackPartType) {
         ResourceLocation resourceId = ResourceLocation.fromNamespaceAndPath(
                 visualId.getNamespace(),
                 "tooling/tool_visuals/" + visualId.getPath() + ".json"
@@ -25,9 +29,9 @@ public final class ToolVisualManager {
                         return ToolVisualDefinition.fromJson(visualId, GsonHelper.parse(reader));
                     } catch (IOException | JsonParseException exception) {
                         MobsToolForging.LOGGER.warn("Failed to load tool visual definition {}", visualId, exception);
-                        return ToolVisualDefinition.fallback(visualId, definition.primaryPartType());
+                        return ToolVisualDefinition.fallback(visualId, fallbackPartType);
                     }
                 })
-                .orElseGet(() -> ToolVisualDefinition.fallback(visualId, definition.primaryPartType()));
+                .orElseGet(() -> ToolVisualDefinition.fallback(visualId, fallbackPartType));
     }
 }
