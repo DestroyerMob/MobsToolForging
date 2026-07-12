@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StonecutterBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -19,10 +20,12 @@ import org.destroyermob.mobstoolforging.world.FoundryForgeBlock;
 import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.KnappingFlintBlock;
+import org.destroyermob.mobstoolforging.world.LavaHeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.LapidaryTableBlock;
 import org.destroyermob.mobstoolforging.world.LeatherStationBlock;
 import org.destroyermob.mobstoolforging.world.PatternCreationStationBlock;
 import org.destroyermob.mobstoolforging.world.PatternRackBlock;
+import org.destroyermob.mobstoolforging.world.SawmillBlock;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlock;
 import org.destroyermob.mobstoolforging.world.ToolmakersBenchBlock;
 
@@ -40,6 +43,34 @@ public final class ModBlocks {
     public static final DeferredBlock<LapidaryTableBlock> LAPIDARY_TABLE = BLOCKS.register(
             "lapidary_table",
             () -> new LapidaryTableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONECUTTER).noOcclusion())
+    );
+    public static final DeferredBlock<StonecutterBlock> DIAMOND_SAW = BLOCKS.register(
+            "diamond_saw",
+            () -> new StonecutterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONECUTTER).noOcclusion())
+    );
+    public static final DeferredBlock<SawmillBlock> SAWMILL = registerSawmill("sawmill", Blocks.OAK_PLANKS);
+    public static final DeferredBlock<SawmillBlock> SPRUCE_SAWMILL = registerSawmill("spruce_sawmill", Blocks.SPRUCE_PLANKS);
+    public static final DeferredBlock<SawmillBlock> BIRCH_SAWMILL = registerSawmill("birch_sawmill", Blocks.BIRCH_PLANKS);
+    public static final DeferredBlock<SawmillBlock> JUNGLE_SAWMILL = registerSawmill("jungle_sawmill", Blocks.JUNGLE_PLANKS);
+    public static final DeferredBlock<SawmillBlock> ACACIA_SAWMILL = registerSawmill("acacia_sawmill", Blocks.ACACIA_PLANKS);
+    public static final DeferredBlock<SawmillBlock> DARK_OAK_SAWMILL = registerSawmill("dark_oak_sawmill", Blocks.DARK_OAK_PLANKS);
+    public static final DeferredBlock<SawmillBlock> MANGROVE_SAWMILL = registerSawmill("mangrove_sawmill", Blocks.MANGROVE_PLANKS);
+    public static final DeferredBlock<SawmillBlock> CHERRY_SAWMILL = registerSawmill("cherry_sawmill", Blocks.CHERRY_PLANKS);
+    public static final DeferredBlock<SawmillBlock> BAMBOO_SAWMILL = registerSawmill("bamboo_sawmill", Blocks.BAMBOO_PLANKS);
+    public static final DeferredBlock<SawmillBlock> CRIMSON_SAWMILL = registerSawmill("crimson_sawmill", Blocks.CRIMSON_PLANKS);
+    public static final DeferredBlock<SawmillBlock> WARPED_SAWMILL = registerSawmill("warped_sawmill", Blocks.WARPED_PLANKS);
+    public static final List<SawmillVariant> SAWMILL_VARIANTS = List.of(
+            sawmillVariant("sawmill", "Oak Sawmill", SAWMILL, Blocks.OAK_PLANKS, Blocks.OAK_LOG, "oak_log", "oak_planks"),
+            sawmillVariant("spruce_sawmill", "Spruce Sawmill", SPRUCE_SAWMILL, Blocks.SPRUCE_PLANKS, Blocks.SPRUCE_LOG, "spruce_log", "spruce_planks"),
+            sawmillVariant("birch_sawmill", "Birch Sawmill", BIRCH_SAWMILL, Blocks.BIRCH_PLANKS, Blocks.BIRCH_LOG, "birch_log", "birch_planks"),
+            sawmillVariant("jungle_sawmill", "Jungle Sawmill", JUNGLE_SAWMILL, Blocks.JUNGLE_PLANKS, Blocks.JUNGLE_LOG, "jungle_log", "jungle_planks"),
+            sawmillVariant("acacia_sawmill", "Acacia Sawmill", ACACIA_SAWMILL, Blocks.ACACIA_PLANKS, Blocks.ACACIA_LOG, "acacia_log", "acacia_planks"),
+            sawmillVariant("dark_oak_sawmill", "Dark Oak Sawmill", DARK_OAK_SAWMILL, Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_LOG, "dark_oak_log", "dark_oak_planks"),
+            sawmillVariant("mangrove_sawmill", "Mangrove Sawmill", MANGROVE_SAWMILL, Blocks.MANGROVE_PLANKS, Blocks.MANGROVE_LOG, "mangrove_log", "mangrove_planks"),
+            sawmillVariant("cherry_sawmill", "Cherry Sawmill", CHERRY_SAWMILL, Blocks.CHERRY_PLANKS, Blocks.CHERRY_LOG, "cherry_log", "cherry_planks"),
+            sawmillVariant("bamboo_sawmill", "Bamboo Sawmill", BAMBOO_SAWMILL, Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_BLOCK, "bamboo_block", "bamboo_planks"),
+            sawmillVariant("crimson_sawmill", "Crimson Sawmill", CRIMSON_SAWMILL, Blocks.CRIMSON_PLANKS, Blocks.CRIMSON_STEM, "crimson_stem", "crimson_planks"),
+            sawmillVariant("warped_sawmill", "Warped Sawmill", WARPED_SAWMILL, Blocks.WARPED_PLANKS, Blocks.WARPED_STEM, "warped_stem", "warped_planks")
     );
     public static final DeferredBlock<PatternCreationStationBlock> PATTERN_CREATION_STATION = BLOCKS.register(
             "pattern_creation_station",
@@ -148,6 +179,10 @@ public final class ModBlocks {
             "heating_forge",
             () -> new HeatingForgeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).noOcclusion())
     );
+    public static final DeferredBlock<LavaHeatingForgeBlock> LAVA_HEATING_FORGE = BLOCKS.register(
+            "lava_heating_forge",
+            () -> new LavaHeatingForgeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).noOcclusion())
+    );
     public static final DeferredBlock<CrucibleBlock> CRUCIBLE = BLOCKS.register(
             "crucible",
             () -> new CrucibleBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.ANVIL).noOcclusion())
@@ -193,6 +228,13 @@ public final class ModBlocks {
         );
     }
 
+    private static DeferredBlock<SawmillBlock> registerSawmill(String id, Block baseBlock) {
+        return BLOCKS.register(
+                id,
+                () -> new SawmillBlock(BlockBehaviour.Properties.ofFullCopy(baseBlock).strength(1.5F, 3.0F).noOcclusion())
+        );
+    }
+
     private static DeferredBlock<DryingRackBlock> registerDryingRack(String id, Block baseBlock) {
         return BLOCKS.register(
                 id,
@@ -234,6 +276,18 @@ public final class ModBlocks {
         );
     }
 
+    private static SawmillVariant sawmillVariant(String id, String displayName, DeferredBlock<SawmillBlock> block, Block recipePlanks, Block recipeLog, String logTexture, String planksTexture) {
+        return new SawmillVariant(
+                id,
+                displayName,
+                block,
+                recipePlanks,
+                recipeLog,
+                ResourceLocation.withDefaultNamespace("block/" + logTexture),
+                ResourceLocation.withDefaultNamespace("block/" + planksTexture)
+        );
+    }
+
     private static DryingRackVariant dryingRackVariant(String id, String displayName, DeferredBlock<DryingRackBlock> block, Block recipeSlab, String planksTexture) {
         return new DryingRackVariant(
                 id,
@@ -262,6 +316,12 @@ public final class ModBlocks {
                 .toArray(Block[]::new);
     }
 
+    public static Block[] sawmillBlocks() {
+        return SAWMILL_VARIANTS.stream()
+                .map(variant -> variant.block().get())
+                .toArray(Block[]::new);
+    }
+
     public static Block[] dryingRackBlocks() {
         return DRYING_RACK_VARIANTS.stream()
                 .map(variant -> variant.block().get())
@@ -273,6 +333,7 @@ public final class ModBlocks {
         blocks.add(TOOL_FORGE.get());
         blocks.add(CRUDE_ANVIL.get());
         blocks.add(LAPIDARY_TABLE.get());
+        SAWMILL_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         TOOLMAKER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         LEATHER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         return blocks.toArray(Block[]::new);
@@ -306,6 +367,17 @@ public final class ModBlocks {
             String id,
             String displayName,
             DeferredBlock<LeatherStationBlock> block,
+            Block recipePlanks,
+            Block recipeLog,
+            ResourceLocation logTexture,
+            ResourceLocation planksTexture
+    ) {
+    }
+
+    public record SawmillVariant(
+            String id,
+            String displayName,
+            DeferredBlock<SawmillBlock> block,
             Block recipePlanks,
             Block recipeLog,
             ResourceLocation logTexture,

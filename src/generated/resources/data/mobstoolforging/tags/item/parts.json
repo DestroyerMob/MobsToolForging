@@ -2,6 +2,8 @@
   "values": [
     "#mobstoolforging:parts/heads",
     "#mobstoolforging:parts/handle",
-    "#mobstoolforging:parts/guards"
+    "#mobstoolforging:parts/guards",
+    "mobstoolforging:crossbow_body",
+    "mobstoolforging:crossbow_limbs"
   ]
 }

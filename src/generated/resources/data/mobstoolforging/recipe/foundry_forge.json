@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "H": {
-      "item": "mobstoolforging:heating_forge"
+      "item": "mobstoolforging:lava_heating_forge"
     },
     "L": {
       "item": "minecraft:lava_bucket"

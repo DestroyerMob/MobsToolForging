@@ -9,19 +9,21 @@ public record WorldAssemblyJeiRecipe(
         Kind kind,
         List<ItemStack> lowerBlocks,
         List<ItemStack> upperBlocks,
-        List<ItemStack> hammers,
+        List<ItemStack> activationItems,
         ItemStack output
 ) {
     public WorldAssemblyJeiRecipe {
         lowerBlocks = List.copyOf(lowerBlocks);
         upperBlocks = List.copyOf(upperBlocks);
-        hammers = List.copyOf(hammers);
+        activationItems = List.copyOf(activationItems);
         output = output.copy();
     }
 
     public enum Kind {
         ANVIL,
+        SAWMILL,
         LEATHER_STATION,
-        LAPIDARY_TABLE
+        LAPIDARY_TABLE,
+        DIAMOND_SAW
     }
 }

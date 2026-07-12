@@ -35,6 +35,12 @@ public final class ToolmakerBenchAssembly {
             return true;
         }
         ToolPartData partData = stack.get(ModDataComponents.TOOL_PART.get());
+        if (CrossbowAssembly.isCrossbowAssemblyComponent(stack)) {
+            return true;
+        }
+        if (SmithingHammerAssembly.isHeadIngredient(stack)) {
+            return true;
+        }
         if (partData != null && ToolTypeRegistry.toolTypes().stream().anyMatch(definition -> isKnownAssemblyPart(definition, stack, partData))) {
             return true;
         }
@@ -51,6 +57,14 @@ public final class ToolmakerBenchAssembly {
     public static ItemStack assemble(List<ItemStack> stacks, HolderLookup.Provider registries) {
         if (stacks.isEmpty() || stacks.stream().anyMatch(ToolmakerBenchAssembly::isFinishedTool)) {
             return ItemStack.EMPTY;
+        }
+        ItemStack hammer = SmithingHammerAssembly.assemble(stacks);
+        if (!hammer.isEmpty()) {
+            return hammer;
+        }
+        ItemStack crossbow = CrossbowAssembly.assemble(stacks);
+        if (!crossbow.isEmpty()) {
+            return crossbow;
         }
         ItemStack armor = assembleArmor(stacks, registries);
         if (!armor.isEmpty()) {
@@ -70,6 +84,7 @@ public final class ToolmakerBenchAssembly {
             if (ToolAssemblyEnchantments.mergeOnto(output, parts.enchantmentSources(), registries)) {
                 ToolExternalComponents.copyPrimaryHeadComponentsToTool(parts.part(), output);
                 output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(stacks));
+                CompositeAffixCompatibility.syncCompatibilityMirror(output);
                 ToolAssemblyEnchantments.syncRoutedToolEnchantments(output, registries);
                 return output;
             }
@@ -78,6 +93,14 @@ public final class ToolmakerBenchAssembly {
     }
 
     public static Optional<List<ItemStack>> disassemble(ItemStack stack) {
+        Optional<List<ItemStack>> hammerParts = SmithingHammerAssembly.disassemble(stack);
+        if (hammerParts.isPresent()) {
+            return hammerParts;
+        }
+        Optional<List<ItemStack>> crossbowParts = CrossbowAssembly.disassemble(stack);
+        if (crossbowParts.isPresent()) {
+            return crossbowParts;
+        }
         ArmorConstructionData armorConstruction = stack.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
         if (armorConstruction != null) {
             return disassembleArmor(stack, armorConstruction);
@@ -126,6 +149,12 @@ public final class ToolmakerBenchAssembly {
     }
 
     public static boolean isFinishedTool(ItemStack stack) {
+        if (SmithingHammerAssembly.isHammer(stack)) {
+            return true;
+        }
+        if (CrossbowAssembly.isCrossbow(stack.get(ModDataComponents.TOOL_CONSTRUCTION.get()))) {
+            return true;
+        }
         ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
         if (construction != null && ToolTypeRegistry.toolType(construction.toolType()).isPresent()) {
             return true;
@@ -148,6 +177,7 @@ public final class ToolmakerBenchAssembly {
         }
         ArmorExternalComponents.copyArmorPartComponentsToArmor(parts.base(), parts.plate(), output);
         output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts.stacks()));
+        CompositeAffixCompatibility.syncCompatibilityMirror(output);
         ToolAssemblyEnchantments.syncRoutedToolEnchantments(output, registries);
         return output;
     }

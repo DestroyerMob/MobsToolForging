@@ -19,6 +19,7 @@ import org.destroyermob.mobstoolforging.world.HeatingRecipe;
 import org.destroyermob.mobstoolforging.world.HeatingRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
+import org.destroyermob.mobstoolforging.world.LavaHeatingForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.HeatingSource;
 import org.destroyermob.mobstoolforging.world.PatternRackBlock;
 import org.destroyermob.mobstoolforging.world.PatternRackBlockEntity;
@@ -132,7 +133,16 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
                 return;
             }
             tooltip.add(Component.translatable(forge.isLit() ? "jade.mobstoolforging.lit" : "jade.mobstoolforging.unlit").withStyle(forge.isLit() ? ChatFormatting.GOLD : ChatFormatting.DARK_GRAY));
-            if (forge.hasFuel()) {
+            if (forge instanceof LavaHeatingForgeBlockEntity fluidForge) {
+                if (!fluidForge.fluidStack().isEmpty()) {
+                    tooltip.add(Component.translatable(
+                            "jade.mobstoolforging.heating_fluid",
+                            fluidForge.fluidStack().getHoverName(),
+                            fluidForge.fluidAmount(),
+                            fluidForge.tankCapacity()
+                    ).withStyle(ChatFormatting.GRAY));
+                }
+            } else if (forge.hasFuel()) {
                 tooltip.add(line("jade.mobstoolforging.fuel", forge.fuelStack().getHoverName()));
             }
             for (int slot = 0; slot < forge.workpieceSlots(); slot++) {

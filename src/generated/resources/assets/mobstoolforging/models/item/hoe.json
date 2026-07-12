@@ -14,6 +14,6 @@
     "layer_hoe_treatment_netherite": "mobstoolforging:source/tool_parts/netherite/netherite_hoe_treatment_tool",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_hoe_head_tool"
   },
-  "tool": "hoe",
+  "tool": "mobstoolforging:hoe",
   "visual": "mobstoolforging:hoe"
 }

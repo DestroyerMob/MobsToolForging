@@ -20,6 +20,6 @@
     "template_mattock_tool_axe": "mobstoolforging:tool_templates/mattock/mattock_tool_axe",
     "template_mattock_tool_hoe": "mobstoolforging:tool_templates/mattock/mattock_tool_hoe"
   },
-  "tool": "mattock",
+  "tool": "mobstoolforging:mattock",
   "visual": "mobstoolforging:mattock"
 }

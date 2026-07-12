@@ -16,6 +16,7 @@ import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -29,6 +30,7 @@ import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.integration.everycomp.CompatWorkstationRegistry;
 import org.destroyermob.mobstoolforging.world.ArmorForgeAttachment;
+import org.destroyermob.mobstoolforging.world.CrossbowAssembly;
 import org.destroyermob.mobstoolforging.world.DryingRecipe;
 import org.destroyermob.mobstoolforging.world.DryingRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
@@ -39,6 +41,7 @@ import org.destroyermob.mobstoolforging.world.LapidaryAbrasives;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCategory;
 import org.destroyermob.mobstoolforging.world.SmithingHammerLevel;
+import org.destroyermob.mobstoolforging.world.SmithingHammerAssembly;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipe;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
@@ -114,10 +117,27 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     }
 
     @Override
+    public void onRuntimeAvailable(IJeiRuntime runtime) {
+        runtime.getIngredientManager().removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, List.of(
+                new ItemStack(ModItems.SMITHING_HAMMER_HEAD.get()),
+                new ItemStack(ModItems.SMITHING_HAMMER_HEAD_PATTERN.get()),
+                new ItemStack(ModItems.SCREWDRIVER.get()),
+                new ItemStack(ModItems.SCREWDRIVER_HEAD.get()),
+                new ItemStack(ModItems.SCREWDRIVER_HEAD_PATTERN.get()),
+                new ItemStack(ModItems.GEM_CUTTERS_KNIFE.get()),
+                new ItemStack(ModItems.GEM_CUTTERS_BLADE.get()),
+                new ItemStack(ModItems.GEM_CUTTERS_BLADE_PATTERN.get())
+        ));
+    }
+
+    @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(ModItems.CRUDE_ANVIL.get(), FORGE_SHAPING);
         registration.addRecipeCatalyst(ModItems.TOOL_FORGE.get(), FORGE_SHAPING, STATION_WORK);
         registration.addRecipeCatalyst(ModItems.LAPIDARY_TABLE.get(), FORGE_SHAPING, LAPIDARY_COATING, STATION_WORK);
+        ModItems.SAWMILL_ITEMS.forEach(item -> registration.addRecipeCatalyst(item.get(), STATION_WORK));
+        CompatWorkstationRegistry.items(CompatWorkstationRegistry.Kind.SAWMILL)
+                .forEach(item -> registration.addRecipeCatalyst(item, STATION_WORK));
         ModItems.LEATHER_STATION_ITEMS.forEach(item -> registration.addRecipeCatalyst(item.get(), STATION_WORK));
         CompatWorkstationRegistry.items(CompatWorkstationRegistry.Kind.LEATHER_STATION)
                 .forEach(item -> registration.addRecipeCatalyst(item, STATION_WORK));
@@ -126,6 +146,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 .forEach(item -> registration.addRecipeCatalyst(item, TOOLMAKER_ASSEMBLY));
         registration.addRecipeCatalyst(ModItems.PATTERN_CREATION_STATION.get(), PATTERN_CREATION);
         registration.addRecipeCatalyst(ModItems.HEATING_FORGE.get(), HEATING);
+        registration.addRecipeCatalyst(ModItems.LAVA_HEATING_FORGE.get(), HEATING);
         registration.addRecipeCatalyst(Items.CAMPFIRE, HEATING);
         registration.addRecipeCatalyst(Items.SOUL_CAMPFIRE, HEATING);
         ModItems.DRYING_RACK_ITEMS.forEach(item -> registration.addRecipeCatalyst(item.get(), DRYING));
@@ -233,6 +254,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                     WorkstationKind.TOOL_FORGE,
                     Optional.empty(),
                     StationWorkRecipe.Input.item(ResourceLocation.withDefaultNamespace("iron_ingot")),
+                    Optional.empty(),
                     new ItemStack(ModItems.DIAMOND_POWDER.get(), 4),
                     4,
                     SmithingHammerLevel.IRON.level()
@@ -294,7 +316,11 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     private static List<ToolmakerAssemblyJeiRecipe> toolmakerAssemblyRecipes() {
         List<ToolmakerAssemblyJeiRecipe> recipes = new ArrayList<>();
+        addHammerAssemblyRecipes(recipes);
         for (var definition : ToolTypeRegistry.toolTypes()) {
+            if (CrossbowAssembly.TOOL_TYPE.equals(definition.id())) {
+                continue;
+            }
             for (ResourceLocation materialId : MaterialCatalog.starterMaterialIds()) {
                 ItemStack primary = definition.createPart(definition.primaryPartType(), materialId);
                 if (primary.isEmpty()) {
@@ -339,8 +365,70 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 }
             }
         }
+        addCrossbowAssemblyRecipes(recipes);
         addArmorAssemblyRecipes(recipes);
         return recipes;
+    }
+
+    private static void addHammerAssemblyRecipes(List<ToolmakerAssemblyJeiRecipe> recipes) {
+        ItemStack handle = new ItemStack(Items.STICK);
+        ItemStack ironBlock = new ItemStack(Items.IRON_BLOCK);
+        ItemStack ironHammer = SmithingHammerAssembly.assemble(List.of(ironBlock, handle));
+        if (!ironHammer.isEmpty()) {
+            recipes.add(new ToolmakerAssemblyJeiRecipe(
+                    recipeId("toolmaker_assembly/hammer/iron"),
+                    List.of(ironBlock, handle),
+                    ironHammer
+            ));
+        }
+        BuiltInRegistries.ITEM.getTagOrEmpty(org.destroyermob.mobstoolforging.registry.ModTags.Items.HAMMER_STONES)
+                .forEach(holder -> {
+                    ItemStack stone = new ItemStack(holder.value());
+                    ItemStack stoneHammer = SmithingHammerAssembly.assemble(List.of(stone, handle));
+                    if (!stoneHammer.isEmpty()) {
+                        ResourceLocation stoneId = BuiltInRegistries.ITEM.getKey(holder.value());
+                        recipes.add(new ToolmakerAssemblyJeiRecipe(
+                                recipeId("toolmaker_assembly/hammer/stone/" + idPath(stoneId)),
+                                List.of(stone, handle),
+                                stoneHammer
+                        ));
+                    }
+                });
+    }
+
+    private static void addCrossbowAssemblyRecipes(List<ToolmakerAssemblyJeiRecipe> recipes) {
+        ItemStack body = ModItems.CROSSBOW_BODY.get().createPart(MaterialCatalog.WOOD);
+        if (body.isEmpty()) {
+            return;
+        }
+        List<ItemStack> strings = List.of(new ItemStack(Items.STRING), new ItemStack(ModItems.PLANT_FIBER.get()));
+        List<ResourceLocation> limbMaterials = List.of(
+                MaterialCatalog.OAK,
+                MaterialCatalog.COPPER,
+                MaterialCatalog.IRON,
+                MaterialCatalog.GOLD,
+                MaterialCatalog.NETHERITE,
+                MaterialCatalog.DIAMOND,
+                MaterialCatalog.EMERALD,
+                MaterialCatalog.RUBY,
+                MaterialCatalog.SAPPHIRE
+        );
+        for (ResourceLocation limbMaterial : limbMaterials) {
+            ItemStack limbs = ModItems.CROSSBOW_LIMBS.get().createPart(limbMaterial);
+            if (limbs.isEmpty()) {
+                continue;
+            }
+            for (ItemStack string : strings) {
+                ItemStack output = CrossbowAssembly.assemble(List.of(body, limbs, string));
+                if (!output.isEmpty()) {
+                    recipes.add(new ToolmakerAssemblyJeiRecipe(
+                            recipeId("toolmaker_assembly/crossbow/" + idPath(limbMaterial) + "/" + idPath(BuiltInRegistries.ITEM.getKey(string.getItem()))),
+                            List.of(body.copy(), limbs.copy(), string.copy()),
+                            output
+                    ));
+                }
+            }
+        }
     }
 
     private static void addArmorAssemblyRecipes(List<ToolmakerAssemblyJeiRecipe> recipes) {
@@ -424,13 +512,40 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         }
 
         recipes.add(new WorldAssemblyJeiRecipe(
+                recipeId("world_assembly/diamond_saw"),
+                WorldAssemblyJeiRecipe.Kind.DIAMOND_SAW,
+                List.of(new ItemStack(Items.STONECUTTER)),
+                List.of(),
+                List.of(abrasiveFor(LapidaryAbrasives.DIAMOND_TIER)),
+                new ItemStack(ModBlocks.DIAMOND_SAW.get())
+        ));
+
+        recipes.add(new WorldAssemblyJeiRecipe(
                 recipeId("world_assembly/lapidary_table"),
                 WorldAssemblyJeiRecipe.Kind.LAPIDARY_TABLE,
                 List.of(new ItemStack(Items.IRON_BLOCK), new ItemStack(Items.IRON_BLOCK)),
-                List.of(new ItemStack(Items.DIAMOND_BLOCK), new ItemStack(Items.LAPIS_BLOCK)),
+                List.of(new ItemStack(ModBlocks.DIAMOND_SAW.get()), new ItemStack(Items.LAPIS_BLOCK)),
                 hammers,
                 new ItemStack(ModBlocks.LAPIDARY_TABLE.get())
         ));
+
+        ModBlocks.SAWMILL_VARIANTS.forEach(variant -> recipes.add(sawmillAssembly(
+                recipeId("world_assembly/sawmill/" + variant.id()),
+                variant.recipePlanks(),
+                variant.recipeLog(),
+                variant.block().get(),
+                hammers
+        )));
+        CompatWorkstationRegistry.sawmills().forEach(variant -> {
+            ResourceLocation sawmillId = BuiltInRegistries.BLOCK.getKey(variant.sawmill());
+            recipes.add(sawmillAssembly(
+                    recipeId("world_assembly/sawmill/" + idPath(sawmillId)),
+                    variant.planks(),
+                    variant.log(),
+                    variant.sawmill(),
+                    hammers
+            ));
+        });
 
         ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> recipes.add(leatherStationAssembly(
                 recipeId("world_assembly/leather_station/" + variant.id()),
@@ -464,6 +579,23 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 WorldAssemblyJeiRecipe.Kind.LEATHER_STATION,
                 List.of(new ItemStack(planks)),
                 List.of(new ItemStack(log)),
+                hammers,
+                new ItemStack(output)
+        );
+    }
+
+    private static WorldAssemblyJeiRecipe sawmillAssembly(
+            ResourceLocation id,
+            net.minecraft.world.level.block.Block planks,
+            net.minecraft.world.level.block.Block log,
+            net.minecraft.world.level.block.Block output,
+            List<ItemStack> hammers
+    ) {
+        return new WorldAssemblyJeiRecipe(
+                id,
+                WorldAssemblyJeiRecipe.Kind.SAWMILL,
+                List.of(new ItemStack(planks)),
+                List.of(new ItemStack(Items.STONECUTTER), new ItemStack(log)),
                 hammers,
                 new ItemStack(output)
         );
@@ -563,12 +695,13 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         if (inputs.isEmpty()) {
             return Optional.empty();
         }
+        List<ItemStack> secondaryInputs = recipe.secondaryInput().map(MobsToolForgingJeiPlugin::inputStacks).orElseGet(List::of);
         return Optional.of(new StationWorkJeiRecipe(
                 recipe.id(),
                 recipe.workstationKind(),
                 stationFor(recipe.workstationKind()),
                 inputs,
-                ItemStack.EMPTY,
+                secondaryInputs,
                 workToolFor(recipe.workstationKind(), recipe.minimumHammerLevel()),
                 recipe.outputCopy(),
                 recipe.requiredHits(),
@@ -656,6 +789,9 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         if (workstation == WorkstationKind.LAPIDARY_TABLE) {
             return new ItemStack(ModItems.LAPIDARY_TABLE.get());
         }
+        if (workstation == WorkstationKind.SAWMILL) {
+            return new ItemStack(ModItems.SAWMILL.get());
+        }
         if (workstation == WorkstationKind.CRUDE_ANVIL) {
             return new ItemStack(ModItems.CRUDE_ANVIL.get());
         }
@@ -679,7 +815,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     }
 
     private static ItemStack workToolFor(WorkstationKind workstation, int level) {
-        return workstation == WorkstationKind.LAPIDARY_TABLE ? new ItemStack(ModItems.GEM_CUTTERS_KNIFE.get()) : hammerFor(level);
+        return hammerFor(level);
     }
 
     private static ItemStack hammerFor(int level) {

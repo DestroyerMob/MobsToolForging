@@ -31,6 +31,7 @@ import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.ArmorVisualKey;
+import org.destroyermob.mobstoolforging.world.CrossbowAssembly;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
@@ -46,6 +47,7 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
     private final BakedModel fallback;
     private final PartedToolQuadFactory quadFactory = new PartedToolQuadFactory(BlockModelRotation.X0_Y0);
     private final Map<ToolVisualKey, BakedModel> toolCache = new ConcurrentHashMap<>();
+    private final Map<ToolVisualKey, ComponentCrossbowBakedModel> crossbowCache = new ConcurrentHashMap<>();
     private final Map<PartKey, BakedModel> partCache = new ConcurrentHashMap<>();
     private final Map<ArmorPartKey, BakedModel> armorPartCache = new ConcurrentHashMap<>();
     private final Map<ArmorVisualKey, BakedModel> armorCache = new ConcurrentHashMap<>();
@@ -60,6 +62,10 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
                 if (toolKey.isPresent()) {
                     ToolTypeDefinition definition = ToolTypeRegistry.toolType(toolKey.get().toolType()).orElse(null);
                     if (definition != null) {
+                        if (CrossbowAssembly.TOOL_TYPE.equals(definition.id())) {
+                            return crossbowCache.computeIfAbsent(toolKey.get(), ignored -> new ComponentCrossbowBakedModel(fallback))
+                                    .resolve(toolKey.get(), stack, entity);
+                        }
                         return toolCache.computeIfAbsent(toolKey.get(), key -> composeTool(definition, key));
                     }
                     warnOnce("missing_tool_type|" + toolKey.get().toolType(), "Cannot render MTF tool stack because tool type {} is not loaded on the client.", toolKey.get().toolType());
@@ -155,6 +161,23 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         TextureAtlasSprite particle = null;
 
         for (ToolVisualLayer layer : visual.layers()) {
+            if (layer.materialFrom().isEmpty()) {
+                Optional<ResourceLocation> texture = large
+                        ? layer.largeTemplateId().or(() -> layer.templateId(false))
+                        : layer.templateId(false);
+                TextureAtlasSprite staticSprite = texture.map(this::sprite).orElseGet(() -> sprite(MissingTextureAtlasSprite.getLocation()));
+                if (isMissing(staticSprite)) {
+                    warnMissingLayer("required static layer missing sprite", visual, layer, Optional.empty(), texture.orElse(null));
+                    if (layer.optional()) {
+                        continue;
+                    }
+                }
+                addLayer(layers, layer.z(), quadFactory.bakeLayer(layer.z(), staticSprite, 0xFFFFFFFF));
+                if (particle == null) {
+                    particle = staticSprite;
+                }
+                continue;
+            }
             Optional<ResourceLocation> material = materialFor(key, layer);
             if (material.isEmpty()) {
                 if (layer.optional()) {
@@ -334,6 +357,11 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
     }
 
     private ResolvedToolLayerSprite resolvePartLayer(ToolTypeDefinition definition, ToolVisualLayer layer, String partType, ResourceLocation material) {
+        if (layer.materialFrom().isEmpty()) {
+            return layer.partTemplateId()
+                    .map(texture -> ResolvedToolLayerSprite.exact(sprite(texture), texture))
+                    .orElseGet(this::missingLayer);
+        }
         if (layer.prefersTemplateFallback()) {
             Optional<ResolvedToolLayerSprite> template = resolveTemplateFallback(layer, material, true);
             if (template.isPresent()) {

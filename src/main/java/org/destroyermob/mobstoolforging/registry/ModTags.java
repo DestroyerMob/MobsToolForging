@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 
 public final class ModTags {
@@ -59,6 +60,8 @@ public final class ModTags {
         public static final TagKey<Item> LAPIDARY_ABRASIVES = itemTag("lapidary_abrasives");
         public static final TagKey<Item> LAPIDARY_ABRASIVES_DIAMOND = itemTag("lapidary_abrasives/diamond");
         public static final TagKey<Item> KNAPPING_TOOLS = itemTag("knapping_tools");
+        public static final TagKey<Item> HAMMER_STONES = itemTag("hammer_stones");
+        public static final TagKey<Item> HIDDEN_FROM_RECIPE_VIEWERS = commonItemTag("hidden_from_recipe_viewers");
 
         private Items() {
         }
@@ -73,6 +76,16 @@ public final class ModTags {
 
         private static TagKey<Item> forgeItemTag(String path) {
             return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("forge", path));
+        }
+    }
+
+    public static final class Fluids {
+        public static final TagKey<Fluid> HEATING_FLUIDS = TagKey.create(
+                Registries.FLUID,
+                ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "heating_fluids")
+        );
+
+        private Fluids() {
         }
     }
 

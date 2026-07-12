@@ -14,6 +14,6 @@
     "layer_handle_oak": "mobstoolforging:source/tool_parts/stick/stick_axe_handle_tool",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_axe_head_tool"
   },
-  "tool": "axe",
+  "tool": "mobstoolforging:axe",
   "visual": "mobstoolforging:axe"
 }

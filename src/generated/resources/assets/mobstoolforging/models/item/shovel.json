@@ -17,6 +17,6 @@
     "layer_shovel_treatment_netherite": "mobstoolforging:source/tool_parts/netherite/netherite_shovel_treatment_tool",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_shovel_head_tool"
   },
-  "tool": "shovel",
+  "tool": "mobstoolforging:shovel",
   "visual": "mobstoolforging:shovel"
 }

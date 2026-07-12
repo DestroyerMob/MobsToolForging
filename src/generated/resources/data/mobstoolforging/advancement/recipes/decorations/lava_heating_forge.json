@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_gem_cutters_blade": {
+    "has_heating_forge": {
       "conditions": {
         "items": [
           {
-            "items": "mobstoolforging:gem_cutters_blade"
+            "items": "mobstoolforging:heating_forge"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "mobstoolforging:gem_cutters_knife"
+        "recipe": "mobstoolforging:lava_heating_forge"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_gem_cutters_blade"
+      "has_heating_forge"
     ]
   ],
   "rewards": {
     "recipes": [
-      "mobstoolforging:gem_cutters_knife"
+      "mobstoolforging:lava_heating_forge"
     ]
   }
 }

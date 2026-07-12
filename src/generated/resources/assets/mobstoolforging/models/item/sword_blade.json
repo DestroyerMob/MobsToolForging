@@ -12,6 +12,6 @@
     "layer_sword_blade_iron": "mobstoolforging:source/tool_parts/iron/iron_sword_blade_part",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_sword_blade_part"
   },
-  "tool": "sword",
+  "tool": "mobstoolforging:sword",
   "visual": "mobstoolforging:sword"
 }

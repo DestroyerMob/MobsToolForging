@@ -2,6 +2,7 @@
   "values": [
     "mobstoolforging:tool_forge",
     "mobstoolforging:heating_forge",
+    "mobstoolforging:lava_heating_forge",
     "mobstoolforging:crucible",
     "mobstoolforging:foundry_forge"
   ]

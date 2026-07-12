@@ -1,0 +1,17 @@
+{
+  "workstation": "sawmill",
+  "input": {
+    "item": "minecraft:tripwire_hook"
+  },
+  "secondary_input": {
+    "tag": "minecraft:planks",
+    "count": 2
+  },
+  "output": {
+    "tool_part": "crossbow_body",
+    "material": "mobstoolforging:wood"
+  },
+  "pattern": "mobstoolforging:crossbow_body",
+  "required_hits": 4,
+  "minimum_hammer_level": "stone"
+}

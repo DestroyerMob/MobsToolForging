@@ -61,7 +61,7 @@ public final class VanillaToolConverter {
     private static void establishAssemblyParts(ItemStack converted) {
         ToolmakerBenchAssembly.disassemble(converted).ifPresent(parts -> {
             converted.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts));
-            ToolExternalComponents.removeApotheosisAffixComponents(converted);
+            CompositeAffixCompatibility.syncCompatibilityMirror(converted);
         });
     }
 

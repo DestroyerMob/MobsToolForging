@@ -1,0 +1,8 @@
+{
+  "workstation": "tool_forge",
+  "input": { "item": "minecraft:gold_ingot", "count": 2 },
+  "output": { "tool_part": "crossbow_limbs", "material": "mobstoolforging:gold" },
+  "pattern": "mobstoolforging:crossbow_limbs",
+  "required_hits": 5,
+  "minimum_hammer_level": "stone"
+}

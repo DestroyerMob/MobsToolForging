@@ -14,12 +14,14 @@ public record StationWorkRecipe(
         WorkstationKind workstationKind,
         Optional<ResourceLocation> patternId,
         Input input,
+        Optional<Input> secondaryInput,
         ItemStack output,
         int requiredHits,
         int minimumHammerLevel
 ) {
     public StationWorkRecipe {
         output = output.copy();
+        secondaryInput = secondaryInput == null ? Optional.empty() : secondaryInput;
         requiredHits = Math.max(1, requiredHits);
         minimumHammerLevel = Math.max(0, minimumHammerLevel);
     }
@@ -33,6 +35,10 @@ public record StationWorkRecipe(
 
     public ItemStack outputCopy() {
         return output.copy();
+    }
+
+    public boolean requiresSecondaryInput() {
+        return secondaryInput.isPresent();
     }
 
     public record Input(Optional<ResourceLocation> itemId, Optional<TagKey<Item>> tag, int count) {

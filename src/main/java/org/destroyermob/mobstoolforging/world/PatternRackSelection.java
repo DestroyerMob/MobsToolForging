@@ -311,7 +311,7 @@ public final class PatternRackSelection {
 
     public static Component compatibleStations(ItemStack pattern, ForgeTemplateDefinition template) {
         List<Component> stations = new ArrayList<>();
-        for (WorkstationKind kind : List.of(WorkstationKind.CRUDE_ANVIL, WorkstationKind.TOOL_FORGE, WorkstationKind.LAPIDARY_TABLE, WorkstationKind.LEATHER_STATION)) {
+        for (WorkstationKind kind : List.of(WorkstationKind.CRUDE_ANVIL, WorkstationKind.TOOL_FORGE, WorkstationKind.LAPIDARY_TABLE, WorkstationKind.SAWMILL, WorkstationKind.LEATHER_STATION)) {
             if (canAssign(pattern, template, kind)) {
                 stations.add(stationName(kind));
             }
@@ -404,6 +404,7 @@ public final class PatternRackSelection {
         return kind == WorkstationKind.CRUDE_ANVIL
                 || kind == WorkstationKind.TOOL_FORGE
                 || kind == WorkstationKind.LAPIDARY_TABLE
+                || kind == WorkstationKind.SAWMILL
                 || kind == WorkstationKind.LEATHER_STATION;
     }
 
@@ -412,6 +413,7 @@ public final class PatternRackSelection {
             case CRUDE_ANVIL -> new ItemStack(ModBlocks.CRUDE_ANVIL.get()).getHoverName();
             case TOOL_FORGE -> new ItemStack(ModBlocks.TOOL_FORGE.get()).getHoverName();
             case LAPIDARY_TABLE -> new ItemStack(ModBlocks.LAPIDARY_TABLE.get()).getHoverName();
+            case SAWMILL -> new ItemStack(ModBlocks.SAWMILL.get()).getHoverName();
             case LEATHER_STATION -> new ItemStack(ModBlocks.LEATHER_STATION.get()).getHoverName();
             case TOOLMAKERS_BENCH -> new ItemStack(ModBlocks.TOOLMAKERS_BENCH.get()).getHoverName();
         };

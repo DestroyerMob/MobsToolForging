@@ -21,6 +21,9 @@ public final class ToolTypeRegistry {
     public static final ResourceLocation SCREWDRIVER_HEAD_TEMPLATE = modLoc("screwdriver_head");
     public static final ResourceLocation GEM_CUTTERS_KNIFE_TOOL_TYPE = modLoc("gem_cutters_knife");
     public static final ResourceLocation GEM_CUTTERS_BLADE_TEMPLATE = modLoc("gem_cutters_blade");
+    public static final ResourceLocation CROSSBOW_TOOL_TYPE = CrossbowAssembly.TOOL_TYPE;
+    public static final ResourceLocation CROSSBOW_BODY_TEMPLATE = modLoc(ToolPartData.CROSSBOW_BODY);
+    public static final ResourceLocation CROSSBOW_LIMBS_TEMPLATE = modLoc(ToolPartData.CROSSBOW_LIMBS);
     public static final ResourceLocation HELMET_CHAINMAIL_TEMPLATE = modLoc(ArmorPartData.HELMET_CHAINMAIL);
     public static final ResourceLocation HELMET_PLATE_TEMPLATE = modLoc(ArmorPartData.HELMET_PLATE);
     public static final ResourceLocation CHESTPLATE_CHAINMAIL_TEMPLATE = modLoc(ArmorPartData.CHESTPLATE_CHAINMAIL);
@@ -50,6 +53,7 @@ public final class ToolTypeRegistry {
         registerBuiltIn(ToolKind.AXE);
         registerBuiltIn(ToolKind.HOE);
         registerBuiltIn(ToolKind.MATTOCK);
+        registerCrossbow();
         registerBuiltInTemplates();
     }
 
@@ -66,59 +70,27 @@ public final class ToolTypeRegistry {
         registerTemplate(ForgeTemplate.PICKAXE_HEAD.definition());
         registerTemplate(ForgeTemplate.AXE_HEAD.definition());
         registerTemplate(ForgeTemplate.HOE_HEAD.definition());
-        registerTemplate(new ForgeTemplateDefinition(
-                SMITHING_HAMMER_HEAD_TEMPLATE,
-                SMITHING_HAMMER_TOOL_TYPE,
-                ToolPartData.SMITHING_HAMMER_HEAD,
-                2,
-                5,
-                "forge_template.mobstoolforging.smithing_hammer_head",
-                Float.NaN,
-                Set.of(MaterialCatalog.IRON),
-                Set.of(),
-                SmithingHammerLevel.STONE.level(),
-                Map.of(),
-                ModItems.SMITHING_HAMMER_HEAD.getId(),
-                Map.of(),
-                Set.of(SMITHING_HAMMER_TOOL_TYPE),
-                true,
-                1
+        registerTemplate(crossbowTemplate(
+                CROSSBOW_BODY_TEMPLATE,
+                ToolPartData.CROSSBOW_BODY,
+                ModItems.CROSSBOW_BODY.getId(),
+                Set.of(MaterialCatalog.WOOD)
         ));
-        registerTemplate(new ForgeTemplateDefinition(
-                SCREWDRIVER_HEAD_TEMPLATE,
-                SCREWDRIVER_TOOL_TYPE,
-                ToolPartData.SCREWDRIVER_HEAD,
-                1,
-                5,
-                "forge_template.mobstoolforging.screwdriver_head",
-                Float.NaN,
-                Set.of(MaterialCatalog.COPPER),
-                Set.of(),
-                SmithingHammerLevel.STONE.level(),
-                Map.of(),
-                ModItems.SCREWDRIVER_HEAD.getId(),
-                Map.of(),
-                Set.of(SCREWDRIVER_TOOL_TYPE),
-                true,
-                1
-        ));
-        registerTemplate(new ForgeTemplateDefinition(
-                GEM_CUTTERS_BLADE_TEMPLATE,
-                GEM_CUTTERS_KNIFE_TOOL_TYPE,
-                ToolPartData.GEM_CUTTERS_BLADE,
-                1,
-                5,
-                "forge_template.mobstoolforging.gem_cutters_blade",
-                Float.NaN,
-                Set.of(MaterialCatalog.COPPER),
-                Set.of(),
-                SmithingHammerLevel.STONE.level(),
-                Map.of(),
-                ModItems.GEM_CUTTERS_BLADE.getId(),
-                Map.of(),
-                Set.of(GEM_CUTTERS_KNIFE_TOOL_TYPE),
-                true,
-                1
+        registerTemplate(crossbowTemplate(
+                CROSSBOW_LIMBS_TEMPLATE,
+                ToolPartData.CROSSBOW_LIMBS,
+                ModItems.CROSSBOW_LIMBS.getId(),
+                Set.of(
+                        MaterialCatalog.OAK,
+                        MaterialCatalog.COPPER,
+                        MaterialCatalog.IRON,
+                        MaterialCatalog.GOLD,
+                        MaterialCatalog.NETHERITE,
+                        MaterialCatalog.DIAMOND,
+                        MaterialCatalog.EMERALD,
+                        MaterialCatalog.RUBY,
+                        MaterialCatalog.SAPPHIRE
+                )
         ));
         registerArmorTemplate(HELMET_CHAINMAIL_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_CHAINMAIL, 2, ModItems.HELMET_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
         registerArmorTemplate(HELMET_PLATE_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_PLATE, 2, ModItems.HELMET_PLATE.getId());
@@ -128,6 +100,32 @@ public final class ToolTypeRegistry {
         registerArmorTemplate(LEGGINGS_PLATE_TEMPLATE, ArmorConstructionData.LEGGINGS_TYPE, ArmorPartData.LEGGINGS_PLATE, 3, ModItems.LEGGINGS_PLATE.getId());
         registerArmorTemplate(BOOTS_CHAINMAIL_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, ArmorPartData.BOOTS_CHAINMAIL, 2, ModItems.BOOTS_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
         registerArmorTemplate(BOOTS_PLATE_TEMPLATE, ArmorConstructionData.BOOTS_TYPE, ArmorPartData.BOOTS_PLATE, 2, ModItems.BOOTS_PLATE.getId());
+    }
+
+    private static ForgeTemplateDefinition crossbowTemplate(
+            ResourceLocation templateId,
+            String partType,
+            ResourceLocation outputItem,
+            Set<ResourceLocation> allowedMaterials
+    ) {
+        return new ForgeTemplateDefinition(
+                templateId,
+                CROSSBOW_TOOL_TYPE,
+                partType,
+                2,
+                4,
+                "forge_template.mobstoolforging." + partType,
+                Float.NaN,
+                allowedMaterials,
+                Set.of(),
+                SmithingHammerLevel.STONE.level(),
+                Map.of(),
+                outputItem,
+                Map.of(),
+                Set.of(CROSSBOW_TOOL_TYPE),
+                true,
+                1
+        );
     }
 
     private static void registerArmorTemplate(ResourceLocation templateId, ResourceLocation armorType, String partType, int requiredMaterials, ResourceLocation outputItem) {
@@ -289,6 +287,18 @@ public final class ToolTypeRegistry {
                     .averageRequiredHeadDurability(true);
         }
         TOOL_TYPES.put(ToolConstructionData.toolType(toolKind), builder.build());
+    }
+
+    private static void registerCrossbow() {
+        ToolTypeDefinition definition = ToolTypeDefinition.builder(CROSSBOW_TOOL_TYPE, ToolPartData.CROSSBOW_LIMBS)
+                .visual(CROSSBOW_TOOL_TYPE)
+                .toolItem(ModItems.CROSSBOW::get)
+                .partItem(ToolPartData.CROSSBOW_LIMBS, ModItems.CROSSBOW_LIMBS::get)
+                .requiredAssemblyPart(ToolPartData.CROSSBOW_BODY, ModItems.CROSSBOW_BODY::get)
+                .noMiningTag()
+                .toolFactory((ignored, construction) -> new ItemStack(ModItems.CROSSBOW.get()))
+                .build();
+        TOOL_TYPES.put(CROSSBOW_TOOL_TYPE, definition);
     }
 
     private static ResourceLocation modLoc(String path) {

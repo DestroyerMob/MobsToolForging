@@ -11,7 +11,7 @@ public record StationWorkJeiRecipe(
         WorkstationKind workstationKind,
         ItemStack station,
         List<ItemStack> inputs,
-        ItemStack catalyst,
+        List<ItemStack> secondaryInputs,
         ItemStack hammer,
         ItemStack output,
         int requiredHits,

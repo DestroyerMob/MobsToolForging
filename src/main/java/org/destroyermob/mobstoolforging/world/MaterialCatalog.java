@@ -36,12 +36,15 @@ public final class MaterialCatalog {
     public static final ResourceLocation SAPPHIRE = materialId("sapphire");
     public static final ResourceLocation LEATHER = materialId("leather");
     public static final ResourceLocation FLINT = materialId("flint");
+    public static final ResourceLocation WOOD = materialId("wood");
     public static final ResourceLocation OAK = materialId("oak");
     public static final ResourceLocation DARK_OAK = materialId("dark_oak");
     public static final ResourceLocation BLAZE = materialId("blaze");
     public static final ResourceLocation BREEZE = materialId("breeze");
     public static final ResourceLocation NETHER = materialId("nether");
     public static final ResourceLocation SCULK = materialId("sculk");
+    public static final ResourceLocation SPIDER_SILK = materialId("spider_silk");
+    public static final ResourceLocation PLANT_FIBER = materialId("plant_fiber");
 
     private static final Tier COPPER_TIER = new SimpleTier(
             BlockTags.INCORRECT_FOR_STONE_TOOL,
@@ -93,7 +96,7 @@ public final class MaterialCatalog {
         register(GOLD, MaterialCategory.METAL, Items.GOLD_INGOT, Tiers.GOLD, HeatLevel.LOW);
         register(COPPER, MaterialCategory.METAL, Items.COPPER_INGOT, COPPER_TIER, HeatLevel.LOW);
         register(NETHERITE, MaterialCategory.METAL, Items.NETHERITE_INGOT, Tiers.NETHERITE, HeatLevel.HIGH);
-        register(DIAMOND, MaterialCategory.GEM, Items.DIAMOND, Tiers.DIAMOND, LapidaryAbrasives.DIAMOND_TIER);
+        register(DIAMOND, MaterialCategory.GEM, Items.DIAMOND, Tiers.DIAMOND);
         register(EMERALD, MaterialCategory.GEM, Items.EMERALD, EMERALD_TIER);
         registerTagged(
                 RUBY,
@@ -111,6 +114,10 @@ public final class MaterialCatalog {
         );
         registerVirtual(LEATHER, MaterialCategory.ORGANIC, Items.LEATHER, Tiers.WOOD);
         registerVirtual(FLINT, MaterialCategory.GEM, Items.FLINT, CrudeFlintTiers.FLINT);
+        registerVirtual(WOOD, MaterialCategory.ORGANIC, Items.OAK_PLANKS, Tiers.WOOD);
+        registerVirtual(OAK, MaterialCategory.ORGANIC, Items.OAK_PLANKS, Tiers.WOOD);
+        registerVirtual(SPIDER_SILK, MaterialCategory.ORGANIC, Items.STRING, Tiers.WOOD);
+        registerVirtual(PLANT_FIBER, MaterialCategory.ORGANIC, Items.STRING, Tiers.WOOD);
     }
 
     private MaterialCatalog() {

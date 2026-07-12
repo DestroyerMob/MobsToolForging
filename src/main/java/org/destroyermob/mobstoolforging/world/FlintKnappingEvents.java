@@ -20,7 +20,7 @@ import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModTags;
 
 public final class FlintKnappingEvents {
-    private static final float PLANT_FIBER_DROP_CHANCE = 0.5F;
+    private static final float PLANT_FIBER_DROP_CHANCE = 0.1F;
 
     private FlintKnappingEvents() {
     }

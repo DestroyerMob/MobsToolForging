@@ -45,6 +45,9 @@ public class ModularToolPartItem extends Item {
     public Component getName(ItemStack stack) {
         ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
         if (data != null && partType.equals(data.partType())) {
+            if (ToolPartData.CROSSBOW_BODY.equals(partType)) {
+                return super.getName(stack);
+            }
             if (data.coatingBaseMaterial().isPresent()) {
                 return ToolStackNames.coatedPartName(partType, data.coatingBaseMaterial().get(), data.materialId());
             }

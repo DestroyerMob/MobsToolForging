@@ -17,12 +17,15 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.CRUDE_ANVIL, "Crude Anvil");
         addBlock(ModBlocks.TOOL_FORGE, "Smithing Anvil");
         addBlock(ModBlocks.LAPIDARY_TABLE, "Lapidary Table");
+        addBlock(ModBlocks.DIAMOND_SAW, "Diamond Saw");
+        ModBlocks.SAWMILL_VARIANTS.forEach(variant -> addBlock(variant.block(), variant.displayName()));
         addBlock(ModBlocks.PATTERN_CREATION_STATION, "Pattern Creation Station");
         ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> addBlock(variant.block(), variant.displayName()));
         ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> addBlock(variant.block(), variant.displayName()));
         ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> addBlock(variant.block(), variant.displayName()));
         ModBlocks.DRYING_RACK_VARIANTS.forEach(variant -> addBlock(variant.block(), variant.displayName()));
         addBlock(ModBlocks.HEATING_FORGE, "Heating Forge");
+        addBlock(ModBlocks.LAVA_HEATING_FORGE, "Lava Heating Forge");
         addBlock(ModBlocks.CRUCIBLE, "Crucible");
         addBlock(ModBlocks.FOUNDRY_FORGE, "Foundry Forge");
         addBlock(ModBlocks.KNAPPING_FLINT, "Knapping Flint");
@@ -31,7 +34,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("commands.mobstoolforging.convert_vanilla_tool.not_supported", "Hold supported vanilla equipment or a More Weapons tool to convert.");
         add("commands.mobstoolforging.convert_vanilla_tool.not_vanilla", "Hold supported vanilla equipment or a More Weapons tool to convert.");
         add("commands.mobstoolforging.convert_vanilla_tool.success", "Converted %s into %s.");
-        addItem(ModItems.SMITHING_HAMMER, "Smithing Hammer");
+        addItem(ModItems.SMITHING_HAMMER, "Stone Smithing Hammer");
         addItem(ModItems.IRON_SMITHING_HAMMER, "Iron Smithing Hammer");
         addItem(ModItems.SMITHING_HAMMER_HEAD, "Iron Smithing Hammer Head");
         addItem(ModItems.SCREWDRIVER, "Screwdriver");
@@ -60,6 +63,8 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.LEGGINGS_PLATE_PATTERN, "Leggings Plate Pattern");
         addItem(ModItems.BOOTS_CHAINMAIL_PATTERN, "Boots Base Pattern");
         addItem(ModItems.BOOTS_PLATE_PATTERN, "Boots Plate Pattern");
+        addItem(ModItems.CROSSBOW_BODY_PATTERN, "Crossbow Body Pattern");
+        addItem(ModItems.CROSSBOW_LIMBS_PATTERN, "Crossbow Limbs Pattern");
         addItem(ModItems.TEMPLATE_PATTERN, "Template Pattern");
         add("item.mobstoolforging.template_pattern.named", "%s Pattern");
         addItem(ModItems.SWORD_BLADE, "Sword Blade");
@@ -69,6 +74,8 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.AXE_HEAD, "Axe Head");
         addItem(ModItems.HOE_HEAD, "Hoe Head");
         addItem(ModItems.COOKING_KNIFE_HEAD, "Cooking Knife Head");
+        addItem(ModItems.CROSSBOW_BODY, "Crossbow Body");
+        addItem(ModItems.CROSSBOW_LIMBS, "Crossbow Limbs");
         addItem(ModItems.HELMET_CHAINMAIL, "Helmet Base");
         addItem(ModItems.HELMET_PLATE, "Helmet Plate");
         addItem(ModItems.CHESTPLATE_CHAINMAIL, "Body Armour Base");
@@ -83,6 +90,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.AXE, "Axe");
         addItem(ModItems.HOE, "Hoe");
         addItem(ModItems.MATTOCK, "Mattock");
+        addItem(ModItems.CROSSBOW, "Crossbow");
         addItem(ModItems.MODULAR_HELMET, "Modular Helmet");
         addItem(ModItems.MODULAR_CHESTPLATE, "Modular Body Armour");
         addItem(ModItems.MODULAR_LEGGINGS, "Modular Leggings");
@@ -94,6 +102,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.mobstoolforging.material_axe_head", "%s Axe Head");
         add("item.mobstoolforging.material_hoe_head", "%s Hoe Head");
         add("item.mobstoolforging.material_cooking_knife_head", "%s Cooking Knife Head");
+        add("item.mobstoolforging.material_crossbow_body", "%s Crossbow Body");
+        add("item.mobstoolforging.material_crossbow_limbs", "%s Crossbow Limbs");
         add("item.mobstoolforging.coated_material_sword_blade", "%s-%s Sword Blade");
         add("item.mobstoolforging.coated_material_shovel_head", "%s-%s Shovel Head");
         add("item.mobstoolforging.coated_material_pickaxe_head", "%s-%s Pickaxe Head");
@@ -114,6 +124,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("item.mobstoolforging.material_axe", "%s Axe");
         add("item.mobstoolforging.material_hoe", "%s Hoe");
         add("item.mobstoolforging.material_mattock", "%s Mattock");
+        add("item.mobstoolforging.material_crossbow", "%s Crossbow");
         add("item.mobstoolforging.coated_material_sword", "%s-%s Sword");
         add("item.mobstoolforging.coated_material_shovel", "%s-%s Shovel");
         add("item.mobstoolforging.coated_material_pickaxe", "%s-%s Pickaxe");
@@ -138,12 +149,15 @@ public class ModLanguageProvider extends LanguageProvider {
         add("material.mobstoolforging.sapphire", "Sapphire");
         add("material.mobstoolforging.leather", "Leather");
         add("material.mobstoolforging.flint", "Flint");
+        add("material.mobstoolforging.wood", "Wood");
         add("material.mobstoolforging.oak", "Oak");
         add("material.mobstoolforging.dark_oak", "Dark Oak");
         add("material.mobstoolforging.blaze", "Blaze");
         add("material.mobstoolforging.breeze", "Breeze");
         add("material.mobstoolforging.nether", "Nether");
         add("material.mobstoolforging.sculk", "Sculk");
+        add("material.mobstoolforging.spider_silk", "Spider Silk");
+        add("material.mobstoolforging.plant_fiber", "Plant Fiber");
         add("quality.mobstoolforging.crude", "Crude");
         add("quality.mobstoolforging.worked", "Worked");
         add("quality.mobstoolforging.well_forged", "Well Forged");
@@ -165,6 +179,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("jei.mobstoolforging.world_assembly.front_view", "Place as shown (front view)");
         add("jei.mobstoolforging.world_assembly.place_block", "Place this block in the world");
         add("jei.mobstoolforging.world_assembly.sneak_use", "Then sneak + use the hammer");
+        add("jei.mobstoolforging.world_assembly.sneak_use_abrasive", "Then sneak + use the diamond abrasive");
         add("book.mobstoolforging.name", "The Forgemaster's Guide");
         add("book.mobstoolforging.subtitle", "Tools, armour, heat, and workmanship");
         add("book.mobstoolforging.landing", "A practical manual for Mobs Tool Forging.$(p)Follow the live workshop progression, then use the reference section for exact quality, material, and trait effects.");
@@ -213,6 +228,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("jade.mobstoolforging.lit", "Lit");
         add("jade.mobstoolforging.unlit", "Unlit");
         add("jade.mobstoolforging.fuel", "Fuel: %s");
+        add("jade.mobstoolforging.heating_fluid", "Heating Fluid: %s (%s/%s mB)");
         add("jade.mobstoolforging.material_heat", "Heat: %s%%, %s");
         add("jade.mobstoolforging.workpiece", "Slot %s: %s, %s%%/%s%%, %s");
         add("jade.mobstoolforging.campfire_workpiece", "Slot %s: %s, %s left");
@@ -245,6 +261,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("forge_template.mobstoolforging.leggings_plate", "Leggings Plate");
         add("forge_template.mobstoolforging.boots_chainmail", "Boots Base");
         add("forge_template.mobstoolforging.boots_plate", "Boots Plate");
+        add("forge_template.mobstoolforging.crossbow_body", "Crossbow Body");
+        add("forge_template.mobstoolforging.crossbow_limbs", "Crossbow Limbs");
         add("knapping_target.mobstoolforging.sword_blade", "Flint Sword Blade");
         add("knapping_target.mobstoolforging.sword_guard", "Flint Sword Guard");
         add("knapping_target.mobstoolforging.shovel_head", "Flint Shovel Head");
@@ -294,6 +312,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.hammer_level.stone", "Smithing Hammer");
         add("message.mobstoolforging.hammer_level.iron", "Iron Smithing Hammer");
         add("message.mobstoolforging.station_work_placed", "Work placed.");
+        add("message.mobstoolforging.station_work_secondary_placed", "Secondary material placed.");
+        add("message.mobstoolforging.station_work_needs_secondary", "Add the secondary material before working this piece.");
         add("message.mobstoolforging.station_work_ready", "Work complete.");
         add("message.mobstoolforging.station_work_missing", "This work recipe is no longer available.");
         add("message.mobstoolforging.lapidary_abrasive_placed", "Abrasive placed.");
@@ -311,6 +331,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.mixed_materials", "Finish this part with the same material.");
         add("abrasive_tier.mobstoolforging.diamond", "Diamond");
         add("message.mobstoolforging.use_lapidary_table", "Gem shells are set on a Lapidary Table.");
+        add("message.mobstoolforging.use_sawmill", "Wooden crossbow parts are worked on a Sawmill.");
         add("message.mobstoolforging.tool_repair_tool_placed", "Item placed for repair.");
         add("message.mobstoolforging.tool_repair_material_placed", "Repair material placed.");
         add("message.mobstoolforging.tool_repair_needs_material", "Add a matching repair material.");
@@ -366,6 +387,13 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.heating_ignited", "Heating forge lit.");
         add("message.mobstoolforging.heating_lit", "The forge is burning.");
         add("message.mobstoolforging.heating_status", "Add fuel, place metal, then light the forge.");
+        add("message.mobstoolforging.lava_heating_fluid_added", "%s added (%s/%s mB).");
+        add("message.mobstoolforging.lava_heating_fluid_removed", "%s removed (%s/%s mB remaining).");
+        add("message.mobstoolforging.lava_heating_fluid_rejected", "That container cannot transfer a valid heating fluid here.");
+        add("message.mobstoolforging.lava_heating_needs_fluid", "Add lava or another valid heating fluid before placing metal.");
+        add("message.mobstoolforging.lava_heating_status_empty", "Add lava or another valid heating fluid, then place metal.");
+        add("message.mobstoolforging.lava_heating_status", "%s: %s/%s mB. Place metal to begin heating.");
+        add("message.mobstoolforging.lava_heating_status_active", "Heating with %s (%s/%s mB).");
         add("message.mobstoolforging.drying_rack_started", "Drying started.");
         add("message.mobstoolforging.drying_rack_busy", "Remove the current item first.");
         add("message.mobstoolforging.drying_rack_empty", "Place a dryable item here.");
@@ -413,6 +441,9 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.mobstoolforging.part.handle", "Handle");
         add("tooltip.mobstoolforging.part.guard", "Guard");
         add("tooltip.mobstoolforging.part.second_head", "Second Head");
+        add("tooltip.mobstoolforging.crossbow_limbs", "Limbs: %s");
+        add("tooltip.mobstoolforging.crossbow_body", "Body: Wood");
+        add("tooltip.mobstoolforging.crossbow_string", "String: %s");
         add("tooltip.mobstoolforging.armor_part.chainmail", "Chainmail: %s");
         add("tooltip.mobstoolforging.armor_part.base", "Base: %s");
         add("tooltip.mobstoolforging.armor_part.plate", "Material Plate: %s");

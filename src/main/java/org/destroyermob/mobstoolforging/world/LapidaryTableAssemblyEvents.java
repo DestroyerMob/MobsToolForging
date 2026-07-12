@@ -62,7 +62,7 @@ public final class LapidaryTableAssemblyEvents {
         return level.getBlockState(bottomRight).is(Blocks.IRON_BLOCK)
                 && level.getBlockState(bottomLeft).is(Blocks.IRON_BLOCK)
                 && level.getBlockState(topRight).is(Blocks.LAPIS_BLOCK)
-                && level.getBlockState(topLeft).is(Blocks.DIAMOND_BLOCK);
+                && level.getBlockState(topLeft).is(ModBlocks.DIAMOND_SAW.get());
     }
 
     private static EquipmentSlot slotFor(InteractionHand hand) {

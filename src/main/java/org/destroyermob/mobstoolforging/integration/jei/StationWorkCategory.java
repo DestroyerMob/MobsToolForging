@@ -48,10 +48,10 @@ public class StationWorkCategory implements IRecipeCategory<StationWorkJeiRecipe
         builder.addInputSlot(36, 10)
                 .setStandardSlotBackground()
                 .addItemStacks(recipe.inputs());
-        if (!recipe.catalyst().isEmpty()) {
-            builder.addSlot(RecipeIngredientRole.CATALYST, 36, 34)
+        if (!recipe.secondaryInputs().isEmpty()) {
+            builder.addInputSlot(36, 34)
                     .setStandardSlotBackground()
-                    .addItemStack(recipe.catalyst());
+                    .addItemStacks(recipe.secondaryInputs());
         }
         builder.addSlot(RecipeIngredientRole.CATALYST, 60, 34)
                 .setStandardSlotBackground()

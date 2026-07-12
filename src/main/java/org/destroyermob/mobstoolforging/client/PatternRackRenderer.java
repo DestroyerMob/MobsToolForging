@@ -13,27 +13,24 @@ import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import org.destroyermob.mobstoolforging.client.model.ToolVisualDefinition;
-import org.destroyermob.mobstoolforging.client.model.ToolVisualManager;
+import org.destroyermob.mobstoolforging.client.model.PatternCutoutTextures;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.world.PatternRackBlock;
 import org.destroyermob.mobstoolforging.world.PatternRackBlockEntity;
-import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
-import org.destroyermob.mobstoolforging.world.ToolPartData;
-import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.joml.Vector3f;
 
 import java.util.Optional;
 
 public class PatternRackRenderer implements BlockEntityRenderer<PatternRackBlockEntity> {
-    private static final float ITEM_SCALE = 0.275F;
-    private static final float ITEM_SURFACE_Z = 0.328F;
+    private static final float ITEM_SCALE = 0.225F;
+    // The rack's front-most wooden frame begins at model Z 12/16. Keep the
+    // stencil slightly in front of that plane so it cannot intersect the grid.
+    private static final float ITEM_SURFACE_Z = 0.234375F;
     private static final float[] SLOT_X = {-0.3125F, 0.0F, 0.3125F};
     private static final float[] SLOT_Y = {0.8125F, 0.5F, 0.1875F};
 
@@ -92,24 +89,9 @@ public class PatternRackRenderer implements BlockEntityRenderer<PatternRackBlock
         }
         return pattern.templateId(stack)
                 .flatMap(ToolTypeRegistry::template)
-                .flatMap(this::maskTexture)
+                .flatMap(PatternCutoutTextures::resolve)
                 .map(texture -> Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(texture))
                 .filter(sprite -> !MissingTextureAtlasSprite.getLocation().equals(sprite.contents().name()));
-    }
-
-    private Optional<ResourceLocation> maskTexture(ForgeTemplateDefinition template) {
-        return ToolTypeRegistry.toolType(template.toolType())
-                .flatMap(definition -> maskTexture(definition, template.partType()));
-    }
-
-    private Optional<ResourceLocation> maskTexture(ToolTypeDefinition definition, String partType) {
-        ToolVisualDefinition visual = ToolVisualManager.resolve(definition.visualId(), definition);
-        return visual.layerForSlot(partVisualSlot(partType)).templateId(true)
-                .or(() -> visual.layerForSlot(partVisualSlot(partType)).templateId(false));
-    }
-
-    private static String partVisualSlot(String partType) {
-        return ToolPartData.SWORD_GUARD.equals(partType) ? "guard" : partType;
     }
 
     private static void renderStencil(PoseStack poseStack, MultiBufferSource bufferSource, TextureAtlasSprite sprite, int packedLight, int packedOverlay) {

@@ -128,6 +128,12 @@ public class ToolTemplateItem extends Item {
         if (id.equals(ToolTypeRegistry.BOOTS_PLATE_TEMPLATE)) {
             return new ItemStack(ModItems.BOOTS_PLATE_PATTERN.get());
         }
+        if (id.equals(ToolTypeRegistry.CROSSBOW_BODY_TEMPLATE)) {
+            return new ItemStack(ModItems.CROSSBOW_BODY_PATTERN.get());
+        }
+        if (id.equals(ToolTypeRegistry.CROSSBOW_LIMBS_TEMPLATE)) {
+            return new ItemStack(ModItems.CROSSBOW_LIMBS_PATTERN.get());
+        }
         ItemStack pattern = new ItemStack(ModItems.TEMPLATE_PATTERN.get());
         pattern.set(ModDataComponents.FORGE_TEMPLATE.get(), id);
         return pattern;

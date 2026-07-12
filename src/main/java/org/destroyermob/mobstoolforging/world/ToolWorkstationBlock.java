@@ -153,6 +153,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (kind == WorkstationKind.LAPIDARY_TABLE && LapidaryAbrasives.isAbrasive(stack)) {
             return placeAbrasive(stack, forge, level, pos, player);
         }
+        if (forge.canPlaceLooseWorkSecondary(stack)) {
+            return placeStationWorkSecondary(stack, forge, level, pos, player);
+        }
         StationWorkRecipe stationWorkRecipe = StationWorkRecipeRegistry.findStartRecipe(kind, forge.templateId(), stack).orElse(null);
         if (stationWorkRecipe != null && forge.canPlaceLooseWork(stationWorkRecipe, stack)) {
             return placeStationWork(stack, stationWorkRecipe, forge, level, pos, player);
@@ -303,6 +306,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (kind == WorkstationKind.LAPIDARY_TABLE && LapidaryAbrasives.isAbrasive(stack)) {
             return forge.canPlaceAbrasive(stack);
         }
+        if (forge.canPlaceLooseWorkSecondary(stack)) {
+            return true;
+        }
         StationWorkRecipe stationWorkRecipe = StationWorkRecipeRegistry.findStartRecipe(kind, forge.templateId(), stack).orElse(null);
         if (stationWorkRecipe != null) {
             return forge.canPlaceLooseWork(stationWorkRecipe, stack);
@@ -385,6 +391,7 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
     private static boolean isPatternRackSelectable(WorkstationKind kind) {
         return kind == WorkstationKind.CRUDE_ANVIL
                 || kind == WorkstationKind.TOOL_FORGE
+                || kind == WorkstationKind.SAWMILL
                 || kind == WorkstationKind.LEATHER_STATION;
     }
 
@@ -644,6 +651,19 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         return ItemInteractionResult.CONSUME;
     }
 
+    private ItemInteractionResult placeStationWorkSecondary(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        var item = stack.getItem();
+        if (forge.placeLooseWorkSecondary(stack)) {
+            level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.7F, 1.1F);
+            player.awardStat(Stats.ITEM_USED.get(item));
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.station_work_secondary_placed"));
+        }
+        return ItemInteractionResult.CONSUME;
+    }
+
     private ItemInteractionResult useToolmakersBench(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
         if (stack.isEmpty()) {
             if (tryCollectToolmakerBenchTool(forge, player, level, pos)) {
@@ -856,6 +876,10 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         if (hammerLevel < recipe.minimumHammerLevel()) {
             DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.hammer_too_weak", SmithingHammerLevel.displayName(recipe.minimumHammerLevel())));
+            return ItemInteractionResult.CONSUME;
+        }
+        if (forge.needsLooseWorkSecondary()) {
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.station_work_needs_secondary"));
             return ItemInteractionResult.CONSUME;
         }
         if (forge.hammerLooseWork(recipe)) {

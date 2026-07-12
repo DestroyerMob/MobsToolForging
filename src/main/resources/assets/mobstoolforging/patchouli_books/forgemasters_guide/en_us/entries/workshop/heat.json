@@ -7,7 +7,7 @@
     {
       "type": "patchouli:text",
       "title": "Heating Workpieces",
-      "text": "$(bold)Campfire$()$(br)Suitable for crude early work.$(p)$(bold)Heating Forge$()$(br)Provides controlled workshop heat.$(p)Before shaping, the workpiece must reach its material's required heat. Heat decays after removal; tooltips and workstation visuals show the current state."
+      "text": "$(bold)Campfire$()$(br)Suitable for crude early work.$(p)$(bold)Heating Forge$()$(br)Provides controlled workshop heat from a solid fuel bed.$(p)$(bold)Lava Heating Forge$()$(br)Stores up to four buckets of tagged heating fluid. Fluid is consumed only while a workpiece is gaining heat; its visible level shows the remaining supply.$(p)Before shaping, the workpiece must reach its material's required heat."
     },
     {
       "type": "patchouli:text",

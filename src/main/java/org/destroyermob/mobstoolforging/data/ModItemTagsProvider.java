@@ -44,7 +44,8 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.PARTS)
                 .addTag(ModTags.Items.PART_HEADS)
                 .addTag(ModTags.Items.PART_HANDLES)
-                .addTag(ModTags.Items.PART_GUARDS);
+                .addTag(ModTags.Items.PART_GUARDS)
+                .add(ModItems.CROSSBOW_BODY.get(), ModItems.CROSSBOW_LIMBS.get());
         tag(ModTags.Items.PART_HEADS)
                 .addTag(ModTags.Items.PART_SWORD_BLADES)
                 .addTag(ModTags.Items.PART_SHOVEL_HEADS)
@@ -112,5 +113,9 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .add(ModItems.DIAMOND_POWDER.get());
         tag(ModTags.Items.KNAPPING_TOOLS)
                 .add(Items.FLINT);
+        tag(ModTags.Items.HAMMER_STONES)
+                .addTag(Tags.Items.STONES)
+                .addTag(Tags.Items.COBBLESTONES)
+                .addTag(ItemTags.STONE_CRAFTING_MATERIALS);
     }
 }

@@ -854,8 +854,37 @@ public class ToolForgeBlockEntity extends BlockEntity {
         return looseWorkRecipeId != null && directOutputStack.isEmpty() && materialId == null && materialCount > 0 && materialItemId != null;
     }
 
+    public boolean canPlaceLooseWorkSecondary(ItemStack stack) {
+        StationWorkRecipe recipe = looseWorkRecipe();
+        return recipe != null
+                && recipe.requiresSecondaryInput()
+                && abrasiveStack.isEmpty()
+                && stack.getCount() >= recipe.secondaryInput().orElseThrow().count()
+                && recipe.secondaryInput().orElseThrow().matches(stack);
+    }
+
+    public boolean needsLooseWorkSecondary() {
+        StationWorkRecipe recipe = looseWorkRecipe();
+        return recipe != null
+                && recipe.secondaryInput().filter(input -> abrasiveStack.getCount() < input.count() || !input.matches(abrasiveStack)).isPresent();
+    }
+
+    public boolean placeLooseWorkSecondary(ItemStack stack) {
+        if (!canPlaceLooseWorkSecondary(stack)) {
+            return false;
+        }
+        StationWorkRecipe.Input input = looseWorkRecipe().secondaryInput().orElseThrow();
+        abrasiveStack = stack.copyWithCount(input.count());
+        stack.shrink(input.count());
+        scheduleFirstGoodHitIfReady();
+        sync();
+        return true;
+    }
+
     public boolean hammerLooseWork(StationWorkRecipe recipe) {
-        if (!hasLooseWork() || !recipe.id().equals(looseWorkRecipeId)) {
+        if (!hasLooseWork()
+                || !recipe.id().equals(looseWorkRecipeId)
+                || needsLooseWorkSecondary()) {
             return false;
         }
         hitCount++;
@@ -872,6 +901,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
         materialItemId = null;
         materialHeatData = null;
         looseWorkRecipeId = null;
+        if (recipe.requiresSecondaryInput()) {
+            abrasiveStack = ItemStack.EMPTY;
+        }
         materialCount = 0;
         hitCount = 0;
         displayRotationDegrees = 0.0F;

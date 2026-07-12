@@ -3,9 +3,14 @@
   "values": [
     "mobstoolforging:flint_shard",
     "mobstoolforging:plant_fiber",
+    "mobstoolforging:smithing_hammer_head",
+    "mobstoolforging:smithing_hammer_head_pattern",
     "mobstoolforging:screwdriver",
     "mobstoolforging:screwdriver_head",
     "mobstoolforging:screwdriver_head_pattern",
+    "mobstoolforging:gem_cutters_knife",
+    "mobstoolforging:gem_cutters_blade",
+    "mobstoolforging:gem_cutters_blade_pattern",
     "mobstoolforging:crucible",
     "mobstoolforging:foundry_forge"
   ]

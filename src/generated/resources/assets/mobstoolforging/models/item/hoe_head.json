@@ -12,6 +12,6 @@
     "layer_hoe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_hoe_head_part",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_hoe_head_part"
   },
-  "tool": "hoe",
+  "tool": "mobstoolforging:hoe",
   "visual": "mobstoolforging:hoe"
 }

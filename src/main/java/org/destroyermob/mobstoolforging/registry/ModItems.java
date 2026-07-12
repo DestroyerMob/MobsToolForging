@@ -16,6 +16,7 @@ import org.destroyermob.mobstoolforging.item.LapidaryTableBlockItem;
 import org.destroyermob.mobstoolforging.item.ModularArmorPartItem;
 import org.destroyermob.mobstoolforging.item.ModularBootsItem;
 import org.destroyermob.mobstoolforging.item.ModularChestplateItem;
+import org.destroyermob.mobstoolforging.item.ModularCrossbowItem;
 import org.destroyermob.mobstoolforging.item.ModularHelmetItem;
 import org.destroyermob.mobstoolforging.item.ModularLeggingsItem;
 import org.destroyermob.mobstoolforging.item.ModularAxeItem;
@@ -48,6 +49,31 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> LAPIDARY_TABLE = ITEMS.register(
             "lapidary_table",
             () -> new LapidaryTableBlockItem(ModBlocks.LAPIDARY_TABLE.get(), new Item.Properties())
+    );
+    public static final DeferredItem<BlockItem> DIAMOND_SAW = blockItem("diamond_saw", ModBlocks.DIAMOND_SAW);
+    public static final DeferredItem<BlockItem> SAWMILL = sawmillItem("sawmill", ModBlocks.SAWMILL);
+    public static final DeferredItem<BlockItem> SPRUCE_SAWMILL = sawmillItem("spruce_sawmill", ModBlocks.SPRUCE_SAWMILL);
+    public static final DeferredItem<BlockItem> BIRCH_SAWMILL = sawmillItem("birch_sawmill", ModBlocks.BIRCH_SAWMILL);
+    public static final DeferredItem<BlockItem> JUNGLE_SAWMILL = sawmillItem("jungle_sawmill", ModBlocks.JUNGLE_SAWMILL);
+    public static final DeferredItem<BlockItem> ACACIA_SAWMILL = sawmillItem("acacia_sawmill", ModBlocks.ACACIA_SAWMILL);
+    public static final DeferredItem<BlockItem> DARK_OAK_SAWMILL = sawmillItem("dark_oak_sawmill", ModBlocks.DARK_OAK_SAWMILL);
+    public static final DeferredItem<BlockItem> MANGROVE_SAWMILL = sawmillItem("mangrove_sawmill", ModBlocks.MANGROVE_SAWMILL);
+    public static final DeferredItem<BlockItem> CHERRY_SAWMILL = sawmillItem("cherry_sawmill", ModBlocks.CHERRY_SAWMILL);
+    public static final DeferredItem<BlockItem> BAMBOO_SAWMILL = sawmillItem("bamboo_sawmill", ModBlocks.BAMBOO_SAWMILL);
+    public static final DeferredItem<BlockItem> CRIMSON_SAWMILL = sawmillItem("crimson_sawmill", ModBlocks.CRIMSON_SAWMILL);
+    public static final DeferredItem<BlockItem> WARPED_SAWMILL = sawmillItem("warped_sawmill", ModBlocks.WARPED_SAWMILL);
+    public static final List<DeferredItem<BlockItem>> SAWMILL_ITEMS = List.of(
+            SAWMILL,
+            SPRUCE_SAWMILL,
+            BIRCH_SAWMILL,
+            JUNGLE_SAWMILL,
+            ACACIA_SAWMILL,
+            DARK_OAK_SAWMILL,
+            MANGROVE_SAWMILL,
+            CHERRY_SAWMILL,
+            BAMBOO_SAWMILL,
+            CRIMSON_SAWMILL,
+            WARPED_SAWMILL
     );
     public static final DeferredItem<BlockItem> PATTERN_CREATION_STATION = ITEMS.register(
             "pattern_creation_station",
@@ -155,6 +181,10 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> HEATING_FORGE = ITEMS.register(
             "heating_forge",
             () -> new BlockItem(ModBlocks.HEATING_FORGE.get(), new Item.Properties())
+    );
+    public static final DeferredItem<BlockItem> LAVA_HEATING_FORGE = ITEMS.register(
+            "lava_heating_forge",
+            () -> new BlockItem(ModBlocks.LAVA_HEATING_FORGE.get(), new Item.Properties())
     );
     public static final DeferredItem<BlockItem> CRUCIBLE = ITEMS.register(
             "crucible",
@@ -281,6 +311,14 @@ public final class ModItems {
             "boots_plate_pattern",
             () -> new ToolTemplateItem(ToolTypeRegistry.BOOTS_PLATE_TEMPLATE, new Item.Properties())
     );
+    public static final DeferredItem<ToolTemplateItem> CROSSBOW_BODY_PATTERN = ITEMS.register(
+            "crossbow_body_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.CROSSBOW_BODY_TEMPLATE, WorkstationKind.SAWMILL, new Item.Properties())
+    );
+    public static final DeferredItem<ToolTemplateItem> CROSSBOW_LIMBS_PATTERN = ITEMS.register(
+            "crossbow_limbs_pattern",
+            () -> new ToolTemplateItem(ToolTypeRegistry.CROSSBOW_LIMBS_TEMPLATE, new Item.Properties())
+    );
     public static final DeferredItem<ToolTemplateItem> TEMPLATE_PATTERN = ITEMS.register(
             "template_pattern",
             () -> new ToolTemplateItem(new Item.Properties())
@@ -312,6 +350,14 @@ public final class ModItems {
     public static final DeferredItem<ModularToolPartItem> COOKING_KNIFE_HEAD = ITEMS.register(
             "cooking_knife_head",
             () -> new ModularToolPartItem(ToolPartData.COOKING_KNIFE_HEAD, new Item.Properties())
+    );
+    public static final DeferredItem<ModularToolPartItem> CROSSBOW_BODY = ITEMS.register(
+            "crossbow_body",
+            () -> new ModularToolPartItem(ToolPartData.CROSSBOW_BODY, new Item.Properties())
+    );
+    public static final DeferredItem<ModularToolPartItem> CROSSBOW_LIMBS = ITEMS.register(
+            "crossbow_limbs",
+            () -> new ModularToolPartItem(ToolPartData.CROSSBOW_LIMBS, new Item.Properties())
     );
     public static final DeferredItem<ModularArmorPartItem> HELMET_CHAINMAIL = ITEMS.register(
             ArmorPartData.HELMET_CHAINMAIL,
@@ -369,6 +415,10 @@ public final class ModItems {
             "mattock",
             () -> new ModularMattockItem(new Item.Properties())
     );
+    public static final DeferredItem<ModularCrossbowItem> CROSSBOW = ITEMS.register(
+            "crossbow",
+            () -> new ModularCrossbowItem(new Item.Properties().durability(326))
+    );
     public static final DeferredItem<ModularHelmetItem> MODULAR_HELMET = ITEMS.register(
             "modular_helmet",
             () -> new ModularHelmetItem(ArmorMaterials.LEATHER, new Item.Properties().stacksTo(1))
@@ -395,6 +445,10 @@ public final class ModItems {
 
     private static DeferredItem<BlockItem> leatherStationItem(String id, DeferredBlock<? extends Block> block) {
         return ITEMS.register(id, () -> new LeatherStationBlockItem(block.get(), new Item.Properties()));
+    }
+
+    private static DeferredItem<BlockItem> sawmillItem(String id, DeferredBlock<? extends Block> block) {
+        return ITEMS.register(id, () -> new LapidaryTableBlockItem(block.get(), new Item.Properties()));
     }
 
     public static void register(IEventBus eventBus) {

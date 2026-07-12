@@ -79,6 +79,7 @@ import org.destroyermob.mobstoolforging.world.CampfireWorkpieceHeating;
 import org.destroyermob.mobstoolforging.world.CompositeAffixCompatibility;
 import org.destroyermob.mobstoolforging.world.CrucibleContents;
 import org.destroyermob.mobstoolforging.world.DebugFeedback;
+import org.destroyermob.mobstoolforging.world.DiamondSawAssemblyEvents;
 import org.destroyermob.mobstoolforging.world.DryingRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.ExternalToolTooltipOrder;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
@@ -92,6 +93,7 @@ import org.destroyermob.mobstoolforging.world.LapidaryTableAssemblyEvents;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialDefinitionReloadListener;
 import org.destroyermob.mobstoolforging.world.PatternRackSelection;
+import org.destroyermob.mobstoolforging.world.SawmillAssemblyEvents;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolKind;
@@ -143,7 +145,9 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::dropPlantFiber);
         NeoForge.EVENT_BUS.addListener(EveryCompatDropFallback::addMissingSelfDrop);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, LeatherStationAssemblyEvents::assembleInWorld);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, DiamondSawAssemblyEvents::assembleInWorld);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, LapidaryTableAssemblyEvents::assembleInWorld);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, SawmillAssemblyEvents::assembleInWorld);
         NeoForge.EVENT_BUS.addListener(AnvilForgingEvents::forgeAnvilInWorld);
         NeoForge.EVENT_BUS.addListener(ArmorStandSwapEvents::swapPlayerArmorWithStand);
         NeoForge.EVENT_BUS.addListener(this::lowerCopperHarvestTier);
@@ -178,12 +182,15 @@ public class MobsToolForging {
             event.accept(ModBlocks.CRUDE_ANVIL);
             event.accept(ModBlocks.TOOL_FORGE);
             event.accept(ModBlocks.LAPIDARY_TABLE);
+            event.accept(ModBlocks.DIAMOND_SAW);
+            ModBlocks.SAWMILL_VARIANTS.forEach(variant -> event.accept(variant.block()));
             event.accept(ModBlocks.PATTERN_CREATION_STATION);
             ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> event.accept(variant.block()));
             ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> event.accept(variant.block()));
             ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> event.accept(variant.block()));
             ModBlocks.DRYING_RACK_VARIANTS.forEach(variant -> event.accept(variant.block()));
             event.accept(ModBlocks.HEATING_FORGE);
+            event.accept(ModBlocks.LAVA_HEATING_FORGE);
             if (MobsToolForgingConfig.ENABLE_CRUCIBLE.get()) {
                 event.accept(ModBlocks.CRUCIBLE);
                 event.accept(ModBlocks.FOUNDRY_FORGE);
@@ -193,7 +200,6 @@ public class MobsToolForging {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.SMITHING_HAMMER);
             event.accept(ModItems.IRON_SMITHING_HAMMER);
-            event.accept(ModItems.GEM_CUTTERS_KNIFE);
             event.accept(ModItems.FIRE_STICK);
             if (MobsToolForgingConfig.ENABLE_CRUDE_FLINT_TOOLS.get()) {
                 flintToolKinds().forEach(toolKind -> event.accept(FlintToolStacks.create(toolKind)));
@@ -204,8 +210,6 @@ public class MobsToolForging {
             event.accept(ModItems.HOE_HEAD_PATTERN);
             event.accept(ModItems.SWORD_BLADE_PATTERN);
             event.accept(ModItems.SWORD_GUARD_PATTERN);
-            event.accept(ModItems.SMITHING_HAMMER_HEAD_PATTERN);
-            event.accept(ModItems.GEM_CUTTERS_BLADE_PATTERN);
             event.accept(ModItems.HELMET_CHAINMAIL_PATTERN);
             event.accept(ModItems.HELMET_PLATE_PATTERN);
             event.accept(ModItems.CHESTPLATE_CHAINMAIL_PATTERN);
@@ -239,8 +243,6 @@ public class MobsToolForging {
             event.accept(ModItems.FLINT_SHARD);
             event.accept(ModItems.PLANT_FIBER);
             event.accept(ModItems.ASH);
-            event.accept(ModItems.SMITHING_HAMMER_HEAD);
-            event.accept(ModItems.GEM_CUTTERS_BLADE);
             if (ModList.get().isLoaded("farmersdelight")) {
                 event.accept(ModItems.COOKING_KNIFE_HEAD.get().createPart(MaterialCatalog.IRON));
             }
@@ -253,6 +255,16 @@ public class MobsToolForging {
                 Capabilities.ItemHandler.BLOCK,
                 ModBlockEntities.HEATING_FORGE.get(),
                 (forge, side) -> forge.itemHandler(side)
+        );
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ModBlockEntities.LAVA_HEATING_FORGE.get(),
+                (forge, side) -> forge.itemHandler(side)
+        );
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                ModBlockEntities.LAVA_HEATING_FORGE.get(),
+                (forge, side) -> forge.fluidHandler(side)
         );
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
@@ -399,7 +411,9 @@ public class MobsToolForging {
             return;
         }
         for (int slot = 0; slot < event.getEntity().getInventory().getContainerSize(); slot++) {
-            WorkpieceHeat.clearIfCooled(event.getEntity().getInventory().getItem(slot), event.getEntity().level());
+            ItemStack stack = event.getEntity().getInventory().getItem(slot);
+            WorkpieceHeat.clearIfCooled(stack, event.getEntity().level());
+            CompositeAffixCompatibility.syncCompatibilityMirror(stack);
         }
     }
 
@@ -408,6 +422,9 @@ public class MobsToolForging {
             return;
         }
         ItemStack stack = itemEntity.getItem();
+        if (CompositeAffixCompatibility.syncCompatibilityMirror(stack)) {
+            itemEntity.setItem(stack);
+        }
         if (WorkpieceHeat.hasHeat(stack) && isQuenching(itemEntity)) {
             float temperature = WorkpieceHeat.temperature(stack, itemEntity.level());
             if (WorkpieceHeat.quench(stack)) {

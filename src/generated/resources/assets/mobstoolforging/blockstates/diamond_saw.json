@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "mobstoolforging:block/diamond_saw",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "mobstoolforging:block/diamond_saw"
+    },
+    "facing=south": {
+      "model": "mobstoolforging:block/diamond_saw",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mobstoolforging:block/diamond_saw",
+      "y": 270
+    }
+  }
+}

@@ -12,6 +12,6 @@
     "layer_pickaxe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_pickaxe_head_part",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_pickaxe_head_part"
   },
-  "tool": "pickaxe",
+  "tool": "mobstoolforging:pickaxe",
   "visual": "mobstoolforging:pickaxe"
 }

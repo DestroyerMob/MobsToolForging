@@ -51,7 +51,11 @@ public class LapidaryTableBlock extends ToolWorkstationBlock {
     private static final VoxelShape HEAD_WEST_SHAPE = rotateClockwise(HEAD_SOUTH_SHAPE);
 
     public LapidaryTableBlock(BlockBehaviour.Properties properties) {
-        super(properties, WorkstationKind.LAPIDARY_TABLE);
+        this(properties, WorkstationKind.LAPIDARY_TABLE);
+    }
+
+    protected LapidaryTableBlock(BlockBehaviour.Properties properties, WorkstationKind kind) {
+        super(properties, kind);
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(PART, BedPart.FOOT));

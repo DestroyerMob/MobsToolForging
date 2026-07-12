@@ -38,6 +38,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
         for (ToolKind toolKind : ToolKind.values()) {
             futures.add(DataProvider.saveStable(output, toolVisual(toolKind), toolVisuals.json(toolType(toolKind))));
         }
+        futures.add(DataProvider.saveStable(output, crossbowVisual(), toolVisuals.json(modLoc("crossbow"))));
         for (ArmorMaterialTextureSpec material : armorMaterialTextureSpecs()) {
             futures.add(DataProvider.saveStable(output, armorMaterialTexture(material), armorMaterialTextures.json(material.id())));
         }
@@ -106,6 +107,49 @@ public class ModVisualDefinitionProvider implements DataProvider {
         layers.add(layer(ToolKind.MATTOCK, "mattock_tool_axe", "headMaterial", 2, false, false));
         layers.add(layer(ToolKind.MATTOCK, "mattock_tool_hoe", "guardMaterial", 2, false, false));
         layers.add(layer(ToolKind.MATTOCK, treatmentSlot(ToolKind.MATTOCK), "treatment", 4, true, true));
+        json.add("layers", layers);
+        return json;
+    }
+
+    private JsonObject crossbowVisual() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", modLoc("tool_visual").toString());
+        json.addProperty("canvas", 16);
+        json.addProperty("large_canvas", 16);
+        json.addProperty("large_in_hand", false);
+        JsonArray layers = new JsonArray();
+
+        JsonObject body = new JsonObject();
+        body.addProperty("slot", "crossbow_body");
+        body.addProperty("template", modLoc("item/crossbow_body").toString());
+        body.addProperty("tool_template", modLoc("item/crossbow_body").toString());
+        body.addProperty("part_template", modLoc("item/crossbow_body_part").toString());
+        body.addProperty("z", 1);
+        body.addProperty("optional", false);
+        body.addProperty("emissive_allowed", false);
+        layers.add(body);
+
+        JsonObject limbs = new JsonObject();
+        limbs.addProperty("slot", "crossbow_limbs");
+        limbs.addProperty("material_from", "headMaterial");
+        limbs.addProperty("template", modLoc("item/crossbow_limbs").toString());
+        limbs.addProperty("tool_template", modLoc("item/crossbow_limbs").toString());
+        limbs.addProperty("part_template", modLoc("item/crossbow_limbs").toString());
+        limbs.addProperty("z", 2);
+        limbs.addProperty("optional", false);
+        limbs.addProperty("emissive_allowed", false);
+        layers.add(limbs);
+
+        JsonObject string = new JsonObject();
+        string.addProperty("slot", "crossbow_string");
+        string.addProperty("material_from", "guardMaterial");
+        string.addProperty("template", modLoc("item/string_crossbow_string_standby").toString());
+        string.addProperty("tool_template", modLoc("item/string_crossbow_string_standby").toString());
+        string.addProperty("part_template", modLoc("item/string_crossbow_string_standby").toString());
+        string.addProperty("z", 3);
+        string.addProperty("optional", false);
+        string.addProperty("emissive_allowed", false);
+        layers.add(string);
         json.add("layers", layers);
         return json;
     }
@@ -196,6 +240,8 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 new MaterialVisualSpec(MaterialCatalog.BREEZE, "crystal", "facets", false, 0, palette(0xFF5B6170, 0xFF7D879A, 0xFFA3B2C7, 0xFFC3D7E8, 0xFFE4F5FF, 0xFFFFFFFF)),
                 new MaterialVisualSpec(MaterialCatalog.NETHER, "nether", "heat_cracks", true, 8, palette(0xFF160503, 0xFF2A0904, 0xFF4D1309, 0xFF8A260D, 0xFFFF6A1A, 0xFFFFD06A)),
                 new MaterialVisualSpec(MaterialCatalog.SCULK, "sculk", "veins", true, 8, palette(0xFF05090A, 0xFF071417, 0xFF0A2428, 0xFF0E3D45, 0xFF0C8395, 0xFF4AF5FF))
+                , new MaterialVisualSpec(MaterialCatalog.SPIDER_SILK, "fiber", "fine_threads", false, 0, palette(0xFF4B4B4B, 0xFF6B6B6B, 0xFF929292, 0xFFB6B6B6, 0xFFD4D4D4, 0xFFF2F2F2))
+                , new MaterialVisualSpec(MaterialCatalog.PLANT_FIBER, "fiber", "fine_threads", false, 0, palette(0xFF3E481E, 0xFF59652A, 0xFF77853A, 0xFF98A94F, 0xFFBDCF6A, 0xFFE0F59A))
         );
     }
 

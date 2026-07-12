@@ -1,5 +1,16 @@
 {
   "values": [
+    "mobstoolforging:sawmill",
+    "mobstoolforging:spruce_sawmill",
+    "mobstoolforging:birch_sawmill",
+    "mobstoolforging:jungle_sawmill",
+    "mobstoolforging:acacia_sawmill",
+    "mobstoolforging:dark_oak_sawmill",
+    "mobstoolforging:mangrove_sawmill",
+    "mobstoolforging:cherry_sawmill",
+    "mobstoolforging:bamboo_sawmill",
+    "mobstoolforging:crimson_sawmill",
+    "mobstoolforging:warped_sawmill",
     "mobstoolforging:toolmakers_bench",
     "mobstoolforging:spruce_toolmakers_bench",
     "mobstoolforging:birch_toolmakers_bench",

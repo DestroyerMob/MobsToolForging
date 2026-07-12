@@ -50,6 +50,17 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
                 .save(output);
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.LAVA_HEATING_FORGE)
+                .define('I', Items.IRON_INGOT)
+                .define('G', Items.GLASS_PANE)
+                .define('H', ModBlocks.HEATING_FORGE.get())
+                .define('L', Items.LAVA_BUCKET)
+                .pattern("IGI")
+                .pattern("IHI")
+                .pattern("ILI")
+                .unlockedBy("has_heating_forge", has(ModBlocks.HEATING_FORGE.get()))
+                .save(output);
+
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.CRUCIBLE)
                 .define('I', Items.IRON_INGOT)
                 .define('B', Items.IRON_BLOCK)
@@ -60,7 +71,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.FOUNDRY_FORGE)
-                .define('H', ModBlocks.HEATING_FORGE.get())
+                .define('H', ModBlocks.LAVA_HEATING_FORGE.get())
                 .define('O', Items.OBSIDIAN)
                 .define('L', Items.LAVA_BUCKET)
                 .pattern("OLO")
@@ -112,31 +123,6 @@ public class ModRecipeProvider extends RecipeProvider {
                     .unlockedBy("has_" + variant.id(), has(variant.recipeSlab()))
                     .save(output);
         }
-
-        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.SMITHING_HAMMER)
-                .define('S', Items.STICK)
-                .define('X', Items.STONE)
-                .pattern(" XS")
-                .pattern(" SX")
-                .pattern("S  ")
-                .unlockedBy("has_stone", has(Items.STONE))
-                .save(output);
-
-        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.IRON_SMITHING_HAMMER)
-                .define('H', ModItems.SMITHING_HAMMER_HEAD.get())
-                .define('S', Items.STICK)
-                .pattern("H")
-                .pattern("S")
-                .unlockedBy("has_smithing_hammer_head", has(ModItems.SMITHING_HAMMER_HEAD.get()))
-                .save(output);
-
-        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.GEM_CUTTERS_KNIFE)
-                .define('B', ModItems.GEM_CUTTERS_BLADE.get())
-                .define('S', Items.STICK)
-                .pattern("B")
-                .pattern("S")
-                .unlockedBy("has_gem_cutters_blade", has(ModItems.GEM_CUTTERS_BLADE.get()))
-                .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.FIRE_STICK)
                 .define('S', Items.STICK)

@@ -19,6 +19,6 @@
     "layer_sword_treatment_netherite": "mobstoolforging:source/tool_parts/netherite/netherite_sword_treatment_tool",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_sword_blade_tool"
   },
-  "tool": "sword",
+  "tool": "mobstoolforging:sword",
   "visual": "mobstoolforging:sword"
 }

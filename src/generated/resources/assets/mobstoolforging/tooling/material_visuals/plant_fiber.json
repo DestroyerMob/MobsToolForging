@@ -1,0 +1,17 @@
+{
+  "type": "mobstoolforging:material_visual",
+  "emissive": false,
+  "fallbacks": [
+    "fiber"
+  ],
+  "family": "fiber",
+  "palette": {
+    "102": "0xFF59652A",
+    "140": "0xFF77853A",
+    "178": "0xFF98A94F",
+    "216": "0xFFBDCF6A",
+    "255": "0xFFE0F59A",
+    "63": "0xFF3E481E"
+  },
+  "texture_noise": "fine_threads"
+}

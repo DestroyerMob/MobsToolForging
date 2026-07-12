@@ -10,6 +10,7 @@ public enum WorkstationKind {
     CRUDE_ANVIL(MaterialCategory.METAL, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.ANVIL_LAND, ParticleTypes.ELECTRIC_SPARK, "message.mobstoolforging.use_lapidary_table"),
     TOOL_FORGE(MaterialCategory.METAL, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.ANVIL_LAND, ParticleTypes.ELECTRIC_SPARK, "message.mobstoolforging.use_lapidary_table"),
     LAPIDARY_TABLE(MaterialCategory.GEM, SoundEvents.AMETHYST_BLOCK_CHIME, SoundEvents.GRINDSTONE_USE, ParticleTypes.ELECTRIC_SPARK, "message.mobstoolforging.use_tool_forge"),
+    SAWMILL(MaterialCategory.ORGANIC, SoundEvents.WOOD_PLACE, SoundEvents.WOOD_HIT, ParticleTypes.CRIT, "message.mobstoolforging.use_sawmill"),
     LEATHER_STATION(MaterialCategory.ORGANIC, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.UI_STONECUTTER_SELECT_RECIPE, ParticleTypes.CRIT, "message.mobstoolforging.use_leather_station"),
     TOOLMAKERS_BENCH(MaterialCategory.METAL, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundEvents.UI_STONECUTTER_SELECT_RECIPE, ParticleTypes.CRIT, "message.mobstoolforging.use_toolmakers_bench");
 
@@ -56,7 +57,7 @@ public enum WorkstationKind {
             case CRUDE_ANVIL -> MobsToolForgingConfig.crudeAnvilMaxQuality();
             case LAPIDARY_TABLE -> MobsToolForgingConfig.lapidaryTableMaxQuality();
             case TOOL_FORGE, TOOLMAKERS_BENCH -> MobsToolForgingConfig.smithingAnvilMaxQuality();
-            case LEATHER_STATION -> MobsToolForgingConfig.leatherStationMaxQuality();
+            case SAWMILL, LEATHER_STATION -> MobsToolForgingConfig.leatherStationMaxQuality();
         };
     }
 
@@ -65,6 +66,7 @@ public enum WorkstationKind {
             case CRUDE_ANVIL -> -12;
             case TOOL_FORGE -> 6;
             case LAPIDARY_TABLE -> 2;
+            case SAWMILL -> 0;
             case LEATHER_STATION -> 0;
             case TOOLMAKERS_BENCH -> 0;
         };

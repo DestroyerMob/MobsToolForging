@@ -16,6 +16,7 @@ import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.item.ModularToolItem;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.world.FlintToolStacks;
+import org.destroyermob.mobstoolforging.world.CrossbowAssembly;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
@@ -53,12 +54,15 @@ public final class ModCreativeTabs {
         output.accept(ModItems.CRUDE_ANVIL.get());
         output.accept(ModItems.TOOL_FORGE.get());
         output.accept(ModItems.LAPIDARY_TABLE.get());
+        output.accept(ModItems.DIAMOND_SAW.get());
+        ModItems.SAWMILL_ITEMS.forEach(item -> output.accept(item.get()));
         output.accept(ModItems.PATTERN_CREATION_STATION.get());
         ModItems.PATTERN_RACK_ITEMS.forEach(item -> output.accept(item.get()));
         ModItems.TOOLMAKER_STATION_ITEMS.forEach(item -> output.accept(item.get()));
         ModItems.LEATHER_STATION_ITEMS.forEach(item -> output.accept(item.get()));
         ModItems.DRYING_RACK_ITEMS.forEach(item -> output.accept(item.get()));
         output.accept(ModItems.HEATING_FORGE.get());
+        output.accept(ModItems.LAVA_HEATING_FORGE.get());
         output.accept(ModItems.CRUCIBLE.get());
         output.accept(ModItems.FOUNDRY_FORGE.get());
     }
@@ -66,8 +70,6 @@ public final class ModCreativeTabs {
     private static void acceptStationTools(CreativeModeTab.Output output) {
         output.accept(ModItems.SMITHING_HAMMER.get());
         output.accept(ModItems.IRON_SMITHING_HAMMER.get());
-        output.accept(ModItems.GEM_CUTTERS_KNIFE.get());
-        output.accept(ModItems.SCREWDRIVER.get());
         output.accept(ModItems.FIRE_STICK.get());
     }
 
@@ -78,9 +80,6 @@ public final class ModCreativeTabs {
         output.accept(ModItems.HOE_HEAD_PATTERN.get());
         output.accept(ModItems.SWORD_BLADE_PATTERN.get());
         output.accept(ModItems.SWORD_GUARD_PATTERN.get());
-        output.accept(ModItems.SMITHING_HAMMER_HEAD_PATTERN.get());
-        output.accept(ModItems.SCREWDRIVER_HEAD_PATTERN.get());
-        output.accept(ModItems.GEM_CUTTERS_BLADE_PATTERN.get());
         output.accept(ModItems.HELMET_CHAINMAIL_PATTERN.get());
         output.accept(ModItems.HELMET_PLATE_PATTERN.get());
         output.accept(ModItems.CHESTPLATE_CHAINMAIL_PATTERN.get());
@@ -89,6 +88,8 @@ public final class ModCreativeTabs {
         output.accept(ModItems.LEGGINGS_PLATE_PATTERN.get());
         output.accept(ModItems.BOOTS_CHAINMAIL_PATTERN.get());
         output.accept(ModItems.BOOTS_PLATE_PATTERN.get());
+        output.accept(ModItems.CROSSBOW_BODY_PATTERN.get());
+        output.accept(ModItems.CROSSBOW_LIMBS_PATTERN.get());
         ToolTypeRegistry.templates().stream()
                 .filter(template -> !template.id().getNamespace().equals(MobsToolForging.MOD_ID))
                 .map(ModCreativeTabs::templatePattern)
@@ -114,15 +115,14 @@ public final class ModCreativeTabs {
         output.accept(ModItems.LEGGINGS_PLATE.get().createPart(MaterialCatalog.IRON));
         output.accept(ModItems.BOOTS_CHAINMAIL.get().createPart(MaterialCatalog.IRON));
         output.accept(ModItems.BOOTS_PLATE.get().createPart(MaterialCatalog.IRON));
+        output.accept(ModItems.CROSSBOW_BODY.get().createPart(MaterialCatalog.WOOD));
+        output.accept(ModItems.CROSSBOW_LIMBS.get().createPart(MaterialCatalog.IRON));
     }
 
     private static void acceptMaterials(CreativeModeTab.Output output) {
         output.accept(ModItems.PATTERN_BOARD.get());
         output.accept(ModItems.FLINT_SHARD.get());
         output.accept(ModItems.PLANT_FIBER.get());
-        output.accept(ModItems.SMITHING_HAMMER_HEAD.get());
-        output.accept(ModItems.SCREWDRIVER_HEAD.get());
-        output.accept(ModItems.GEM_CUTTERS_BLADE.get());
         output.accept(ModItems.DIAMOND_POWDER.get());
     }
 
@@ -136,6 +136,11 @@ public final class ModCreativeTabs {
         output.accept(modularTool(ToolKind.AXE, Optional.empty()));
         output.accept(modularTool(ToolKind.HOE, Optional.empty()));
         output.accept(modularTool(ToolKind.MATTOCK, Optional.of(MaterialCatalog.IRON)));
+        output.accept(CrossbowAssembly.assemble(java.util.List.of(
+                ModItems.CROSSBOW_BODY.get().createPart(MaterialCatalog.WOOD),
+                ModItems.CROSSBOW_LIMBS.get().createPart(MaterialCatalog.IRON),
+                new ItemStack(net.minecraft.world.item.Items.STRING)
+        )));
     }
 
     private static void acceptStarterArmor(CreativeModeTab.Output output) {

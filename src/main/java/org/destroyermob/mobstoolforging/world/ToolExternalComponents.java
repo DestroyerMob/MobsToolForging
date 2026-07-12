@@ -39,18 +39,6 @@ public final class ToolExternalComponents {
         copyCompatibleExternalComponents(source, target, false);
     }
 
-    public static void removeApotheosisAffixComponents(ItemStack stack) {
-        if (stack.isEmpty()) {
-            return;
-        }
-        for (DataComponentType<?> component : List.copyOf(stack.getComponents().keySet())) {
-            ResourceLocation componentId = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component);
-            if (componentId != null && isApotheosisAffixComponent(componentId)) {
-                stack.remove(component);
-            }
-        }
-    }
-
     private static void copyCompatibleExternalComponents(ItemStack source, ItemStack target, boolean includeAffixes) {
         if (source.isEmpty() || target.isEmpty()) {
             return;

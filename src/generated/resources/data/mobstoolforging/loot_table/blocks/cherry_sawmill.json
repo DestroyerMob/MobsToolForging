@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "block": "mobstoolforging:cherry_sawmill",
+              "condition": "minecraft:block_state_property",
+              "properties": {
+                "part": "foot"
+              }
+            }
+          ],
+          "functions": [
+            {
+              "function": "minecraft:explosion_decay"
+            }
+          ],
+          "name": "mobstoolforging:cherry_sawmill"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "mobstoolforging:blocks/cherry_sawmill"
+}

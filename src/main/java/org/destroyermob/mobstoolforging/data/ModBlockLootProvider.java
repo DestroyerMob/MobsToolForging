@@ -30,12 +30,15 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.CRUDE_ANVIL.get());
         dropSelf(ModBlocks.TOOL_FORGE.get());
         dropSelf(ModBlocks.LAPIDARY_TABLE.get());
+        dropSelf(ModBlocks.DIAMOND_SAW.get());
+        ModBlocks.SAWMILL_VARIANTS.forEach(variant -> add(variant.block().get(), this::createLeatherStationDrops));
         dropSelf(ModBlocks.PATTERN_CREATION_STATION.get());
         ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> dropSelf(variant.block().get()));
         ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> dropSelf(variant.block().get()));
         ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> add(variant.block().get(), this::createLeatherStationDrops));
         ModBlocks.DRYING_RACK_VARIANTS.forEach(variant -> dropSelf(variant.block().get()));
         dropSelf(ModBlocks.HEATING_FORGE.get());
+        dropSelf(ModBlocks.LAVA_HEATING_FORGE.get());
         dropSelf(ModBlocks.CRUCIBLE.get());
         dropSelf(ModBlocks.FOUNDRY_FORGE.get());
         add(ModBlocks.KNAPPING_FLINT.get(), noDrop());
@@ -49,8 +52,10 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
                 ModBlocks.CRUDE_ANVIL.get(),
                 ModBlocks.TOOL_FORGE.get(),
                 ModBlocks.LAPIDARY_TABLE.get(),
+                ModBlocks.DIAMOND_SAW.get(),
                 ModBlocks.PATTERN_CREATION_STATION.get(),
                 ModBlocks.HEATING_FORGE.get(),
+                ModBlocks.LAVA_HEATING_FORGE.get(),
                 ModBlocks.CRUCIBLE.get(),
                 ModBlocks.FOUNDRY_FORGE.get(),
                 ModBlocks.KNAPPING_FLINT.get(),
@@ -58,6 +63,7 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
                 ModBlocks.ASH.get()
         ));
         ModBlocks.PATTERN_RACK_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
+        ModBlocks.SAWMILL_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         ModBlocks.TOOLMAKER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));
         ModBlocks.DRYING_RACK_VARIANTS.forEach(variant -> blocks.add(variant.block().get()));

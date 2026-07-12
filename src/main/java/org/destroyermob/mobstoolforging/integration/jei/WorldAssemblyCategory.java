@@ -50,6 +50,11 @@ public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRe
             addInput(builder, 25, 7, List.of(recipe.upperBlocks().get(1)));
             addInput(builder, 5, 27, List.of(recipe.lowerBlocks().get(0)));
             addInput(builder, 25, 27, List.of(recipe.lowerBlocks().get(1)));
+        } else if (recipe.kind() == WorldAssemblyJeiRecipe.Kind.SAWMILL) {
+            addInput(builder, 5, 7, List.of(recipe.upperBlocks().get(0)));
+            addInput(builder, 25, 7, List.of(recipe.upperBlocks().get(1)));
+            addInput(builder, 5, 27, recipe.lowerBlocks());
+            addInput(builder, 25, 27, recipe.lowerBlocks());
         } else if (recipe.kind() == WorldAssemblyJeiRecipe.Kind.LEATHER_STATION) {
             addInput(builder, 5, 7, recipe.upperBlocks());
             addInput(builder, 25, 7, recipe.upperBlocks());
@@ -61,7 +66,7 @@ public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRe
 
         builder.addSlot(RecipeIngredientRole.CATALYST, 60, 27)
                 .setStandardSlotBackground()
-                .addItemStacks(recipe.hammers());
+                .addItemStacks(recipe.activationItems());
         builder.addOutputSlot(122, 17)
                 .setOutputSlotBackground()
                 .addItemStack(recipe.output());
@@ -77,12 +82,17 @@ public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRe
     public void draw(WorldAssemblyJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
         var font = Minecraft.getInstance().font;
         Component arrangement = switch (recipe.kind()) {
+            case SAWMILL -> Component.translatable("jei.mobstoolforging.world_assembly.front_view");
             case LEATHER_STATION -> Component.translatable("jei.mobstoolforging.world_assembly.side_view");
             case LAPIDARY_TABLE -> Component.translatable("jei.mobstoolforging.world_assembly.front_view");
+            case DIAMOND_SAW -> Component.translatable("jei.mobstoolforging.world_assembly.place_block");
             case ANVIL -> Component.translatable("jei.mobstoolforging.world_assembly.place_block");
         };
         guiGraphics.drawString(font, arrangement, 3, 51, TEXT, false);
-        guiGraphics.drawString(font, Component.translatable("jei.mobstoolforging.world_assembly.sneak_use"), 3, 62, TEXT, false);
+        Component instruction = recipe.kind() == WorldAssemblyJeiRecipe.Kind.DIAMOND_SAW
+                ? Component.translatable("jei.mobstoolforging.world_assembly.sneak_use_abrasive")
+                : Component.translatable("jei.mobstoolforging.world_assembly.sneak_use");
+        guiGraphics.drawString(font, instruction, 3, 62, TEXT, false);
         JeiRecipeVisuals.drawArrow(guiGraphics, 94, 22);
     }
 }

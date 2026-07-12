@@ -44,10 +44,13 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
         WorkstationKind workstationKind = parseWorkstation(GsonHelper.getAsString(json, "workstation", "tool_forge"));
         Optional<ResourceLocation> pattern = parsePattern(json);
         StationWorkRecipe.Input input = parseInput(GsonHelper.getAsJsonObject(json, "input"));
+        Optional<StationWorkRecipe.Input> secondaryInput = json.has("secondary_input")
+                ? Optional.of(parseInput(GsonHelper.getAsJsonObject(json, "secondary_input")))
+                : Optional.empty();
         ItemStack output = parseOutput(GsonHelper.getAsJsonObject(json, "output"));
         int requiredHits = Math.max(1, GsonHelper.getAsInt(json, "required_hits", 1));
         int minimumHammerLevel = parseHammerLevel(json, SmithingHammerLevel.STONE.level());
-        return new StationWorkRecipe(id, workstationKind, pattern, input, output, requiredHits, minimumHammerLevel);
+        return new StationWorkRecipe(id, workstationKind, pattern, input, secondaryInput, output, requiredHits, minimumHammerLevel);
     }
 
     private static WorkstationKind parseWorkstation(String value) {
@@ -60,6 +63,9 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
         }
         if (normalized.equals("lapidary_table")) {
             return WorkstationKind.LAPIDARY_TABLE;
+        }
+        if (normalized.equals("sawmill")) {
+            return WorkstationKind.SAWMILL;
         }
         if (normalized.equals("leather_station") || normalized.equals("leatherworking") || normalized.equals("leather_working_station")) {
             return WorkstationKind.LEATHER_STATION;
@@ -103,6 +109,9 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
         if (output.has("armor")) {
             return parseArmorOutput(output);
         }
+        if (output.has("tool_part")) {
+            return parseToolPartOutput(output);
+        }
         ResourceLocation itemId = ResourceLocation.parse(output.has("id") ? GsonHelper.getAsString(output, "id") : GsonHelper.getAsString(output, "item"));
         Item item = BuiltInRegistries.ITEM.get(itemId);
         if (item == Items.AIR) {
@@ -121,6 +130,17 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
             case ArmorPartData.LEGGINGS_CHAINMAIL -> ModItems.LEGGINGS_CHAINMAIL.get().createPart(material, quality);
             case ArmorPartData.BOOTS_CHAINMAIL -> ModItems.BOOTS_CHAINMAIL.get().createPart(material, quality);
             default -> throw new IllegalArgumentException("Unknown station work armor part output " + part);
+        };
+    }
+
+    private static ItemStack parseToolPartOutput(JsonObject output) {
+        String part = GsonHelper.getAsString(output, "tool_part").toLowerCase(Locale.ROOT);
+        ResourceLocation material = ResourceLocation.parse(GsonHelper.getAsString(output, "material"));
+        int quality = GsonHelper.getAsInt(output, "quality", ToolPartData.DEFAULT_QUALITY);
+        return switch (part) {
+            case ToolPartData.CROSSBOW_BODY -> ModItems.CROSSBOW_BODY.get().createPart(material, quality);
+            case ToolPartData.CROSSBOW_LIMBS -> ModItems.CROSSBOW_LIMBS.get().createPart(material, quality);
+            default -> throw new IllegalArgumentException("Unknown station work tool part output " + part);
         };
     }
 

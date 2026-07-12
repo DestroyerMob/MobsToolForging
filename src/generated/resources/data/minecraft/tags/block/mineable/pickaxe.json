@@ -3,8 +3,10 @@
     "mobstoolforging:crude_anvil",
     "mobstoolforging:tool_forge",
     "mobstoolforging:lapidary_table",
+    "mobstoolforging:diamond_saw",
     "mobstoolforging:pattern_creation_station",
     "mobstoolforging:heating_forge",
+    "mobstoolforging:lava_heating_forge",
     "mobstoolforging:crucible",
     "mobstoolforging:foundry_forge"
   ]

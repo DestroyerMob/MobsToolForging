@@ -56,7 +56,7 @@ public class ToolForgeTemplateScreen extends Screen {
 
         int hovered = hoveredIndex(layout, mouseX, mouseY);
         int shownIndex = hovered >= 0 ? hovered : previewIndex;
-        ItemStack hoveredStack = ItemStack.EMPTY;
+        ForgeTemplateDefinition hoveredTemplate = null;
         if (templates.isEmpty()) {
             return;
         }
@@ -67,19 +67,19 @@ public class ToolForgeTemplateScreen extends Screen {
             ItemStack previewStack = previewStack(template);
             drawRecipeButton(graphics, left, top, previewStack, i == shownIndex, i == hovered);
             if (i == hovered) {
-                hoveredStack = previewStack;
+                hoveredTemplate = template;
             }
         }
 
         ItemStack shownStack = previewStack(templates.get(Math.min(shownIndex, templates.size() - 1)));
         graphics.renderItem(shownStack, layout.left() + OUTPUT_LEFT, layout.top() + OUTPUT_TOP);
 
-        if (!hoveredStack.isEmpty()) {
-            graphics.renderTooltip(font, hoveredStack, mouseX, mouseY);
+        if (hoveredTemplate != null) {
+            graphics.renderTooltip(font, hoveredTemplate.displayName(), mouseX, mouseY);
         } else if (contains(mouseX, mouseY, layout.left() + INPUT_LEFT, layout.top() + INPUT_TOP, 16, 16)) {
             graphics.renderTooltip(font, MaterialCatalog.displayStack(previewMaterial()), mouseX, mouseY);
         } else if (contains(mouseX, mouseY, layout.left() + OUTPUT_LEFT, layout.top() + OUTPUT_TOP, 16, 16)) {
-            graphics.renderTooltip(font, shownStack, mouseX, mouseY);
+            graphics.renderTooltip(font, templates.get(Math.min(shownIndex, templates.size() - 1)).displayName(), mouseX, mouseY);
         }
     }
 

@@ -12,6 +12,6 @@
     "layer_shovel_head_iron": "mobstoolforging:source/tool_parts/iron/iron_shovel_head_part",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_shovel_head_part"
   },
-  "tool": "shovel",
+  "tool": "mobstoolforging:shovel",
   "visual": "mobstoolforging:shovel"
 }

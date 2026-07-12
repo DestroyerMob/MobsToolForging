@@ -16,6 +16,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
@@ -56,7 +57,11 @@ public class HeatingForgeBlockEntity extends BlockEntity {
     private boolean spentFuelBed;
 
     public HeatingForgeBlockEntity(BlockPos pos, BlockState blockState) {
-        super(ModBlockEntities.HEATING_FORGE.get(), pos, blockState);
+        this(ModBlockEntities.HEATING_FORGE.get(), pos, blockState);
+    }
+
+    protected HeatingForgeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
+        super(type, pos, blockState);
         for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
             workpieceStacks[slot] = ItemStack.EMPTY;
         }
@@ -75,7 +80,7 @@ public class HeatingForgeBlockEntity extends BlockEntity {
                 sync = true;
             }
         }
-        boolean canHeat = forge.isFuelBurning();
+        boolean canHeat = forge.hasAvailableHeatSource();
         int[] heatingSlots = new int[WORKPIECE_SLOTS];
         int heatingSlotCount = 0;
         for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
@@ -88,15 +93,24 @@ public class HeatingForgeBlockEntity extends BlockEntity {
                 heatingSlots[heatingSlotCount++] = slot;
             }
         }
+        int appliedHeatUnits = 0;
         if (canHeat && heatingSlotCount > 0) {
             for (int unit = 0; unit < HEAT_UNITS_PER_TICK; unit++) {
                 int slot = heatingSlots[(int) ((level.getGameTime() + unit) % heatingSlotCount)];
                 if (forge.heatProgress[slot] < forge.requiredHeatTicks(forge.workpieceStacks[slot])) {
+                    if (!forge.consumeHeatUnit()) {
+                        break;
+                    }
                     forge.heatProgress[slot]++;
+                    appliedHeatUnits++;
                     changed = true;
                 }
             }
             sync = sync || level.getGameTime() % 10L == 0L;
+        }
+        if (forge.setActivelyHeating(appliedHeatUnits > 0)) {
+            changed = true;
+            sync = true;
         }
         for (int slot = 0; slot < WORKPIECE_SLOTS; slot++) {
             ItemStack workpiece = forge.workpieceStacks[slot];
@@ -175,6 +189,10 @@ public class HeatingForgeBlockEntity extends BlockEntity {
 
     public boolean isLit() {
         return isFuelBurning();
+    }
+
+    public boolean usesFluidFuel() {
+        return false;
     }
 
     public boolean isWorkshopHot(Level level) {
@@ -406,6 +424,18 @@ public class HeatingForgeBlockEntity extends BlockEntity {
 
     private boolean isFuelBurning() {
         return ignited && burnTime > 0 && !spentFuelBed && isFuelBedFull();
+    }
+
+    protected boolean hasAvailableHeatSource() {
+        return isFuelBurning();
+    }
+
+    protected boolean consumeHeatUnit() {
+        return isFuelBurning();
+    }
+
+    protected boolean setActivelyHeating(boolean activelyHeating) {
+        return false;
     }
 
     private void finishFuelBedUse() {

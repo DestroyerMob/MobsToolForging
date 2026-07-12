@@ -29,8 +29,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
-import org.destroyermob.mobstoolforging.world.ToolPartData;
-import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.joml.Vector3f;
 
@@ -134,18 +132,7 @@ public final class PatternCutoutBakedModel implements BakedModel {
     }
 
     private Optional<ResourceLocation> cutoutTexture(ForgeTemplateDefinition template) {
-        return ToolTypeRegistry.toolType(template.toolType())
-                .flatMap(definition -> cutoutTexture(definition, template.partType()));
-    }
-
-    private Optional<ResourceLocation> cutoutTexture(ToolTypeDefinition definition, String partType) {
-        ToolVisualDefinition visual = ToolVisualManager.resolve(definition.visualId(), definition);
-        ToolVisualLayer layer = visual.layerForSlot(partVisualSlot(partType));
-        return layer.templateId(true).or(() -> layer.templateId(false));
-    }
-
-    private static String partVisualSlot(String partType) {
-        return ToolPartData.SWORD_GUARD.equals(partType) ? "guard" : partType;
+        return PatternCutoutTextures.resolve(template);
     }
 
     private List<BakedQuad> bakeFullBoard() {

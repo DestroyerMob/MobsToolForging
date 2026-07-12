@@ -21,6 +21,7 @@ import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModRecipeSerializers;
 import org.destroyermob.mobstoolforging.registry.ModTags;
+import org.destroyermob.mobstoolforging.world.CompositeAffixCompatibility;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolAssemblyEnchantments;
 import org.destroyermob.mobstoolforging.world.ToolAssemblyParts;
@@ -70,6 +71,7 @@ public class ModularToolRecipe extends CustomRecipe {
         }
         ToolExternalComponents.copyPrimaryHeadComponentsToTool(parts.part(), output);
         output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts.assemblyStacks()));
+        CompositeAffixCompatibility.syncCompatibilityMirror(output);
         ToolAssemblyEnchantments.syncRoutedToolEnchantments(output, registries);
         return output;
     }

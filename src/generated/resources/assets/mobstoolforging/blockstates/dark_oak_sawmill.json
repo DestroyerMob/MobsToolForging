@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=east,part=foot": {
+      "model": "mobstoolforging:block/dark_oak_sawmill",
+      "y": 90
+    },
+    "facing=east,part=head": {
+      "model": "mobstoolforging:block/invisible_sawmill",
+      "y": 90
+    },
+    "facing=north,part=foot": {
+      "model": "mobstoolforging:block/dark_oak_sawmill"
+    },
+    "facing=north,part=head": {
+      "model": "mobstoolforging:block/invisible_sawmill"
+    },
+    "facing=south,part=foot": {
+      "model": "mobstoolforging:block/dark_oak_sawmill",
+      "y": 180
+    },
+    "facing=south,part=head": {
+      "model": "mobstoolforging:block/invisible_sawmill",
+      "y": 180
+    },
+    "facing=west,part=foot": {
+      "model": "mobstoolforging:block/dark_oak_sawmill",
+      "y": 270
+    },
+    "facing=west,part=head": {
+      "model": "mobstoolforging:block/invisible_sawmill",
+      "y": 270
+    }
+  }
+}

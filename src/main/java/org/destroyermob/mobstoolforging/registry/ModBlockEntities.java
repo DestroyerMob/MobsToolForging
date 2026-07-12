@@ -12,6 +12,7 @@ import org.destroyermob.mobstoolforging.world.FoundryForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlockEntity;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.KnappingFlintBlockEntity;
+import org.destroyermob.mobstoolforging.world.LavaHeatingForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.PatternCreationStationBlockEntity;
 import org.destroyermob.mobstoolforging.world.PatternRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
@@ -29,6 +30,10 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<HeatingForgeBlockEntity>> HEATING_FORGE = BLOCK_ENTITIES.register(
             "heating_forge",
             () -> BlockEntityType.Builder.of(HeatingForgeBlockEntity::new, ModBlocks.HEATING_FORGE.get()).build(null)
+    );
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<LavaHeatingForgeBlockEntity>> LAVA_HEATING_FORGE = BLOCK_ENTITIES.register(
+            "lava_heating_forge",
+            () -> BlockEntityType.Builder.of(LavaHeatingForgeBlockEntity::new, ModBlocks.LAVA_HEATING_FORGE.get()).build(null)
     );
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CrucibleBlockEntity>> CRUCIBLE = BLOCK_ENTITIES.register(
             "crucible",

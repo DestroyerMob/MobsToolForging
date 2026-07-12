@@ -12,6 +12,6 @@
     "layer_axe_head_iron": "mobstoolforging:source/tool_parts/iron/iron_axe_head_part",
     "particle": "mobstoolforging:source/tool_parts/iron/iron_axe_head_part"
   },
-  "tool": "axe",
+  "tool": "mobstoolforging:axe",
   "visual": "mobstoolforging:axe"
 }

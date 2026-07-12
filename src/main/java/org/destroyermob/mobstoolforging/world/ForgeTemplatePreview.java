@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.world;
 
+import java.util.LinkedHashSet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -17,10 +18,11 @@ public final class ForgeTemplatePreview {
     }
 
     public static ResourceLocation material(ForgeTemplateDefinition template) {
-        if (isUsableMaterial(template, MaterialCatalog.IRON)) {
-            return MaterialCatalog.IRON;
-        }
-        for (ResourceLocation material : MaterialCatalog.starterMaterialIds()) {
+        LinkedHashSet<ResourceLocation> candidates = new LinkedHashSet<>();
+        candidates.add(MaterialCatalog.IRON);
+        candidates.addAll(MaterialCatalog.starterMaterialIds());
+        candidates.addAll(MaterialCatalog.handleMaterialIds());
+        for (ResourceLocation material : candidates) {
             if (isUsableMaterial(template, material)) {
                 return material;
             }

@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -36,6 +37,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.common.SoundActions;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidUtil;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModItems;
@@ -136,6 +140,9 @@ public class HeatingForgeBlock extends BaseEntityBlock {
                 && !canHandleItem(stack, forge, player, state, pos, hitResult)) {
             return EmptyMainHandInteractions.itemResult(useWithoutItem(state, level, pos, player, hitResult), level);
         }
+        if (forge instanceof LavaHeatingForgeBlockEntity fluidForge) {
+            return useFluidForgeItem(stack, state, level, pos, player, hand, hitResult, fluidForge);
+        }
         if (isFireStick(stack)) {
             return hasFireSticksInBothHands(player) ? ignite(stack, forge, level, pos, player) : ItemInteractionResult.CONSUME;
         }
@@ -185,6 +192,9 @@ public class HeatingForgeBlock extends BaseEntityBlock {
                 stack -> canHandleItem(stack, forge, player, state, pos, hitResult)
         )) {
             return InteractionResult.PASS;
+        }
+        if (forge instanceof LavaHeatingForgeBlockEntity fluidForge) {
+            return useFluidForgeWithoutItem(state, level, pos, player, hitResult, fluidForge);
         }
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
@@ -299,6 +309,15 @@ public class HeatingForgeBlock extends BaseEntityBlock {
     }
 
     private static Component heatingWorkpieceRejectedMessage(HeatingForgeBlockEntity forge, int slot) {
+        if (forge instanceof LavaHeatingForgeBlockEntity fluidForge) {
+            if (!fluidForge.hasFuel()) {
+                return Component.translatable("message.mobstoolforging.lava_heating_needs_fluid");
+            }
+            if (!fluidForge.workpieceStack(slot).isEmpty()) {
+                return Component.translatable("message.mobstoolforging.heating_workpiece_slot_busy");
+            }
+            return Component.translatable("message.mobstoolforging.heating_workpiece_busy");
+        }
         if (forge.hasSpentFuelBed()) {
             return Component.translatable("message.mobstoolforging.heating_clear_embers");
         }
@@ -407,6 +426,11 @@ public class HeatingForgeBlock extends BaseEntityBlock {
 
     private static boolean canHandleItem(ItemStack stack, HeatingForgeBlockEntity forge, Player player,
                                          BlockState state, BlockPos pos, BlockHitResult hitResult) {
+        if (forge instanceof LavaHeatingForgeBlockEntity fluidForge) {
+            return FluidUtil.getFluidHandler(stack).isPresent()
+                    || HeatingForgeBlockEntity.isHeatableWorkpiece(stack)
+                    && fluidForge.canAcceptWorkpiece(stack, workpieceSlotFromHit(state, pos, hitResult));
+        }
         if (isFireStick(stack)) {
             return hasFireSticksInBothHands(player);
         }
@@ -418,6 +442,103 @@ public class HeatingForgeBlock extends BaseEntityBlock {
         }
         return HeatingForgeBlockEntity.isHeatableWorkpiece(stack)
                 && forge.canAcceptWorkpiece(stack, workpieceSlotFromHit(state, pos, hitResult));
+    }
+
+    private static ItemInteractionResult useFluidForgeItem(
+            ItemStack stack,
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hitResult,
+            LavaHeatingForgeBlockEntity forge
+    ) {
+        if (FluidUtil.getFluidHandler(stack).isPresent()) {
+            if (level.isClientSide) {
+                return ItemInteractionResult.SUCCESS;
+            }
+            FluidStack before = forge.fluidStack();
+            int beforeAmount = forge.fluidAmount();
+            if (!FluidUtil.interactWithFluidHandler(player, hand, forge.fluidHandler(hitResult.getDirection()))) {
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.lava_heating_fluid_rejected"));
+                return ItemInteractionResult.CONSUME;
+            }
+
+            FluidStack after = forge.fluidStack();
+            boolean added = forge.fluidAmount() > beforeAmount;
+            FluidStack soundFluid = added ? after : before;
+            SoundEvent sound = soundFluid.isEmpty() ? null : soundFluid.getFluidType().getSound(
+                    soundFluid,
+                    added ? SoundActions.BUCKET_EMPTY : SoundActions.BUCKET_FILL
+            );
+            level.playSound(
+                    null,
+                    pos,
+                    sound == null ? (added ? SoundEvents.BUCKET_EMPTY : SoundEvents.BUCKET_FILL) : sound,
+                    SoundSource.BLOCKS,
+                    0.8F,
+                    1.0F
+            );
+            FluidStack displayFluid = after.isEmpty() ? before : after;
+            DebugFeedback.actionBar(player, Component.translatable(
+                    added ? "message.mobstoolforging.lava_heating_fluid_added" : "message.mobstoolforging.lava_heating_fluid_removed",
+                    displayFluid.getHoverName(),
+                    forge.fluidAmount(),
+                    forge.tankCapacity()
+            ));
+            return ItemInteractionResult.CONSUME;
+        }
+
+        if (HeatingForgeBlockEntity.isHeatableWorkpiece(stack)) {
+            if (level.isClientSide) {
+                return ItemInteractionResult.SUCCESS;
+            }
+            int slot = workpieceSlotFromHit(state, pos, hitResult);
+            float temperature = WorkpieceHeat.temperature(stack, level);
+            if (forge.acceptWorkpiece(stack, slot)) {
+                level.playSound(null, pos, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 0.5F, 1.1F);
+                HeatingInteractionEffects.movedHotMetal(level, pos, temperature);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.heating_workpiece_added"));
+            } else {
+                DebugFeedback.actionBar(player, heatingWorkpieceRejectedMessage(forge, slot));
+            }
+            return ItemInteractionResult.CONSUME;
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    private static InteractionResult useFluidForgeWithoutItem(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            BlockHitResult hitResult,
+            LavaHeatingForgeBlockEntity forge
+    ) {
+        if (level.isClientSide) {
+            return InteractionResult.SUCCESS;
+        }
+        int slot = workpieceSlotFromHit(state, pos, hitResult);
+        if (!forge.workpieceStack(slot).isEmpty()) {
+            ItemStack removed = forge.removeWorkpiece(slot);
+            float temperature = WorkpieceHeat.temperature(removed, level);
+            giveOrDrop(player, removed);
+            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.0F);
+            HeatingInteractionEffects.movedHotMetal(level, pos, temperature);
+            return InteractionResult.CONSUME;
+        }
+        if (forge.fluidStack().isEmpty()) {
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.lava_heating_status_empty"));
+        } else {
+            DebugFeedback.actionBar(player, Component.translatable(
+                    forge.isLit() ? "message.mobstoolforging.lava_heating_status_active" : "message.mobstoolforging.lava_heating_status",
+                    forge.fluidStack().getHoverName(),
+                    forge.fluidAmount(),
+                    forge.tankCapacity()
+            ));
+        }
+        return InteractionResult.CONSUME;
     }
 
     private static boolean hasFireSticksInBothHands(Player player) {

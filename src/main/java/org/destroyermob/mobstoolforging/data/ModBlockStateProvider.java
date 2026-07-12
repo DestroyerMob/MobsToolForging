@@ -53,6 +53,17 @@ public class ModBlockStateProvider extends BlockStateProvider {
         );
         simpleBlockItem(lapidaryTable, lapidaryModel);
 
+        Block diamondSaw = ModBlocks.DIAMOND_SAW.get();
+        ModelFile diamondSawModel = new ModelFile.UncheckedModelFile(modLoc("block/diamond_saw"));
+        horizontalBlock(diamondSaw, diamondSawModel);
+        simpleBlockItem(diamondSaw, diamondSawModel);
+
+        ModelFile invisibleSawmillModel = models().getBuilder("block/invisible_sawmill")
+                .texture("particle", mcLoc("block/oak_planks"));
+        for (ModBlocks.SawmillVariant variant : ModBlocks.SAWMILL_VARIANTS) {
+            sawmillBlock(variant, invisibleSawmillModel);
+        }
+
         Block patternCreationStation = ModBlocks.PATTERN_CREATION_STATION.get();
         ModelFile patternCreationStationModel = new ModelFile.UncheckedModelFile(modLoc("block/pattern_creation_station"));
         horizontalBlock(patternCreationStation, patternCreationStationModel);
@@ -90,6 +101,11 @@ public class ModBlockStateProvider extends BlockStateProvider {
         heatingForgeBlock(heatingForge, heatingForgeModel);
         simpleBlockItem(heatingForge, heatingForgeModel);
 
+        Block lavaHeatingForge = ModBlocks.LAVA_HEATING_FORGE.get();
+        ModelFile lavaHeatingForgeModel = new ModelFile.UncheckedModelFile(modLoc("block/lava_heating_forge"));
+        heatingForgeBlock(lavaHeatingForge, lavaHeatingForgeModel);
+        simpleBlockItem(lavaHeatingForge, lavaHeatingForgeModel);
+
         ashBlock();
 
         ModelFile invisibleGroundModel = models().getBuilder("block/invisible_ground")
@@ -125,6 +141,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
         patternModel(ModItems.LEGGINGS_PLATE_PATTERN.getId().getPath());
         patternModel(ModItems.BOOTS_CHAINMAIL_PATTERN.getId().getPath());
         patternModel(ModItems.BOOTS_PLATE_PATTERN.getId().getPath());
+        patternModel(ModItems.CROSSBOW_BODY_PATTERN.getId().getPath());
+        patternModel(ModItems.CROSSBOW_LIMBS_PATTERN.getId().getPath());
         patternModel(ModItems.TEMPLATE_PATTERN.getId().getPath());
         armorPartModel(ModItems.HELMET_CHAINMAIL.getId().getPath(), mcLoc("item/chainmail_helmet"));
         armorPartModel(ModItems.HELMET_PLATE.getId().getPath(), mcLoc("item/iron_helmet"));
@@ -195,6 +213,27 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .build()
         );
         simpleBlockItem(station, stationModel);
+    }
+
+    private void sawmillBlock(ModBlocks.SawmillVariant variant, ModelFile invisibleModel) {
+        Block sawmill = variant.block().get();
+        ModelFile sawmillModel = sawmillModel(variant);
+        getVariantBuilder(sawmill).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(state.getValue(LapidaryTableBlock.PART) == BedPart.FOOT ? sawmillModel : invisibleModel)
+                .rotationY(horizontalRotation(state.getValue(LapidaryTableBlock.FACING)))
+                .build()
+        );
+        simpleBlockItem(sawmill, sawmillModel);
+    }
+
+    private ModelFile sawmillModel(ModBlocks.SawmillVariant variant) {
+        if (variant.block() == ModBlocks.SAWMILL) {
+            return new ModelFile.UncheckedModelFile(modLoc("block/sawmill"));
+        }
+        return models().withExistingParent("block/" + variant.id(), modLoc("block/sawmill"))
+                .texture("log", variant.logTexture())
+                .texture("planks", variant.planksTexture())
+                .texture("particle", mcLoc("block/stonecutter_saw"));
     }
 
     private ModelFile leatherStationModel(ModBlocks.LeatherStationVariant variant) {

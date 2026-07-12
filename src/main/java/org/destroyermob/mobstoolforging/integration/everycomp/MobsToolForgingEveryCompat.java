@@ -39,6 +39,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePrope
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.item.LeatherStationBlockItem;
+import org.destroyermob.mobstoolforging.item.LapidaryTableBlockItem;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModCreativeTabs;
@@ -46,6 +47,7 @@ import org.destroyermob.mobstoolforging.registry.ModTags;
 import org.destroyermob.mobstoolforging.world.DryingRackBlock;
 import org.destroyermob.mobstoolforging.world.LeatherStationBlock;
 import org.destroyermob.mobstoolforging.world.PatternRackBlock;
+import org.destroyermob.mobstoolforging.world.SawmillBlock;
 import org.destroyermob.mobstoolforging.world.ToolmakersBenchBlock;
 
 /** Optional Every Compat entry point. This class is loaded only when Every Compat is present. */
@@ -62,6 +64,7 @@ public final class MobsToolForgingEveryCompat {
     private static final class Module extends EveryCompatModule {
         private final SimpleEntrySet<WoodType, PatternRackBlock> patternRacks;
         private final SimpleEntrySet<WoodType, ToolmakersBenchBlock> toolmakersBenches;
+        private final SimpleEntrySet<WoodType, SawmillBlock> sawmills;
         private final SimpleEntrySet<WoodType, LeatherStationBlock> leatherStations;
         private final SimpleEntrySet<WoodType, DryingRackBlock> dryingRacks;
 
@@ -101,6 +104,26 @@ public final class MobsToolForgingEveryCompat {
                     .copyParentDrop()
                     .build();
             addEntry(toolmakersBenches);
+
+            sawmills = SimpleEntrySet.builder(
+                            WoodType.class,
+                            "sawmill",
+                            ModBlocks.SAWMILL,
+                            () -> VanillaWoodTypes.OAK,
+                            wood -> CompatWorkstationRegistry.registerSawmill(
+                                    wood.planks,
+                                    wood.log,
+                                    new SawmillBlock(woodProperties(wood))))
+                    .addTile(ModBlockEntities.TOOL_WORKSTATION)
+                    .addCustomItem((wood, block, properties) -> CompatWorkstationRegistry.registerItem(
+                            CompatWorkstationRegistry.Kind.SAWMILL,
+                            new LapidaryTableBlockItem(block, properties)))
+                    .addTag(BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK)
+                    .addTag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST, Registries.BLOCK)
+                    .setTabKey(ModCreativeTabs.MOBS_TOOL_FORGING.getKey())
+                    .copyParentDrop()
+                    .build();
+            addEntry(sawmills);
 
             leatherStations = SimpleEntrySet.builder(
                             WoodType.class,
@@ -153,6 +176,7 @@ public final class MobsToolForgingEveryCompat {
                     addRecipe(sink, block, 1, List.of("PPP", "S S", "S S"), Map.of('P', wood.planks, 'S', Items.STICK));
                     sink.addSimpleBlockLootTable(block);
                 });
+                sawmills.blocks.forEach((wood, block) -> sink.addLootTable(block, doubleStationDrops(block)));
                 leatherStations.blocks.forEach((wood, block) -> sink.addLootTable(block, leatherStationDrops(block)));
                 dryingRacks.blocks.forEach((wood, block) -> {
                     addRecipe(sink, block, 4, List.of("SSS"), Map.of('S', wood.getBlockOfThis("slab")));
@@ -162,6 +186,7 @@ public final class MobsToolForgingEveryCompat {
                 SimpleTagBuilder carryOnBlacklist = SimpleTagBuilder.of(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST);
                 patternRacks.blocks.values().forEach(block -> carryOnBlacklist.add(BuiltInRegistries.BLOCK.getKey(block)));
                 toolmakersBenches.blocks.values().forEach(block -> carryOnBlacklist.add(BuiltInRegistries.BLOCK.getKey(block)));
+                sawmills.blocks.values().forEach(block -> carryOnBlacklist.add(BuiltInRegistries.BLOCK.getKey(block)));
                 leatherStations.blocks.values().forEach(block -> carryOnBlacklist.add(BuiltInRegistries.BLOCK.getKey(block)));
                 dryingRacks.blocks.values().forEach(block -> carryOnBlacklist.add(BuiltInRegistries.BLOCK.getKey(block)));
                 sink.addTag(carryOnBlacklist, Registries.BLOCK);
@@ -194,18 +219,27 @@ public final class MobsToolForgingEveryCompat {
                                     "mobstoolforging:block/template_toolmakers_bench",
                                     Map.of("side", logTextures.side(), "top", logTextures.top())));
                 });
-                leatherStations.blocks.forEach((wood, block) -> addClientResources(
+                sawmills.blocks.forEach((wood, block) -> addClientResources(
                         sink,
                         block,
-                        leatherStationBlockState(block),
+                        sawmillBlockState(block),
                         texturedModel(
-                                "mobstoolforging:block/template_leather_station",
+                                "mobstoolforging:block/sawmill",
                                 Map.of(
                                         "log", modelTextures(resourceManager, wood.log).side(),
-                                        "planks", modelTextures(resourceManager, wood.planks).side(),
-                                        "display_left", ResourceLocation.withDefaultNamespace("item/leather"),
-                                        "display_right", ResourceLocation.fromNamespaceAndPath(
-                                                MobsToolForging.MOD_ID, "item/plant_fiber")))));
+                                        "planks", modelTextures(resourceManager, wood.planks).side()))));
+                leatherStations.blocks.forEach((wood, block) -> {
+                    JsonObject model = texturedModel(
+                            "mobstoolforging:block/template_leather_station",
+                            Map.of(
+                                    "log", modelTextures(resourceManager, wood.log).side(),
+                                    "planks", modelTextures(resourceManager, wood.planks).side(),
+                                    "display_left", ResourceLocation.withDefaultNamespace("item/leather"),
+                                    "display_right", ResourceLocation.fromNamespaceAndPath(
+                                            MobsToolForging.MOD_ID, "item/plant_fiber")));
+                    model.addProperty("render_type", "minecraft:cutout");
+                    addClientResources(sink, block, leatherStationBlockState(block), model);
+                });
                 dryingRacks.blocks.forEach((wood, block) -> addClientResources(
                         sink,
                         block,
@@ -224,6 +258,7 @@ public final class MobsToolForgingEveryCompat {
         private void addTranslations(AfterLanguageLoadEvent event) {
             addTranslations(event, patternRacks, "Pattern Rack");
             addTranslations(event, toolmakersBenches, "Toolmaker's Station");
+            addTranslations(event, sawmills, "Sawmill");
             addTranslations(event, leatherStations, "Leather Station");
             addTranslations(event, dryingRacks, "Drying Rack");
         }
@@ -273,6 +308,10 @@ public final class MobsToolForgingEveryCompat {
         }
 
         private static LootTable.Builder leatherStationDrops(Block block) {
+            return doubleStationDrops(block);
+        }
+
+        private static LootTable.Builder doubleStationDrops(Block block) {
             return LootTable.lootTable()
                     .withPool(
                             LootPool.lootPool()
@@ -324,6 +363,26 @@ public final class MobsToolForgingEveryCompat {
                         variants,
                         "facing=" + facing.getKey() + ",part=head",
                         "mobstoolforging:block/invisible_leather_station",
+                        facing.getValue());
+            }
+            JsonObject root = new JsonObject();
+            root.add("variants", variants);
+            return root;
+        }
+
+        private static JsonObject sawmillBlockState(Block block) {
+            ResourceLocation id = BuiltInRegistries.BLOCK.getKey(block);
+            JsonObject variants = new JsonObject();
+            for (Map.Entry<String, Integer> facing : Map.of(
+                    "north", 0,
+                    "east", 90,
+                    "south", 180,
+                    "west", 270).entrySet()) {
+                addVariant(variants, "facing=" + facing.getKey() + ",part=foot", modelId(id), facing.getValue());
+                addVariant(
+                        variants,
+                        "facing=" + facing.getKey() + ",part=head",
+                        "mobstoolforging:block/invisible_sawmill",
                         facing.getValue());
             }
             JsonObject root = new JsonObject();

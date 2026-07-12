@@ -36,6 +36,7 @@ public final class MobsToolForgingConfig {
     public static final ModConfigSpec.BooleanValue REQUIRE_HEAT_AT_JOB_START_ONLY;
     public static final ModConfigSpec.BooleanValue WORKPIECE_COOLS_MID_CRAFT;
     public static final ModConfigSpec.IntValue FORGE_HEAT_BUFFER_TICKS;
+    public static final ModConfigSpec.IntValue FLUID_FORGE_HEAT_UNITS_PER_MB;
     public static final ModConfigSpec.BooleanValue ENABLE_QUALITY;
     public static final ModConfigSpec.BooleanValue ENABLE_TIMING_QUALITY;
     public static final ModConfigSpec.BooleanValue QUALITY_AFFECTS_STATS;
@@ -70,8 +71,8 @@ public final class MobsToolForgingConfig {
                 .comment("When true, starter flint tool progression is enabled: placed flint knapping and data-driven ground assembly.")
                 .define("enableCrudeFlintTools", true);
         ENABLE_PLANT_FIBER_DROPS = builder
-                .comment("When true, grass and ferns can drop Plant Fiber when broken with a knapping tool. Default is false so Plant Fiber can remain recipe/config driven without extra world drops.")
-                .define("enablePlantFiberDrops", false);
+                .comment("When true, grass and ferns have a 10% chance to drop Plant Fiber when broken with flint or another knapping tool.")
+                .define("enablePlantFiberDrops", true);
         DISABLE_STONE_TOOLS = builder
                 .comment("When true, vanilla stone tool recipes are removed at server start.")
                 .define("disableStoneTools", true);
@@ -144,6 +145,9 @@ public final class MobsToolForgingConfig {
         FORGE_HEAT_BUFFER_TICKS = builder
                 .comment("Ticks a Heating Forge keeps nearby workshop heat after burning fuel.")
                 .defineInRange("forgeHeatBufferTicks", 2400, 1, 20 * 60 * 60);
+        FLUID_FORGE_HEAT_UNITS_PER_MB = builder
+                .comment("Heat progress supplied by each millibucket in the Lava Heating Forge. The default heats roughly 16 full-temperature ingots per lava bucket.")
+                .defineInRange("fluidForgeHeatUnitsPerMb", 20, 1, 1000);
         builder.pop();
         builder.push("quality");
         ENABLE_QUALITY = builder

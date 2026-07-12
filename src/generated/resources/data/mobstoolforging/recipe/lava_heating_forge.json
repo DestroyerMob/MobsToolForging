@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "H": {
+      "item": "mobstoolforging:heating_forge"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "L": {
+      "item": "minecraft:lava_bucket"
+    }
+  },
+  "pattern": [
+    "IGI",
+    "IHI",
+    "ILI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "mobstoolforging:lava_heating_forge"
+  }
+}

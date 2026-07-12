@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.item.ItemStack;
@@ -21,6 +22,7 @@ public final class CompositeAffixCompatibility {
     private static final String AFFIX_HELPER = "dev.shadowsoffire.apotheosis.affix.AffixHelper";
 
     private static ApotheosisComponents apotheosisComponents;
+    private static boolean apotheosisComponentsUnavailable;
     private static Method getAffixes;
     private static Method affixLevel;
 
@@ -65,8 +67,11 @@ public final class CompositeAffixCompatibility {
      */
     public static List<ItemStack> affixedParts(ItemStack assembled) {
         ToolAssemblyParts assemblyParts = assembled.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
+        if (assemblyParts == null) {
+            return List.of();
+        }
         ApotheosisComponents components = components();
-        if (assemblyParts == null || components == null) {
+        if (components == null) {
             return List.of();
         }
         return assemblyParts.stacks().stream()
@@ -77,10 +82,40 @@ public final class CompositeAffixCompatibility {
 
     public static boolean hasComponentAffixes(ItemStack assembled) {
         ToolAssemblyParts assemblyParts = assembled.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
+        if (assemblyParts == null) {
+            return false;
+        }
         ApotheosisComponents components = components();
-        return assemblyParts != null
-                && components != null
+        return components != null
                 && assemblyParts.stacks().stream().anyMatch(part -> part.has(components.affixes()));
+    }
+
+    /**
+     * Mirrors one contributing part's presentation components onto the completed item.
+     * The stored parts remain authoritative and {@link #affixesFor(ItemStack)} still supplies
+     * the aggregate affix map, but Apotheosis checks these top-level components before it asks
+     * for that map in several tooltip and event paths.
+     */
+    public static boolean syncCompatibilityMirror(ItemStack assembled) {
+        ToolAssemblyParts assemblyParts = assembled.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
+        if (assemblyParts == null) {
+            return false;
+        }
+        ApotheosisComponents components = components();
+        if (components == null) {
+            return false;
+        }
+        ItemStack contributor = assemblyParts.stacks().stream()
+                .filter(part -> part.has(components.affixes()))
+                .findFirst()
+                .orElse(ItemStack.EMPTY);
+        if (contributor.isEmpty()) {
+            return false;
+        }
+        boolean changed = copyComponentIfDifferent(contributor, assembled, components.affixes());
+        changed |= copyComponentIfDifferent(contributor, assembled, components.rarity());
+        changed |= copyComponentIfDifferent(contributor, assembled, components.affixName());
+        return changed;
     }
 
     private static ItemStack affixProxy(ItemStack assembled, ItemStack part, ApotheosisComponents components) {
@@ -125,6 +160,9 @@ public final class CompositeAffixCompatibility {
         if (apotheosisComponents != null) {
             return apotheosisComponents;
         }
+        if (apotheosisComponentsUnavailable) {
+            return null;
+        }
         try {
             Class<?> type = Class.forName(APOTH_COMPONENTS);
             apotheosisComponents = new ApotheosisComponents(
@@ -134,6 +172,7 @@ public final class CompositeAffixCompatibility {
             );
             return apotheosisComponents;
         } catch (ReflectiveOperationException | LinkageError ignored) {
+            apotheosisComponentsUnavailable = true;
             return null;
         }
     }
@@ -173,6 +212,15 @@ public final class CompositeAffixCompatibility {
         if (value != null) {
             target.set(component, value);
         }
+    }
+
+    private static <T> boolean copyComponentIfDifferent(ItemStack source, ItemStack target, DataComponentType<T> component) {
+        T value = source.get(component);
+        if (value == null || Objects.equals(value, target.get(component))) {
+            return false;
+        }
+        target.set(component, value);
+        return true;
     }
 
     private record ApotheosisComponents(
