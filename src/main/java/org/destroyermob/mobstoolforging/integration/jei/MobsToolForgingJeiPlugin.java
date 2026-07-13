@@ -74,15 +74,15 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     public void registerCategories(IRecipeCategoryRegistration registration) {
         var guiHelper = registration.getJeiHelpers().getGuiHelper();
         registration.addRecipeCategories(
-                new ForgeShapingCategory(guiHelper),
-                new LapidaryCoatingCategory(guiHelper),
-                new StationWorkCategory(guiHelper),
                 new PatternCreationCategory(guiHelper),
                 new HeatingCategory(guiHelper),
+                new ForgeShapingCategory(guiHelper),
+                new StationWorkCategory(guiHelper),
+                new LapidaryCoatingCategory(guiHelper),
                 new DryingCategory(guiHelper),
-                new MaterialTraitInfoCategory(guiHelper),
                 new ToolmakerAssemblyCategory(guiHelper),
-                new WorldAssemblyCategory(guiHelper)
+                new WorldAssemblyCategory(guiHelper),
+                new MaterialTraitInfoCategory(guiHelper)
         );
     }
 
@@ -840,6 +840,10 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         return new ItemStack(ModItems.TOOL_FORGE.get());
     }
 
+    static ItemStack stationWorkIcon() {
+        return new ItemStack(ModItems.IRON_SMITHING_HAMMER.get());
+    }
+
     static ItemStack patternCreationStationIcon() {
         return new ItemStack(ModItems.PATTERN_CREATION_STATION.get());
     }
@@ -862,5 +866,9 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     static ItemStack toolmakersBenchIcon() {
         return new ItemStack(ModItems.TOOLMAKERS_BENCH.get());
+    }
+
+    static ItemStack worldAssemblyIcon() {
+        return new ItemStack(Items.CRAFTING_TABLE);
     }
 }

@@ -10,13 +10,14 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class DryingCategory implements IRecipeCategory<DryingJeiRecipe> {
-    private final IDrawable background;
+    private static final int WIDTH = 112;
+    private static final int HEIGHT = 42;
     private final IDrawable icon;
 
     public DryingCategory(IGuiHelper guiHelper) {
-        this.background = guiHelper.createBlankDrawable(112, 42);
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.dryingRackIcon());
     }
 
@@ -31,8 +32,13 @@ public class DryingCategory implements IRecipeCategory<DryingJeiRecipe> {
     }
 
     @Override
-    public IDrawable getBackground() {
-        return background;
+    public int getWidth() {
+        return WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return HEIGHT;
     }
 
     @Override
@@ -41,14 +47,19 @@ public class DryingCategory implements IRecipeCategory<DryingJeiRecipe> {
     }
 
     @Override
+    public ResourceLocation getRegistryName(DryingJeiRecipe recipe) {
+        return recipe.id();
+    }
+
+    @Override
     public void setRecipe(IRecipeLayoutBuilder builder, DryingJeiRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.CATALYST, 2, 14)
+        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 2, 14), "workstation")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.station());
-        builder.addInputSlot(36, 14)
+        JeiRecipeVisuals.role(builder.addInputSlot(36, 14), "input")
                 .setStandardSlotBackground()
                 .addItemStacks(recipe.inputs());
-        builder.addOutputSlot(84, 14)
+        JeiRecipeVisuals.role(builder.addOutputSlot(84, 14), "result")
                 .setOutputSlotBackground()
                 .addItemStack(recipe.output());
     }

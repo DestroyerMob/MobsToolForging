@@ -10,14 +10,15 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class StationWorkCategory implements IRecipeCategory<StationWorkJeiRecipe> {
-    private final IDrawable background;
+    private static final int WIDTH = 134;
+    private static final int HEIGHT = 60;
     private final IDrawable icon;
 
     public StationWorkCategory(IGuiHelper guiHelper) {
-        this.background = guiHelper.createBlankDrawable(130, 54);
-        this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.smithingAnvilIcon());
+        this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.stationWorkIcon());
     }
 
     @Override
@@ -31,8 +32,13 @@ public class StationWorkCategory implements IRecipeCategory<StationWorkJeiRecipe
     }
 
     @Override
-    public IDrawable getBackground() {
-        return background;
+    public int getWidth() {
+        return WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return HEIGHT;
     }
 
     @Override
@@ -41,29 +47,34 @@ public class StationWorkCategory implements IRecipeCategory<StationWorkJeiRecipe
     }
 
     @Override
+    public ResourceLocation getRegistryName(StationWorkJeiRecipe recipe) {
+        return recipe.id();
+    }
+
+    @Override
     public void setRecipe(IRecipeLayoutBuilder builder, StationWorkJeiRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.CATALYST, 2, 19)
+        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 2, 21), "workstation")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.station());
-        builder.addInputSlot(36, 10)
+        JeiRecipeVisuals.role(builder.addInputSlot(36, 12), "input")
                 .setStandardSlotBackground()
                 .addItemStacks(recipe.inputs());
         if (!recipe.secondaryInputs().isEmpty()) {
-            builder.addInputSlot(36, 34)
+            JeiRecipeVisuals.role(builder.addInputSlot(36, 36), "secondary_material")
                     .setStandardSlotBackground()
                     .addItemStacks(recipe.secondaryInputs());
         }
-        builder.addSlot(RecipeIngredientRole.CATALYST, 60, 34)
+        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 60, 36), "tool")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.hammer());
-        builder.addOutputSlot(100, 19)
+        JeiRecipeVisuals.role(builder.addOutputSlot(104, 21), "result")
                 .setOutputSlotBackground()
                 .addItemStack(recipe.output());
     }
 
     @Override
     public void draw(StationWorkJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        JeiRecipeVisuals.drawArrow(guiGraphics, 78, 23);
-        JeiRecipeVisuals.drawHitCount(guiGraphics, 82, 39, recipe.requiredHits());
+        JeiRecipeVisuals.drawArrow(guiGraphics, 82, 25);
+        JeiRecipeVisuals.drawHitCount(guiGraphics, 82, 49, recipe.requiredHits());
     }
 }

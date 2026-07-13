@@ -5,17 +5,19 @@ import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class ToolmakerAssemblyCategory implements IRecipeCategory<ToolmakerAssemblyJeiRecipe> {
-    private final IDrawable background;
+    private static final int WIDTH = 196;
+    private static final int HEIGHT = 54;
     private final IDrawable icon;
 
     public ToolmakerAssemblyCategory(IGuiHelper guiHelper) {
-        this.background = guiHelper.createBlankDrawable(172, 54);
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.toolmakersBenchIcon());
     }
 
@@ -30,8 +32,13 @@ public class ToolmakerAssemblyCategory implements IRecipeCategory<ToolmakerAssem
     }
 
     @Override
-    public IDrawable getBackground() {
-        return background;
+    public int getWidth() {
+        return WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return HEIGHT;
     }
 
     @Override
@@ -40,24 +47,29 @@ public class ToolmakerAssemblyCategory implements IRecipeCategory<ToolmakerAssem
     }
 
     @Override
+    public ResourceLocation getRegistryName(ToolmakerAssemblyJeiRecipe recipe) {
+        return recipe.id();
+    }
+
+    @Override
     public void setRecipe(IRecipeLayoutBuilder builder, ToolmakerAssemblyJeiRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(mezz.jei.api.recipe.RecipeIngredientRole.CATALYST, 2, 19)
+        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 2, 19), "workstation")
                 .setStandardSlotBackground()
                 .addItemStack(MobsToolForgingJeiPlugin.toolmakersBenchIcon());
         int partCount = Math.min(5, recipe.parts().size());
-        int startX = 28 + Math.max(0, 4 - partCount) * 6;
+        int startX = 28 + Math.max(0, 5 - partCount) * 11;
         for (int index = 0; index < partCount; index++) {
-            builder.addInputSlot(startX + index * 22, 19)
+            JeiRecipeVisuals.role(builder.addInputSlot(startX + index * 22, 19), "component")
                     .setStandardSlotBackground()
                     .addItemStack(recipe.parts().get(index));
         }
-        builder.addOutputSlot(144, 19)
+        JeiRecipeVisuals.role(builder.addOutputSlot(170, 19), "result")
                 .setOutputSlotBackground()
                 .addItemStack(recipe.output());
     }
 
     @Override
     public void draw(ToolmakerAssemblyJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        JeiRecipeVisuals.drawArrow(guiGraphics, 120, 23);
+        JeiRecipeVisuals.drawArrow(guiGraphics, 144, 23);
     }
 }

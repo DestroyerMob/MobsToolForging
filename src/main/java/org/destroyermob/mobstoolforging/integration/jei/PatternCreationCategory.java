@@ -10,13 +10,14 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class PatternCreationCategory implements IRecipeCategory<PatternCreationJeiRecipe> {
-    private final IDrawable background;
+    private static final int WIDTH = 100;
+    private static final int HEIGHT = 42;
     private final IDrawable icon;
 
     public PatternCreationCategory(IGuiHelper guiHelper) {
-        this.background = guiHelper.createBlankDrawable(100, 42);
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.patternCreationStationIcon());
     }
 
@@ -31,8 +32,13 @@ public class PatternCreationCategory implements IRecipeCategory<PatternCreationJ
     }
 
     @Override
-    public IDrawable getBackground() {
-        return background;
+    public int getWidth() {
+        return WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return HEIGHT;
     }
 
     @Override
@@ -41,14 +47,19 @@ public class PatternCreationCategory implements IRecipeCategory<PatternCreationJ
     }
 
     @Override
+    public ResourceLocation getRegistryName(PatternCreationJeiRecipe recipe) {
+        return recipe.id();
+    }
+
+    @Override
     public void setRecipe(IRecipeLayoutBuilder builder, PatternCreationJeiRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.CATALYST, 2, 13)
+        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 2, 13), "workstation")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.station());
-        builder.addInputSlot(28, 13)
+        JeiRecipeVisuals.role(builder.addInputSlot(28, 13), "pattern_material")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.paper());
-        builder.addOutputSlot(74, 13)
+        JeiRecipeVisuals.role(builder.addOutputSlot(74, 13), "result")
                 .setOutputSlotBackground()
                 .addItemStack(recipe.output());
     }

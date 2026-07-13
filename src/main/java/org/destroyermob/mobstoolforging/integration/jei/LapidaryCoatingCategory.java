@@ -10,13 +10,14 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class LapidaryCoatingCategory implements IRecipeCategory<LapidaryCoatingJeiRecipe> {
-    private final IDrawable background;
+    private static final int WIDTH = 148;
+    private static final int HEIGHT = 58;
     private final IDrawable icon;
 
     public LapidaryCoatingCategory(IGuiHelper guiHelper) {
-        this.background = guiHelper.createBlankDrawable(148, 58);
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.lapidaryTableIcon());
     }
 
@@ -31,8 +32,13 @@ public class LapidaryCoatingCategory implements IRecipeCategory<LapidaryCoatingJ
     }
 
     @Override
-    public IDrawable getBackground() {
-        return background;
+    public int getWidth() {
+        return WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return HEIGHT;
     }
 
     @Override
@@ -41,25 +47,30 @@ public class LapidaryCoatingCategory implements IRecipeCategory<LapidaryCoatingJ
     }
 
     @Override
+    public ResourceLocation getRegistryName(LapidaryCoatingJeiRecipe recipe) {
+        return recipe.id();
+    }
+
+    @Override
     public void setRecipe(IRecipeLayoutBuilder builder, LapidaryCoatingJeiRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.CATALYST, 2, 21)
+        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 2, 21), "workstation")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.station());
-        builder.addInputSlot(28, 12)
+        JeiRecipeVisuals.role(builder.addInputSlot(28, 12), "base_part")
                 .setStandardSlotBackground()
                 .addItemStacks(recipe.baseParts());
-        builder.addInputSlot(52, 12)
+        JeiRecipeVisuals.role(builder.addInputSlot(52, 12), "coating")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.coatingMaterial());
         if (!recipe.abrasive().isEmpty()) {
-            builder.addSlot(RecipeIngredientRole.CATALYST, 52, 36)
+            JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 52, 36), "abrasive")
                     .setStandardSlotBackground()
                     .addItemStack(recipe.abrasive());
         }
-        builder.addSlot(RecipeIngredientRole.CATALYST, 76, 36)
+        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 76, 36), "tool")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.workTool());
-        builder.addOutputSlot(118, 21)
+        JeiRecipeVisuals.role(builder.addOutputSlot(118, 21), "result")
                 .setOutputSlotBackground()
                 .addItemStacks(recipe.outputs());
     }

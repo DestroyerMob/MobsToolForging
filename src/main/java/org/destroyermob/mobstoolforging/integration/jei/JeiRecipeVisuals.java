@@ -1,5 +1,7 @@
 package org.destroyermob.mobstoolforging.integration.jei;
 
+import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -8,6 +10,7 @@ import net.minecraft.network.chat.Component;
 final class JeiRecipeVisuals {
     private static final int DARK = 0xFF555555;
     private static final int LIGHT = 0xFFE9E9E9;
+    private static final int COPPER = 0xFFC47E37;
     private static final int HEAT_HOT = 0xFFFFD24A;
     private static final int TEXT = 0xFF606060;
 
@@ -15,10 +18,13 @@ final class JeiRecipeVisuals {
     }
 
     static void drawArrow(GuiGraphics guiGraphics, int x, int y) {
-        guiGraphics.fill(x, y + 4, x + 13, y + 6, DARK);
-        guiGraphics.fill(x + 12, y + 2, x + 15, y + 8, DARK);
-        guiGraphics.fill(x + 15, y + 3, x + 17, y + 7, DARK);
-        guiGraphics.fill(x + 17, y + 4, x + 19, y + 6, DARK);
+        guiGraphics.fill(x, y + 3, x + 13, y + 7, DARK);
+        guiGraphics.fill(x + 11, y + 1, x + 15, y + 9, DARK);
+        guiGraphics.fill(x + 14, y + 2, x + 17, y + 8, DARK);
+        guiGraphics.fill(x + 17, y + 4, x + 20, y + 6, DARK);
+        guiGraphics.fill(x + 1, y + 4, x + 14, y + 6, COPPER);
+        guiGraphics.fill(x + 13, y + 3, x + 16, y + 7, COPPER);
+        guiGraphics.fill(x + 16, y + 4, x + 18, y + 6, COPPER);
     }
 
     static void drawClock(GuiGraphics guiGraphics, int x, int y, int ticks) {
@@ -33,7 +39,32 @@ final class JeiRecipeVisuals {
 
     static void drawHitCount(GuiGraphics guiGraphics, int x, int y, int hits) {
         drawImpactMark(guiGraphics, x, y);
-        drawSmallText(guiGraphics, "x" + Math.max(0, hits), x + 11, y + 1);
+        drawSmallText(
+                guiGraphics,
+                Component.translatable("jei.mobstoolforging.work.hits", Math.max(0, hits)),
+                x + 11,
+                y + 1
+        );
+    }
+
+    static void drawTargetHeat(GuiGraphics guiGraphics, int x, int y, float targetTemperature) {
+        int percentage = Math.round(Math.max(0.0F, Math.min(1.0F, targetTemperature)) * 100.0F);
+        guiGraphics.fill(x + 2, y, x + 6, y + 8, DARK);
+        guiGraphics.fill(x, y + 6, x + 8, y + 11, DARK);
+        guiGraphics.fill(x + 3, y + 1, x + 5, y + 9, HEAT_HOT);
+        guiGraphics.fill(x + 2, y + 7, x + 6, y + 10, HEAT_HOT);
+        drawSmallText(
+                guiGraphics,
+                Component.translatable("jei.mobstoolforging.heat.target", percentage),
+                x + 11,
+                y + 1
+        );
+    }
+
+    static IRecipeSlotBuilder role(IRecipeSlotBuilder slot, String role) {
+        return slot.addRichTooltipCallback((recipeSlotView, tooltip) -> tooltip.add(
+                Component.translatable("jei.mobstoolforging.role." + role).withStyle(ChatFormatting.GRAY)
+        ));
     }
 
     private static void drawClockFace(GuiGraphics guiGraphics, int x, int y) {
@@ -56,15 +87,18 @@ final class JeiRecipeVisuals {
         guiGraphics.fill(x + 4, y + 3, x + 6, y + 6, HEAT_HOT);
     }
 
-    private static void drawSmallText(GuiGraphics guiGraphics, String text, int x, int y) {
+    private static void drawSmallText(GuiGraphics guiGraphics, Component text, int x, int y) {
         Font font = Minecraft.getInstance().font;
-        guiGraphics.drawString(font, Component.literal(text), x, y, TEXT, false);
+        guiGraphics.drawString(font, text, x, y, TEXT, false);
     }
 
-    private static String secondsText(int ticks) {
+    private static Component secondsText(int ticks) {
         if (ticks <= 0) {
-            return "0s";
+            return Component.translatable("jei.mobstoolforging.duration.seconds", 0);
         }
-        return Math.max(1, (int) Math.ceil(ticks / 20.0D)) + "s";
+        return Component.translatable(
+                "jei.mobstoolforging.duration.seconds",
+                Math.max(1, (int) Math.ceil(ticks / 20.0D))
+        );
     }
 }

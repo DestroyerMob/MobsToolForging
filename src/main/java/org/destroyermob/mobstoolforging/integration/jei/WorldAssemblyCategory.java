@@ -12,15 +12,16 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRecipe> {
+    private static final int WIDTH = 170;
+    private static final int HEIGHT = 84;
     private static final int TEXT = 0xFF606060;
-    private final IDrawable background;
     private final IDrawable icon;
 
     public WorldAssemblyCategory(IGuiHelper guiHelper) {
-        this.background = guiHelper.createBlankDrawable(150, 74);
-        this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.smithingAnvilIcon());
+        this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.worldAssemblyIcon());
     }
 
     @Override
@@ -34,13 +35,23 @@ public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRe
     }
 
     @Override
-    public IDrawable getBackground() {
-        return background;
+    public int getWidth() {
+        return WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return HEIGHT;
     }
 
     @Override
     public IDrawable getIcon() {
         return icon;
+    }
+
+    @Override
+    public ResourceLocation getRegistryName(WorldAssemblyJeiRecipe recipe) {
+        return recipe.id();
     }
 
     @Override
@@ -64,16 +75,16 @@ public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRe
             addInput(builder, 15, 17, recipe.lowerBlocks());
         }
 
-        builder.addSlot(RecipeIngredientRole.CATALYST, 60, 27)
+        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 66, 27), "activation_tool")
                 .setStandardSlotBackground()
                 .addItemStacks(recipe.activationItems());
-        builder.addOutputSlot(122, 17)
+        JeiRecipeVisuals.role(builder.addOutputSlot(142, 17), "result")
                 .setOutputSlotBackground()
                 .addItemStack(recipe.output());
     }
 
     private static void addInput(IRecipeLayoutBuilder builder, int x, int y, java.util.List<net.minecraft.world.item.ItemStack> stacks) {
-        builder.addInputSlot(x, y)
+        JeiRecipeVisuals.role(builder.addInputSlot(x, y), "placed_block")
                 .setStandardSlotBackground()
                 .addItemStacks(stacks);
     }
@@ -92,7 +103,10 @@ public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRe
         Component instruction = recipe.kind() == WorldAssemblyJeiRecipe.Kind.DIAMOND_SAW
                 ? Component.translatable("jei.mobstoolforging.world_assembly.sneak_use_abrasive")
                 : Component.translatable("jei.mobstoolforging.world_assembly.sneak_use");
-        guiGraphics.drawString(font, instruction, 3, 62, TEXT, false);
-        JeiRecipeVisuals.drawArrow(guiGraphics, 94, 22);
+        List<net.minecraft.util.FormattedCharSequence> lines = font.split(instruction, 164);
+        for (int index = 0; index < Math.min(2, lines.size()); index++) {
+            guiGraphics.drawString(font, lines.get(index), 3, 64 + index * 9, TEXT, false);
+        }
+        JeiRecipeVisuals.drawArrow(guiGraphics, 108, 22);
     }
 }

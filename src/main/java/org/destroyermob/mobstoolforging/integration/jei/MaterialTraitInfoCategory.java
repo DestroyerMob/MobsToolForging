@@ -20,18 +20,16 @@ import org.destroyermob.mobstoolforging.world.ToolTraitRegistry;
 
 public class MaterialTraitInfoCategory implements IRecipeCategory<MaterialTraitInfoRecipe> {
     private static final int WIDTH = 220;
-    private static final int HEIGHT = 132;
+    private static final int HEIGHT = 140;
     private static final int TEXT = 0xFF404040;
     private static final int MUTED = 0xFF707070;
     private static final int LINE = 0xFFB7B7B7;
     private static final int MAX_ROWS = 3;
     private static final int ROW_HEIGHT = 28;
 
-    private final IDrawable background;
     private final IDrawable icon;
 
     public MaterialTraitInfoCategory(IGuiHelper guiHelper) {
-        this.background = guiHelper.createBlankDrawable(WIDTH, HEIGHT);
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.materialTraitIcon());
     }
 
@@ -46,8 +44,13 @@ public class MaterialTraitInfoCategory implements IRecipeCategory<MaterialTraitI
     }
 
     @Override
-    public IDrawable getBackground() {
-        return background;
+    public int getWidth() {
+        return WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return HEIGHT;
     }
 
     @Override
@@ -56,8 +59,13 @@ public class MaterialTraitInfoCategory implements IRecipeCategory<MaterialTraitI
     }
 
     @Override
+    public ResourceLocation getRegistryName(MaterialTraitInfoRecipe recipe) {
+        return recipe.id();
+    }
+
+    @Override
     public void setRecipe(IRecipeLayoutBuilder builder, MaterialTraitInfoRecipe recipe, IFocusGroup focuses) {
-        builder.addInputSlot(5, 6)
+        JeiRecipeVisuals.role(builder.addInputSlot(5, 6), "trait_material")
                 .setStandardSlotBackground()
                 .addItemStacks(recipe.inputs());
     }
@@ -82,7 +90,13 @@ public class MaterialTraitInfoCategory implements IRecipeCategory<MaterialTraitI
         if (recipe.traits().size() > MAX_ROWS) {
             guiGraphics.drawString(font, Component.translatable("jei.mobstoolforging.material_traits.more", recipe.traits().size() - MAX_ROWS), 7, footerY, MUTED, false);
         } else {
-            guiGraphics.drawString(font, Component.translatable("jei.mobstoolforging.material_traits.level_hint"), 7, footerY, MUTED, false);
+            List<FormattedCharSequence> lines = font.split(
+                    Component.translatable("jei.mobstoolforging.material_traits.level_hint"),
+                    WIDTH - 14
+            );
+            for (int index = 0; index < Math.min(2, lines.size()); index++) {
+                guiGraphics.drawString(font, lines.get(index), 7, footerY + index * 9, MUTED, false);
+            }
         }
     }
 
