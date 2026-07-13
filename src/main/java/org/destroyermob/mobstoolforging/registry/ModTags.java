@@ -30,10 +30,14 @@ public final class ModTags {
         public static final TagKey<Item> MATERIALS = itemTag("materials");
         public static final TagKey<Item> MATERIALS_METALS = itemTag("materials/metals");
         public static final TagKey<Item> MATERIALS_GEMS = itemTag("materials/gems");
+        public static final TagKey<Item> GEMS_AMETHYST = commonItemTag("gems/amethyst");
         public static final TagKey<Item> GEMS_RUBY = commonItemTag("gems/ruby");
         public static final TagKey<Item> GEMS_SAPPHIRE = commonItemTag("gems/sapphire");
+        public static final TagKey<Item> GEMS_TOPAZ = commonItemTag("gems/topaz");
+        public static final TagKey<Item> LEGACY_FORGE_GEMS_AMETHYST = forgeItemTag("gems/amethyst");
         public static final TagKey<Item> LEGACY_FORGE_GEMS_RUBY = forgeItemTag("gems/ruby");
         public static final TagKey<Item> LEGACY_FORGE_GEMS_SAPPHIRE = forgeItemTag("gems/sapphire");
+        public static final TagKey<Item> LEGACY_FORGE_GEMS_TOPAZ = forgeItemTag("gems/topaz");
         public static final TagKey<Item> PARTS = itemTag("parts");
         public static final TagKey<Item> PART_HEADS = itemTag("parts/heads");
         public static final TagKey<Item> PART_HANDLES = itemTag("parts/handle");
@@ -47,6 +51,8 @@ public final class ModTags {
         public static final TagKey<Item> PART_COOKING_KNIFE_HEADS = itemTag("parts/cooking_knife_head");
         public static final TagKey<Item> PART_SCREWDRIVER_HEADS = itemTag("parts/screwdriver_head");
         public static final TagKey<Item> PART_GEM_CUTTERS_BLADES = itemTag("parts/gem_cutters_blade");
+        public static final TagKey<Item> PART_CROSSBOW_BODIES = itemTag("parts/crossbow_body");
+        public static final TagKey<Item> PART_CROSSBOW_LIMBS = itemTag("parts/crossbow_limbs");
         public static final TagKey<Item> ARMOR_PARTS = itemTag("parts/armor");
         public static final TagKey<Item> PART_HELMET_CHAINMAILS = itemTag("parts/helmet_chainmail");
         public static final TagKey<Item> PART_HELMET_PLATES = itemTag("parts/helmet_plate");

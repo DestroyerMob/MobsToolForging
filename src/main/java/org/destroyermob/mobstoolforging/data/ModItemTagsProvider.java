@@ -29,6 +29,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ItemTags.SHOVELS).add(ModItems.MATTOCK.get());
         tag(ItemTags.AXES).add(ModItems.MATTOCK.get());
         tag(ItemTags.HOES).add(ModItems.MATTOCK.get());
+        tag(ItemTags.CROSSBOW_ENCHANTABLE).add(ModItems.CROSSBOW.get());
         tag(ItemTags.TRIMMABLE_ARMOR).add(
                 ModItems.MODULAR_HELMET.get(),
                 ModItems.MODULAR_CHESTPLATE.get(),
@@ -43,15 +44,20 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.MATERIALS_GEMS)
                 .addTag(Tags.Items.GEMS_DIAMOND)
                 .addTag(Tags.Items.GEMS_EMERALD)
+                .addOptionalTag(ModTags.Items.GEMS_AMETHYST.location())
                 .addOptionalTag(ModTags.Items.GEMS_RUBY.location())
                 .addOptionalTag(ModTags.Items.GEMS_SAPPHIRE.location())
+                .addOptionalTag(ModTags.Items.GEMS_TOPAZ.location())
+                .addOptionalTag(ModTags.Items.LEGACY_FORGE_GEMS_AMETHYST.location())
                 .addOptionalTag(ModTags.Items.LEGACY_FORGE_GEMS_RUBY.location())
-                .addOptionalTag(ModTags.Items.LEGACY_FORGE_GEMS_SAPPHIRE.location());
+                .addOptionalTag(ModTags.Items.LEGACY_FORGE_GEMS_SAPPHIRE.location())
+                .addOptionalTag(ModTags.Items.LEGACY_FORGE_GEMS_TOPAZ.location());
         tag(ModTags.Items.PARTS)
                 .addTag(ModTags.Items.PART_HEADS)
                 .addTag(ModTags.Items.PART_HANDLES)
                 .addTag(ModTags.Items.PART_GUARDS)
-                .add(ModItems.CROSSBOW_BODY.get(), ModItems.CROSSBOW_LIMBS.get());
+                .addTag(ModTags.Items.PART_CROSSBOW_BODIES)
+                .addTag(ModTags.Items.PART_CROSSBOW_LIMBS);
         tag(ModTags.Items.PART_HEADS)
                 .addTag(ModTags.Items.PART_SWORD_BLADES)
                 .addTag(ModTags.Items.PART_SHOVEL_HEADS)
@@ -92,6 +98,10 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .add(ModItems.SCREWDRIVER_HEAD.get());
         tag(ModTags.Items.PART_GEM_CUTTERS_BLADES)
                 .add(ModItems.GEM_CUTTERS_BLADE.get());
+        tag(ModTags.Items.PART_CROSSBOW_BODIES)
+                .add(ModItems.CROSSBOW_BODY.get());
+        tag(ModTags.Items.PART_CROSSBOW_LIMBS)
+                .add(ModItems.CROSSBOW_LIMBS.get());
         tag(ModTags.Items.PART_HELMET_CHAINMAILS)
                 .add(ModItems.HELMET_CHAINMAIL.get());
         tag(ModTags.Items.PART_HELMET_PLATES)

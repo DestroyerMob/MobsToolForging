@@ -230,8 +230,10 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 new MaterialVisualSpec(MaterialCatalog.NETHERITE, "metal", "fine_scratches", false, 0, palette(0xFF1E1B20, 0xFF312B33, 0xFF4A414B, 0xFF675E68, 0xFF8C818D, 0xFFB0A6B2)),
                 new MaterialVisualSpec(MaterialCatalog.DIAMOND, "gem", "facets", false, 0, palette(0xFF0F5563, 0xFF178397, 0xFF24B9C8, 0xFF65E7EE, 0xFFB7FFFF, 0xFFFFFFFF)),
                 new MaterialVisualSpec(MaterialCatalog.EMERALD, "gem", "facets", false, 0, palette(0xFF06451F, 0xFF0C6C32, 0xFF159949, 0xFF33C967, 0xFF89F2A8, 0xFFE3FFE9)),
+                new MaterialVisualSpec(MaterialCatalog.AMETHYST, "gem", "facets", false, 0, palette(0xFF321456, 0xFF5D2A8C, 0xFF8A3FB8, 0xFFB26BE0, 0xFFD9A6F2, 0xFFF5E8FF)),
                 new MaterialVisualSpec(MaterialCatalog.RUBY, "gem", "facets", false, 0, palette(0xFF4A0610, 0xFF7A0B1A, 0xFFB5152C, 0xFFE83E52, 0xFFFF8A98, 0xFFFFD8DD)),
                 new MaterialVisualSpec(MaterialCatalog.SAPPHIRE, "gem", "facets", false, 0, palette(0xFF071A4A, 0xFF0B2E78, 0xFF174BB0, 0xFF3C78E8, 0xFF8AB7FF, 0xFFDCEAFF)),
+                new MaterialVisualSpec(MaterialCatalog.TOPAZ, "gem", "facets", false, 0, palette(0xFF6A2D05, 0xFF9A4B08, 0xFFD8730E, 0xFFF5A623, 0xFFFFD16A, 0xFFFFF2BF)),
                 new MaterialVisualSpec(MaterialCatalog.LEATHER, "leather", "wood_grain", false, 0, palette(0xFF4D2B1C, 0xFF6F4528, 0xFF8A5A35, 0xFFA9784C, 0xFFC99B6B, 0xFFE5C18F)),
                 new MaterialVisualSpec(MaterialCatalog.FLINT, "stone", "chipped_edges", false, 0, palette(0xFF15171A, 0xFF252932, 0xFF3D4550, 0xFF59636D, 0xFF7C8792, 0xFFB7C0C8)),
                 new MaterialVisualSpec(MaterialCatalog.OAK, "wood", "wood_grain", false, 0, palette(0xFF3B2613, 0xFF5A371A, 0xFF7D5126, 0xFFA5733A, 0xFFC99758, 0xFFE2BE80)),
@@ -255,8 +257,10 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 vanillaArmor(MaterialCatalog.NETHERITE, ResourceLocation.withDefaultNamespace("block/netherite_block"), "netherite"),
                 vanillaArmor(MaterialCatalog.DIAMOND, ResourceLocation.withDefaultNamespace("block/diamond_block"), "diamond"),
                 tintedLeatherArmor(MaterialCatalog.EMERALD, ResourceLocation.withDefaultNamespace("block/emerald_block")),
+                tintedLeatherArmor(MaterialCatalog.AMETHYST, ResourceLocation.fromNamespaceAndPath("extragems", "block/amethyst_block")),
                 tintedLeatherArmor(MaterialCatalog.RUBY, ResourceLocation.withDefaultNamespace("block/redstone_block")),
-                tintedLeatherArmor(MaterialCatalog.SAPPHIRE, ResourceLocation.withDefaultNamespace("block/lapis_block"))
+                tintedLeatherArmor(MaterialCatalog.SAPPHIRE, ResourceLocation.withDefaultNamespace("block/lapis_block")),
+                tintedLeatherArmor(MaterialCatalog.TOPAZ, ResourceLocation.fromNamespaceAndPath("extragems", "block/topaz_block"))
         );
     }
 

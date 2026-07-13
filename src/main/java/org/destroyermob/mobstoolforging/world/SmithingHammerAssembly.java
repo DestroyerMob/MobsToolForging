@@ -18,7 +18,7 @@ public final class SmithingHammerAssembly {
     }
 
     public static boolean isHeadIngredient(ItemStack stack) {
-        return stack.is(Items.IRON_BLOCK) || stack.is(ModTags.Items.HAMMER_STONES);
+        return stack.is(Items.IRON_INGOT) || stack.is(ModTags.Items.HAMMER_STONES);
     }
 
     public static ItemStack assemble(List<ItemStack> stacks) {
@@ -48,7 +48,7 @@ public final class SmithingHammerAssembly {
         if (head.isEmpty() || handle.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        ItemStack output = new ItemStack(head.is(Items.IRON_BLOCK)
+        ItemStack output = new ItemStack(head.is(Items.IRON_INGOT)
                 ? ModItems.IRON_SMITHING_HAMMER.get()
                 : ModItems.SMITHING_HAMMER.get());
         output.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(List.of(head, handle)));
@@ -65,7 +65,7 @@ public final class SmithingHammerAssembly {
             return Optional.of(storedParts.copyStacks());
         }
         ItemStack fallbackHead = hammer.is(ModItems.IRON_SMITHING_HAMMER.get())
-                ? new ItemStack(Items.IRON_BLOCK)
+                ? new ItemStack(Items.IRON_INGOT)
                 : new ItemStack(Items.COBBLESTONE);
         return Optional.of(List.of(fallbackHead, new ItemStack(Items.STICK)));
     }

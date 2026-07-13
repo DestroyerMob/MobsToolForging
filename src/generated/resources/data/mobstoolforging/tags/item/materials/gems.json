@@ -3,6 +3,10 @@
     "#c:gems/diamond",
     "#c:gems/emerald",
     {
+      "id": "#c:gems/amethyst",
+      "required": false
+    },
+    {
       "id": "#c:gems/ruby",
       "required": false
     },
@@ -11,11 +15,23 @@
       "required": false
     },
     {
+      "id": "#c:gems/topaz",
+      "required": false
+    },
+    {
+      "id": "#forge:gems/amethyst",
+      "required": false
+    },
+    {
       "id": "#forge:gems/ruby",
       "required": false
     },
     {
       "id": "#forge:gems/sapphire",
+      "required": false
+    },
+    {
+      "id": "#forge:gems/topaz",
       "required": false
     }
   ]

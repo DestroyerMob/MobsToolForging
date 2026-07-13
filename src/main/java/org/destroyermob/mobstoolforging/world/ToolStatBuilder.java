@@ -244,11 +244,17 @@ public final class ToolStatBuilder {
         if (MaterialCatalog.EMERALD.equals(material)) {
             return Optional.of(ToolTrait.FORTUNATE);
         }
+        if (MaterialCatalog.AMETHYST.equals(material)) {
+            return Optional.of(ToolTrait.FOCUSED);
+        }
         if (MaterialCatalog.RUBY.equals(material)) {
             return Optional.of(ToolTrait.KEEN);
         }
         if (MaterialCatalog.SAPPHIRE.equals(material)) {
             return Optional.of(ToolTrait.FOCUSED);
+        }
+        if (MaterialCatalog.TOPAZ.equals(material)) {
+            return Optional.of(ToolTrait.KEEN);
         }
         if (MaterialCatalog.NETHERITE.equals(material)) {
             return Optional.of(ToolTrait.NETHER_FORGED);
@@ -272,10 +278,12 @@ public final class ToolStatBuilder {
         if (MaterialCatalog.GOLD.equals(material)) {
             return List.of(ToolTrait.CONDUCTIVE);
         }
-        if (MaterialCatalog.COPPER.equals(material) || MaterialCatalog.SAPPHIRE.equals(material)) {
+        if (MaterialCatalog.COPPER.equals(material)
+                || MaterialCatalog.AMETHYST.equals(material)
+                || MaterialCatalog.SAPPHIRE.equals(material)) {
             return List.of(ToolTrait.RESONANT);
         }
-        if (MaterialCatalog.RUBY.equals(material)) {
+        if (MaterialCatalog.RUBY.equals(material) || MaterialCatalog.TOPAZ.equals(material)) {
             return List.of(ToolTrait.FORTUNATE);
         }
         return List.of();
@@ -607,8 +615,10 @@ public final class ToolStatBuilder {
     private static boolean isGemLikeToolMaterial(ResourceLocation materialId) {
         return MaterialCatalog.DIAMOND.equals(materialId)
                 || MaterialCatalog.EMERALD.equals(materialId)
+                || MaterialCatalog.AMETHYST.equals(materialId)
                 || MaterialCatalog.RUBY.equals(materialId)
-                || MaterialCatalog.SAPPHIRE.equals(materialId);
+                || MaterialCatalog.SAPPHIRE.equals(materialId)
+                || MaterialCatalog.TOPAZ.equals(materialId);
     }
 
     private static void applyTraitDebug(MutableStats stats, ToolTrait trait, String note) {

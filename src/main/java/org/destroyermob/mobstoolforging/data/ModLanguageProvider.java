@@ -146,8 +146,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("material.mobstoolforging.netherite", "Netherite");
         add("material.mobstoolforging.diamond", "Diamond");
         add("material.mobstoolforging.emerald", "Emerald");
+        add("material.mobstoolforging.amethyst", "Amethyst");
         add("material.mobstoolforging.ruby", "Ruby");
         add("material.mobstoolforging.sapphire", "Sapphire");
+        add("material.mobstoolforging.topaz", "Topaz");
         add("material.mobstoolforging.leather", "Leather");
         add("material.mobstoolforging.flint", "Flint");
         add("material.mobstoolforging.wood", "Wood");

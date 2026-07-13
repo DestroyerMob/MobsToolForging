@@ -2,6 +2,7 @@ package org.destroyermob.mobstoolforging.world;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.item.ModularArmorItem;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 
@@ -36,6 +37,9 @@ public final class ArmorRepairing {
         ArmorConstructionData construction = armor.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
         if (construction == null) {
             return false;
+        }
+        if (construction.hasLeatherBase()) {
+            return candidate.is(Items.LEATHER);
         }
         ResourceLocation materialId = repairMaterial(construction);
         return MaterialCatalog.definition(materialId)

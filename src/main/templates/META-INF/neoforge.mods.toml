@@ -39,3 +39,10 @@ type = "optional"
 versionRange = "[1.21-2.11.46,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "extragems"
+type = "optional"
+versionRange = "[0,)"
+ordering = "AFTER"
+side = "BOTH"

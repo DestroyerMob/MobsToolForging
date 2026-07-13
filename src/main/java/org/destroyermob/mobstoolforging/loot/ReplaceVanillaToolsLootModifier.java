@@ -37,10 +37,13 @@ public class ReplaceVanillaToolsLootModifier extends LootModifier {
 
         ResourceLocation handleMaterial = handleMaterial(context);
         for (int i = 0; i < generatedLoot.size(); i++) {
-            ItemStack converted = VanillaToolConverter.convertLootOrEquipment(generatedLoot.get(i), handleMaterial);
+            ItemStack current = generatedLoot.get(i);
+            ItemStack converted = VanillaToolConverter.convertLootOrEquipment(current, handleMaterial);
             if (!converted.isEmpty()) {
                 generatedLoot.set(i, converted);
+                current = converted;
             }
+            VanillaToolConverter.syncLootAssemblyComponents(current);
         }
     }
 

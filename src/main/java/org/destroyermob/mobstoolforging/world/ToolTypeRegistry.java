@@ -12,6 +12,7 @@ import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 
 public final class ToolTypeRegistry {
@@ -88,8 +89,10 @@ public final class ToolTypeRegistry {
                         MaterialCatalog.NETHERITE,
                         MaterialCatalog.DIAMOND,
                         MaterialCatalog.EMERALD,
+                        MaterialCatalog.AMETHYST,
                         MaterialCatalog.RUBY,
-                        MaterialCatalog.SAPPHIRE
+                        MaterialCatalog.SAPPHIRE,
+                        MaterialCatalog.TOPAZ
                 )
         ));
         registerArmorTemplate(HELMET_CHAINMAIL_TEMPLATE, ArmorConstructionData.HELMET_TYPE, ArmorPartData.HELMET_CHAINMAIL, 2, ModItems.HELMET_CHAINMAIL.getId(), Set.of(MaterialCatalog.IRON));
@@ -160,8 +163,10 @@ public final class ToolTypeRegistry {
                 MaterialCatalog.GOLD,
                 MaterialCatalog.DIAMOND,
                 MaterialCatalog.EMERALD,
+                MaterialCatalog.AMETHYST,
                 MaterialCatalog.RUBY,
-                MaterialCatalog.SAPPHIRE
+                MaterialCatalog.SAPPHIRE,
+                MaterialCatalog.TOPAZ
         );
     }
 
@@ -296,7 +301,11 @@ public final class ToolTypeRegistry {
                 .partItem(ToolPartData.CROSSBOW_LIMBS, ModItems.CROSSBOW_LIMBS::get)
                 .requiredAssemblyPart(ToolPartData.CROSSBOW_BODY, ModItems.CROSSBOW_BODY::get)
                 .noMiningTag()
-                .toolFactory((ignored, construction) -> new ItemStack(ModItems.CROSSBOW.get()))
+                .toolFactory((ignored, construction) -> {
+                    ItemStack stack = new ItemStack(ModItems.CROSSBOW.get());
+                    stack.set(ModDataComponents.TOOL_CONSTRUCTION.get(), construction);
+                    return stack;
+                })
                 .build();
         TOOL_TYPES.put(CROSSBOW_TOOL_TYPE, definition);
     }

@@ -203,8 +203,10 @@ public final class ArmorStatsCatalog {
         stats.put(MaterialCatalog.NETHERITE, new ArmorStats(3, 37, 15, 3.0F, 0.1F, true));
         stats.put(MaterialCatalog.DIAMOND, new ArmorStats(3, 33, 10, 2.0F, 0.0F, false));
         stats.put(MaterialCatalog.EMERALD, new ArmorStats(3, 30, 18, 2.0F, 0.0F, false));
+        stats.put(MaterialCatalog.AMETHYST, new ArmorStats(3, 20, 20, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.RUBY, new ArmorStats(3, 29, 16, 2.0F, 0.0F, false));
         stats.put(MaterialCatalog.SAPPHIRE, new ArmorStats(3, 31, 20, 2.0F, 0.0F, false));
+        stats.put(MaterialCatalog.TOPAZ, new ArmorStats(3, 18, 18, 0.0F, 0.0F, false));
         return Map.copyOf(stats);
     }
 
@@ -217,8 +219,10 @@ public final class ArmorStatsCatalog {
         stats.put(MaterialCatalog.NETHERITE, new ArmorStats(8, 37, 15, 3.0F, 0.1F, true));
         stats.put(MaterialCatalog.DIAMOND, new ArmorStats(8, 33, 10, 2.0F, 0.0F, false));
         stats.put(MaterialCatalog.EMERALD, new ArmorStats(7, 30, 18, 2.0F, 0.0F, false));
+        stats.put(MaterialCatalog.AMETHYST, new ArmorStats(8, 20, 20, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.RUBY, new ArmorStats(7, 29, 16, 2.0F, 0.0F, false));
         stats.put(MaterialCatalog.SAPPHIRE, new ArmorStats(7, 31, 20, 2.0F, 0.0F, false));
+        stats.put(MaterialCatalog.TOPAZ, new ArmorStats(8, 18, 18, 0.0F, 0.0F, false));
         return Map.copyOf(stats);
     }
 
@@ -231,8 +235,10 @@ public final class ArmorStatsCatalog {
         stats.put(MaterialCatalog.NETHERITE, new ArmorStats(6, 37, 15, 3.0F, 0.1F, true));
         stats.put(MaterialCatalog.DIAMOND, new ArmorStats(6, 33, 10, 2.0F, 0.0F, false));
         stats.put(MaterialCatalog.EMERALD, new ArmorStats(6, 30, 18, 2.0F, 0.0F, false));
+        stats.put(MaterialCatalog.AMETHYST, new ArmorStats(6, 20, 20, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.RUBY, new ArmorStats(6, 29, 16, 2.0F, 0.0F, false));
         stats.put(MaterialCatalog.SAPPHIRE, new ArmorStats(6, 31, 20, 2.0F, 0.0F, false));
+        stats.put(MaterialCatalog.TOPAZ, new ArmorStats(6, 18, 18, 0.0F, 0.0F, false));
         return Map.copyOf(stats);
     }
 
@@ -245,8 +251,10 @@ public final class ArmorStatsCatalog {
         stats.put(MaterialCatalog.NETHERITE, new ArmorStats(3, 37, 15, 3.0F, 0.1F, true));
         stats.put(MaterialCatalog.DIAMOND, new ArmorStats(3, 33, 10, 2.0F, 0.0F, false));
         stats.put(MaterialCatalog.EMERALD, new ArmorStats(3, 30, 18, 2.0F, 0.0F, false));
+        stats.put(MaterialCatalog.AMETHYST, new ArmorStats(3, 20, 20, 0.0F, 0.0F, false));
         stats.put(MaterialCatalog.RUBY, new ArmorStats(3, 29, 16, 2.0F, 0.0F, false));
         stats.put(MaterialCatalog.SAPPHIRE, new ArmorStats(3, 31, 20, 2.0F, 0.0F, false));
+        stats.put(MaterialCatalog.TOPAZ, new ArmorStats(3, 18, 18, 0.0F, 0.0F, false));
         return Map.copyOf(stats);
     }
 

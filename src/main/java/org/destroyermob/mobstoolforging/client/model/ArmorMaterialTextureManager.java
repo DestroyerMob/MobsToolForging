@@ -228,8 +228,10 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
         defaults.put(MaterialCatalog.NETHERITE, exact(ResourceLocation.withDefaultNamespace("block/netherite_block"), "netherite"));
         defaults.put(MaterialCatalog.DIAMOND, exact(ResourceLocation.withDefaultNamespace("block/diamond_block"), "diamond"));
         defaults.put(MaterialCatalog.EMERALD, tintedLeather(ResourceLocation.withDefaultNamespace("block/emerald_block")));
+        defaults.put(MaterialCatalog.AMETHYST, tintedLeather(ResourceLocation.fromNamespaceAndPath("extragems", "block/amethyst_block")));
         defaults.put(MaterialCatalog.RUBY, tintedLeather(ResourceLocation.withDefaultNamespace("block/redstone_block")));
         defaults.put(MaterialCatalog.SAPPHIRE, tintedLeather(ResourceLocation.withDefaultNamespace("block/lapis_block")));
+        defaults.put(MaterialCatalog.TOPAZ, tintedLeather(ResourceLocation.fromNamespaceAndPath("extragems", "block/topaz_block")));
         return defaults;
     }
 

@@ -59,9 +59,9 @@ public final class LapidaryTableAssemblyEvents {
     }
 
     private static boolean matches(Level level, BlockPos bottomRight, BlockPos bottomLeft, BlockPos topRight, BlockPos topLeft) {
-        return level.getBlockState(bottomRight).is(Blocks.IRON_BLOCK)
-                && level.getBlockState(bottomLeft).is(Blocks.IRON_BLOCK)
-                && level.getBlockState(topRight).is(Blocks.LAPIS_BLOCK)
+        return level.getBlockState(bottomRight).is(Blocks.LAPIS_BLOCK)
+                && level.getBlockState(bottomLeft).is(Blocks.LAPIS_BLOCK)
+                && level.getBlockState(topRight).is(Blocks.SMOOTH_STONE)
                 && level.getBlockState(topLeft).is(ModBlocks.DIAMOND_SAW.get());
     }
 

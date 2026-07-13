@@ -21,6 +21,16 @@
       "color": "#8fc7ff"
     },
     {
+      "tag": "mobstoolforging:parts/crossbow_body",
+      "label": "Crossbow Body",
+      "color": "#c58a3a"
+    },
+    {
+      "tag": "mobstoolforging:parts/crossbow_limbs",
+      "label": "Crossbow Limbs",
+      "color": "#d6a96c"
+    },
+    {
       "tag": "mobstoolforging:parts/helmet_chainmail",
       "label": "Helmet Base",
       "color": "#b9c7d6"

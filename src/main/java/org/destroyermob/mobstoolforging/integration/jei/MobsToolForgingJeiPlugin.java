@@ -255,7 +255,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                     Optional.empty(),
                     StationWorkRecipe.Input.item(ResourceLocation.withDefaultNamespace("iron_ingot")),
                     Optional.empty(),
-                    new ItemStack(ModItems.DIAMOND_POWDER.get(), 4),
+                    new ItemStack(ModItems.DIAMOND_POWDER.get()),
                     4,
                     SmithingHammerLevel.IRON.level()
             ));
@@ -372,12 +372,12 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     private static void addHammerAssemblyRecipes(List<ToolmakerAssemblyJeiRecipe> recipes) {
         ItemStack handle = new ItemStack(Items.STICK);
-        ItemStack ironBlock = new ItemStack(Items.IRON_BLOCK);
-        ItemStack ironHammer = SmithingHammerAssembly.assemble(List.of(ironBlock, handle));
+        ItemStack ironIngot = new ItemStack(Items.IRON_INGOT);
+        ItemStack ironHammer = SmithingHammerAssembly.assemble(List.of(ironIngot, handle));
         if (!ironHammer.isEmpty()) {
             recipes.add(new ToolmakerAssemblyJeiRecipe(
                     recipeId("toolmaker_assembly/hammer/iron"),
-                    List.of(ironBlock, handle),
+                    List.of(ironIngot, handle),
                     ironHammer
             ));
         }
@@ -410,8 +410,10 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 MaterialCatalog.NETHERITE,
                 MaterialCatalog.DIAMOND,
                 MaterialCatalog.EMERALD,
+                MaterialCatalog.AMETHYST,
                 MaterialCatalog.RUBY,
-                MaterialCatalog.SAPPHIRE
+                MaterialCatalog.SAPPHIRE,
+                MaterialCatalog.TOPAZ
         );
         for (ResourceLocation limbMaterial : limbMaterials) {
             ItemStack limbs = ModItems.CROSSBOW_LIMBS.get().createPart(limbMaterial);
@@ -523,8 +525,8 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         recipes.add(new WorldAssemblyJeiRecipe(
                 recipeId("world_assembly/lapidary_table"),
                 WorldAssemblyJeiRecipe.Kind.LAPIDARY_TABLE,
-                List.of(new ItemStack(Items.IRON_BLOCK), new ItemStack(Items.IRON_BLOCK)),
-                List.of(new ItemStack(ModBlocks.DIAMOND_SAW.get()), new ItemStack(Items.LAPIS_BLOCK)),
+                List.of(new ItemStack(Items.LAPIS_BLOCK), new ItemStack(Items.LAPIS_BLOCK)),
+                List.of(new ItemStack(ModBlocks.DIAMOND_SAW.get()), new ItemStack(Items.SMOOTH_STONE)),
                 hammers,
                 new ItemStack(ModBlocks.LAPIDARY_TABLE.get())
         ));

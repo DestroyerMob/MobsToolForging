@@ -129,6 +129,18 @@
       "enchantment_tag": "betterenchanting:targets/durability"
     },
     {
+      "item_tag": "mobstoolforging:parts/crossbow_limbs",
+      "enchantment_tag": "betterenchanting:targets/weapons"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/crossbow_limbs",
+      "enchantment_tag": "betterenchanting:targets/weapons/ranged"
+    },
+    {
+      "item_tag": "mobstoolforging:parts/crossbow_limbs",
+      "enchantment_tag": "betterenchanting:targets/weapons/crossbows"
+    },
+    {
       "item_tag": "mobstoolforging:parts/armor",
       "enchantment_tag": "betterenchanting:targets/durability"
     },

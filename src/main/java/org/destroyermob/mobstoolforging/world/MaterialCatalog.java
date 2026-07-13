@@ -32,8 +32,10 @@ public final class MaterialCatalog {
     public static final ResourceLocation NETHERITE = materialId("netherite");
     public static final ResourceLocation DIAMOND = materialId("diamond");
     public static final ResourceLocation EMERALD = materialId("emerald");
+    public static final ResourceLocation AMETHYST = materialId("amethyst");
     public static final ResourceLocation RUBY = materialId("ruby");
     public static final ResourceLocation SAPPHIRE = materialId("sapphire");
+    public static final ResourceLocation TOPAZ = materialId("topaz");
     public static final ResourceLocation LEATHER = materialId("leather");
     public static final ResourceLocation FLINT = materialId("flint");
     public static final ResourceLocation WOOD = materialId("wood");
@@ -79,6 +81,22 @@ public final class MaterialCatalog {
             20,
             () -> Ingredient.of(ModTags.Items.GEMS_SAPPHIRE)
     );
+    private static final Tier AMETHYST_TIER = new SimpleTier(
+            BlockTags.INCORRECT_FOR_DIAMOND_TOOL,
+            550,
+            7.0F,
+            2.5F,
+            30,
+            () -> Ingredient.of(ModTags.Items.GEMS_AMETHYST)
+    );
+    private static final Tier TOPAZ_TIER = new SimpleTier(
+            BlockTags.INCORRECT_FOR_DIAMOND_TOOL,
+            450,
+            7.5F,
+            3.5F,
+            12,
+            () -> Ingredient.of(ModTags.Items.GEMS_TOPAZ)
+    );
 
     private static final Map<ResourceLocation, ToolMaterialDefinition> DEFINITIONS = new LinkedHashMap<>();
     private static final Map<String, LinkedHashSet<ResourceLocation>> EXTRA_VISUAL_MATERIALS = new LinkedHashMap<>();
@@ -87,7 +105,9 @@ public final class MaterialCatalog {
     private static final Map<TagKey<Item>, ResourceLocation> MATERIAL_TAG_IDS = new LinkedHashMap<>();
     private static final Map<ResourceLocation, LinkedList<TagKey<Item>>> MATERIAL_DISPLAY_TAGS = new LinkedHashMap<>();
     private static final Map<Item, ResourceLocation> CUSTOM_HANDLE_MATERIALS = new LinkedHashMap<>();
-    private static final List<ResourceLocation> STARTER_MATERIALS = List.of(IRON, GOLD, COPPER, DIAMOND, EMERALD, RUBY, SAPPHIRE);
+    private static final List<ResourceLocation> STARTER_MATERIALS = List.of(
+            IRON, GOLD, COPPER, DIAMOND, EMERALD, AMETHYST, RUBY, SAPPHIRE, TOPAZ
+    );
     private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(OAK, DARK_OAK, BLAZE, BREEZE);
     private static final List<ResourceLocation> GUARD_MATERIALS = STARTER_MATERIALS;
     private static final List<ResourceLocation> TREATMENT_MATERIALS = List.of(NETHERITE, NETHER, SCULK);
@@ -99,6 +119,13 @@ public final class MaterialCatalog {
         register(NETHERITE, MaterialCategory.METAL, Items.NETHERITE_INGOT, Tiers.NETHERITE, HeatLevel.HIGH);
         register(DIAMOND, MaterialCategory.GEM, Items.DIAMOND, Tiers.DIAMOND);
         register(EMERALD, MaterialCategory.GEM, Items.EMERALD, EMERALD_TIER);
+        registerTagged(
+                AMETHYST,
+                MaterialCategory.GEM,
+                Items.AMETHYST_SHARD,
+                AMETHYST_TIER,
+                List.of(ModTags.Items.GEMS_AMETHYST, ModTags.Items.LEGACY_FORGE_GEMS_AMETHYST)
+        );
         registerTagged(
                 RUBY,
                 MaterialCategory.GEM,
@@ -112,6 +139,13 @@ public final class MaterialCatalog {
                 Items.LAPIS_LAZULI,
                 SAPPHIRE_TIER,
                 List.of(ModTags.Items.GEMS_SAPPHIRE, ModTags.Items.LEGACY_FORGE_GEMS_SAPPHIRE)
+        );
+        registerTagged(
+                TOPAZ,
+                MaterialCategory.GEM,
+                Items.GOLD_INGOT,
+                TOPAZ_TIER,
+                List.of(ModTags.Items.GEMS_TOPAZ, ModTags.Items.LEGACY_FORGE_GEMS_TOPAZ)
         );
         registerVirtual(LEATHER, MaterialCategory.ORGANIC, Items.LEATHER, Tiers.WOOD);
         registerVirtual(FLINT, MaterialCategory.GEM, Items.FLINT, CrudeFlintTiers.FLINT);

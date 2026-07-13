@@ -3,7 +3,7 @@
     "#mobstoolforging:parts/heads",
     "#mobstoolforging:parts/handle",
     "#mobstoolforging:parts/guards",
-    "mobstoolforging:crossbow_body",
-    "mobstoolforging:crossbow_limbs"
+    "#mobstoolforging:parts/crossbow_body",
+    "#mobstoolforging:parts/crossbow_limbs"
   ]
 }

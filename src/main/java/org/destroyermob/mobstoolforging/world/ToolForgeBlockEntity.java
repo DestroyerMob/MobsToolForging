@@ -1335,8 +1335,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private int materialDifficultyPenalty(ToolMaterialDefinition material) {
         if (MaterialCatalog.DIAMOND.equals(material.id())
                 || MaterialCatalog.EMERALD.equals(material.id())
+                || MaterialCatalog.AMETHYST.equals(material.id())
                 || MaterialCatalog.RUBY.equals(material.id())
-                || MaterialCatalog.SAPPHIRE.equals(material.id())) {
+                || MaterialCatalog.SAPPHIRE.equals(material.id())
+                || MaterialCatalog.TOPAZ.equals(material.id())) {
             return -8;
         }
         if (MaterialCatalog.IRON.equals(material.id())) {

@@ -90,6 +90,11 @@ public final class CompositeAffixCompatibility {
                 && assemblyParts.stacks().stream().anyMatch(part -> part.has(components.affixes()));
     }
 
+    public static boolean hasDirectAffixes(ItemStack stack) {
+        ApotheosisComponents components = components();
+        return components != null && !stack.isEmpty() && stack.has(components.affixes());
+    }
+
     /**
      * Mirrors one contributing part's presentation components onto the completed item.
      * The stored parts remain authoritative and {@link #affixesFor(ItemStack)} still supplies

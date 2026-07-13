@@ -1,5 +1,7 @@
 package org.destroyermob.mobstoolforging.world;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -60,12 +62,88 @@ public final class VanillaToolConverter {
 
     private static void establishAssemblyParts(ItemStack converted) {
         ToolmakerBenchAssembly.disassemble(converted).ifPresent(parts -> {
-            converted.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts));
+            List<ItemStack> routedParts = routeConvertedComponents(converted, parts);
+            converted.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(routedParts));
             CompositeAffixCompatibility.syncCompatibilityMirror(converted);
         });
     }
 
+    /** Seeds an affix added by a later loot modifier into the authoritative physical part. */
+    public static void syncLootAssemblyComponents(ItemStack stack) {
+        if (stack.isEmpty()
+                || !CompositeAffixCompatibility.hasDirectAffixes(stack)
+                || CompositeAffixCompatibility.hasComponentAffixes(stack)) {
+            return;
+        }
+        ToolAssemblyParts storedParts = stack.get(ModDataComponents.TOOL_ASSEMBLY_PARTS.get());
+        if (storedParts == null || storedParts.stacks().isEmpty()) {
+            return;
+        }
+        List<ItemStack> parts = routeExternalComponents(stack, storedParts.copyStacks());
+        stack.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(parts));
+        CompositeAffixCompatibility.syncCompatibilityMirror(stack);
+    }
+
+    private static List<ItemStack> routeConvertedComponents(ItemStack converted, List<ItemStack> parts) {
+        List<ItemStack> routed = ToolAssemblyEnchantments.copyToolEnchantmentsToViableParts(converted, parts);
+        ToolConstructionData construction = converted.get(ModDataComponents.TOOL_CONSTRUCTION.get());
+        if (CrossbowAssembly.isCrossbow(construction)) {
+            routed = copyEnchantmentsToPrimaryPart(converted, routed, ToolPartData.CROSSBOW_LIMBS);
+        }
+        return routeExternalComponents(converted, routed);
+    }
+
+    private static List<ItemStack> routeExternalComponents(ItemStack converted, List<ItemStack> parts) {
+        ToolConstructionData construction = converted.get(ModDataComponents.TOOL_CONSTRUCTION.get());
+        if (construction != null) {
+            ToolTypeDefinition definition = ToolTypeRegistry.toolType(construction.toolType()).orElse(null);
+            if (definition != null) {
+                return ToolExternalComponents.copyToolComponentsToPrimaryHead(definition, converted, parts);
+            }
+        }
+        if (converted.get(ModDataComponents.ARMOR_CONSTRUCTION.get()) != null) {
+            return ArmorExternalComponents.copyArmorComponentsToPrimaryPart(converted, parts);
+        }
+        return List.copyOf(parts);
+    }
+
+    private static List<ItemStack> copyEnchantmentsToPrimaryPart(ItemStack source, List<ItemStack> parts, String primaryPartType) {
+        var enchantments = source.get(DataComponents.ENCHANTMENTS);
+        if (enchantments == null || enchantments.isEmpty()) {
+            return List.copyOf(parts);
+        }
+        List<ItemStack> result = new ArrayList<>(parts.size());
+        for (ItemStack part : parts) {
+            ItemStack copy = part.copy();
+            ToolPartData data = copy.get(ModDataComponents.TOOL_PART.get());
+            if (data != null && primaryPartType.equals(data.partType())) {
+                copy.set(DataComponents.ENCHANTMENTS, enchantments);
+            }
+            result.add(copy);
+        }
+        return List.copyOf(result);
+    }
+
     private static ToolConversion conversion(Item item, ResourceLocation handleMaterial) {
+        if (item == Items.CROSSBOW) {
+            ToolTypeDefinition definition = ToolTypeRegistry.toolType(CrossbowAssembly.TOOL_TYPE).orElse(null);
+            if (definition == null) {
+                return null;
+            }
+            ToolConstructionData construction = new ToolConstructionData(
+                    CrossbowAssembly.TOOL_TYPE,
+                    MaterialCatalog.IRON,
+                    Optional.empty(),
+                    MaterialCatalog.WOOD,
+                    Optional.of(MaterialCatalog.SPIDER_SILK),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    ToolConstructionData.DEFAULT_QUALITY
+            );
+            return new ToolConversion(definition, construction);
+        }
         Optional<ToolConversion> knownExternal = knownExternalConversion(item, handleMaterial);
         if (knownExternal.isPresent()) {
             return knownExternal.get();
@@ -332,6 +410,7 @@ public final class VanillaToolConverter {
         copyIfPresent(original, converted, DataComponents.LORE);
         copyIfPresent(original, converted, DataComponents.ENCHANTMENTS);
         copyIfPresent(original, converted, DataComponents.REPAIR_COST);
+        copyIfPresent(original, converted, DataComponents.CHARGED_PROJECTILES);
         copyIfPresent(original, converted, DataComponents.CUSTOM_DATA);
         ToolExternalComponents.copyCompatibleExternalComponents(original, converted);
     }
