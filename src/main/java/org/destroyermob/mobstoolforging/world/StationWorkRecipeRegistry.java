@@ -28,6 +28,16 @@ public final class StationWorkRecipeRegistry {
                 .findFirst();
     }
 
+    public static Optional<StationWorkRecipe> findPatternRecipe(WorkstationKind kind, @Nullable ResourceLocation selectedPattern) {
+        if (selectedPattern == null) {
+            return Optional.empty();
+        }
+        return recipes.values().stream()
+                .filter(recipe -> recipe.workstationKind() == kind)
+                .filter(recipe -> recipe.patternId().filter(selectedPattern::equals).isPresent())
+                .findFirst();
+    }
+
     public static boolean hasStartRecipe(WorkstationKind kind, ResourceLocation patternId) {
         return recipes.values().stream()
                 .anyMatch(recipe -> recipe.workstationKind() == kind

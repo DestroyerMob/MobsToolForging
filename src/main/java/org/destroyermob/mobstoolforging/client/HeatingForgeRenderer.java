@@ -96,15 +96,18 @@ public class HeatingForgeRenderer implements BlockEntityRenderer<HeatingForgeBlo
         float heightPixels = (maxY - minY) * 16.0F;
         float u0 = sprite.getU(0.0F);
         float v0 = sprite.getV(0.0F);
-        float uWidth = sprite.getU(widthPixels);
-        float uDepth = sprite.getU(depthPixels);
-        float vHeight = sprite.getV(heightPixels);
+        // TextureAtlasSprite coordinates are normalized in 1.21.1. Passing the
+        // old 0-16 pixel values walks across neighbouring sprites in the atlas.
+        float uWidth = sprite.getU(widthPixels / 16.0F);
+        float uDepth = sprite.getU(depthPixels / 16.0F);
+        float vDepth = sprite.getV(depthPixels / 16.0F);
+        float vHeight = sprite.getV(heightPixels / 16.0F);
 
         quad(poseStack, consumer, Direction.UP.step(), color, light, overlay,
-                minX, maxY, minZ, u0, sprite.getV(depthPixels),
+                minX, maxY, minZ, u0, vDepth,
                 minX, maxY, maxZ, u0, v0,
                 maxX, maxY, maxZ, uWidth, v0,
-                maxX, maxY, minZ, uWidth, sprite.getV(depthPixels));
+                maxX, maxY, minZ, uWidth, vDepth);
         quad(poseStack, consumer, Direction.NORTH.step(), color, light, overlay,
                 minX, minY, minZ, u0, vHeight,
                 maxX, minY, minZ, uWidth, vHeight,

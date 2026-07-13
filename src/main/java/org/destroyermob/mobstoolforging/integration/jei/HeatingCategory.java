@@ -16,7 +16,7 @@ public class HeatingCategory implements IRecipeCategory<HeatingJeiRecipe> {
     private final IDrawable icon;
 
     public HeatingCategory(IGuiHelper guiHelper) {
-        this.background = guiHelper.createBlankDrawable(132, 52);
+        this.background = guiHelper.createBlankDrawable(132, 40);
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.heatingForgeIcon());
     }
 
@@ -42,21 +42,21 @@ public class HeatingCategory implements IRecipeCategory<HeatingJeiRecipe> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, HeatingJeiRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.CATALYST, 2, 18)
+        builder.addSlot(RecipeIngredientRole.CATALYST, 2, 17)
                 .setStandardSlotBackground()
                 .addItemStack(recipe.station());
-        builder.addInputSlot(36, 18)
+        builder.addInputSlot(38, 17)
                 .setStandardSlotBackground()
                 .addItemStacks(recipe.inputs());
-        builder.addOutputSlot(100, 18)
+        builder.addOutputSlot(104, 17)
                 .setOutputSlotBackground()
                 .addItemStack(recipe.output());
     }
 
     @Override
     public void draw(HeatingJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        JeiRecipeVisuals.drawClock(guiGraphics, 46, 2, recipe.ticks());
-        JeiRecipeVisuals.drawHeatTarget(guiGraphics, 88, 0, recipe.targetTemperature());
-        JeiRecipeVisuals.drawArrow(guiGraphics, 72, 22);
+        JeiRecipeVisuals.drawPlus(guiGraphics, 26, 22);
+        JeiRecipeVisuals.drawClock(guiGraphics, 57, 2, recipe.ticks());
+        JeiRecipeVisuals.drawArrow(guiGraphics, 74, 21);
     }
 }

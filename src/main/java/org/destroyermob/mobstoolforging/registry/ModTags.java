@@ -57,6 +57,7 @@ public final class ModTags {
         public static final TagKey<Item> PART_BOOTS_CHAINMAILS = itemTag("parts/boots_chainmail");
         public static final TagKey<Item> PART_BOOTS_PLATES = itemTag("parts/boots_plate");
         public static final TagKey<Item> TOOL_HANDLES = itemTag("tool_handles");
+        public static final TagKey<Item> CROSSBOW_STRINGS = itemTag("crossbow_strings");
         public static final TagKey<Item> LAPIDARY_ABRASIVES = itemTag("lapidary_abrasives");
         public static final TagKey<Item> LAPIDARY_ABRASIVES_DIAMOND = itemTag("lapidary_abrasives/diamond");
         public static final TagKey<Item> KNAPPING_TOOLS = itemTag("knapping_tools");

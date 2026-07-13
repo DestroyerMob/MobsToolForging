@@ -50,7 +50,8 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
         ItemStack output = parseOutput(GsonHelper.getAsJsonObject(json, "output"));
         int requiredHits = Math.max(1, GsonHelper.getAsInt(json, "required_hits", 1));
         int minimumHammerLevel = parseHammerLevel(json, SmithingHammerLevel.STONE.level());
-        return new StationWorkRecipe(id, workstationKind, pattern, input, secondaryInput, output, requiredHits, minimumHammerLevel);
+        StationWorkRecipe.QualityMode qualityMode = StationWorkRecipe.QualityMode.parse(GsonHelper.getAsString(json, "quality_mode", "none"));
+        return new StationWorkRecipe(id, workstationKind, pattern, input, secondaryInput, output, requiredHits, minimumHammerLevel, qualityMode);
     }
 
     private static WorkstationKind parseWorkstation(String value) {

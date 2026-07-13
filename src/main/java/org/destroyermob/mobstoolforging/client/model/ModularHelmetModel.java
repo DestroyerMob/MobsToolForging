@@ -18,12 +18,18 @@ public final class ModularHelmetModel {
     public static final ModelLayerLocation BLANK_ARMOR_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "blank_modular_armor"), "main");
     private static final String CHAINMAIL_HELMET = "ChainmailHelmet";
     private static final String MATERIAL_HELMET = "MaterialHelmet";
+    private static final String CHAINMAIL_TRIM_HELMET = "ChainmailTrimHelmet";
+    private static final String MATERIAL_TRIM_HELMET = "MaterialTrimHelmet";
     private final ModelPart chainmailHelmet;
     private final ModelPart materialHelmet;
+    private final ModelPart chainmailTrimHelmet;
+    private final ModelPart materialTrimHelmet;
 
     public ModularHelmetModel(ModelPart root) {
         this.chainmailHelmet = root.getChild(CHAINMAIL_HELMET);
         this.materialHelmet = root.getChild(MATERIAL_HELMET);
+        this.chainmailTrimHelmet = root.getChild(CHAINMAIL_TRIM_HELMET);
+        this.materialTrimHelmet = root.getChild(MATERIAL_TRIM_HELMET);
     }
 
     public void renderChainmail(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay) {
@@ -42,11 +48,18 @@ public final class ModularHelmetModel {
         materialHelmet.render(poseStack, new TintingVertexConsumer(consumer, color), packedLight, packedOverlay);
     }
 
+    public void renderTrim(PoseStack poseStack, VertexConsumer consumer, boolean plated, int packedLight, int packedOverlay) {
+        ModelPart trimShell = plated ? materialTrimHelmet : chainmailTrimHelmet;
+        trimShell.render(poseStack, consumer, packedLight, packedOverlay);
+    }
+
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition root = meshdefinition.getRoot();
         CubeDeformation chainmailDeformation = new CubeDeformation(0.5F);
         CubeDeformation materialDeformation = new CubeDeformation(0.65F);
+        CubeDeformation chainmailTrimDeformation = new CubeDeformation(0.53F);
+        CubeDeformation materialTrimDeformation = new CubeDeformation(0.68F);
 
         root.addOrReplaceChild(CHAINMAIL_HELMET, CubeListBuilder.create()
                 .texOffs(0, 0)
@@ -55,6 +68,14 @@ public final class ModularHelmetModel {
         root.addOrReplaceChild(MATERIAL_HELMET, CubeListBuilder.create()
                 .texOffs(0, 0)
                 .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, materialDeformation), PartPose.ZERO);
+
+        root.addOrReplaceChild(CHAINMAIL_TRIM_HELMET, CubeListBuilder.create()
+                .texOffs(0, 0)
+                .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, chainmailTrimDeformation), PartPose.ZERO);
+
+        root.addOrReplaceChild(MATERIAL_TRIM_HELMET, CubeListBuilder.create()
+                .texOffs(0, 0)
+                .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, materialTrimDeformation), PartPose.ZERO);
 
         return LayerDefinition.create(meshdefinition, 64, 32);
     }

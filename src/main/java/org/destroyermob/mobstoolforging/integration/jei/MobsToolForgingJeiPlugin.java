@@ -401,7 +401,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         if (body.isEmpty()) {
             return;
         }
-        List<ItemStack> strings = List.of(new ItemStack(Items.STRING), new ItemStack(ModItems.PLANT_FIBER.get()));
+        List<ItemStack> strings = CrossbowAssembly.stringIngredientStacks();
         List<ResourceLocation> limbMaterials = List.of(
                 MaterialCatalog.OAK,
                 MaterialCatalog.COPPER,

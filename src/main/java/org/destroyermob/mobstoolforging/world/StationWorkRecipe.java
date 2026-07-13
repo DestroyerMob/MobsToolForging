@@ -1,6 +1,7 @@
 package org.destroyermob.mobstoolforging.world;
 
 import java.util.Optional;
+import java.util.Locale;
 import javax.annotation.Nullable;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -17,13 +18,28 @@ public record StationWorkRecipe(
         Optional<Input> secondaryInput,
         ItemStack output,
         int requiredHits,
-        int minimumHammerLevel
+        int minimumHammerLevel,
+        QualityMode qualityMode
 ) {
     public StationWorkRecipe {
         output = output.copy();
         secondaryInput = secondaryInput == null ? Optional.empty() : secondaryInput;
         requiredHits = Math.max(1, requiredHits);
         minimumHammerLevel = Math.max(0, minimumHammerLevel);
+        qualityMode = qualityMode == null ? QualityMode.NONE : qualityMode;
+    }
+
+    public StationWorkRecipe(
+            ResourceLocation id,
+            WorkstationKind workstationKind,
+            Optional<ResourceLocation> patternId,
+            Input input,
+            Optional<Input> secondaryInput,
+            ItemStack output,
+            int requiredHits,
+            int minimumHammerLevel
+    ) {
+        this(id, workstationKind, patternId, input, secondaryInput, output, requiredHits, minimumHammerLevel, QualityMode.NONE);
     }
 
     public boolean canStart(WorkstationKind kind, @Nullable ResourceLocation selectedPattern, ItemStack stack) {
@@ -39,6 +55,29 @@ public record StationWorkRecipe(
 
     public boolean requiresSecondaryInput() {
         return secondaryInput.isPresent();
+    }
+
+    public enum QualityMode {
+        NONE,
+        STATIC,
+        TIMED;
+
+        public boolean appliesQuality() {
+            return this != NONE;
+        }
+
+        public boolean usesTimingQte() {
+            return this == TIMED;
+        }
+
+        public static QualityMode parse(String value) {
+            String normalized = value == null ? "none" : value.trim().toUpperCase(Locale.ROOT);
+            try {
+                return valueOf(normalized);
+            } catch (IllegalArgumentException exception) {
+                throw new IllegalArgumentException("Unknown station work quality_mode '" + value + "'. Expected none, static, or timed.", exception);
+            }
+        }
     }
 
     public record Input(Optional<ResourceLocation> itemId, Optional<TagKey<Item>> tag, int count) {

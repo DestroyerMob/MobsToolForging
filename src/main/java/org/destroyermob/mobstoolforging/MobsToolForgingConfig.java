@@ -33,8 +33,6 @@ public final class MobsToolForgingConfig {
     public static final ModConfigSpec.IntValue COOLING_TICKS;
     public static final ModConfigSpec.BooleanValue ENABLE_CAMPFIRE_LOW_HEAT;
     public static final ModConfigSpec.ConfigValue<String> CAMPFIRE_HEAT_LEVEL;
-    public static final ModConfigSpec.BooleanValue REQUIRE_HEAT_AT_JOB_START_ONLY;
-    public static final ModConfigSpec.BooleanValue WORKPIECE_COOLS_MID_CRAFT;
     public static final ModConfigSpec.IntValue FORGE_HEAT_BUFFER_TICKS;
     public static final ModConfigSpec.IntValue FLUID_FORGE_HEAT_UNITS_PER_MB;
     public static final ModConfigSpec.BooleanValue ENABLE_QUALITY;
@@ -136,12 +134,6 @@ public final class MobsToolForgingConfig {
         CAMPFIRE_HEAT_LEVEL = builder
                 .comment("Heat level supplied by nearby lit campfires. Valid values: NONE, LOW, HOT, HIGH.")
                 .define("campfireHeatLevel", "LOW");
-        REQUIRE_HEAT_AT_JOB_START_ONLY = builder
-                .comment("When true, metal heat is checked when a shaping job starts rather than interrupting hammering mid-craft.")
-                .define("requireHeatAtJobStartOnly", true);
-        WORKPIECE_COOLS_MID_CRAFT = builder
-                .comment("When false, an active anvil workpiece stays workable until it completes or is cleared.")
-                .define("workpieceCoolsMidCraft", false);
         FORGE_HEAT_BUFFER_TICKS = builder
                 .comment("Ticks a Heating Forge keeps nearby workshop heat after burning fuel.")
                 .defineInRange("forgeHeatBufferTicks", 2400, 1, 20 * 60 * 60);

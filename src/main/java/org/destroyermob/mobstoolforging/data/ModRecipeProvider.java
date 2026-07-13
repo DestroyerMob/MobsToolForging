@@ -6,6 +6,7 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.data.recipes.SpecialRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
@@ -129,6 +130,12 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("S ")
                 .pattern(" S")
                 .unlockedBy("has_stick", has(Items.STICK))
+                .save(output);
+
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.BLAZE_THREAD)
+                .requires(Items.STRING)
+                .requires(Items.BLAZE_POWDER)
+                .unlockedBy("has_blaze_powder", has(Items.BLAZE_POWDER))
                 .save(output);
 
     }

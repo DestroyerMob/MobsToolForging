@@ -41,7 +41,7 @@ public class LapidaryTableBlock extends ToolWorkstationBlock {
             Block.box(13.0, 0.0, 1.0, 15.0, 11.0, 3.0),
             Block.box(13.0, 0.0, 13.0, 15.0, 11.0, 15.0),
             Block.box(0.0, 11.0, 0.0, 16.0, 13.0, 16.0),
-            Block.box(0.0, 13.0, 7.75, 16.0, 29.0, 8.25)
+            Block.box(0.0, 13.0, 7.75, 16.0, 20.0, 8.25)
     ).optimize();
     private static final VoxelShape FOOT_EAST_SHAPE = rotateClockwise(FOOT_NORTH_SHAPE);
     private static final VoxelShape FOOT_SOUTH_SHAPE = rotateClockwise(FOOT_EAST_SHAPE);

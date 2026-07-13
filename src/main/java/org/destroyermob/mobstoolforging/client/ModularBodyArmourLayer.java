@@ -40,6 +40,7 @@ public final class ModularBodyArmourLayer<T extends LivingEntity, M extends Enti
 
         renderChainmailLayer(poseStack, bufferSource, packedLight, construction, humanoidModel);
         renderLayer(poseStack, bufferSource, packedLight, humanoidModel, construction);
+        renderTrim(poseStack, bufferSource, packedLight, stack, humanoidModel, construction);
         if (stack.hasFoil()) {
             VertexConsumer glint = bufferSource.getBuffer(RenderType.armorEntityGlint());
             renderChainmailLayer(poseStack, glint, 0xFFFFFFFF, packedLight, humanoidModel);
@@ -65,6 +66,17 @@ public final class ModularBodyArmourLayer<T extends LivingEntity, M extends Enti
             VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(texture.texture()));
             renderLayer(poseStack, consumer, texture.color(), packedLight, humanoidModel, construction);
         });
+    }
+
+    private void renderTrim(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ItemStack stack, HumanoidModel<?> humanoidModel, ArmorConstructionData construction) {
+        VertexConsumer trim = ModularArmorTrimRenderer.consumer(stack, bufferSource, false);
+        if (trim == null) {
+            return;
+        }
+        boolean plated = construction.chestplatePlateMaterial().isPresent();
+        renderTrimBodyPart(poseStack, humanoidModel.body, trim, plated, packedLight);
+        renderTrimRightArmPart(poseStack, humanoidModel.rightArm, trim, plated, packedLight);
+        renderTrimLeftArmPart(poseStack, humanoidModel.leftArm, trim, plated, packedLight);
     }
 
     private void renderLayer(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, HumanoidModel<?> humanoidModel, ArmorConstructionData construction) {
@@ -115,6 +127,27 @@ public final class ModularBodyArmourLayer<T extends LivingEntity, M extends Enti
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
         bodyArmourModel.renderLeftArm(poseStack, consumer, color, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderTrimBodyPart(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, boolean plated, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        bodyArmourModel.renderTrimBody(poseStack, consumer, plated, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderTrimRightArmPart(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, boolean plated, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        bodyArmourModel.renderTrimRightArm(poseStack, consumer, plated, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderTrimLeftArmPart(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, boolean plated, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        bodyArmourModel.renderTrimLeftArm(poseStack, consumer, plated, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 

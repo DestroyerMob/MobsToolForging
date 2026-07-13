@@ -1,0 +1,12 @@
+{
+  "category": "organic",
+  "display_item": "mobstoolforging:blaze_thread",
+  "items": [
+    "mobstoolforging:blaze_thread"
+  ],
+  "translation_key": "material.mobstoolforging.blaze_thread",
+  "tier": "wood",
+  "visual_slots": [
+    "guardMaterial"
+  ]
+}

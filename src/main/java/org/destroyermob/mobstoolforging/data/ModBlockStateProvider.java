@@ -117,6 +117,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         itemModels().withExistingParent("pattern_board", mcLoc("item/generated")).texture("layer0", textureExists(modLoc("item/pattern_board")) ? modLoc("item/pattern_board") : mcLoc("block/oak_planks"));
         itemModels().withExistingParent("flint_shard", mcLoc("item/generated")).texture("layer0", modLoc("item/flint_shard"));
         itemModels().withExistingParent("plant_fiber", mcLoc("item/generated")).texture("layer0", modLoc("item/plant_fiber"));
+        itemModels().withExistingParent("blaze_thread", mcLoc("item/generated")).texture("layer0", modLoc("item/blaze_thread"));
         itemModels().withExistingParent("fire_stick", mcLoc("item/handheld")).texture("layer0", mcLoc("item/stick"));
         itemModels().withExistingParent("diamond_powder", mcLoc("item/generated")).texture("layer0", modLoc("item/diamond_powder"));
         cookingKnifeHeadModel();

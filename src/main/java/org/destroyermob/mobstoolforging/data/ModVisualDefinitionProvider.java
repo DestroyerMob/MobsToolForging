@@ -242,6 +242,7 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 new MaterialVisualSpec(MaterialCatalog.SCULK, "sculk", "veins", true, 8, palette(0xFF05090A, 0xFF071417, 0xFF0A2428, 0xFF0E3D45, 0xFF0C8395, 0xFF4AF5FF))
                 , new MaterialVisualSpec(MaterialCatalog.SPIDER_SILK, "fiber", "fine_threads", false, 0, palette(0xFF4B4B4B, 0xFF6B6B6B, 0xFF929292, 0xFFB6B6B6, 0xFFD4D4D4, 0xFFF2F2F2))
                 , new MaterialVisualSpec(MaterialCatalog.PLANT_FIBER, "fiber", "fine_threads", false, 0, palette(0xFF3E481E, 0xFF59652A, 0xFF77853A, 0xFF98A94F, 0xFFBDCF6A, 0xFFE0F59A))
+                , new MaterialVisualSpec(MaterialCatalog.BLAZE_THREAD, "fiber", "fine_threads", true, 7, palette(0xFF4A1604, 0xFF7C2705, 0xFFB84307, 0xFFF07412, 0xFFFFB12E, 0xFFFFF0A4))
         );
     }
 

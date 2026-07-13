@@ -71,6 +71,10 @@ public record ToolPartData(
         return new ToolPartData(partType, materialId, quality, Optional.of(treatment), finish, coatingBaseMaterial);
     }
 
+    public ToolPartData withQuality(int quality) {
+        return new ToolPartData(partType, materialId, quality, treatment, finish, coatingBaseMaterial);
+    }
+
     public boolean supportsTreatment() {
         return MaterialCatalog.supportsTreatment(coatingBaseMaterial.orElse(materialId));
     }

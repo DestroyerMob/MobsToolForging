@@ -1,0 +1,12 @@
+{
+  "category": "organic",
+  "display_item": "minecraft:string",
+  "items": [
+    "minecraft:string"
+  ],
+  "translation_key": "material.mobstoolforging.spider_silk",
+  "tier": "wood",
+  "visual_slots": [
+    "guardMaterial"
+  ]
+}

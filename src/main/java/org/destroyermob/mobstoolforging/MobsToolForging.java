@@ -242,6 +242,7 @@ public class MobsToolForging {
             event.accept(ModItems.PATTERN_BOARD);
             event.accept(ModItems.FLINT_SHARD);
             event.accept(ModItems.PLANT_FIBER);
+            event.accept(ModItems.BLAZE_THREAD);
             event.accept(ModItems.ASH);
             if (ModList.get().isLoaded("farmersdelight")) {
                 event.accept(ModItems.COOKING_KNIFE_HEAD.get().createPart(MaterialCatalog.IRON));

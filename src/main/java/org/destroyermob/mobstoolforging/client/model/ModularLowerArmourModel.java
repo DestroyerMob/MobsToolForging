@@ -23,6 +23,14 @@ public final class ModularLowerArmourModel {
     private static final String CHAINMAIL_LEFT_BOOT = "ChainmailLeftBoot";
     private static final String MATERIAL_RIGHT_BOOT = "MaterialRightBoot";
     private static final String MATERIAL_LEFT_BOOT = "MaterialLeftBoot";
+    private static final String CHAINMAIL_TRIM_RIGHT_LEGGINGS = "ChainmailTrimRightLeggings";
+    private static final String CHAINMAIL_TRIM_LEFT_LEGGINGS = "ChainmailTrimLeftLeggings";
+    private static final String MATERIAL_TRIM_RIGHT_LEGGINGS = "MaterialTrimRightLeggings";
+    private static final String MATERIAL_TRIM_LEFT_LEGGINGS = "MaterialTrimLeftLeggings";
+    private static final String CHAINMAIL_TRIM_RIGHT_BOOT = "ChainmailTrimRightBoot";
+    private static final String CHAINMAIL_TRIM_LEFT_BOOT = "ChainmailTrimLeftBoot";
+    private static final String MATERIAL_TRIM_RIGHT_BOOT = "MaterialTrimRightBoot";
+    private static final String MATERIAL_TRIM_LEFT_BOOT = "MaterialTrimLeftBoot";
     private final ModelPart chainmailRightLeggings;
     private final ModelPart chainmailLeftLeggings;
     private final ModelPart materialRightLeggings;
@@ -31,6 +39,14 @@ public final class ModularLowerArmourModel {
     private final ModelPart chainmailLeftBoot;
     private final ModelPart materialRightBoot;
     private final ModelPart materialLeftBoot;
+    private final ModelPart chainmailTrimRightLeggings;
+    private final ModelPart chainmailTrimLeftLeggings;
+    private final ModelPart materialTrimRightLeggings;
+    private final ModelPart materialTrimLeftLeggings;
+    private final ModelPart chainmailTrimRightBoot;
+    private final ModelPart chainmailTrimLeftBoot;
+    private final ModelPart materialTrimRightBoot;
+    private final ModelPart materialTrimLeftBoot;
 
     public ModularLowerArmourModel(ModelPart root) {
         this.chainmailRightLeggings = root.getChild(CHAINMAIL_RIGHT_LEGGINGS);
@@ -41,6 +57,14 @@ public final class ModularLowerArmourModel {
         this.chainmailLeftBoot = root.getChild(CHAINMAIL_LEFT_BOOT);
         this.materialRightBoot = root.getChild(MATERIAL_RIGHT_BOOT);
         this.materialLeftBoot = root.getChild(MATERIAL_LEFT_BOOT);
+        this.chainmailTrimRightLeggings = root.getChild(CHAINMAIL_TRIM_RIGHT_LEGGINGS);
+        this.chainmailTrimLeftLeggings = root.getChild(CHAINMAIL_TRIM_LEFT_LEGGINGS);
+        this.materialTrimRightLeggings = root.getChild(MATERIAL_TRIM_RIGHT_LEGGINGS);
+        this.materialTrimLeftLeggings = root.getChild(MATERIAL_TRIM_LEFT_LEGGINGS);
+        this.chainmailTrimRightBoot = root.getChild(CHAINMAIL_TRIM_RIGHT_BOOT);
+        this.chainmailTrimLeftBoot = root.getChild(CHAINMAIL_TRIM_LEFT_BOOT);
+        this.materialTrimRightBoot = root.getChild(MATERIAL_TRIM_RIGHT_BOOT);
+        this.materialTrimLeftBoot = root.getChild(MATERIAL_TRIM_LEFT_BOOT);
     }
 
     public void renderChainmailRightLeggings(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
@@ -75,6 +99,22 @@ public final class ModularLowerArmourModel {
         render(materialLeftBoot, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
+    public void renderTrimRightLeggings(PoseStack poseStack, VertexConsumer consumer, boolean plated, int packedLight, int packedOverlay) {
+        render(plated ? materialTrimRightLeggings : chainmailTrimRightLeggings, poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
+    }
+
+    public void renderTrimLeftLeggings(PoseStack poseStack, VertexConsumer consumer, boolean plated, int packedLight, int packedOverlay) {
+        render(plated ? materialTrimLeftLeggings : chainmailTrimLeftLeggings, poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
+    }
+
+    public void renderTrimRightBoot(PoseStack poseStack, VertexConsumer consumer, boolean plated, int packedLight, int packedOverlay) {
+        render(plated ? materialTrimRightBoot : chainmailTrimRightBoot, poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
+    }
+
+    public void renderTrimLeftBoot(PoseStack poseStack, VertexConsumer consumer, boolean plated, int packedLight, int packedOverlay) {
+        render(plated ? materialTrimLeftBoot : chainmailTrimLeftBoot, poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
+    }
+
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition root = meshdefinition.getRoot();
@@ -82,6 +122,10 @@ public final class ModularLowerArmourModel {
         CubeDeformation leggingsMaterialDeformation = new CubeDeformation(0.65F);
         CubeDeformation bootChainmailDeformation = new CubeDeformation(1.0F);
         CubeDeformation bootMaterialDeformation = new CubeDeformation(1.15F);
+        CubeDeformation leggingsChainmailTrimDeformation = new CubeDeformation(0.53F);
+        CubeDeformation leggingsMaterialTrimDeformation = new CubeDeformation(0.68F);
+        CubeDeformation bootChainmailTrimDeformation = new CubeDeformation(1.03F);
+        CubeDeformation bootMaterialTrimDeformation = new CubeDeformation(1.18F);
 
         addLeg(root, CHAINMAIL_RIGHT_LEGGINGS, leggingsChainmailDeformation, false);
         addLeg(root, CHAINMAIL_LEFT_LEGGINGS, leggingsChainmailDeformation, true);
@@ -91,6 +135,14 @@ public final class ModularLowerArmourModel {
         addLeg(root, CHAINMAIL_LEFT_BOOT, bootChainmailDeformation, true);
         addLeg(root, MATERIAL_RIGHT_BOOT, bootMaterialDeformation, false);
         addLeg(root, MATERIAL_LEFT_BOOT, bootMaterialDeformation, true);
+        addLeg(root, CHAINMAIL_TRIM_RIGHT_LEGGINGS, leggingsChainmailTrimDeformation, false);
+        addLeg(root, CHAINMAIL_TRIM_LEFT_LEGGINGS, leggingsChainmailTrimDeformation, true);
+        addLeg(root, MATERIAL_TRIM_RIGHT_LEGGINGS, leggingsMaterialTrimDeformation, false);
+        addLeg(root, MATERIAL_TRIM_LEFT_LEGGINGS, leggingsMaterialTrimDeformation, true);
+        addLeg(root, CHAINMAIL_TRIM_RIGHT_BOOT, bootChainmailTrimDeformation, false);
+        addLeg(root, CHAINMAIL_TRIM_LEFT_BOOT, bootChainmailTrimDeformation, true);
+        addLeg(root, MATERIAL_TRIM_RIGHT_BOOT, bootMaterialTrimDeformation, false);
+        addLeg(root, MATERIAL_TRIM_LEFT_BOOT, bootMaterialTrimDeformation, true);
 
         return LayerDefinition.create(meshdefinition, 64, 32);
     }

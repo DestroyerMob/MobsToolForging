@@ -1,0 +1,12 @@
+{
+  "category": "organic",
+  "display_item": "mobstoolforging:plant_fiber",
+  "items": [
+    "mobstoolforging:plant_fiber"
+  ],
+  "translation_key": "material.mobstoolforging.plant_fiber",
+  "tier": "wood",
+  "visual_slots": [
+    "guardMaterial"
+  ]
+}

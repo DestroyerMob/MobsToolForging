@@ -29,6 +29,12 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ItemTags.SHOVELS).add(ModItems.MATTOCK.get());
         tag(ItemTags.AXES).add(ModItems.MATTOCK.get());
         tag(ItemTags.HOES).add(ModItems.MATTOCK.get());
+        tag(ItemTags.TRIMMABLE_ARMOR).add(
+                ModItems.MODULAR_HELMET.get(),
+                ModItems.MODULAR_CHESTPLATE.get(),
+                ModItems.MODULAR_LEGGINGS.get(),
+                ModItems.MODULAR_BOOTS.get()
+        );
         tag(ModTags.Items.MATERIALS).addTag(ModTags.Items.MATERIALS_METALS).addTag(ModTags.Items.MATERIALS_GEMS);
         tag(ModTags.Items.MATERIALS_METALS)
                 .addTag(Tags.Items.INGOTS_IRON)
@@ -107,6 +113,8 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 .addTag(Tags.Items.RODS_WOODEN)
                 .addTag(Tags.Items.RODS_BLAZE)
                 .addTag(Tags.Items.RODS_BREEZE);
+        tag(ModTags.Items.CROSSBOW_STRINGS)
+                .add(Items.STRING, ModItems.PLANT_FIBER.get(), ModItems.BLAZE_THREAD.get());
         tag(ModTags.Items.LAPIDARY_ABRASIVES)
                 .addTag(ModTags.Items.LAPIDARY_ABRASIVES_DIAMOND);
         tag(ModTags.Items.LAPIDARY_ABRASIVES_DIAMOND)

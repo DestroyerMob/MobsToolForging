@@ -40,6 +40,7 @@ public final class ModularHelmetLayer<T extends LivingEntity, M extends EntityMo
         poseStack.pushPose();
         humanoidModel.head.translateAndRotate(poseStack);
         renderParts(poseStack, bufferSource, packedLight, construction);
+        renderTrim(poseStack, bufferSource, packedLight, stack, construction);
         if (stack.hasFoil()) {
             renderGlint(poseStack, bufferSource, packedLight, construction);
         }
@@ -54,6 +55,20 @@ public final class ModularHelmetLayer<T extends LivingEntity, M extends EntityMo
             VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(texture.texture()));
             helmetModel.renderMaterial(poseStack, consumer, texture.color(), packedLight, OverlayTexture.NO_OVERLAY);
         });
+    }
+
+    private void renderTrim(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ItemStack stack, ArmorConstructionData construction) {
+        VertexConsumer trim = ModularArmorTrimRenderer.consumer(stack, bufferSource, false);
+        if (trim == null) {
+            return;
+        }
+        helmetModel.renderTrim(
+                poseStack,
+                trim,
+                construction.helmetPlateMaterial().isPresent(),
+                packedLight,
+                OverlayTexture.NO_OVERLAY
+        );
     }
 
     private void renderGlint(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {

@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.item.ModularArmorPartItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
@@ -178,11 +179,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public ItemStack abrasiveStack() {
-        return abrasiveStack.copy();
+        return resumeStationStackHeat(abrasiveStack.copy());
     }
 
     public List<ItemStack> benchStacks() {
-        return benchStacks.stream().map(ItemStack::copy).toList();
+        return benchStacks.stream().map(ItemStack::copy).map(this::resumeStationStackHeat).toList();
     }
 
     public boolean hasBenchStacks() {
@@ -221,6 +222,13 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public boolean isComplete() {
         if (!directOutputStack.isEmpty()) {
             return true;
+        }
+        if (looseWorkRecipeId != null) {
+            StationWorkRecipe looseRecipe = looseWorkRecipe();
+            return looseRecipe != null
+                    && materialCount >= looseRecipe.input().count()
+                    && !needsLooseWorkSecondary()
+                    && hitCount >= looseRecipe.requiredHits();
         }
         LapidaryCoatingWork coatingWork = lapidaryCoatingWork().orElse(null);
         if (coatingWork != null) {
@@ -323,7 +331,6 @@ public class ToolForgeBlockEntity extends BlockEntity {
             captureMaterialHeat(stack);
             stack.shrink(taken);
             materialCount += taken;
-            scheduleFirstGoodHitIfReady();
             sync();
         }
         return taken;
@@ -358,13 +365,17 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     public ItemStack outputStack() {
         if (!directOutputStack.isEmpty()) {
-            return directOutputStack.copy();
+            return resumeStationStackHeat(directOutputStack.copy());
         }
         if (isComplete() && lapidaryCoatingWork().isPresent()) {
-            return lapidaryCoatingOutput();
+            return resumeStationStackHeat(lapidaryCoatingOutput());
         }
         ForgeTemplateDefinition template = template();
         return isComplete() && template != null && materialId != null ? applyMaterialHeat(template.outputStack(materialId, completedQualityScore())) : ItemStack.EMPTY;
+    }
+
+    public boolean hasDirectOutput() {
+        return !directOutputStack.isEmpty();
     }
 
     public ItemStack displayMaterialStack() {
@@ -411,11 +422,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
             removed.add(materialDrop);
         }
         if (!abrasiveStack.isEmpty()) {
-            removed.add(abrasiveStack.copy());
+            removed.add(resumeStationStackHeat(abrasiveStack.copy()));
         }
         for (ItemStack benchStack : benchStacks) {
             if (!benchStack.isEmpty()) {
-                removed.add(benchStack.copy());
+                removed.add(resumeStationStackHeat(benchStack.copy()));
             }
         }
 
@@ -437,7 +448,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (!canPlaceAbrasive(stack)) {
             return false;
         }
-        abrasiveStack = stack.copyWithCount(1);
+        abrasiveStack = freezeStationStackHeat(stack.copyWithCount(1));
         stack.shrink(1);
         sync();
         return true;
@@ -476,7 +487,6 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public boolean canPlaceLapidaryBasePart(ItemStack stack) {
         return workstationKind() == WorkstationKind.LAPIDARY_TABLE
                 && directOutputStack.isEmpty()
-                && templateId == null
                 && materialId == null
                 && materialItemId == null
                 && materialHeatData == null
@@ -494,7 +504,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (!canPlaceLapidaryBasePart(stack)) {
             return false;
         }
-        benchStacks.add(stack.copyWithCount(1));
+        benchStacks.add(freezeStationStackHeat(stack.copyWithCount(1)));
         stack.shrink(1);
         sync();
         return true;
@@ -532,7 +542,6 @@ public class ToolForgeBlockEntity extends BlockEntity {
         }
         stack.shrink(taken);
         materialCount += taken;
-        scheduleFirstGoodHitIfReady();
         sync();
         return taken;
     }
@@ -556,7 +565,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (!canPlaceRepairTool(stack)) {
             return false;
         }
-        benchStacks.add(stack.copyWithCount(1));
+        benchStacks.add(freezeStationStackHeat(stack.copyWithCount(1)));
         stack.shrink(1);
         sync();
         return true;
@@ -572,7 +581,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (!canPlaceRepairMaterial(stack)) {
             return false;
         }
-        benchStacks.add(stack.copyWithCount(1));
+        benchStacks.add(freezeStationStackHeat(stack.copyWithCount(1)));
         stack.shrink(1);
         sync();
         return true;
@@ -610,7 +619,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (!canPlaceArmorAttachmentTarget(stack)) {
             return false;
         }
-        benchStacks.add(stack.copyWithCount(1));
+        benchStacks.add(freezeStationStackHeat(stack.copyWithCount(1)));
         stack.shrink(1);
         sync();
         return true;
@@ -701,7 +710,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (!canPlaceToolmakerStack(stack)) {
             return false;
         }
-        benchStacks.add(stack.copyWithCount(1));
+        benchStacks.add(freezeStationStackHeat(stack.copyWithCount(1)));
         stack.shrink(1);
         sync();
         return true;
@@ -728,7 +737,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
             if (benchStacks.size() >= MAX_BENCH_STACKS) {
                 break;
             }
-            benchStacks.add(stack.copyWithCount(1));
+            benchStacks.add(freezeStationStackHeat(stack.copyWithCount(1)));
         }
         sync();
     }
@@ -745,7 +754,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 continue;
             }
             if (currentAssemblyIndex == assemblyIndex) {
-                benchStacks.set(stackIndex, replacement.copyWithCount(1));
+                benchStacks.set(stackIndex, freezeStationStackHeat(replacement.copyWithCount(1)));
                 sync();
                 return true;
             }
@@ -761,7 +770,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 || replacement.isEmpty()) {
             return false;
         }
-        benchStacks.set(stackIndex, replacement.copyWithCount(1));
+        benchStacks.set(stackIndex, freezeStationStackHeat(replacement.copyWithCount(1)));
         sync();
         return true;
     }
@@ -771,7 +780,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (output.isEmpty()) {
             directOutputStack = ItemStack.EMPTY;
         } else {
-            directOutputStack = output.copy();
+            directOutputStack = freezeStationStackHeat(output.copy());
         }
         sync();
     }
@@ -835,19 +844,55 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean placeLooseWork(StationWorkRecipe recipe, ItemStack stack) {
-        if (stack.isEmpty() || stack.getCount() < recipe.input().count() || !canPlaceLooseWork(recipe, stack)) {
+        if (stack.isEmpty() || !canPlaceLooseWork(recipe, stack)) {
+            return false;
+        }
+        int taken = Math.min(stack.getCount(), recipe.input().count());
+        if (taken <= 0) {
             return false;
         }
         looseWorkRecipeId = recipe.id();
         materialItemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        materialCount = recipe.input().count();
-        qualityScore = ForgingQuality.DEFAULT_SCORE;
-        stack.shrink(recipe.input().count());
-        if (workstationKind() == WorkstationKind.LEATHER_STATION) {
-            scheduleFirstGoodHitIfReady();
-        }
+        materialCount = taken;
+        qualityScore = initialLooseWorkQuality(recipe);
+        captureMaterialHeat(stack);
+        stack.shrink(taken);
         sync();
         return true;
+    }
+
+    public boolean canPlaceLooseWorkInput(ItemStack stack) {
+        StationWorkRecipe recipe = looseWorkRecipe();
+        return recipe != null
+                && hasLooseWork()
+                && materialCount < recipe.input().count()
+                && recipe.input().matches(stack)
+                && BuiltInRegistries.ITEM.getKey(stack.getItem()).equals(materialItemId);
+    }
+
+    public boolean placeLooseWorkInput(ItemStack stack) {
+        if (!canPlaceLooseWorkInput(stack)) {
+            return false;
+        }
+        StationWorkRecipe recipe = looseWorkRecipe();
+        int taken = Math.min(stack.getCount(), recipe.input().count() - materialCount);
+        if (taken <= 0) {
+            return false;
+        }
+        captureMaterialHeat(stack);
+        stack.shrink(taken);
+        materialCount += taken;
+        sync();
+        return true;
+    }
+
+    public boolean needsLooseWorkInput() {
+        return remainingLooseWorkInput() > 0;
+    }
+
+    public int remainingLooseWorkInput() {
+        StationWorkRecipe recipe = looseWorkRecipe();
+        return recipe == null ? 0 : Math.max(0, recipe.input().count() - materialCount);
     }
 
     public boolean hasLooseWork() {
@@ -873,10 +918,10 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (!canPlaceLooseWorkSecondary(stack)) {
             return false;
         }
-        StationWorkRecipe.Input input = looseWorkRecipe().secondaryInput().orElseThrow();
-        abrasiveStack = stack.copyWithCount(input.count());
+        StationWorkRecipe recipe = looseWorkRecipe();
+        StationWorkRecipe.Input input = recipe.secondaryInput().orElseThrow();
+        abrasiveStack = freezeStationStackHeat(stack.copyWithCount(input.count()));
         stack.shrink(input.count());
-        scheduleFirstGoodHitIfReady();
         sync();
         return true;
     }
@@ -884,60 +929,79 @@ public class ToolForgeBlockEntity extends BlockEntity {
     public boolean hammerLooseWork(StationWorkRecipe recipe) {
         if (!hasLooseWork()
                 || !recipe.id().equals(looseWorkRecipeId)
+                || needsLooseWorkInput()
                 || needsLooseWorkSecondary()) {
             return false;
         }
+
+        boolean completing = hitCount + 1 >= recipe.requiredHits();
+        ItemStack output = completing ? recipe.outputCopy() : ItemStack.EMPTY;
+        if (completing && output.isEmpty()) {
+            MobsToolForging.LOGGER.error("Station work recipe {} produced an empty output at completion; preserving its inputs.", recipe.id());
+            return false;
+        }
+
         hitCount++;
-        if (workstationKind() == WorkstationKind.LEATHER_STATION) {
+        if (recipe.qualityMode().usesTimingQte()) {
             applyTimingQuality(false);
         }
         randomizeDisplayRotation();
-        if (hitCount < recipe.requiredHits()) {
+        if (!completing) {
             sync();
             return true;
         }
-        ItemStack output = applyLooseWorkQuality(recipe.outputCopy());
+
+        output = applyMaterialHeat(applyLooseWorkQuality(recipe, output));
+        directOutputStack = output;
         materialId = null;
         materialItemId = null;
         materialHeatData = null;
+        startingHeatLevel = HeatLevel.NONE;
         looseWorkRecipeId = null;
         if (recipe.requiresSecondaryInput()) {
             abrasiveStack = ItemStack.EMPTY;
         }
         materialCount = 0;
         hitCount = 0;
+        qualityScore = ForgingQuality.DEFAULT_SCORE;
+        nextGoodHitGameTime = -1L;
         displayRotationDegrees = 0.0F;
-        directOutputStack = output;
         sync();
         return true;
     }
 
-    private ItemStack applyLooseWorkQuality(ItemStack output) {
-        if (output.isEmpty() || workstationKind() != WorkstationKind.LEATHER_STATION) {
+    private ItemStack applyLooseWorkQuality(StationWorkRecipe recipe, ItemStack output) {
+        if (output.isEmpty() || !recipe.qualityMode().appliesQuality()) {
             return output;
         }
         int quality = completedQualityScore();
+        ToolPartData toolPartData = output.get(ModDataComponents.TOOL_PART.get());
+        if (toolPartData != null) {
+            output.set(ModDataComponents.TOOL_PART.get(), toolPartData.withQuality(quality));
+        }
         ArmorPartData partData = output.get(ModDataComponents.ARMOR_PART.get());
         if (partData != null) {
-            output.set(ModDataComponents.ARMOR_PART.get(), new ArmorPartData(
-                    partData.partType(),
-                    partData.materialId(),
-                    quality,
-                    partData.coatingBaseMaterial()
-            ));
+            output.set(ModDataComponents.ARMOR_PART.get(), partData.withQuality(quality));
         }
         ArmorConstructionData armorData = output.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
         if (armorData != null) {
-            output.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), new ArmorConstructionData(
-                    armorData.armorType(),
-                    armorData.skullMaterial(),
-                    armorData.combMaterial(),
-                    armorData.overlayBaseMaterial(),
-                    armorData.visorMaterial(),
-                    quality
-            ));
+            output.set(ModDataComponents.ARMOR_CONSTRUCTION.get(), armorData.withQuality(quality));
         }
         return output;
+    }
+
+    private int initialLooseWorkQuality(StationWorkRecipe recipe) {
+        ItemStack output = recipe.outputCopy();
+        ToolPartData toolPartData = output.get(ModDataComponents.TOOL_PART.get());
+        if (toolPartData != null) {
+            return toolPartData.quality();
+        }
+        ArmorPartData armorPartData = output.get(ModDataComponents.ARMOR_PART.get());
+        if (armorPartData != null) {
+            return armorPartData.quality();
+        }
+        ArmorConstructionData armorData = output.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
+        return armorData == null ? ForgingQuality.DEFAULT_SCORE : armorData.quality();
     }
 
     private Optional<LapidaryCoatingWork> lapidaryCoatingWork() {
@@ -1025,7 +1089,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         }
         return ToolTypeRegistry.templates().stream()
                 .filter(template -> data.partType().equals(template.partType()))
-                .filter(ArmorForgeAttachment::isAttachmentTemplate)
+                .filter(ArmorForgeAttachment::isPlateTemplate)
                 .filter(template -> {
                     ItemStack output = template.outputStack(data.materialId(), data.quality());
                     return !output.isEmpty() && output.is(stack.getItem());
@@ -1178,12 +1242,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
 
     public boolean materialIsForgeReady() {
         ForgeTemplateDefinition template = template();
-        if (MobsToolForgingConfig.REQUIRE_HEAT_AT_JOB_START_ONLY.get() && !MobsToolForgingConfig.WORKPIECE_COOLS_MID_CRAFT.get()) {
-            return startingHeatLevel != HeatLevel.NONE;
-        }
-        return materialHeatData != null && level != null
-                && template != null
-                && materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get()) >= materialMinimumForgeTemperature();
+        return template != null
+                && startingHeatLevel != HeatLevel.NONE
+                && materialHeatTemperature() >= materialMinimumForgeTemperature();
     }
 
     public boolean hasMaterialHeat() {
@@ -1191,15 +1252,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public float materialHeatTemperature() {
-        if (startingHeatLevel != HeatLevel.NONE && MobsToolForgingConfig.REQUIRE_HEAT_AT_JOB_START_ONLY.get() && !MobsToolForgingConfig.WORKPIECE_COOLS_MID_CRAFT.get()) {
-            return materialHeatData == null ? startingHeatLevel.temperature() : Math.max(0.0F, Math.min(1.0F, materialHeatData.temperature()));
-        }
-        if (materialHeatData == null) {
-            return 0.0F;
-        }
-        return level == null
-                ? Math.max(0.0F, Math.min(1.0F, materialHeatData.temperature()))
-                : materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
+        return materialHeatData == null
+                ? startingHeatLevel.temperature()
+                : Math.max(0.0F, Math.min(1.0F, materialHeatData.temperature()));
     }
 
     public boolean materialHeatWasWorkable() {
@@ -1238,7 +1293,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean isTimingQualityWindow() {
-        if (level == null || !MobsToolForgingConfig.ENABLE_QUALITY.get() || !MobsToolForgingConfig.ENABLE_TIMING_QUALITY.get() || nextGoodHitGameTime < 0L || isComplete()) {
+        if (level == null || hitCount <= 0 || !MobsToolForgingConfig.ENABLE_QUALITY.get() || !MobsToolForgingConfig.ENABLE_TIMING_QUALITY.get() || nextGoodHitGameTime < 0L || isComplete()) {
             return false;
         }
         long delta = Math.abs(level.getGameTime() - nextGoodHitGameTime);
@@ -1294,7 +1349,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (level == null || !MobsToolForgingConfig.ENABLE_QUALITY.get() || !MobsToolForgingConfig.ENABLE_TIMING_QUALITY.get()) {
             return;
         }
-        if (nextGoodHitGameTime < 0L) {
+        if (hitCount <= 1 || nextGoodHitGameTime < 0L) {
             scheduleNextGoodHit();
             return;
         }
@@ -1304,16 +1359,6 @@ public class ToolForgeBlockEntity extends BlockEntity {
             playTimingHitSound(precisionTool);
         } else {
             qualityScore = ForgingQuality.clampScore(qualityScore - (precisionTool ? 0 : MISSED_TIMING_QUALITY_PENALTY));
-        }
-        scheduleNextGoodHit();
-    }
-
-    private void scheduleFirstGoodHitIfReady() {
-        if (nextGoodHitGameTime >= 0L
-                || !MobsToolForgingConfig.ENABLE_QUALITY.get()
-                || !MobsToolForgingConfig.ENABLE_TIMING_QUALITY.get()
-                || !canHammer() && !hasLooseWork()) {
-            return;
         }
         scheduleNextGoodHit();
     }
@@ -1344,7 +1389,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
             return;
         }
         float stackTemperature = heatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
-        float existingTemperature = materialHeatData == null ? 0.0F : materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
+        float existingTemperature = materialHeatData == null ? 0.0F : Math.max(0.0F, Math.min(1.0F, materialHeatData.temperature()));
         boolean workable = heatData.workable() || materialHeatData != null && materialHeatData.workable();
         if (stackTemperature >= existingTemperature) {
             materialHeatData = refreshedHeatData(stackTemperature, workable);
@@ -1360,21 +1405,46 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (materialHeatData == null && startingHeatLevel == HeatLevel.NONE) {
             return stack;
         }
-        if (level == null) {
-            stack.set(ModDataComponents.HEATED_WORKPIECE.get(), materialHeatData == null ? refreshedHeatData(startingHeatLevel.temperature(), true) : materialHeatData);
-            return stack;
-        }
-        boolean freezeActiveWorkpieceHeat = MobsToolForgingConfig.REQUIRE_HEAT_AT_JOB_START_ONLY.get() && !MobsToolForgingConfig.WORKPIECE_COOLS_MID_CRAFT.get();
-        float temperature;
-        if (materialHeatData == null) {
-            temperature = startingHeatLevel.temperature();
-        } else if (freezeActiveWorkpieceHeat) {
-            temperature = Math.max(0.0F, Math.min(1.0F, materialHeatData.temperature()));
-        } else {
-            temperature = materialHeatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
-        }
+        float temperature = materialHeatData == null
+                ? startingHeatLevel.temperature()
+                : Math.max(0.0F, Math.min(1.0F, materialHeatData.temperature()));
         if (temperature > 0.0F) {
             stack.set(ModDataComponents.HEATED_WORKPIECE.get(), refreshedHeatData(temperature, materialHeatData == null || materialHeatData.workable()));
+        }
+        return stack;
+    }
+
+    private ItemStack freezeStationStackHeat(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return stack;
+        }
+        HeatedWorkpieceData heatData = stack.get(ModDataComponents.HEATED_WORKPIECE.get());
+        if (heatData == null) {
+            return stack;
+        }
+        float temperature = level == null
+                ? Math.max(0.0F, Math.min(1.0F, heatData.temperature()))
+                : heatData.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get());
+        if (temperature > 0.0F) {
+            stack.set(ModDataComponents.HEATED_WORKPIECE.get(), refreshedHeatData(temperature, heatData.workable()));
+        } else {
+            stack.remove(ModDataComponents.HEATED_WORKPIECE.get());
+        }
+        return stack;
+    }
+
+    private ItemStack resumeStationStackHeat(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return stack;
+        }
+        HeatedWorkpieceData heatData = stack.get(ModDataComponents.HEATED_WORKPIECE.get());
+        if (heatData != null && heatData.temperature() > 0.0F) {
+            stack.set(ModDataComponents.HEATED_WORKPIECE.get(), refreshedHeatData(
+                    Math.max(0.0F, Math.min(1.0F, heatData.temperature())),
+                    heatData.workable()
+            ));
+        } else if (heatData != null) {
+            stack.remove(ModDataComponents.HEATED_WORKPIECE.get());
         }
         return stack;
     }

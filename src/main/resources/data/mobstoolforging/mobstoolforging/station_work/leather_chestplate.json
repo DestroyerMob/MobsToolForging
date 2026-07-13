@@ -10,5 +10,6 @@
   },
   "pattern": "mobstoolforging:chestplate_chainmail",
   "required_hits": 5,
+  "quality_mode": "timed",
   "minimum_hammer_level": "stone"
 }

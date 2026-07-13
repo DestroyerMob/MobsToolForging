@@ -153,6 +153,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (kind == WorkstationKind.LAPIDARY_TABLE && LapidaryAbrasives.isAbrasive(stack)) {
             return placeAbrasive(stack, forge, level, pos, player);
         }
+        if (forge.canPlaceLooseWorkInput(stack)) {
+            return placeAdditionalStationWorkInput(stack, forge, level, pos, player);
+        }
         if (forge.canPlaceLooseWorkSecondary(stack)) {
             return placeStationWorkSecondary(stack, forge, level, pos, player);
         }
@@ -305,6 +308,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         }
         if (kind == WorkstationKind.LAPIDARY_TABLE && LapidaryAbrasives.isAbrasive(stack)) {
             return forge.canPlaceAbrasive(stack);
+        }
+        if (forge.canPlaceLooseWorkInput(stack)) {
+            return true;
         }
         if (forge.canPlaceLooseWorkSecondary(stack)) {
             return true;
@@ -651,6 +657,19 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         return ItemInteractionResult.CONSUME;
     }
 
+    private ItemInteractionResult placeAdditionalStationWorkInput(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        var item = stack.getItem();
+        if (forge.placeLooseWorkInput(stationInputStack(stack, player, forge.remainingLooseWorkInput()))) {
+            level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.75F, 1.05F);
+            player.awardStat(Stats.ITEM_USED.get(item));
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.station_work_placed"));
+        }
+        return ItemInteractionResult.CONSUME;
+    }
+
     private ItemInteractionResult placeStationWorkSecondary(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
         if (level.isClientSide) {
             return ItemInteractionResult.SUCCESS;
@@ -874,6 +893,10 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.station_work_missing"));
             return ItemInteractionResult.CONSUME;
         }
+        if (forge.needsLooseWorkInput()) {
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.need_materials"));
+            return ItemInteractionResult.CONSUME;
+        }
         if (hammerLevel < recipe.minimumHammerLevel()) {
             DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.hammer_too_weak", SmithingHammerLevel.displayName(recipe.minimumHammerLevel())));
             return ItemInteractionResult.CONSUME;
@@ -940,10 +963,13 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (!forge.isComplete()) {
             return false;
         }
+        ItemStack output = forge.outputStack();
+        if (output.isEmpty()) {
+            return false;
+        }
         if (player.level().isClientSide) {
             return true;
         }
-        ItemStack output = forge.outputStack();
         if (player.getInventory().add(output)) {
             forge.removeOutput();
             player.level().playSound(null, forge.getBlockPos(), net.minecraft.sounds.SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.0F);

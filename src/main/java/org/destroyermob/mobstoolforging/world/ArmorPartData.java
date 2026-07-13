@@ -50,6 +50,10 @@ public record ArmorPartData(
         return new ArmorPartData(partType, coatingMaterial, coatingQuality, Optional.of(materialId));
     }
 
+    public ArmorPartData withQuality(int quality) {
+        return new ArmorPartData(partType, materialId, quality, coatingBaseMaterial);
+    }
+
     public ArmorPartData withCoatingBaseMaterial(ResourceLocation baseMaterial) {
         return new ArmorPartData(partType, materialId, quality, Optional.of(baseMaterial));
     }

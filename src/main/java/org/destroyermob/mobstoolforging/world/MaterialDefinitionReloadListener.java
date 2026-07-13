@@ -73,6 +73,7 @@ public class MaterialDefinitionReloadListener extends SimpleJsonResourceReloadLi
         return switch (value.toLowerCase(Locale.ROOT)) {
             case "gem", "gems" -> MaterialCategory.GEM;
             case "metal", "metals" -> MaterialCategory.METAL;
+            case "organic", "fiber", "wood" -> MaterialCategory.ORGANIC;
             default -> throw new IllegalArgumentException("Unknown material category: " + value);
         };
     }

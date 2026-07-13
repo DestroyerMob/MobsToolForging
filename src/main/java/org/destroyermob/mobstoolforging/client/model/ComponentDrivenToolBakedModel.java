@@ -19,12 +19,14 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
@@ -50,7 +52,7 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
     private final Map<ToolVisualKey, ComponentCrossbowBakedModel> crossbowCache = new ConcurrentHashMap<>();
     private final Map<PartKey, BakedModel> partCache = new ConcurrentHashMap<>();
     private final Map<ArmorPartKey, BakedModel> armorPartCache = new ConcurrentHashMap<>();
-    private final Map<ArmorVisualKey, BakedModel> armorCache = new ConcurrentHashMap<>();
+    private final Map<ArmorModelKey, BakedModel> armorCache = new ConcurrentHashMap<>();
     private final ItemOverrides overrides;
 
     public ComponentDrivenToolBakedModel(BakedModel fallback) {
@@ -87,7 +89,8 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
 
                 Optional<ArmorVisualKey> armorKey = ArmorVisualKey.from(stack);
                 if (armorKey.isPresent()) {
-                    return armorCache.computeIfAbsent(armorKey.get(), ComponentDrivenToolBakedModel.this::composeArmor);
+                    ArmorModelKey modelKey = ArmorModelKey.from(armorKey.get(), stack);
+                    return armorCache.computeIfAbsent(modelKey, ComponentDrivenToolBakedModel.this::composeArmor);
                 }
 
                 return resolveFallback(stack, level, entity, seed);
@@ -277,32 +280,40 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
         return ToolPartData.SWORD_GUARD.equals(partType) ? "guard" : partType;
     }
 
-    private BakedModel composeArmor(ArmorVisualKey key) {
+    private BakedModel composeArmor(ArmorModelKey modelKey) {
+        ArmorVisualKey key = modelKey.armor();
         if (ArmorConstructionData.HELMET_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.helmetChainmailMaterial(), key.helmetPlateMaterial(), ArmorPartData.HELMET_PLATE, ArmorPartData.HELMET_CHAINMAIL);
+            return composeArmorItem(key.helmetChainmailMaterial(), key.helmetPlateMaterial(), ArmorPartData.HELMET_PLATE, ArmorPartData.HELMET_CHAINMAIL, "helmet", modelKey.trimMaterial());
         }
         if (ArmorConstructionData.CHESTPLATE_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.chestplateChainmailMaterial(), key.chestplatePlateMaterial(), ArmorPartData.CHESTPLATE_BODY, ArmorPartData.CHESTPLATE_CHAINMAIL);
+            return composeArmorItem(key.chestplateChainmailMaterial(), key.chestplatePlateMaterial(), ArmorPartData.CHESTPLATE_BODY, ArmorPartData.CHESTPLATE_CHAINMAIL, "chestplate", modelKey.trimMaterial());
         }
         if (ArmorConstructionData.LEGGINGS_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.leggingsChainmailMaterial(), key.leggingsPlateMaterial(), ArmorPartData.LEGGINGS_PLATE, ArmorPartData.LEGGINGS_CHAINMAIL);
+            return composeArmorItem(key.leggingsChainmailMaterial(), key.leggingsPlateMaterial(), ArmorPartData.LEGGINGS_PLATE, ArmorPartData.LEGGINGS_CHAINMAIL, "leggings", modelKey.trimMaterial());
         }
         if (ArmorConstructionData.BOOTS_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.bootsChainmailMaterial(), key.bootsPlateMaterial(), ArmorPartData.BOOTS_PLATE, ArmorPartData.BOOTS_CHAINMAIL);
+            return composeArmorItem(key.bootsChainmailMaterial(), key.bootsPlateMaterial(), ArmorPartData.BOOTS_PLATE, ArmorPartData.BOOTS_CHAINMAIL, "boots", modelKey.trimMaterial());
         }
         warnOnce("missing_armor_type|" + key.armorType(), "Cannot render MTF armor stack because armor type {} is not loaded on the client.", key.armorType());
         return fallback;
     }
 
-    private BakedModel composeArmorItem(ResourceLocation baseMaterial, Optional<ResourceLocation> plateMaterial, String platePartType, String chainmailPartType) {
+    private BakedModel composeArmorItem(ResourceLocation baseMaterial, Optional<ResourceLocation> plateMaterial, String platePartType, String chainmailPartType, String armorSlot, Optional<String> trimMaterial) {
         ArmorMaterialTextureManager.ResolvedArmorTexture texture = plateMaterial
                 .map(material -> ArmorMaterialTextureManager.INSTANCE.itemTexture(material, platePartType))
                 .orElseGet(() -> ArmorMaterialTextureManager.INSTANCE.itemTexture(baseMaterial, chainmailPartType));
-        return new ResolvedPartedItemModel(
-                quadFactory.bakeLayer(0, texture.sprite(), texture.color()),
-                texture.sprite(),
-                fallback.getTransforms()
-        );
+        Map<Integer, List<BakedQuad>> layers = new LinkedHashMap<>();
+        addLayer(layers, 0, quadFactory.bakeLayer(0, texture.sprite(), texture.color()));
+        trimMaterial.ifPresent(material -> {
+            ResourceLocation trimTexture = ResourceLocation.withDefaultNamespace("trims/items/" + armorSlot + "_trim_" + material);
+            TextureAtlasSprite trimSprite = sprite(trimTexture);
+            if (!isMissing(trimSprite)) {
+                addLayer(layers, 1, quadFactory.bakeLayer(1, trimSprite, 0xFFFFFFFF));
+            } else {
+                warnOnce("missing_armor_trim|" + trimTexture, "Cannot render MTF armor item trim because sprite {} is missing.", trimTexture);
+            }
+        });
+        return ResolvedPartedItemModel.compose(layers, texture.sprite(), fallback.getTransforms());
     }
 
     private Optional<ToolTypeDefinition> findPartDefinition(ItemStack stack, ToolPartData partData) {
@@ -638,5 +649,15 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
     }
 
     private record ArmorPartKey(String partType, ResourceLocation material) {
+    }
+
+    private record ArmorModelKey(ArmorVisualKey armor, Optional<String> trimMaterial) {
+        private static ArmorModelKey from(ArmorVisualKey armor, ItemStack stack) {
+            ArmorTrim trim = stack.get(DataComponents.TRIM);
+            return new ArmorModelKey(
+                    armor,
+                    trim == null ? Optional.empty() : Optional.of(trim.material().value().assetName())
+            );
+        }
     }
 }

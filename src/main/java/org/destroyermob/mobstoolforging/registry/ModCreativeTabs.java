@@ -123,6 +123,7 @@ public final class ModCreativeTabs {
         output.accept(ModItems.PATTERN_BOARD.get());
         output.accept(ModItems.FLINT_SHARD.get());
         output.accept(ModItems.PLANT_FIBER.get());
+        output.accept(ModItems.BLAZE_THREAD.get());
         output.accept(ModItems.DIAMOND_POWDER.get());
     }
 

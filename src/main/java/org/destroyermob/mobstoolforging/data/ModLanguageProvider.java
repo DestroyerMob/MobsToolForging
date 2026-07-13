@@ -45,6 +45,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.PATTERN_BOARD, "Pattern Board");
         addItem(ModItems.FLINT_SHARD, "Flint Shard");
         addItem(ModItems.PLANT_FIBER, "Plant Fiber");
+        addItem(ModItems.BLAZE_THREAD, "Blaze Thread");
         addItem(ModItems.FIRE_STICK, "Fire Stick");
         addItem(ModItems.PICKAXE_HEAD_PATTERN, "Pickaxe Head Pattern");
         addItem(ModItems.AXE_HEAD_PATTERN, "Axe Head Pattern");
@@ -158,6 +159,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("material.mobstoolforging.sculk", "Sculk");
         add("material.mobstoolforging.spider_silk", "Spider Silk");
         add("material.mobstoolforging.plant_fiber", "Plant Fiber");
+        add("material.mobstoolforging.blaze_thread", "Blaze Thread");
         add("quality.mobstoolforging.crude", "Crude");
         add("quality.mobstoolforging.worked", "Worked");
         add("quality.mobstoolforging.well_forged", "Well Forged");

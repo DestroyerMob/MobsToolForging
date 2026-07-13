@@ -121,7 +121,27 @@ Use that result in a normal recipe to create a pattern item for any loaded forge
 
 Forge template JSON keeps the existing `pattern_station_paper_cost` field for compatibility. The field now means the generic Pattern Creation Station input cost: Pattern Boards by default, or paper when `basicPatternsRequirePaper=true`. Existing bridge JSON does not need to be renamed.
 
-Station-work JSON can target `"tool_forge"`, `"smithing_anvil"`, `"crude_anvil"`, `"stone_anvil"`, `"lapidary_table"`, or `"toolmakers_bench"` as the `workstation` value. Crude Anvil recipes should be treated as lower-tier physical anvil work, not a separate tool-family schema.
+Station-work JSON can target `"tool_forge"`, `"smithing_anvil"`, `"crude_anvil"`, `"stone_anvil"`, `"lapidary_table"`, `"sawmill"`, `"leather_station"`, or `"toolmakers_bench"` as the `workstation` value. Crude Anvil recipes should be treated as lower-tier physical anvil work, not a separate tool-family schema.
+
+Station-work quality behavior is selected per recipe with `quality_mode`; it is not inferred from the workstation. `"none"` leaves the declared output unchanged, `"static"` applies the recipe's declared starting quality without timing prompts, and `"timed"` enables the hit-timing QTE and writes the completed score to modular tool parts, armour parts, or armour outputs. Missing `quality_mode` defaults to `"none"` so existing datapacks retain their previous output data.
+
+```json
+{
+  "workstation": "tool_forge",
+  "input": { "item": "minecraft:iron_ingot", "count": 2 },
+  "output": {
+    "tool_part": "crossbow_limbs",
+    "material": "mobstoolforging:iron",
+    "quality": 100
+  },
+  "pattern": "mobstoolforging:crossbow_limbs",
+  "required_hits": 5,
+  "quality_mode": "timed",
+  "minimum_hammer_level": "stone"
+}
+```
+
+Crossbow strings are also data-driven. An item must be included in `mobstoolforging:crossbow_strings`; a material definition can map that item to the material id stored on the assembled crossbow and select `guardMaterial` visuals. Vanilla String, Plant Fiber, and Blaze Thread are the built-in examples.
 
 ## Quality Compatibility
 

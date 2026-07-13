@@ -3,12 +3,14 @@ package org.destroyermob.mobstoolforging.world;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
+import org.destroyermob.mobstoolforging.registry.ModTags;
 
 /** Validation and construction for a body, limbs, and a raw string component. */
 public final class CrossbowAssembly {
@@ -72,8 +74,7 @@ public final class CrossbowAssembly {
         ResourceLocation stringMaterial = stringMaterial(string).orElse(null);
         if (bodyData == null || limbData == null || stringMaterial == null
                 || !isBodyMaterial(bodyData.materialId())
-                || !isLimbMaterial(limbData.materialId())
-                || !isStringMaterial(stringMaterial)) {
+                || !isLimbMaterial(limbData.materialId())) {
             return ItemStack.EMPTY;
         }
 
@@ -128,23 +129,36 @@ public final class CrossbowAssembly {
         return MaterialCatalog.WOOD.equals(material) || MaterialCatalog.OAK.equals(material);
     }
 
-    private static boolean isStringMaterial(ResourceLocation material) {
-        return MaterialCatalog.SPIDER_SILK.equals(material) || MaterialCatalog.PLANT_FIBER.equals(material);
+    public static List<ItemStack> stringIngredientStacks() {
+        List<ItemStack> stacks = new ArrayList<>();
+        BuiltInRegistries.ITEM.getTagOrEmpty(ModTags.Items.CROSSBOW_STRINGS).forEach(holder -> stacks.add(new ItemStack(holder.value())));
+        return List.copyOf(stacks);
     }
 
     private static Optional<ResourceLocation> stringMaterial(ItemStack stack) {
-        if (stack.is(Items.STRING)) {
-            return Optional.of(MaterialCatalog.SPIDER_SILK);
+        if (!stack.is(ModTags.Items.CROSSBOW_STRINGS)) {
+            return Optional.empty();
         }
-        if (stack.is(ModItems.PLANT_FIBER.get())) {
-            return Optional.of(MaterialCatalog.PLANT_FIBER);
-        }
-        return Optional.empty();
+        return MaterialCatalog.resolve(stack)
+                .map(ToolMaterialDefinition::id)
+                .or(() -> Optional.of(BuiltInRegistries.ITEM.getKey(stack.getItem())));
     }
 
     private static ItemStack stringStack(ResourceLocation material) {
-        return MaterialCatalog.PLANT_FIBER.equals(material)
-                ? new ItemStack(ModItems.PLANT_FIBER.get())
-                : new ItemStack(Items.STRING);
+        ItemStack resolved = MaterialCatalog.ingredientStacks(material).stream()
+                .filter(stack -> stack.is(ModTags.Items.CROSSBOW_STRINGS))
+                .findFirst()
+                .map(stack -> stack.copyWithCount(1))
+                .orElse(ItemStack.EMPTY);
+        if (!resolved.isEmpty()) {
+            return resolved;
+        }
+        if (MaterialCatalog.PLANT_FIBER.equals(material)) {
+            return new ItemStack(ModItems.PLANT_FIBER.get());
+        }
+        if (MaterialCatalog.BLAZE_THREAD.equals(material)) {
+            return new ItemStack(ModItems.BLAZE_THREAD.get());
+        }
+        return new ItemStack(Items.STRING);
     }
 }

@@ -21,12 +21,24 @@ public final class ModularBodyArmourModel {
     private static final String MATERIAL_BODY = "MaterialBody";
     private static final String MATERIAL_RIGHT_ARM = "MaterialRightArm";
     private static final String MATERIAL_LEFT_ARM = "MaterialLeftArm";
+    private static final String CHAINMAIL_TRIM_BODY = "ChainmailTrimBody";
+    private static final String CHAINMAIL_TRIM_RIGHT_ARM = "ChainmailTrimRightArm";
+    private static final String CHAINMAIL_TRIM_LEFT_ARM = "ChainmailTrimLeftArm";
+    private static final String MATERIAL_TRIM_BODY = "MaterialTrimBody";
+    private static final String MATERIAL_TRIM_RIGHT_ARM = "MaterialTrimRightArm";
+    private static final String MATERIAL_TRIM_LEFT_ARM = "MaterialTrimLeftArm";
     private final ModelPart chainmailBody;
     private final ModelPart chainmailRightArm;
     private final ModelPart chainmailLeftArm;
     private final ModelPart materialBody;
     private final ModelPart materialRightArm;
     private final ModelPart materialLeftArm;
+    private final ModelPart chainmailTrimBody;
+    private final ModelPart chainmailTrimRightArm;
+    private final ModelPart chainmailTrimLeftArm;
+    private final ModelPart materialTrimBody;
+    private final ModelPart materialTrimRightArm;
+    private final ModelPart materialTrimLeftArm;
 
     public ModularBodyArmourModel(ModelPart root) {
         this.chainmailBody = root.getChild(CHAINMAIL_BODY);
@@ -35,6 +47,12 @@ public final class ModularBodyArmourModel {
         this.materialBody = root.getChild(MATERIAL_BODY);
         this.materialRightArm = root.getChild(MATERIAL_RIGHT_ARM);
         this.materialLeftArm = root.getChild(MATERIAL_LEFT_ARM);
+        this.chainmailTrimBody = root.getChild(CHAINMAIL_TRIM_BODY);
+        this.chainmailTrimRightArm = root.getChild(CHAINMAIL_TRIM_RIGHT_ARM);
+        this.chainmailTrimLeftArm = root.getChild(CHAINMAIL_TRIM_LEFT_ARM);
+        this.materialTrimBody = root.getChild(MATERIAL_TRIM_BODY);
+        this.materialTrimRightArm = root.getChild(MATERIAL_TRIM_RIGHT_ARM);
+        this.materialTrimLeftArm = root.getChild(MATERIAL_TRIM_LEFT_ARM);
     }
 
     public void renderChainmailBody(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, int packedOverlay) {
@@ -73,11 +91,25 @@ public final class ModularBodyArmourModel {
         render(materialLeftArm, poseStack, consumer, color, packedLight, packedOverlay);
     }
 
+    public void renderTrimBody(PoseStack poseStack, VertexConsumer consumer, boolean plated, int packedLight, int packedOverlay) {
+        render(plated ? materialTrimBody : chainmailTrimBody, poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
+    }
+
+    public void renderTrimRightArm(PoseStack poseStack, VertexConsumer consumer, boolean plated, int packedLight, int packedOverlay) {
+        render(plated ? materialTrimRightArm : chainmailTrimRightArm, poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
+    }
+
+    public void renderTrimLeftArm(PoseStack poseStack, VertexConsumer consumer, boolean plated, int packedLight, int packedOverlay) {
+        render(plated ? materialTrimLeftArm : chainmailTrimLeftArm, poseStack, consumer, 0xFFFFFFFF, packedLight, packedOverlay);
+    }
+
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition root = meshdefinition.getRoot();
         CubeDeformation chainmailDeformation = new CubeDeformation(1.0F);
         CubeDeformation materialDeformation = new CubeDeformation(1.15F);
+        CubeDeformation chainmailTrimDeformation = new CubeDeformation(1.03F);
+        CubeDeformation materialTrimDeformation = new CubeDeformation(1.18F);
 
         addBody(root, CHAINMAIL_BODY, chainmailDeformation);
         addRightArm(root, CHAINMAIL_RIGHT_ARM, chainmailDeformation);
@@ -85,6 +117,12 @@ public final class ModularBodyArmourModel {
         addBody(root, MATERIAL_BODY, materialDeformation);
         addRightArm(root, MATERIAL_RIGHT_ARM, materialDeformation);
         addLeftArm(root, MATERIAL_LEFT_ARM, materialDeformation);
+        addBody(root, CHAINMAIL_TRIM_BODY, chainmailTrimDeformation);
+        addRightArm(root, CHAINMAIL_TRIM_RIGHT_ARM, chainmailTrimDeformation);
+        addLeftArm(root, CHAINMAIL_TRIM_LEFT_ARM, chainmailTrimDeformation);
+        addBody(root, MATERIAL_TRIM_BODY, materialTrimDeformation);
+        addRightArm(root, MATERIAL_TRIM_RIGHT_ARM, materialTrimDeformation);
+        addLeftArm(root, MATERIAL_TRIM_LEFT_ARM, materialTrimDeformation);
 
         return LayerDefinition.create(meshdefinition, 64, 32);
     }

@@ -10,5 +10,6 @@
   },
   "pattern": "mobstoolforging:crossbow_limbs",
   "required_hits": 4,
+  "quality_mode": "timed",
   "minimum_hammer_level": "stone"
 }

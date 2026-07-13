@@ -45,6 +45,7 @@ public final class MaterialCatalog {
     public static final ResourceLocation SCULK = materialId("sculk");
     public static final ResourceLocation SPIDER_SILK = materialId("spider_silk");
     public static final ResourceLocation PLANT_FIBER = materialId("plant_fiber");
+    public static final ResourceLocation BLAZE_THREAD = materialId("blaze_thread");
 
     private static final Tier COPPER_TIER = new SimpleTier(
             BlockTags.INCORRECT_FOR_STONE_TOOL,
@@ -118,6 +119,7 @@ public final class MaterialCatalog {
         registerVirtual(OAK, MaterialCategory.ORGANIC, Items.OAK_PLANKS, Tiers.WOOD);
         registerVirtual(SPIDER_SILK, MaterialCategory.ORGANIC, Items.STRING, Tiers.WOOD);
         registerVirtual(PLANT_FIBER, MaterialCategory.ORGANIC, Items.STRING, Tiers.WOOD);
+        registerVirtual(BLAZE_THREAD, MaterialCategory.ORGANIC, Items.BLAZE_POWDER, Tiers.WOOD);
     }
 
     private MaterialCatalog() {
@@ -187,7 +189,13 @@ public final class MaterialCatalog {
     }
 
     public static boolean isNormalForgingMaterial(ResourceLocation materialId) {
-        return !NETHERITE.equals(materialId) && !LEATHER.equals(materialId);
+        if (NETHERITE.equals(materialId) || LEATHER.equals(materialId)) {
+            return false;
+        }
+        return definition(materialId)
+                .map(ToolMaterialDefinition::category)
+                .filter(category -> category == MaterialCategory.METAL || category == MaterialCategory.GEM)
+                .isPresent();
     }
 
     public static boolean isKnappableMaterial(ResourceLocation materialId) {

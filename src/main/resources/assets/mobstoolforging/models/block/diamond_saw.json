@@ -1,5 +1,6 @@
 {
   "credit": "Made with Blockbench",
+  "render_type": "minecraft:cutout",
   "textures": {
     "0": "mobstoolforging:block/stonecutter_diamond_saw",
     "1": "minecraft:block/stonecutter_bottom",

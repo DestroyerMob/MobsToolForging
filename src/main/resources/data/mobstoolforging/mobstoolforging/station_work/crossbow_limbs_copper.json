@@ -4,5 +4,6 @@
   "output": { "tool_part": "crossbow_limbs", "material": "mobstoolforging:copper" },
   "pattern": "mobstoolforging:crossbow_limbs",
   "required_hits": 5,
+  "quality_mode": "timed",
   "minimum_hammer_level": "stone"
 }

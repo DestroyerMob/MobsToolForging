@@ -219,15 +219,15 @@ public final class MobsToolForgingEveryCompat {
                                     "mobstoolforging:block/template_toolmakers_bench",
                                     Map.of("side", logTextures.side(), "top", logTextures.top())));
                 });
-                sawmills.blocks.forEach((wood, block) -> addClientResources(
-                        sink,
-                        block,
-                        sawmillBlockState(block),
-                        texturedModel(
-                                "mobstoolforging:block/sawmill",
-                                Map.of(
-                                        "log", modelTextures(resourceManager, wood.log).side(),
-                                        "planks", modelTextures(resourceManager, wood.planks).side()))));
+                sawmills.blocks.forEach((wood, block) -> {
+                    JsonObject model = texturedModel(
+                            "mobstoolforging:block/sawmill",
+                            Map.of(
+                                    "log", modelTextures(resourceManager, wood.log).side(),
+                                    "planks", modelTextures(resourceManager, wood.planks).side()));
+                    model.addProperty("render_type", "minecraft:cutout");
+                    addClientResources(sink, block, sawmillBlockState(block), model);
+                });
                 leatherStations.blocks.forEach((wood, block) -> {
                     JsonObject model = texturedModel(
                             "mobstoolforging:block/template_leather_station",

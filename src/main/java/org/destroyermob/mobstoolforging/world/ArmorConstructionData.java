@@ -193,6 +193,10 @@ public record ArmorConstructionData(
         return new ArmorConstructionData(armorType, skullMaterial, combMaterial, baseMaterial, visorMaterial, quality);
     }
 
+    public ArmorConstructionData withQuality(int quality) {
+        return new ArmorConstructionData(armorType, skullMaterial, combMaterial, overlayBaseMaterial, visorMaterial, quality);
+    }
+
     public boolean hasLeatherBase() {
         return MaterialCatalog.LEATHER.equals(chainmailMaterial());
     }

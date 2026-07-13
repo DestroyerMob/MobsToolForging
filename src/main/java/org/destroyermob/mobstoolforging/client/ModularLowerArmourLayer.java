@@ -43,6 +43,7 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
             return;
         }
         renderLeggingsParts(poseStack, humanoidModel, bufferSource, packedLight, construction);
+        renderLeggingsTrim(poseStack, humanoidModel, bufferSource, packedLight, stack, construction);
         if (stack.hasFoil()) {
             renderLeggingsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), 0xFFFFFFFF, packedLight, construction);
         }
@@ -55,6 +56,7 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
             return;
         }
         renderBootsParts(poseStack, humanoidModel, bufferSource, packedLight, construction);
+        renderBootsTrim(poseStack, humanoidModel, bufferSource, packedLight, stack, construction);
         if (stack.hasFoil()) {
             renderBootsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), 0xFFFFFFFF, packedLight, construction);
         }
@@ -71,6 +73,16 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
             renderRightLeggings(poseStack, humanoidModel.rightLeg, materialConsumer, texture.color(), packedLight);
             renderLeftLeggings(poseStack, humanoidModel.leftLeg, materialConsumer, texture.color(), packedLight);
         });
+    }
+
+    private void renderLeggingsTrim(PoseStack poseStack, HumanoidModel<?> humanoidModel, MultiBufferSource bufferSource, int packedLight, ItemStack stack, ArmorConstructionData construction) {
+        VertexConsumer trim = ModularArmorTrimRenderer.consumer(stack, bufferSource, true);
+        if (trim == null) {
+            return;
+        }
+        boolean plated = construction.leggingsPlateMaterial().isPresent();
+        renderTrimRightLeggings(poseStack, humanoidModel.rightLeg, trim, plated, packedLight);
+        renderTrimLeftLeggings(poseStack, humanoidModel.leftLeg, trim, plated, packedLight);
     }
 
     private void renderLeggingsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int color, int packedLight, ArmorConstructionData construction) {
@@ -93,6 +105,16 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
             renderRightBoot(poseStack, humanoidModel.rightLeg, materialConsumer, texture.color(), packedLight);
             renderLeftBoot(poseStack, humanoidModel.leftLeg, materialConsumer, texture.color(), packedLight);
         });
+    }
+
+    private void renderBootsTrim(PoseStack poseStack, HumanoidModel<?> humanoidModel, MultiBufferSource bufferSource, int packedLight, ItemStack stack, ArmorConstructionData construction) {
+        VertexConsumer trim = ModularArmorTrimRenderer.consumer(stack, bufferSource, false);
+        if (trim == null) {
+            return;
+        }
+        boolean plated = construction.bootsPlateMaterial().isPresent();
+        renderTrimRightBoot(poseStack, humanoidModel.rightLeg, trim, plated, packedLight);
+        renderTrimLeftBoot(poseStack, humanoidModel.leftLeg, trim, plated, packedLight);
     }
 
     private void renderBootsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, VertexConsumer consumer, int color, int packedLight, ArmorConstructionData construction) {
@@ -157,6 +179,34 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
         poseStack.pushPose();
         parentPart.translateAndRotate(poseStack);
         lowerArmourModel.renderLeftBoot(poseStack, consumer, color, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderTrimRightLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, boolean plated, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        lowerArmourModel.renderTrimRightLeggings(poseStack, consumer, plated, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderTrimLeftLeggings(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, boolean plated, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        lowerArmourModel.renderTrimLeftLeggings(poseStack, consumer, plated, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderTrimRightBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, boolean plated, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        lowerArmourModel.renderTrimRightBoot(poseStack, consumer, plated, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
+    }
+
+    private void renderTrimLeftBoot(PoseStack poseStack, ModelPart parentPart, VertexConsumer consumer, boolean plated, int packedLight) {
+        poseStack.pushPose();
+        parentPart.translateAndRotate(poseStack);
+        lowerArmourModel.renderTrimLeftBoot(poseStack, consumer, plated, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
