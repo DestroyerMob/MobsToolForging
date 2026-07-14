@@ -38,10 +38,14 @@ import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 public class DryingRackBlock extends BaseEntityBlock {
     public static final MapCodec<DryingRackBlock> CODEC = simpleCodec(DryingRackBlock::new);
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    private static final VoxelShape NORTH_SHAPE = Block.box(0.0D, 15.0D, 15.0D, 16.0D, 16.0D, 16.0D);
-    private static final VoxelShape EAST_SHAPE = rotateClockwise(NORTH_SHAPE);
-    private static final VoxelShape SOUTH_SHAPE = rotateClockwise(EAST_SHAPE);
-    private static final VoxelShape WEST_SHAPE = rotateClockwise(SOUTH_SHAPE);
+    private static final VoxelShape NORTH_OUTLINE_SHAPE = Block.box(0.0D, 0.0D, 15.0D, 16.0D, 16.0D, 16.0D);
+    private static final VoxelShape EAST_OUTLINE_SHAPE = rotateClockwise(NORTH_OUTLINE_SHAPE);
+    private static final VoxelShape SOUTH_OUTLINE_SHAPE = rotateClockwise(EAST_OUTLINE_SHAPE);
+    private static final VoxelShape WEST_OUTLINE_SHAPE = rotateClockwise(SOUTH_OUTLINE_SHAPE);
+    private static final VoxelShape NORTH_COLLISION_SHAPE = Block.box(0.0D, 15.0D, 15.0D, 16.0D, 16.0D, 16.0D);
+    private static final VoxelShape EAST_COLLISION_SHAPE = rotateClockwise(NORTH_COLLISION_SHAPE);
+    private static final VoxelShape SOUTH_COLLISION_SHAPE = rotateClockwise(EAST_COLLISION_SHAPE);
+    private static final VoxelShape WEST_COLLISION_SHAPE = rotateClockwise(SOUTH_COLLISION_SHAPE);
 
     public DryingRackBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -138,11 +142,38 @@ public class DryingRackBlock extends BaseEntityBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return shapeForFacing(
+                state,
+                NORTH_OUTLINE_SHAPE,
+                EAST_OUTLINE_SHAPE,
+                SOUTH_OUTLINE_SHAPE,
+                WEST_OUTLINE_SHAPE
+        );
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return shapeForFacing(
+                state,
+                NORTH_COLLISION_SHAPE,
+                EAST_COLLISION_SHAPE,
+                SOUTH_COLLISION_SHAPE,
+                WEST_COLLISION_SHAPE
+        );
+    }
+
+    private static VoxelShape shapeForFacing(
+            BlockState state,
+            VoxelShape north,
+            VoxelShape east,
+            VoxelShape south,
+            VoxelShape west
+    ) {
         return switch (state.getValue(FACING)) {
-            case EAST -> EAST_SHAPE;
-            case SOUTH -> SOUTH_SHAPE;
-            case WEST -> WEST_SHAPE;
-            case NORTH, UP, DOWN -> NORTH_SHAPE;
+            case EAST -> east;
+            case SOUTH -> south;
+            case WEST -> west;
+            case NORTH, UP, DOWN -> north;
         };
     }
 
