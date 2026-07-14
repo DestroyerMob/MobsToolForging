@@ -13,6 +13,11 @@ public final class ModTags {
     }
 
     public static final class Blocks {
+        public static final TagKey<Block> PATTERN_RACKS = blockTag("workstations/pattern_racks");
+        public static final TagKey<Block> TOOLMAKERS_BENCHES = blockTag("workstations/toolmakers_benches");
+        public static final TagKey<Block> SAWMILLS = blockTag("workstations/sawmills");
+        public static final TagKey<Block> LEATHER_STATIONS = blockTag("workstations/leather_stations");
+        public static final TagKey<Block> DRYING_RACKS = blockTag("workstations/drying_racks");
         public static final TagKey<Block> CARRY_ON_BLOCK_BLACKLIST = TagKey.create(
                 Registries.BLOCK,
                 ResourceLocation.fromNamespaceAndPath("carryon", "block_blacklist")
@@ -23,6 +28,10 @@ public final class ModTags {
         );
 
         private Blocks() {
+        }
+
+        private static TagKey<Block> blockTag(String path) {
+            return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, path));
         }
     }
 
@@ -68,6 +77,11 @@ public final class ModTags {
         public static final TagKey<Item> LAPIDARY_ABRASIVES_DIAMOND = itemTag("lapidary_abrasives/diamond");
         public static final TagKey<Item> KNAPPING_TOOLS = itemTag("knapping_tools");
         public static final TagKey<Item> HAMMER_STONES = itemTag("hammer_stones");
+        public static final TagKey<Item> PATTERN_RACKS = itemTag("workstations/pattern_racks");
+        public static final TagKey<Item> TOOLMAKERS_BENCHES = itemTag("workstations/toolmakers_benches");
+        public static final TagKey<Item> SAWMILLS = itemTag("workstations/sawmills");
+        public static final TagKey<Item> LEATHER_STATIONS = itemTag("workstations/leather_stations");
+        public static final TagKey<Item> DRYING_RACKS = itemTag("workstations/drying_racks");
         public static final TagKey<Item> HIDDEN_FROM_RECIPE_VIEWERS = commonItemTag("hidden_from_recipe_viewers");
 
         private Items() {

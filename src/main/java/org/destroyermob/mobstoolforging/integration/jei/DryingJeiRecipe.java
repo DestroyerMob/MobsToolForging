@@ -7,7 +7,6 @@ import org.destroyermob.mobstoolforging.world.DryingRecipe;
 
 public record DryingJeiRecipe(
         ResourceLocation id,
-        ItemStack station,
         List<ItemStack> inputs,
         ItemStack output,
         int ticks,

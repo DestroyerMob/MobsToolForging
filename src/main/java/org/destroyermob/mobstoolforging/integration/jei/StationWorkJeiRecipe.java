@@ -9,7 +9,6 @@ import org.destroyermob.mobstoolforging.world.WorkstationKind;
 public record StationWorkJeiRecipe(
         ResourceLocation id,
         WorkstationKind workstationKind,
-        ItemStack station,
         List<ItemStack> inputs,
         List<ItemStack> secondaryInputs,
         ItemStack hammer,

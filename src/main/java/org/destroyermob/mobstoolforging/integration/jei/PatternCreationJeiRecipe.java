@@ -5,7 +5,6 @@ import net.minecraft.world.item.ItemStack;
 
 public record PatternCreationJeiRecipe(
         ResourceLocation id,
-        ItemStack station,
         ItemStack paper,
         ItemStack output
 ) {

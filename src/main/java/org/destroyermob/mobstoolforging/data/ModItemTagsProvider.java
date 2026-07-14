@@ -21,6 +21,11 @@ public class ModItemTagsProvider extends ItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
+        copy(ModTags.Blocks.PATTERN_RACKS, ModTags.Items.PATTERN_RACKS);
+        copy(ModTags.Blocks.TOOLMAKERS_BENCHES, ModTags.Items.TOOLMAKERS_BENCHES);
+        copy(ModTags.Blocks.SAWMILLS, ModTags.Items.SAWMILLS);
+        copy(ModTags.Blocks.LEATHER_STATIONS, ModTags.Items.LEATHER_STATIONS);
+        copy(ModTags.Blocks.DRYING_RACKS, ModTags.Items.DRYING_RACKS);
         tag(ItemTags.SWORDS).add(ModItems.SWORD.get());
         tag(ItemTags.SHOVELS).add(ModItems.SHOVEL.get());
         tag(ItemTags.PICKAXES).add(ModItems.PICKAXE.get());

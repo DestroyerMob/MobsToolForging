@@ -10,31 +10,15 @@ import net.minecraft.network.chat.Component;
 final class JeiRecipeVisuals {
     private static final int DARK = 0xFF555555;
     private static final int LIGHT = 0xFFE9E9E9;
-    private static final int COPPER = 0xFFC47E37;
     private static final int HEAT_HOT = 0xFFFFD24A;
     private static final int TEXT = 0xFF606060;
 
     private JeiRecipeVisuals() {
     }
 
-    static void drawArrow(GuiGraphics guiGraphics, int x, int y) {
-        guiGraphics.fill(x, y + 3, x + 13, y + 7, DARK);
-        guiGraphics.fill(x + 11, y + 1, x + 15, y + 9, DARK);
-        guiGraphics.fill(x + 14, y + 2, x + 17, y + 8, DARK);
-        guiGraphics.fill(x + 17, y + 4, x + 20, y + 6, DARK);
-        guiGraphics.fill(x + 1, y + 4, x + 14, y + 6, COPPER);
-        guiGraphics.fill(x + 13, y + 3, x + 16, y + 7, COPPER);
-        guiGraphics.fill(x + 16, y + 4, x + 18, y + 6, COPPER);
-    }
-
     static void drawClock(GuiGraphics guiGraphics, int x, int y, int ticks) {
         drawClockFace(guiGraphics, x, y);
         drawSmallText(guiGraphics, secondsText(ticks), x + 14, y + 2);
-    }
-
-    static void drawPlus(GuiGraphics guiGraphics, int x, int y) {
-        guiGraphics.fill(x, y + 3, x + 7, y + 5, DARK);
-        guiGraphics.fill(x + 3, y, x + 5, y + 8, DARK);
     }
 
     static void drawHitCount(GuiGraphics guiGraphics, int x, int y, int hits) {

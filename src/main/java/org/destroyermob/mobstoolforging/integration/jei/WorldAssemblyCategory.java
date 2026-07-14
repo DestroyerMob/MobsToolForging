@@ -19,9 +19,13 @@ public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRe
     private static final int HEIGHT = 84;
     private static final int TEXT = 0xFF606060;
     private final IDrawable icon;
+    private final IDrawable arrow;
+    private final IDrawable plus;
 
     public WorldAssemblyCategory(IGuiHelper guiHelper) {
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.worldAssemblyIcon());
+        this.arrow = guiHelper.getRecipeArrow();
+        this.plus = guiHelper.getRecipePlusSign();
     }
 
     @Override
@@ -107,6 +111,7 @@ public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRe
         for (int index = 0; index < Math.min(2, lines.size()); index++) {
             guiGraphics.drawString(font, lines.get(index), 3, 64 + index * 9, TEXT, false);
         }
-        JeiRecipeVisuals.drawArrow(guiGraphics, 108, 22);
+        plus.draw(guiGraphics, 49, 24);
+        arrow.draw(guiGraphics, 108, 17);
     }
 }

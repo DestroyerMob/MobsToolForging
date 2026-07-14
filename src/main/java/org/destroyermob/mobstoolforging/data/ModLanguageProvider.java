@@ -202,7 +202,6 @@ public class ModLanguageProvider extends LanguageProvider {
         add("jei.mobstoolforging.role.tool", "Work tool");
         add("jei.mobstoolforging.role.trait_material", "Trait material");
         add("jei.mobstoolforging.role.workpiece", "Workpiece");
-        add("jei.mobstoolforging.role.workstation", "Workstation");
         add("book.mobstoolforging.name", "The Forgemaster's Guide");
         add("book.mobstoolforging.subtitle", "Tools, armour, heat, and workmanship");
         add("book.mobstoolforging.landing", "A practical manual for Mobs Tool Forging.$(p)Follow the live workshop progression, then use the reference section for exact quality, material, and trait effects.");

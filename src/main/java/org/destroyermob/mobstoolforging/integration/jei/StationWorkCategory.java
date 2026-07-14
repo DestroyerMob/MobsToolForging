@@ -13,12 +13,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class StationWorkCategory implements IRecipeCategory<StationWorkJeiRecipe> {
-    private static final int WIDTH = 134;
+    private static final int WIDTH = 116;
     private static final int HEIGHT = 60;
     private final IDrawable icon;
+    private final IDrawable arrow;
 
     public StationWorkCategory(IGuiHelper guiHelper) {
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.stationWorkIcon());
+        this.arrow = guiHelper.getRecipeArrow();
     }
 
     @Override
@@ -53,28 +55,25 @@ public class StationWorkCategory implements IRecipeCategory<StationWorkJeiRecipe
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, StationWorkJeiRecipe recipe, IFocusGroup focuses) {
-        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 2, 21), "workstation")
-                .setStandardSlotBackground()
-                .addItemStack(recipe.station());
-        JeiRecipeVisuals.role(builder.addInputSlot(36, 12), "input")
+        JeiRecipeVisuals.role(builder.addInputSlot(10, 12), "input")
                 .setStandardSlotBackground()
                 .addItemStacks(recipe.inputs());
         if (!recipe.secondaryInputs().isEmpty()) {
-            JeiRecipeVisuals.role(builder.addInputSlot(36, 36), "secondary_material")
+            JeiRecipeVisuals.role(builder.addInputSlot(10, 36), "secondary_material")
                     .setStandardSlotBackground()
                     .addItemStacks(recipe.secondaryInputs());
         }
-        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 60, 36), "tool")
+        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 34, 36), "tool")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.hammer());
-        JeiRecipeVisuals.role(builder.addOutputSlot(104, 21), "result")
+        JeiRecipeVisuals.role(builder.addOutputSlot(88, 21), "result")
                 .setOutputSlotBackground()
                 .addItemStack(recipe.output());
     }
 
     @Override
     public void draw(StationWorkJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        JeiRecipeVisuals.drawArrow(guiGraphics, 82, 25);
-        JeiRecipeVisuals.drawHitCount(guiGraphics, 82, 49, recipe.requiredHits());
+        arrow.draw(guiGraphics, 60, 21);
+        JeiRecipeVisuals.drawHitCount(guiGraphics, 60, 49, recipe.requiredHits());
     }
 }

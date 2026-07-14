@@ -28,15 +28,13 @@ import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModItems;
-import org.destroyermob.mobstoolforging.integration.everycomp.CompatWorkstationRegistry;
-import org.destroyermob.mobstoolforging.world.ArmorForgeAttachment;
+import org.destroyermob.mobstoolforging.integration.WorldInteractionDisplayRecipes;
 import org.destroyermob.mobstoolforging.world.CrossbowAssembly;
 import org.destroyermob.mobstoolforging.world.DryingRecipe;
 import org.destroyermob.mobstoolforging.world.DryingRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.HeatingDisplayRecipe;
 import org.destroyermob.mobstoolforging.world.HeatingRecipeRegistry;
-import org.destroyermob.mobstoolforging.world.HeatingSource;
 import org.destroyermob.mobstoolforging.world.LapidaryAbrasives;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCategory;
@@ -55,19 +53,23 @@ import org.destroyermob.mobstoolforging.world.WorkstationKind;
 
 @JeiPlugin
 public class MobsToolForgingJeiPlugin implements IModPlugin {
-    public static final RecipeType<ForgeShapingJeiRecipe> FORGE_SHAPING = RecipeType.create(MobsToolForging.MOD_ID, "forge_shaping", ForgeShapingJeiRecipe.class);
-    public static final RecipeType<LapidaryCoatingJeiRecipe> LAPIDARY_COATING = RecipeType.create(MobsToolForging.MOD_ID, "lapidary_coating", LapidaryCoatingJeiRecipe.class);
-    public static final RecipeType<StationWorkJeiRecipe> STATION_WORK = RecipeType.create(MobsToolForging.MOD_ID, "station_work", StationWorkJeiRecipe.class);
-    public static final RecipeType<PatternCreationJeiRecipe> PATTERN_CREATION = RecipeType.create(MobsToolForging.MOD_ID, "pattern_creation", PatternCreationJeiRecipe.class);
-    public static final RecipeType<HeatingJeiRecipe> HEATING = RecipeType.create(MobsToolForging.MOD_ID, "heating", HeatingJeiRecipe.class);
-    public static final RecipeType<DryingJeiRecipe> DRYING = RecipeType.create(MobsToolForging.MOD_ID, "drying", DryingJeiRecipe.class);
-    public static final RecipeType<MaterialTraitInfoRecipe> MATERIAL_TRAITS = RecipeType.create(MobsToolForging.MOD_ID, "material_traits", MaterialTraitInfoRecipe.class);
-    public static final RecipeType<WorldAssemblyJeiRecipe> WORLD_ASSEMBLY = RecipeType.create(MobsToolForging.MOD_ID, "world_assembly", WorldAssemblyJeiRecipe.class);
-    public static final RecipeType<ToolmakerAssemblyJeiRecipe> TOOLMAKER_ASSEMBLY = RecipeType.create(MobsToolForging.MOD_ID, "toolmaker_assembly", ToolmakerAssemblyJeiRecipe.class);
+    public static final String JEI_NAMESPACE = MobsToolForging.MOD_ID + "_jei";
+    public static final RecipeType<ForgeShapingJeiRecipe> FORGE_SHAPING = RecipeType.create(JEI_NAMESPACE, "forge_shaping", ForgeShapingJeiRecipe.class);
+    public static final RecipeType<LapidaryCoatingJeiRecipe> LAPIDARY_COATING = RecipeType.create(JEI_NAMESPACE, "lapidary_coating", LapidaryCoatingJeiRecipe.class);
+    public static final RecipeType<StationWorkJeiRecipe> STATION_WORK = RecipeType.create(JEI_NAMESPACE, "station_work", StationWorkJeiRecipe.class);
+    public static final RecipeType<PatternCreationJeiRecipe> PATTERN_CREATION = RecipeType.create(JEI_NAMESPACE, "pattern_creation", PatternCreationJeiRecipe.class);
+    public static final RecipeType<HeatingJeiRecipe> HEATING = RecipeType.create(JEI_NAMESPACE, "heating", HeatingJeiRecipe.class);
+    public static final RecipeType<DryingJeiRecipe> DRYING = RecipeType.create(JEI_NAMESPACE, "drying", DryingJeiRecipe.class);
+    public static final RecipeType<MaterialTraitInfoRecipe> MATERIAL_TRAITS = RecipeType.create(JEI_NAMESPACE, "material_traits", MaterialTraitInfoRecipe.class);
+    public static final RecipeType<WorldAssemblyJeiRecipe> WORLD_ASSEMBLY = RecipeType.create(JEI_NAMESPACE, "world_assembly", WorldAssemblyJeiRecipe.class);
+    public static final RecipeType<ToolmakerAssemblyJeiRecipe> TOOLMAKER_ASSEMBLY = RecipeType.create(JEI_NAMESPACE, "toolmaker_assembly", ToolmakerAssemblyJeiRecipe.class);
 
     @Override
     public ResourceLocation getPluginUid() {
-        return ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "jei");
+        // EMI suppresses JEI callbacks whose plugin namespace matches a mod
+        // that also has a native EMI plugin. Keep this adapter distinct so
+        // JEMI still imports MTF's non-native categories and workstations.
+        return ResourceLocation.fromNamespaceAndPath(JEI_NAMESPACE, "plugin");
     }
 
     @Override
@@ -135,23 +137,17 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(ModItems.CRUDE_ANVIL.get(), FORGE_SHAPING);
         registration.addRecipeCatalyst(ModItems.TOOL_FORGE.get(), FORGE_SHAPING, STATION_WORK);
         registration.addRecipeCatalyst(ModItems.LAPIDARY_TABLE.get(), FORGE_SHAPING, LAPIDARY_COATING, STATION_WORK);
-        ModItems.SAWMILL_ITEMS.forEach(item -> registration.addRecipeCatalyst(item.get(), STATION_WORK));
-        CompatWorkstationRegistry.items(CompatWorkstationRegistry.Kind.SAWMILL)
-                .forEach(item -> registration.addRecipeCatalyst(item, STATION_WORK));
-        ModItems.LEATHER_STATION_ITEMS.forEach(item -> registration.addRecipeCatalyst(item.get(), STATION_WORK));
-        CompatWorkstationRegistry.items(CompatWorkstationRegistry.Kind.LEATHER_STATION)
-                .forEach(item -> registration.addRecipeCatalyst(item, STATION_WORK));
-        ModItems.TOOLMAKER_STATION_ITEMS.forEach(item -> registration.addRecipeCatalyst(item.get(), TOOLMAKER_ASSEMBLY));
-        CompatWorkstationRegistry.items(CompatWorkstationRegistry.Kind.TOOLMAKERS_BENCH)
-                .forEach(item -> registration.addRecipeCatalyst(item, TOOLMAKER_ASSEMBLY));
+        // JEI catalysts are individual stacks rather than tag ingredients. Register one
+        // representative per tagged family so JEI and JEMI do not list every wood skin.
+        registration.addRecipeCatalyst(ModItems.SAWMILL.get(), STATION_WORK);
+        registration.addRecipeCatalyst(ModItems.LEATHER_STATION.get(), STATION_WORK);
+        registration.addRecipeCatalyst(ModItems.TOOLMAKERS_BENCH.get(), TOOLMAKER_ASSEMBLY);
         registration.addRecipeCatalyst(ModItems.PATTERN_CREATION_STATION.get(), PATTERN_CREATION);
         registration.addRecipeCatalyst(ModItems.HEATING_FORGE.get(), HEATING);
         registration.addRecipeCatalyst(ModItems.LAVA_HEATING_FORGE.get(), HEATING);
         registration.addRecipeCatalyst(Items.CAMPFIRE, HEATING);
         registration.addRecipeCatalyst(Items.SOUL_CAMPFIRE, HEATING);
-        ModItems.DRYING_RACK_ITEMS.forEach(item -> registration.addRecipeCatalyst(item.get(), DRYING));
-        CompatWorkstationRegistry.items(CompatWorkstationRegistry.Kind.DRYING_RACK)
-                .forEach(item -> registration.addRecipeCatalyst(item, DRYING));
+        registration.addRecipeCatalyst(ModItems.DRYING_RACK.get(), DRYING);
     }
 
     private static List<ForgeShapingJeiRecipe> forgeShapingRecipes() {
@@ -162,7 +158,6 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
             }
             for (ResourceLocation materialId : MaterialCatalog.starterMaterialIds()) {
                 Optional<ToolMaterialDefinition> material = MaterialCatalog.definition(materialId);
-                boolean plate = ArmorForgeAttachment.isPlateTemplate(template);
                 if (material.isEmpty()
                         || !template.allowsMaterial(materialId)
                         || (material.get().category() != MaterialCategory.METAL && material.get().category() != MaterialCategory.GEM)
@@ -179,14 +174,10 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                     continue;
                 }
                 ItemStack materialStack = new ItemStack(material.get().displayItem(), template.requiredMaterials());
-                List<ItemStack> stations = plate
-                        ? List.of(new ItemStack(ModItems.TOOL_FORGE.get()))
-                        : List.of(new ItemStack(ModItems.CRUDE_ANVIL.get()), new ItemStack(ModItems.TOOL_FORGE.get()));
                 recipes.add(new ForgeShapingJeiRecipe(
                         recipeId("forge_shaping/" + idPath(template.id()) + "/" + idPath(materialId)),
                         template,
                         materialId,
-                        stations,
                         pattern,
                         materialStack,
                         target,
@@ -233,11 +224,9 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                         recipeId("lapidary_coating/" + idPath(template.id()) + "/" + idPath(coatingId)),
                         template,
                         coatingId,
-                        new ItemStack(ModItems.LAPIDARY_TABLE.get()),
                         bases,
                         new ItemStack(coating.get().displayItem(), template.requiredMaterials()),
                         coating.get().requiredLapidaryAbrasiveTier().map(MobsToolForgingJeiPlugin::abrasiveFor).orElse(ItemStack.EMPTY),
-                        new ItemStack(ModItems.GEM_CUTTERS_KNIFE.get()),
                         outputs,
                         template.requiredHits()
                 ));
@@ -486,121 +475,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     }
 
     private static List<WorldAssemblyJeiRecipe> worldAssemblyRecipes() {
-        List<WorldAssemblyJeiRecipe> recipes = new ArrayList<>();
-        List<ItemStack> hammers = List.of(
-                new ItemStack(ModItems.SMITHING_HAMMER.get()),
-                new ItemStack(ModItems.IRON_SMITHING_HAMMER.get())
-        );
-
-        if (!MobsToolForgingConfig.ENABLE_ANVIL_CRAFTING_RECIPES.get()) {
-            if (MobsToolForgingConfig.ENABLE_CRUDE_ANVIL.get()) {
-                recipes.add(new WorldAssemblyJeiRecipe(
-                        recipeId("world_assembly/crude_anvil"),
-                        WorldAssemblyJeiRecipe.Kind.ANVIL,
-                        List.of(new ItemStack(Items.COBBLESTONE), new ItemStack(Items.STONE)),
-                        List.of(),
-                        hammers,
-                        new ItemStack(ModItems.CRUDE_ANVIL.get())
-                ));
-            }
-            recipes.add(new WorldAssemblyJeiRecipe(
-                    recipeId("world_assembly/smithing_anvil"),
-                    WorldAssemblyJeiRecipe.Kind.ANVIL,
-                    List.of(new ItemStack(Items.IRON_BLOCK)),
-                    List.of(),
-                    hammers,
-                    new ItemStack(ModItems.TOOL_FORGE.get())
-            ));
-        }
-
-        recipes.add(new WorldAssemblyJeiRecipe(
-                recipeId("world_assembly/diamond_saw"),
-                WorldAssemblyJeiRecipe.Kind.DIAMOND_SAW,
-                List.of(new ItemStack(Items.STONECUTTER)),
-                List.of(),
-                List.of(abrasiveFor(LapidaryAbrasives.DIAMOND_TIER)),
-                new ItemStack(ModBlocks.DIAMOND_SAW.get())
-        ));
-
-        recipes.add(new WorldAssemblyJeiRecipe(
-                recipeId("world_assembly/lapidary_table"),
-                WorldAssemblyJeiRecipe.Kind.LAPIDARY_TABLE,
-                List.of(new ItemStack(Items.LAPIS_BLOCK), new ItemStack(Items.LAPIS_BLOCK)),
-                List.of(new ItemStack(ModBlocks.DIAMOND_SAW.get()), new ItemStack(Items.SMOOTH_STONE)),
-                hammers,
-                new ItemStack(ModBlocks.LAPIDARY_TABLE.get())
-        ));
-
-        ModBlocks.SAWMILL_VARIANTS.forEach(variant -> recipes.add(sawmillAssembly(
-                recipeId("world_assembly/sawmill/" + variant.id()),
-                variant.recipePlanks(),
-                variant.recipeLog(),
-                variant.block().get(),
-                hammers
-        )));
-        CompatWorkstationRegistry.sawmills().forEach(variant -> {
-            ResourceLocation sawmillId = BuiltInRegistries.BLOCK.getKey(variant.sawmill());
-            recipes.add(sawmillAssembly(
-                    recipeId("world_assembly/sawmill/" + idPath(sawmillId)),
-                    variant.planks(),
-                    variant.log(),
-                    variant.sawmill(),
-                    hammers
-            ));
-        });
-
-        ModBlocks.LEATHER_STATION_VARIANTS.forEach(variant -> recipes.add(leatherStationAssembly(
-                recipeId("world_assembly/leather_station/" + variant.id()),
-                variant.recipePlanks(),
-                variant.recipeLog(),
-                variant.block().get(),
-                hammers
-        )));
-        CompatWorkstationRegistry.leatherStations().forEach(variant -> {
-            ResourceLocation stationId = BuiltInRegistries.BLOCK.getKey(variant.station());
-            recipes.add(leatherStationAssembly(
-                    recipeId("world_assembly/leather_station/" + idPath(stationId)),
-                    variant.planks(),
-                    variant.log(),
-                    variant.station(),
-                    hammers
-            ));
-        });
-        return recipes;
-    }
-
-    private static WorldAssemblyJeiRecipe leatherStationAssembly(
-            ResourceLocation id,
-            net.minecraft.world.level.block.Block planks,
-            net.minecraft.world.level.block.Block log,
-            net.minecraft.world.level.block.Block output,
-            List<ItemStack> hammers
-    ) {
-        return new WorldAssemblyJeiRecipe(
-                id,
-                WorldAssemblyJeiRecipe.Kind.LEATHER_STATION,
-                List.of(new ItemStack(planks)),
-                List.of(new ItemStack(log)),
-                hammers,
-                new ItemStack(output)
-        );
-    }
-
-    private static WorldAssemblyJeiRecipe sawmillAssembly(
-            ResourceLocation id,
-            net.minecraft.world.level.block.Block planks,
-            net.minecraft.world.level.block.Block log,
-            net.minecraft.world.level.block.Block output,
-            List<ItemStack> hammers
-    ) {
-        return new WorldAssemblyJeiRecipe(
-                id,
-                WorldAssemblyJeiRecipe.Kind.SAWMILL,
-                List.of(new ItemStack(planks)),
-                List.of(new ItemStack(Items.STONECUTTER), new ItemStack(log)),
-                hammers,
-                new ItemStack(output)
-        );
+        return WorldInteractionDisplayRecipes.recipes();
     }
 
     private static List<ResourceLocation> materialTraitMaterials() {
@@ -686,7 +561,6 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         }
         return Optional.of(new PatternCreationJeiRecipe(
                 recipeId("pattern_creation/" + idPath(template.id())),
-                new ItemStack(ModItems.PATTERN_CREATION_STATION.get()),
                 patternInput(template.patternStationPaperCost()),
                 pattern
         ));
@@ -701,7 +575,6 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         return Optional.of(new StationWorkJeiRecipe(
                 recipe.id(),
                 recipe.workstationKind(),
-                stationFor(recipe.workstationKind()),
                 inputs,
                 secondaryInputs,
                 workToolFor(recipe.workstationKind(), recipe.minimumHammerLevel()),
@@ -719,7 +592,6 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         return Optional.of(new HeatingJeiRecipe(
                 recipe.id(),
                 recipe.source(),
-                stationFor(recipe.source()),
                 recipe.inputs(),
                 recipe.output(),
                 recipe.ticks(),
@@ -735,7 +607,6 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         }
         return Optional.of(new DryingJeiRecipe(
                 recipe.id(),
-                new ItemStack(ModItems.DRYING_RACK.get()),
                 inputs,
                 recipe.outputCopy(),
                 recipe.ticks(),
@@ -785,29 +656,6 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     private static boolean isActiveTemplate(ForgeTemplateDefinition template) {
         return !ToolTypeRegistry.SCREWDRIVER_HEAD_TEMPLATE.equals(template.id());
-    }
-
-    private static ItemStack stationFor(WorkstationKind workstation) {
-        if (workstation == WorkstationKind.LAPIDARY_TABLE) {
-            return new ItemStack(ModItems.LAPIDARY_TABLE.get());
-        }
-        if (workstation == WorkstationKind.SAWMILL) {
-            return new ItemStack(ModItems.SAWMILL.get());
-        }
-        if (workstation == WorkstationKind.CRUDE_ANVIL) {
-            return new ItemStack(ModItems.CRUDE_ANVIL.get());
-        }
-        if (workstation == WorkstationKind.TOOLMAKERS_BENCH) {
-            return new ItemStack(ModItems.TOOLMAKERS_BENCH.get());
-        }
-        if (workstation == WorkstationKind.LEATHER_STATION) {
-            return new ItemStack(ModItems.LEATHER_STATION.get());
-        }
-        return new ItemStack(ModItems.TOOL_FORGE.get());
-    }
-
-    private static ItemStack stationFor(HeatingSource source) {
-        return source == HeatingSource.CAMPFIRE ? new ItemStack(Items.CAMPFIRE) : new ItemStack(ModItems.HEATING_FORGE.get());
     }
 
     private static ItemStack patternInput(int count) {

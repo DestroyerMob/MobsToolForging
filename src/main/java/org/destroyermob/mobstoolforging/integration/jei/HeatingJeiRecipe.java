@@ -9,7 +9,6 @@ import org.destroyermob.mobstoolforging.world.HeatingSource;
 public record HeatingJeiRecipe(
         ResourceLocation id,
         HeatingSource source,
-        ItemStack station,
         List<ItemStack> inputs,
         ItemStack output,
         int ticks,

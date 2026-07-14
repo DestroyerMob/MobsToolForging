@@ -5,7 +5,6 @@ import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
-import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,12 +12,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class HeatingCategory implements IRecipeCategory<HeatingJeiRecipe> {
-    private static final int WIDTH = 150;
+    private static final int WIDTH = 126;
     private static final int HEIGHT = 52;
     private final IDrawable icon;
+    private final IDrawable arrow;
 
     public HeatingCategory(IGuiHelper guiHelper) {
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.heatingForgeIcon());
+        this.arrow = guiHelper.getRecipeArrow();
     }
 
     @Override
@@ -53,22 +54,18 @@ public class HeatingCategory implements IRecipeCategory<HeatingJeiRecipe> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, HeatingJeiRecipe recipe, IFocusGroup focuses) {
-        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 2, 22), "workstation")
-                .setStandardSlotBackground()
-                .addItemStack(recipe.station());
-        JeiRecipeVisuals.role(builder.addInputSlot(40, 22), "workpiece")
+        JeiRecipeVisuals.role(builder.addInputSlot(4, 22), "workpiece")
                 .setStandardSlotBackground()
                 .addItemStacks(recipe.inputs());
-        JeiRecipeVisuals.role(builder.addOutputSlot(122, 22), "result")
+        JeiRecipeVisuals.role(builder.addOutputSlot(98, 22), "result")
                 .setOutputSlotBackground()
                 .addItemStack(recipe.output());
     }
 
     @Override
     public void draw(HeatingJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        JeiRecipeVisuals.drawPlus(guiGraphics, 27, 27);
-        JeiRecipeVisuals.drawClock(guiGraphics, 64, 3, recipe.ticks());
-        JeiRecipeVisuals.drawArrow(guiGraphics, 92, 26);
-        JeiRecipeVisuals.drawTargetHeat(guiGraphics, 59, 40, recipe.targetTemperature());
+        JeiRecipeVisuals.drawClock(guiGraphics, 32, 3, recipe.ticks());
+        arrow.draw(guiGraphics, 68, 22);
+        JeiRecipeVisuals.drawTargetHeat(guiGraphics, 31, 40, recipe.targetTemperature());
     }
 }

@@ -82,6 +82,8 @@ public final class MobsToolForgingEveryCompat {
                             CompatWorkstationRegistry.Kind.PATTERN_RACK,
                             new BlockItem(block, properties)))
                     .addTag(BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK)
+                    .addTag(ModTags.Blocks.PATTERN_RACKS, Registries.BLOCK)
+                    .addTag(ModTags.Items.PATTERN_RACKS, Registries.ITEM)
                     .addTag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST, Registries.BLOCK)
                     .setTabKey(ModCreativeTabs.MOBS_TOOL_FORGING.getKey())
                     .copyParentDrop()
@@ -99,6 +101,8 @@ public final class MobsToolForgingEveryCompat {
                             CompatWorkstationRegistry.Kind.TOOLMAKERS_BENCH,
                             new BlockItem(block, properties)))
                     .addTag(BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK)
+                    .addTag(ModTags.Blocks.TOOLMAKERS_BENCHES, Registries.BLOCK)
+                    .addTag(ModTags.Items.TOOLMAKERS_BENCHES, Registries.ITEM)
                     .addTag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST, Registries.BLOCK)
                     .setTabKey(ModCreativeTabs.MOBS_TOOL_FORGING.getKey())
                     .copyParentDrop()
@@ -119,6 +123,8 @@ public final class MobsToolForgingEveryCompat {
                             CompatWorkstationRegistry.Kind.SAWMILL,
                             new LapidaryTableBlockItem(block, properties)))
                     .addTag(BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK)
+                    .addTag(ModTags.Blocks.SAWMILLS, Registries.BLOCK)
+                    .addTag(ModTags.Items.SAWMILLS, Registries.ITEM)
                     .addTag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST, Registries.BLOCK)
                     .setTabKey(ModCreativeTabs.MOBS_TOOL_FORGING.getKey())
                     .copyParentDrop()
@@ -139,6 +145,8 @@ public final class MobsToolForgingEveryCompat {
                             CompatWorkstationRegistry.Kind.LEATHER_STATION,
                             new LeatherStationBlockItem(block, properties)))
                     .addTag(BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK)
+                    .addTag(ModTags.Blocks.LEATHER_STATIONS, Registries.BLOCK)
+                    .addTag(ModTags.Items.LEATHER_STATIONS, Registries.ITEM)
                     .addTag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST, Registries.BLOCK)
                     .setTabKey(ModCreativeTabs.MOBS_TOOL_FORGING.getKey())
                     .copyParentDrop()
@@ -157,6 +165,8 @@ public final class MobsToolForgingEveryCompat {
                             CompatWorkstationRegistry.Kind.DRYING_RACK,
                             new BlockItem(block, properties)))
                     .addTag(BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK)
+                    .addTag(ModTags.Blocks.DRYING_RACKS, Registries.BLOCK)
+                    .addTag(ModTags.Items.DRYING_RACKS, Registries.ITEM)
                     .addTag(ModTags.Blocks.CARRY_ON_BLOCK_BLACKLIST, Registries.BLOCK)
                     .setTabKey(ModCreativeTabs.MOBS_TOOL_FORGING.getKey())
                     .copyParentDrop()

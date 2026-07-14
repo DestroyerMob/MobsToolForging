@@ -13,12 +13,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class LapidaryCoatingCategory implements IRecipeCategory<LapidaryCoatingJeiRecipe> {
-    private static final int WIDTH = 148;
+    private static final int WIDTH = 132;
     private static final int HEIGHT = 58;
     private final IDrawable icon;
+    private final IDrawable arrow;
 
     public LapidaryCoatingCategory(IGuiHelper guiHelper) {
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.lapidaryTableIcon());
+        this.arrow = guiHelper.getRecipeArrow();
     }
 
     @Override
@@ -53,31 +55,25 @@ public class LapidaryCoatingCategory implements IRecipeCategory<LapidaryCoatingJ
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, LapidaryCoatingJeiRecipe recipe, IFocusGroup focuses) {
-        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 2, 21), "workstation")
-                .setStandardSlotBackground()
-                .addItemStack(recipe.station());
-        JeiRecipeVisuals.role(builder.addInputSlot(28, 12), "base_part")
+        JeiRecipeVisuals.role(builder.addInputSlot(8, 12), "base_part")
                 .setStandardSlotBackground()
                 .addItemStacks(recipe.baseParts());
-        JeiRecipeVisuals.role(builder.addInputSlot(52, 12), "coating")
+        JeiRecipeVisuals.role(builder.addInputSlot(32, 12), "coating")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.coatingMaterial());
         if (!recipe.abrasive().isEmpty()) {
-            JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 52, 36), "abrasive")
+            JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 32, 36), "abrasive")
                     .setStandardSlotBackground()
                     .addItemStack(recipe.abrasive());
         }
-        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 76, 36), "tool")
-                .setStandardSlotBackground()
-                .addItemStack(recipe.workTool());
-        JeiRecipeVisuals.role(builder.addOutputSlot(118, 21), "result")
+        JeiRecipeVisuals.role(builder.addOutputSlot(102, 21), "result")
                 .setOutputSlotBackground()
                 .addItemStacks(recipe.outputs());
     }
 
     @Override
     public void draw(LapidaryCoatingJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        JeiRecipeVisuals.drawArrow(guiGraphics, 96, 25);
-        JeiRecipeVisuals.drawHitCount(guiGraphics, 96, 43, recipe.requiredHits());
+        arrow.draw(guiGraphics, 72, 21);
+        JeiRecipeVisuals.drawHitCount(guiGraphics, 72, 43, recipe.requiredHits());
     }
 }

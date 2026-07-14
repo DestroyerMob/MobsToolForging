@@ -16,9 +16,11 @@ public class ForgeShapingCategory implements IRecipeCategory<ForgeShapingJeiReci
     private static final int WIDTH = 148;
     private static final int HEIGHT = 58;
     private final IDrawable icon;
+    private final IDrawable arrow;
 
     public ForgeShapingCategory(IGuiHelper guiHelper) {
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.smithingAnvilIcon());
+        this.arrow = guiHelper.getRecipeArrow();
     }
 
     @Override
@@ -53,26 +55,23 @@ public class ForgeShapingCategory implements IRecipeCategory<ForgeShapingJeiReci
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, ForgeShapingJeiRecipe recipe, IFocusGroup focuses) {
-        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 2, 21), "workstation")
-                .setStandardSlotBackground()
-                .addItemStacks(recipe.stations());
-        JeiRecipeVisuals.role(builder.addInputSlot(28, 12), "pattern")
+        JeiRecipeVisuals.role(builder.addInputSlot(14, 12), "pattern")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.pattern());
-        JeiRecipeVisuals.role(builder.addInputSlot(52, 12), "material")
+        JeiRecipeVisuals.role(builder.addInputSlot(38, 12), "material")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.material());
         if (!recipe.target().isEmpty()) {
-            JeiRecipeVisuals.role(builder.addInputSlot(28, 36), "workpiece")
+            JeiRecipeVisuals.role(builder.addInputSlot(14, 36), "workpiece")
                     .setStandardSlotBackground()
                     .addItemStack(recipe.target());
         }
         if (!recipe.catalyst().isEmpty()) {
-            JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 52, 36), "abrasive")
+            JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 38, 36), "abrasive")
                     .setStandardSlotBackground()
                     .addItemStack(recipe.catalyst());
         }
-        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 76, 36), "tool")
+        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 62, 36), "tool")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.hammer());
         JeiRecipeVisuals.role(builder.addOutputSlot(118, 21), "result")
@@ -82,7 +81,7 @@ public class ForgeShapingCategory implements IRecipeCategory<ForgeShapingJeiReci
 
     @Override
     public void draw(ForgeShapingJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        JeiRecipeVisuals.drawArrow(guiGraphics, 96, 25);
-        JeiRecipeVisuals.drawHitCount(guiGraphics, 96, 43, recipe.requiredHits());
+        arrow.draw(guiGraphics, 88, 21);
+        JeiRecipeVisuals.drawHitCount(guiGraphics, 91, 43, recipe.requiredHits());
     }
 }

@@ -104,6 +104,7 @@ repositories {
 dependencies {
     annotationProcessor "net.fabricmc:sponge-mixin:0.15.2+mixin.0.8.7"
     compileOnly 'mezz.jei:jei-1.21.1-neoforge:19.27.0.340'
+    compileOnly 'maven.modrinth:emi:1.1.24+1.21.1+neoforge'
     compileOnly 'maven.modrinth:jade:15.10.5+neoforge'
     compileOnly 'curse.maven:apotheosis-313970:8182695'
     compileOnly 'curse.maven:selene-499980:8343403'

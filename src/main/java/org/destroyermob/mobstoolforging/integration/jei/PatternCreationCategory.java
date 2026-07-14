@@ -5,7 +5,6 @@ import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
-import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
@@ -16,9 +15,11 @@ public class PatternCreationCategory implements IRecipeCategory<PatternCreationJ
     private static final int WIDTH = 100;
     private static final int HEIGHT = 42;
     private final IDrawable icon;
+    private final IDrawable arrow;
 
     public PatternCreationCategory(IGuiHelper guiHelper) {
         this.icon = guiHelper.createDrawableItemStack(MobsToolForgingJeiPlugin.patternCreationStationIcon());
+        this.arrow = guiHelper.getRecipeArrow();
     }
 
     @Override
@@ -53,10 +54,7 @@ public class PatternCreationCategory implements IRecipeCategory<PatternCreationJ
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, PatternCreationJeiRecipe recipe, IFocusGroup focuses) {
-        JeiRecipeVisuals.role(builder.addSlot(RecipeIngredientRole.CATALYST, 2, 13), "workstation")
-                .setStandardSlotBackground()
-                .addItemStack(recipe.station());
-        JeiRecipeVisuals.role(builder.addInputSlot(28, 13), "pattern_material")
+        JeiRecipeVisuals.role(builder.addInputSlot(4, 13), "pattern_material")
                 .setStandardSlotBackground()
                 .addItemStack(recipe.paper());
         JeiRecipeVisuals.role(builder.addOutputSlot(74, 13), "result")
@@ -66,6 +64,6 @@ public class PatternCreationCategory implements IRecipeCategory<PatternCreationJ
 
     @Override
     public void draw(PatternCreationJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        JeiRecipeVisuals.drawArrow(guiGraphics, 52, 17);
+        arrow.draw(guiGraphics, 40, 13);
     }
 }
