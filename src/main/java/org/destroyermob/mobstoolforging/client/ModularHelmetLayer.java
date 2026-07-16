@@ -14,6 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.destroyermob.mobstoolforging.client.model.ArmorMaterialTextureManager;
 import org.destroyermob.mobstoolforging.client.model.ModularHelmetModel;
+import org.destroyermob.mobstoolforging.item.ModularArmorDyeing;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
@@ -39,7 +40,7 @@ public final class ModularHelmetLayer<T extends LivingEntity, M extends EntityMo
 
         poseStack.pushPose();
         humanoidModel.head.translateAndRotate(poseStack);
-        renderParts(poseStack, bufferSource, packedLight, construction);
+        renderParts(poseStack, bufferSource, packedLight, stack, construction);
         renderTrim(poseStack, bufferSource, packedLight, stack, construction);
         if (stack.hasFoil()) {
             renderGlint(poseStack, bufferSource, packedLight, construction);
@@ -47,9 +48,10 @@ public final class ModularHelmetLayer<T extends LivingEntity, M extends EntityMo
         poseStack.popPose();
     }
 
-    private void renderParts(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
+    private void renderParts(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ItemStack stack, ArmorConstructionData construction) {
         ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(construction.helmetChainmailMaterial(), ArmorPartData.HELMET_CHAINMAIL);
-        renderChainmail(poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture())), chainmail.color(), packedLight);
+        int chainmailColor = ModularArmorDyeing.color(stack, chainmail.color());
+        renderChainmail(poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture())), chainmailColor, packedLight);
         construction.helmetPlateMaterial().ifPresent(material -> {
             ArmorMaterialTextureManager.WornArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.HELMET_PLATE);
             VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(texture.texture()));

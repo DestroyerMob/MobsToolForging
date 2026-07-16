@@ -7,6 +7,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.recipe.ModularArmorDyeRecipe;
 import org.destroyermob.mobstoolforging.recipe.ModularToolRecipe;
 import org.destroyermob.mobstoolforging.recipe.ToolConversionRecipe;
 import org.destroyermob.mobstoolforging.world.ToolKind;
@@ -56,6 +57,11 @@ public final class ModRecipeSerializers {
             RECIPE_SERIALIZERS.register(
                     "crafting_special_tool_conversion",
                     () -> new SimpleCraftingRecipeSerializer<>(ToolConversionRecipe::new)
+            );
+    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<ModularArmorDyeRecipe>> MODULAR_ARMOR_DYE =
+            RECIPE_SERIALIZERS.register(
+                    "crafting_special_modular_armor_dye",
+                    () -> new SimpleCraftingRecipeSerializer<>(ModularArmorDyeRecipe::new)
             );
     private ModRecipeSerializers() {
     }

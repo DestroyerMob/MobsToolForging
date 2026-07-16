@@ -1,5 +1,6 @@
 package org.destroyermob.mobstoolforging.gametest;
 
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -10,6 +11,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.item.crafting.SmithingTrimRecipe;
@@ -18,6 +22,8 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.item.ModularArmorDyeing;
+import org.destroyermob.mobstoolforging.recipe.ModularArmorDyeRecipe;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
@@ -129,6 +135,27 @@ public final class StationWorkGameTests {
         helper.assertFalse(repaired.isEmpty(), "Leather armour repair produced no output");
         helper.assertTrue(repaired.getDamageValue() < damageBefore, "Leather armour repair did not restore durability");
         helper.assertTrue(repaired.get(ModDataComponents.ARMOR_CONSTRUCTION.get()) != null, "Leather armour repair lost construction data");
+        helper.succeed();
+    }
+
+    @GameTest(template = "station_work_completion", timeoutTicks = 20)
+    public static void modularLeatherArmorCanBeDyed(GameTestHelper helper) {
+        ItemStack leatherArmor = ModItems.MODULAR_CHESTPLATE.get().createBase(MaterialCatalog.LEATHER);
+        ArmorConstructionData construction = leatherArmor.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
+        ModularArmorDyeRecipe recipe = new ModularArmorDyeRecipe(CraftingBookCategory.MISC);
+        CraftingInput input = CraftingInput.of(2, 1, List.of(leatherArmor, new ItemStack(Items.RED_DYE)));
+
+        helper.assertTrue(recipe.matches(input, helper.getLevel()), "Modular leather armour did not accept a vanilla dye");
+        ItemStack dyedArmor = recipe.assemble(input, helper.getLevel().registryAccess());
+        DyedItemColor dyedColor = dyedArmor.get(DataComponents.DYED_COLOR);
+        helper.assertFalse(dyedArmor.isEmpty(), "Dyeing modular leather armour produced no output");
+        helper.assertTrue(dyedColor != null, "Dyeing modular leather armour did not set its dyed-color component");
+        helper.assertTrue(ModularArmorDyeing.dyedColor(dyedArmor).isPresent(), "The modular armour renderer cannot resolve the dyed color");
+        helper.assertTrue(construction != null && construction.equals(dyedArmor.get(ModDataComponents.ARMOR_CONSTRUCTION.get())), "Dyeing lost modular armour construction data");
+
+        ItemStack metalArmor = ModItems.MODULAR_CHESTPLATE.get().createBase(MaterialCatalog.IRON);
+        CraftingInput metalInput = CraftingInput.of(2, 1, List.of(metalArmor, new ItemStack(Items.RED_DYE)));
+        helper.assertFalse(recipe.matches(metalInput, helper.getLevel()), "Modular metal armour incorrectly accepted dye");
         helper.succeed();
     }
 

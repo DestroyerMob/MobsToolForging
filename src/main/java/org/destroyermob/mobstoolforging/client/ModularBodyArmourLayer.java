@@ -15,6 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.destroyermob.mobstoolforging.client.model.ArmorMaterialTextureManager;
 import org.destroyermob.mobstoolforging.client.model.ModularBodyArmourModel;
+import org.destroyermob.mobstoolforging.item.ModularArmorDyeing;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
@@ -38,7 +39,7 @@ public final class ModularBodyArmourLayer<T extends LivingEntity, M extends Enti
             return;
         }
 
-        renderChainmailLayer(poseStack, bufferSource, packedLight, construction, humanoidModel);
+        renderChainmailLayer(poseStack, bufferSource, packedLight, stack, construction, humanoidModel);
         renderLayer(poseStack, bufferSource, packedLight, humanoidModel, construction);
         renderTrim(poseStack, bufferSource, packedLight, stack, humanoidModel, construction);
         if (stack.hasFoil()) {
@@ -48,10 +49,10 @@ public final class ModularBodyArmourLayer<T extends LivingEntity, M extends Enti
         }
     }
 
-    private void renderChainmailLayer(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction, HumanoidModel<?> humanoidModel) {
+    private void renderChainmailLayer(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, ItemStack stack, ArmorConstructionData construction, HumanoidModel<?> humanoidModel) {
         ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(construction.chestplateChainmailMaterial(), ArmorPartData.CHESTPLATE_CHAINMAIL);
         VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture()));
-        renderChainmailLayer(poseStack, consumer, chainmail.color(), packedLight, humanoidModel);
+        renderChainmailLayer(poseStack, consumer, ModularArmorDyeing.color(stack, chainmail.color()), packedLight, humanoidModel);
     }
 
     private void renderChainmailLayer(PoseStack poseStack, VertexConsumer consumer, int color, int packedLight, HumanoidModel<?> humanoidModel) {

@@ -15,6 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.destroyermob.mobstoolforging.client.model.ArmorMaterialTextureManager;
 import org.destroyermob.mobstoolforging.client.model.ModularLowerArmourModel;
+import org.destroyermob.mobstoolforging.item.ModularArmorDyeing;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
@@ -42,7 +43,7 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
         if (construction == null || !ArmorConstructionData.LEGGINGS_TYPE.equals(construction.armorType())) {
             return;
         }
-        renderLeggingsParts(poseStack, humanoidModel, bufferSource, packedLight, construction);
+        renderLeggingsParts(poseStack, humanoidModel, bufferSource, packedLight, stack, construction);
         renderLeggingsTrim(poseStack, humanoidModel, bufferSource, packedLight, stack, construction);
         if (stack.hasFoil()) {
             renderLeggingsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), 0xFFFFFFFF, packedLight, construction);
@@ -55,18 +56,19 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
         if (construction == null || !ArmorConstructionData.BOOTS_TYPE.equals(construction.armorType())) {
             return;
         }
-        renderBootsParts(poseStack, humanoidModel, bufferSource, packedLight, construction);
+        renderBootsParts(poseStack, humanoidModel, bufferSource, packedLight, stack, construction);
         renderBootsTrim(poseStack, humanoidModel, bufferSource, packedLight, stack, construction);
         if (stack.hasFoil()) {
             renderBootsParts(poseStack, humanoidModel, bufferSource.getBuffer(RenderType.armorEntityGlint()), 0xFFFFFFFF, packedLight, construction);
         }
     }
 
-    private void renderLeggingsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
+    private void renderLeggingsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, MultiBufferSource bufferSource, int packedLight, ItemStack stack, ArmorConstructionData construction) {
         ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(construction.leggingsChainmailMaterial(), ArmorPartData.LEGGINGS_CHAINMAIL);
         VertexConsumer chainmailConsumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture()));
-        renderChainmailRightLeggings(poseStack, humanoidModel.rightLeg, chainmailConsumer, chainmail.color(), packedLight);
-        renderChainmailLeftLeggings(poseStack, humanoidModel.leftLeg, chainmailConsumer, chainmail.color(), packedLight);
+        int chainmailColor = ModularArmorDyeing.color(stack, chainmail.color());
+        renderChainmailRightLeggings(poseStack, humanoidModel.rightLeg, chainmailConsumer, chainmailColor, packedLight);
+        renderChainmailLeftLeggings(poseStack, humanoidModel.leftLeg, chainmailConsumer, chainmailColor, packedLight);
         construction.leggingsPlateMaterial().ifPresent(material -> {
             ArmorMaterialTextureManager.WornArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.LEGGINGS_PLATE);
             VertexConsumer materialConsumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(texture.texture()));
@@ -94,11 +96,12 @@ public final class ModularLowerArmourLayer<T extends LivingEntity, M extends Ent
         }
     }
 
-    private void renderBootsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, MultiBufferSource bufferSource, int packedLight, ArmorConstructionData construction) {
+    private void renderBootsParts(PoseStack poseStack, HumanoidModel<?> humanoidModel, MultiBufferSource bufferSource, int packedLight, ItemStack stack, ArmorConstructionData construction) {
         ArmorMaterialTextureManager.WornArmorTexture chainmail = ArmorMaterialTextureManager.INSTANCE.wornChainmailTexture(construction.bootsChainmailMaterial(), ArmorPartData.BOOTS_CHAINMAIL);
         VertexConsumer chainmailConsumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(chainmail.texture()));
-        renderChainmailRightBoot(poseStack, humanoidModel.rightLeg, chainmailConsumer, chainmail.color(), packedLight);
-        renderChainmailLeftBoot(poseStack, humanoidModel.leftLeg, chainmailConsumer, chainmail.color(), packedLight);
+        int chainmailColor = ModularArmorDyeing.color(stack, chainmail.color());
+        renderChainmailRightBoot(poseStack, humanoidModel.rightLeg, chainmailConsumer, chainmailColor, packedLight);
+        renderChainmailLeftBoot(poseStack, humanoidModel.leftLeg, chainmailConsumer, chainmailColor, packedLight);
         construction.bootsPlateMaterial().ifPresent(material -> {
             ArmorMaterialTextureManager.WornArmorTexture texture = ArmorMaterialTextureManager.INSTANCE.wornMaterialTexture(material, ArmorPartData.BOOTS_PLATE);
             VertexConsumer materialConsumer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(texture.texture()));

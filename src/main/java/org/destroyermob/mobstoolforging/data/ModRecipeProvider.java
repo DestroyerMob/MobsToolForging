@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.recipe.ModularArmorDyeRecipe;
 import org.destroyermob.mobstoolforging.recipe.ToolConversionRecipe;
 import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModItems;
@@ -27,6 +28,8 @@ public class ModRecipeProvider extends RecipeProvider {
     protected void buildRecipes(RecipeOutput output) {
         SpecialRecipeBuilder.special(ToolConversionRecipe::new)
                 .save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "tool_conversion").toString());
+        SpecialRecipeBuilder.special(ModularArmorDyeRecipe::new)
+                .save(output, ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "modular_armor_dye").toString());
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.CRUDE_ANVIL)
                 .define('S', Items.COBBLESTONE)
                 .pattern("SSS")

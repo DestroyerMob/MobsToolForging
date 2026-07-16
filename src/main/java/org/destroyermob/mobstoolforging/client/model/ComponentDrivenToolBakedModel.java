@@ -29,6 +29,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.level.block.state.BlockState;
 import org.destroyermob.mobstoolforging.MobsToolForging;
+import org.destroyermob.mobstoolforging.item.ModularArmorDyeing;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
@@ -283,27 +284,30 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
     private BakedModel composeArmor(ArmorModelKey modelKey) {
         ArmorVisualKey key = modelKey.armor();
         if (ArmorConstructionData.HELMET_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.helmetChainmailMaterial(), key.helmetPlateMaterial(), ArmorPartData.HELMET_PLATE, ArmorPartData.HELMET_CHAINMAIL, "helmet", modelKey.trimMaterial());
+            return composeArmorItem(key.helmetChainmailMaterial(), key.helmetPlateMaterial(), ArmorPartData.HELMET_PLATE, ArmorPartData.HELMET_CHAINMAIL, "helmet", modelKey.trimMaterial(), modelKey.dyedColor());
         }
         if (ArmorConstructionData.CHESTPLATE_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.chestplateChainmailMaterial(), key.chestplatePlateMaterial(), ArmorPartData.CHESTPLATE_BODY, ArmorPartData.CHESTPLATE_CHAINMAIL, "chestplate", modelKey.trimMaterial());
+            return composeArmorItem(key.chestplateChainmailMaterial(), key.chestplatePlateMaterial(), ArmorPartData.CHESTPLATE_BODY, ArmorPartData.CHESTPLATE_CHAINMAIL, "chestplate", modelKey.trimMaterial(), modelKey.dyedColor());
         }
         if (ArmorConstructionData.LEGGINGS_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.leggingsChainmailMaterial(), key.leggingsPlateMaterial(), ArmorPartData.LEGGINGS_PLATE, ArmorPartData.LEGGINGS_CHAINMAIL, "leggings", modelKey.trimMaterial());
+            return composeArmorItem(key.leggingsChainmailMaterial(), key.leggingsPlateMaterial(), ArmorPartData.LEGGINGS_PLATE, ArmorPartData.LEGGINGS_CHAINMAIL, "leggings", modelKey.trimMaterial(), modelKey.dyedColor());
         }
         if (ArmorConstructionData.BOOTS_TYPE.equals(key.armorType())) {
-            return composeArmorItem(key.bootsChainmailMaterial(), key.bootsPlateMaterial(), ArmorPartData.BOOTS_PLATE, ArmorPartData.BOOTS_CHAINMAIL, "boots", modelKey.trimMaterial());
+            return composeArmorItem(key.bootsChainmailMaterial(), key.bootsPlateMaterial(), ArmorPartData.BOOTS_PLATE, ArmorPartData.BOOTS_CHAINMAIL, "boots", modelKey.trimMaterial(), modelKey.dyedColor());
         }
         warnOnce("missing_armor_type|" + key.armorType(), "Cannot render MTF armor stack because armor type {} is not loaded on the client.", key.armorType());
         return fallback;
     }
 
-    private BakedModel composeArmorItem(ResourceLocation baseMaterial, Optional<ResourceLocation> plateMaterial, String platePartType, String chainmailPartType, String armorSlot, Optional<String> trimMaterial) {
+    private BakedModel composeArmorItem(ResourceLocation baseMaterial, Optional<ResourceLocation> plateMaterial, String platePartType, String chainmailPartType, String armorSlot, Optional<String> trimMaterial, Optional<Integer> dyedColor) {
         ArmorMaterialTextureManager.ResolvedArmorTexture texture = plateMaterial
                 .map(material -> ArmorMaterialTextureManager.INSTANCE.itemTexture(material, platePartType))
                 .orElseGet(() -> ArmorMaterialTextureManager.INSTANCE.itemTexture(baseMaterial, chainmailPartType));
+        int color = MaterialCatalog.LEATHER.equals(baseMaterial) && plateMaterial.isEmpty()
+                ? dyedColor.orElse(texture.color())
+                : texture.color();
         Map<Integer, List<BakedQuad>> layers = new LinkedHashMap<>();
-        addLayer(layers, 0, quadFactory.bakeLayer(0, texture.sprite(), texture.color()));
+        addLayer(layers, 0, quadFactory.bakeLayer(0, texture.sprite(), color));
         trimMaterial.ifPresent(material -> {
             ResourceLocation trimTexture = ResourceLocation.withDefaultNamespace("trims/items/" + armorSlot + "_trim_" + material);
             TextureAtlasSprite trimSprite = sprite(trimTexture);
@@ -651,12 +655,13 @@ public final class ComponentDrivenToolBakedModel implements BakedModel {
     private record ArmorPartKey(String partType, ResourceLocation material) {
     }
 
-    private record ArmorModelKey(ArmorVisualKey armor, Optional<String> trimMaterial) {
+    private record ArmorModelKey(ArmorVisualKey armor, Optional<String> trimMaterial, Optional<Integer> dyedColor) {
         private static ArmorModelKey from(ArmorVisualKey armor, ItemStack stack) {
             ArmorTrim trim = stack.get(DataComponents.TRIM);
             return new ArmorModelKey(
                     armor,
-                    trim == null ? Optional.empty() : Optional.of(trim.material().value().assetName())
+                    trim == null ? Optional.empty() : Optional.of(trim.material().value().assetName()),
+                    ModularArmorDyeing.dyedColor(stack)
             );
         }
     }
