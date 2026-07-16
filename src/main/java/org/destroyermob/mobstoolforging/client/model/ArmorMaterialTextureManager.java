@@ -71,7 +71,7 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
         if (wornTexture != null) {
             return new WornArmorTexture(wornTexture, 0xFFFFFFFF);
         }
-        ResourceLocation tintedTexture = ArmorPartData.LEGGINGS_PLATE.equals(partType)
+        ResourceLocation tintedTexture = isLeggingsPart(partType)
                 ? WORN_MATERIAL_LAYER_2_TEXTURE
                 : WORN_MATERIAL_LAYER_1_TEXTURE;
         return new WornArmorTexture(tintedTexture, ToolMaterialVisualManager.INSTANCE.tintColor(materialId));
@@ -179,6 +179,11 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
                 || ArmorPartData.BOOTS_CHAINMAIL.equals(partType);
     }
 
+    private static boolean isLeggingsPart(String partType) {
+        return ArmorPartData.LEGGINGS_CHAINMAIL.equals(partType)
+                || ArmorPartData.LEGGINGS_PLATE.equals(partType);
+    }
+
     private static ResourceLocation chainmailTexture(String partType) {
         return switch (roleForPart(partType)) {
             case HELMET_ROLE -> VANILLA_CHAINMAIL_HELMET_TEXTURE;
@@ -199,7 +204,7 @@ public final class ArmorMaterialTextureManager extends SimpleJsonResourceReloadL
         if (prefix == null) {
             return null;
         }
-        String layer = ArmorPartData.LEGGINGS_PLATE.equals(partType) ? "2" : "1";
+        String layer = isLeggingsPart(partType) ? "2" : "1";
         return ResourceLocation.withDefaultNamespace("textures/models/armor/" + prefix + "_layer_" + layer + ".png");
     }
 
