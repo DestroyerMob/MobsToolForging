@@ -14,6 +14,9 @@ public class ModLanguageProvider extends LanguageProvider {
     @Override
     protected void addTranslations() {
         add("itemGroup.mobstoolforging", "Mobs Tool Forging");
+        add("key.categories.mobstoolforging", "Mobs Tool Forging");
+        add("key.mobstoolforging.knapping_previous", "Previous Knapping Target");
+        add("key.mobstoolforging.knapping_next", "Next Knapping Target");
         addBlock(ModBlocks.CRUDE_ANVIL, "Crude Anvil");
         addBlock(ModBlocks.TOOL_FORGE, "Smithing Anvil");
         addBlock(ModBlocks.LAPIDARY_TABLE, "Lapidary Table");

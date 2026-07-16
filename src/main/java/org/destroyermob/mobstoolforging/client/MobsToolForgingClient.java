@@ -1,5 +1,7 @@
 package org.destroyermob.mobstoolforging.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -20,6 +22,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
@@ -46,6 +49,20 @@ import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
 
 public final class MobsToolForgingClient {
+    private static final String KEY_CATEGORY = "key.categories.mobstoolforging";
+    private static final KeyMapping PREVIOUS_KNAPPING_TARGET = new KeyMapping(
+            "key.mobstoolforging.knapping_previous",
+            InputConstants.Type.KEYSYM,
+            InputConstants.UNKNOWN.getValue(),
+            KEY_CATEGORY
+    );
+    private static final KeyMapping NEXT_KNAPPING_TARGET = new KeyMapping(
+            "key.mobstoolforging.knapping_next",
+            InputConstants.Type.KEYSYM,
+            InputConstants.UNKNOWN.getValue(),
+            KEY_CATEGORY
+    );
+
     private MobsToolForgingClient() {
     }
 
@@ -57,10 +74,12 @@ public final class MobsToolForgingClient {
         eventBus.addListener(MobsToolForgingClient::registerGeometryLoaders);
         eventBus.addListener(MobsToolForgingClient::wrapComponentDrivenItemModels);
         eventBus.addListener(MobsToolForgingClient::registerReloadListeners);
+        eventBus.addListener(MobsToolForgingClient::registerKeyMappings);
         eventBus.addListener(MobsToolForgingClient::registerMenuScreens);
         eventBus.addListener(MobsToolForgingClient::registerShaders);
         eventBus.addListener(MobsToolForgingClient::registerRenderBuffers);
         NeoForge.EVENT_BUS.addListener(MobsToolForgingClient::handleKnappingScroll);
+        NeoForge.EVENT_BUS.addListener(MobsToolForgingClient::handleKnappingKeys);
         NeoForge.EVENT_BUS.addListener(MobsToolForgingClient::showKnappingActionbar);
     }
 
@@ -162,6 +181,11 @@ public final class MobsToolForgingClient {
         event.register(ModMenuTypes.PATTERN_CREATION_STATION.get(), PatternCreationStationScreen::new);
     }
 
+    private static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+        event.register(PREVIOUS_KNAPPING_TARGET);
+        event.register(NEXT_KNAPPING_TARGET);
+    }
+
     private static void registerShaders(RegisterShadersEvent event) {
         HeatRenderTypes.registerShader(event);
     }
@@ -172,18 +196,33 @@ public final class MobsToolForgingClient {
     }
 
     private static void handleKnappingScroll(InputEvent.MouseScrollingEvent event) {
-        KnappingLookTarget target = knappingLookTarget(true);
-        if (target == null) {
-            return;
-        }
         double scrollDelta = event.getScrollDeltaY();
         if (scrollDelta == 0.0D) {
             return;
         }
         int delta = scrollDelta > 0.0D ? 1 : -1;
+        if (cycleKnappingTarget(delta)) {
+            event.setCanceled(true);
+        }
+    }
+
+    private static void handleKnappingKeys(ClientTickEvent.Post event) {
+        while (PREVIOUS_KNAPPING_TARGET.consumeClick()) {
+            cycleKnappingTarget(-1);
+        }
+        while (NEXT_KNAPPING_TARGET.consumeClick()) {
+            cycleKnappingTarget(1);
+        }
+    }
+
+    private static boolean cycleKnappingTarget(int delta) {
+        KnappingLookTarget target = knappingLookTarget(true);
+        if (target == null) {
+            return false;
+        }
         target.knapping().cycleTarget(delta);
         PacketDistributor.sendToServer(new CycleKnappingTargetPayload(target.pos(), delta));
-        event.setCanceled(true);
+        return true;
     }
 
     private static void showKnappingActionbar(ClientTickEvent.Post event) {
