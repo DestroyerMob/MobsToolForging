@@ -274,12 +274,14 @@ public final class ToolTooltipBuilder {
     }
 
     private static Component traitDescriptionLine(ToolStatProfile profile, ResourceLocation traitId) {
+        int level = traitLevel(profile, traitId);
         MutableComponent line = Component.empty()
                 .append(traitNameWithLevel(profile, traitId))
                 .append(Component.literal(" \u2014 ").withStyle(ChatFormatting.DARK_GRAY));
-        ToolTraitRegistry.definition(traitId)
-                .map(ToolTraitDefinition::description)
-                .ifPresentOrElse(line::append, () -> line.append(Component.literal(traitId.toString()).withStyle(ChatFormatting.GRAY)));
+        Component description = ToolTraitDescriptions.description(traitId, level);
+        line.append(description.getString().isBlank()
+                ? Component.literal(traitId.toString()).withStyle(ChatFormatting.GRAY)
+                : description);
         return line;
     }
 

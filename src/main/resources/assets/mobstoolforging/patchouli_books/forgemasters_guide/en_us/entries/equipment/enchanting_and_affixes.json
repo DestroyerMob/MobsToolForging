@@ -7,7 +7,7 @@
     {
       "type": "patchouli:text",
       "title": "Traits and Enchantments",
-      "text": "Material traits are inherent construction effects and do not consume enchantment capacity.$(p)Static trait bonuses modify the tool's physical base stats first; enchantments then evaluate that completed base. Conditional traits such as Work-Hardened remain separate output multipliers.$(p)Enchantments remain flexible, while a material trait is fixed until disassembly."
+      "text": "Material traits are inherent construction effects and do not consume enchantment capacity.$(p)Static trait bonuses modify the tool's physical base stats first; enchantments then evaluate that completed base. Conditional traits such as Work-Hardened remain separate output multipliers.$(p)Hold Shift over a finished tool for level-aware trait descriptions calculated from its complete construction. JEI and EMI show the Level-I effect supplied by each material."
     },
     {
       "type": "patchouli:text",

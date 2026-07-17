@@ -6,7 +6,7 @@ Use this as the visible manual matrix for modular tooltip and layer checks.
 | --- | --- | --- |
 | Gold pickaxe head with diamond coating + blaze handle | Normal tooltip includes `Quality: ...` and all three traits: `Adamant`, `Gilded`, and `Kindled`; Shift tooltip identifies Diamond as the head, Gold as the core, and Blaze as the handle; advanced tooltip shows the expected trait IDs and stat profile | `blaze` pickaxe handle and `diamond` pickaxe head |
 | Crafted iron pickaxe + oak handle | Normal tooltip includes both `Reinforced` and `Steady`; Shift tooltip describes 75% wear prevention, stronger repair, faster mining, and stronger repair from the handle | `oak` pickaxe handle and `iron` pickaxe head |
-| Crafted diamond sword + breeze handle + diamond guard | Normal tooltip includes `Adamant II` and `Swift`; Shift tooltip shows both diamond components and the breeze handle; advanced tooltip reports the diminished level-II Adamant potency | `breeze` sword handle, `diamond` sword blade, and `diamond` sword guard |
+| Crafted diamond sword + breeze handle + diamond guard | Normal tooltip includes `Adamant II` and `Swift`; Shift tooltip calculates Adamant II as mining ×2.13 and 45% armour-mitigation bypass, and Swift I as mining ×1.60, attack speed +0.75, and wear ×2; advanced tooltip reports the same stored multipliers | `breeze` sword handle, `diamond` sword blade, and `diamond` sword guard |
 | Netherite-dipped iron pickaxe head + oak handle | Normal tooltip includes `Nether-Forged` and `Steady`; the item is fireproof, has doubled base durability, and retains the netherite treatment through assembly/disassembly | `oak` pickaxe handle, `iron` pickaxe head, and `netherite` treatment overlay |
 | Forged iron sword guard item by itself | Item name: Iron Sword Guard; tooltip includes quality; stack part data: `part_type=sword_guard`, `material_id=mobstoolforging:iron`; no finished-tool effect tooltip | Standalone `iron` sword guard part sprite only |
 
@@ -17,9 +17,10 @@ Unknown tagged rod handles should craft as handles but resolve to a known visual
 | Test | Expected Result |
 | --- | --- |
 | Component identity | A material grants the same primary trait as a head, coated core, guard, legacy binding/wrap/focus, or handle whenever that material is valid in the slot. Support slots do not add unrelated secondary traits. |
-| Repeated materials | Trait potency is 100% at level I, 150% at level II, and 175% at level III. Tooltip numerals match the number of contributing components. |
+| Repeated materials | Trait potency is 100% at level I, 150% at level II, and 175% at level III. Shift descriptions calculate the resulting multipliers, percentages, attack-speed bonuses, effective enchantment levels, wear, and capacity instead of repeating Level-I prose. |
 | Gold flexibility | Every gold component still adds one Better Enchanting capacity. Gilded grants no additional XP or raw stat bonus. |
-| Adamant | A level-I diamond component multiplies suitable-block mining speed by 1.35. Against an armored target, 30% of the armor reduction is ignored; unarmored targets receive no artificial damage bonus. |
+| Gem mining roles | Level-I mining multipliers are Adamant ×1.75, Focused ×1.15, Keen ×1.15, Forceful ×1.30, and Jagged ×1.20. A diamond-tier head therefore remains the unconditional general-mining benchmark; combat gems retain narrower utility. |
+| Adamant | A level-I diamond component multiplies suitable-block mining speed by 1.75. Against an armoured target, 30% of the armour reduction is bypassed; unarmoured targets receive no artificial damage bonus. |
 | Kindled | A blaze component makes the item fireproof, replaces smeltable block drops with their smelting output, and ignites a successfully damaged target for five seconds. |
 | Reinforced and repair | Over many durability actions, an iron component prevents approximately 75% of wear. One matching repair material restores 50%; adding Steady raises that to 75%. |
 | Work-Hardened | A copper component adds no output above 75% condition, then adds 25%, 50%, and 100% mining and attack/projectile output below the three documented thresholds. The current multiplier is listed separately from physical base stats. |
@@ -28,6 +29,7 @@ Unknown tagged rod handles should craft as handles but resolve to a known visual
 | Tensioned | A spider-silk crossbow string supplies effective Quick Charge II and multiplies projectile damage by 1.30. It supplies no fictional harvest-tool bonuses. Leather does not appear as a tool-trait source. |
 | Removed treatments | Nether-Treated and Echoing do not appear in JEI's standard material trait list, generated examples, or normal construction. Netherite dipping remains Nether-Forged. |
 | Physical trait ordering | Keen, Forceful, Jagged, and Nether-Forged multiply the stored physical attack/tool stats before Sharpness or another unconditional damage enchantment is evaluated. |
+| Information surfaces | Shift tooltips show current combined trait values. JEI and JEMI material-trait recipes show the shared Level-I description. The Forgemaster's Guide lists the same Level-I values and explains repeated-level scaling. |
 | Effective stat tooltip | A modular tool visibly reports item-only attack damage, attack speed, suitable-block tool speed, and durability; Sharpness and Efficiency change the reported totals. Hold Shift to see the scope note. |
 | Crossbow effective stats | A modular crossbow visibly reports charge seconds/ticks, its combined physical/projectile trait multiplier, durability, and any current Work-Hardened output multiplier. |
 

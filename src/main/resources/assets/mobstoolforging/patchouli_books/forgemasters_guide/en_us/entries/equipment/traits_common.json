@@ -7,7 +7,7 @@
     {
       "type": "patchouli:text",
       "title": "How Trait Levels Work",
-      "text": "Every eligible component contributes its material's trait, regardless of whether it is a head, core, guard, binding, wrap, or handle.$(p)The first level supplies the complete identity. Repeated components add half as much each time:$(li)Level I: 100%$(li)Level II: 150%$(li)Level III: 175%$(p)Traits do not consume enchantment capacity."
+      "text": "Every eligible component contributes its material's trait, whether it is a head, coated core, guard, binding, wrap, string, or handle.$(p)The first level supplies the full effect. Repeated components add half of the remaining strength:$(li)Level I: 100%$(li)Level II: 150%$(li)Level III: 175%$(li)Level IV: 187.5%$(p)Hold Shift over a finished tool to see the exact combined values. Traits do not consume enchantment capacity."
     },
     {
       "type": "patchouli:text",

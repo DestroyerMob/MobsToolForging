@@ -37,14 +37,14 @@ public final class ToolTraitEffects {
         if (amount <= 0) {
             return amount;
         }
-        float wearMultiplier = 1.0F;
-        wearMultiplier += ToolStatBuilder.traitPotency(level(stack, ToolTrait.SWIFT));
-        wearMultiplier += ToolStatBuilder.traitPotency(level(stack, ToolTrait.JAGGED));
-        wearMultiplier += 0.50F * ToolStatBuilder.traitPotency(level(stack, ToolTrait.FORCEFUL));
+        float wearMultiplier = ToolTraitTuning.durabilityWearMultiplier(
+                level(stack, ToolTrait.SWIFT),
+                level(stack, ToolTrait.JAGGED),
+                level(stack, ToolTrait.FORCEFUL)
+        );
         int adjusted = Math.max(1, Math.round(amount * wearMultiplier));
 
-        float reinforcedPotency = ToolStatBuilder.traitPotency(level(stack, ToolTrait.REINFORCED));
-        float prevention = reinforcedPotency <= 0.0F ? 0.0F : 1.0F - 1.0F / (1.0F + 3.0F * reinforcedPotency);
+        float prevention = ToolTraitTuning.reinforcedWearPrevention(level(stack, ToolTrait.REINFORCED));
         if (prevention <= 0.0F) {
             return adjusted;
         }
@@ -58,9 +58,11 @@ public final class ToolTraitEffects {
     }
 
     public static float repairFraction(ItemStack stack) {
-        float fraction = level(stack, ToolTrait.REINFORCED) > 0 ? 0.50F : 0.25F;
+        float fraction = level(stack, ToolTrait.REINFORCED) > 0
+                ? ToolTraitTuning.REINFORCED_REPAIR_FRACTION
+                : ToolTraitTuning.NORMAL_REPAIR_FRACTION;
         if (level(stack, ToolTrait.STEADY) > 0) {
-            fraction *= 1.50F;
+            fraction *= ToolTraitTuning.STEADY_REPAIR_MULTIPLIER;
         }
         return Math.min(1.0F, fraction);
     }
@@ -90,8 +92,8 @@ public final class ToolTraitEffects {
 
     public static void modifyEnchantmentLevels(GetEnchantmentLevelEvent event) {
         ItemStack stack = event.getStack();
-        int quickChargeBonus = discreteBonus(level(stack, ToolTrait.TENSIONED))
-                + discreteBonus(level(stack, ToolTrait.FOCUSED));
+        int quickChargeBonus = ToolTraitTuning.discreteEnchantmentBonus(level(stack, ToolTrait.TENSIONED))
+                + ToolTraitTuning.discreteEnchantmentBonus(level(stack, ToolTrait.FOCUSED));
         if (quickChargeBonus > 0) {
             event.getHolder(Enchantments.QUICK_CHARGE).filter(event::isTargetting)
                     .ifPresent(enchantment -> event.getEnchantments().set(
@@ -102,7 +104,7 @@ public final class ToolTraitEffects {
 
         int fortunate = level(stack, ToolTrait.FORTUNATE);
         if (fortunate > 0) {
-            int bonus = discreteBonus(fortunate);
+            int bonus = ToolTraitTuning.discreteEnchantmentBonus(fortunate);
             event.getHolder(Enchantments.FORTUNE).filter(event::isTargetting)
                     .ifPresent(enchantment -> event.getEnchantments().set(enchantment, event.getEnchantments().getLevel(enchantment) + bonus));
             event.getHolder(Enchantments.LOOTING).filter(event::isTargetting)
@@ -116,7 +118,7 @@ public final class ToolTraitEffects {
         highestInstalledEnchantment(stack).filter(event::isTargetting).ifPresent(enchantment ->
                 event.getEnchantments().set(
                         enchantment,
-                        event.getEnchantments().getLevel(enchantment) + discreteBonus(resonant)
+                        event.getEnchantments().getLevel(enchantment) + ToolTraitTuning.discreteEnchantmentBonus(resonant)
                 )
         );
     }
@@ -132,14 +134,20 @@ public final class ToolTraitEffects {
             float physicalDamage = ToolStatBuilder.profile(tool)
                     .map(ToolStatProfile::physicalDamageMultiplier)
                     .orElse(1.0F);
-            float tensioned = 1.0F + 0.30F * ToolStatBuilder.traitPotency(level(tool, ToolTrait.TENSIONED));
+            float tensioned = ToolTraitTuning.scaledMultiplier(
+                    ToolTraitTuning.TENSIONED_PROJECTILE_DAMAGE_BONUS,
+                    level(tool, ToolTrait.TENSIONED)
+            );
             multiplier *= physicalDamage * tensioned;
         }
         if (multiplier != 1.0F) {
             event.setAmount(event.getAmount() * multiplier);
         }
 
-        float armorIgnored = Math.min(0.75F, 0.30F * ToolStatBuilder.traitPotency(level(tool, ToolTrait.ADAMANT)));
+        float armorIgnored = Math.min(
+                0.75F,
+                ToolTraitTuning.ADAMANT_ARMOR_BYPASS * ToolTraitTuning.potency(level(tool, ToolTrait.ADAMANT))
+        );
         if (armorIgnored > 0.0F) {
             event.addReductionModifier(DamageContainer.Reduction.ARMOR, (container, reduction) -> reduction * (1.0F - armorIgnored));
         }
@@ -149,7 +157,7 @@ public final class ToolTraitEffects {
         if (event.getNewDamage() <= 0.0F || level(attackingTool(event.getSource()), ToolTrait.KINDLED) <= 0) {
             return;
         }
-        event.getEntity().igniteForSeconds(5.0F);
+        event.getEntity().igniteForSeconds(ToolTraitTuning.KINDLED_BURN_SECONDS);
     }
 
     public static void smeltBlockDrops(BlockDropsEvent event) {
@@ -191,18 +199,13 @@ public final class ToolTraitEffects {
         return java.util.Optional.ofNullable(selected);
     }
 
-    private static int discreteBonus(int traitLevel) {
-        return traitLevel <= 0 ? 0 : Math.max(2, Math.round(2.0F * ToolStatBuilder.traitPotency(traitLevel)));
-    }
-
     private static float workHardenedBonus(ItemStack stack) {
         int traitLevel = level(stack, ToolTrait.WORK_HARDENED);
         if (traitLevel <= 0 || !stack.isDamageableItem() || stack.getMaxDamage() <= 0) {
             return 0.0F;
         }
         float condition = 1.0F - stack.getDamageValue() / (float) stack.getMaxDamage();
-        float baseBonus = condition < 0.25F ? 1.00F : condition < 0.50F ? 0.50F : condition < 0.75F ? 0.25F : 0.0F;
-        return baseBonus * ToolStatBuilder.traitPotency(traitLevel);
+        return ToolTraitTuning.workHardenedBonus(traitLevel, condition);
     }
 
     public static float currentOutputMultiplier(ItemStack stack) {

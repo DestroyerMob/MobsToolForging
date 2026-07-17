@@ -7,6 +7,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
@@ -35,8 +36,15 @@ import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipe;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
+import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolAssemblyParts;
+import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
+import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
+import org.destroyermob.mobstoolforging.world.ToolStatProfile;
+import org.destroyermob.mobstoolforging.world.ToolTrait;
+import org.destroyermob.mobstoolforging.world.ToolTraitDescriptions;
+import org.destroyermob.mobstoolforging.world.ToolTraitTuning;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.VanillaToolConverter;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
@@ -122,6 +130,40 @@ public final class StationWorkGameTests {
     }
 
     @GameTest(template = "station_work_completion", timeoutTicks = 20)
+    public static void traitBalanceAndDescriptionsUseSharedValues(GameTestHelper helper) {
+        ToolStatProfile diamond = ToolStatBuilder.build(
+                ToolKind.PICKAXE,
+                ToolConstructionData.basic(ToolKind.PICKAXE, MaterialCatalog.DIAMOND, MaterialCatalog.OAK)
+        );
+        ToolStatProfile ruby = ToolStatBuilder.build(
+                ToolKind.PICKAXE,
+                ToolConstructionData.basic(ToolKind.PICKAXE, MaterialCatalog.RUBY, MaterialCatalog.OAK)
+        );
+        ToolStatProfile topaz = ToolStatBuilder.build(
+                ToolKind.PICKAXE,
+                ToolConstructionData.basic(ToolKind.PICKAXE, MaterialCatalog.TOPAZ, MaterialCatalog.OAK)
+        );
+
+        assertClose(helper, diamond.miningSpeedMultiplier(), 1.75F * 1.25F, "Diamond and Steady did not apply the intended mining multipliers");
+        assertClose(helper, ruby.miningSpeedMultiplier(), 1.15F * 1.25F, "Ruby retained its old mining multiplier");
+        assertClose(helper, topaz.miningSpeedMultiplier(), 1.30F * 1.25F, "Topaz retained its old mining multiplier");
+        helper.assertTrue(diamond.miningSpeedMultiplier() > topaz.miningSpeedMultiplier(), "Diamond is not the general-mining benchmark");
+
+        Component adamantTwo = ToolTraitDescriptions.description(ToolTrait.ADAMANT.id(), 2);
+        helper.assertTrue(adamantTwo.getContents() instanceof TranslatableContents, "Adamant II did not produce a translatable dynamic description");
+        Object[] adamantArgs = ((TranslatableContents) adamantTwo.getContents()).getArgs();
+        helper.assertTrue(adamantArgs.length == 2, "Adamant II description has the wrong number of calculated values");
+        helper.assertTrue("2.13".equals(adamantArgs[0]), "Adamant II tooltip did not calculate mining ×2.13");
+        helper.assertTrue("45".equals(adamantArgs[1]), "Adamant II tooltip did not calculate 45% armour bypass");
+
+        Component reinforcedTwo = ToolTraitDescriptions.description(ToolTrait.REINFORCED.id(), 2);
+        Object[] reinforcedArgs = ((TranslatableContents) reinforcedTwo.getContents()).getArgs();
+        helper.assertTrue("81.82".equals(reinforcedArgs[0]), "Reinforced II tooltip drifted from its wear-prevention formula");
+        helper.assertTrue(ToolTraitTuning.discreteEnchantmentBonus(3) == 4, "Level-III enchantment traits no longer grant four effective levels");
+        helper.succeed();
+    }
+
+    @GameTest(template = "station_work_completion", timeoutTicks = 20)
     public static void leatherStationRepairsLeatherArmorWithLeather(GameTestHelper helper) {
         ItemStack armor = ModItems.MODULAR_CHESTPLATE.get().createBase(MaterialCatalog.LEATHER);
         armor.setDamageValue(Math.max(1, armor.getMaxDamage() / 2));
@@ -188,5 +230,9 @@ public final class StationWorkGameTests {
         helper.assertFalse(limbs.isEmpty(), "Converted crossbow has no limb part");
         helper.assertTrue(EnchantmentHelper.getEnchantmentsForCrafting(limbs).getLevel(quickCharge) == 2, "Quick Charge was not routed onto the crossbow limbs");
         helper.succeed();
+    }
+
+    private static void assertClose(GameTestHelper helper, float actual, float expected, String message) {
+        helper.assertTrue(Math.abs(actual - expected) < 0.0001F, message + ": expected " + expected + ", got " + actual);
     }
 }

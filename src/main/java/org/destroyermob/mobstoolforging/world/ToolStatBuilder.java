@@ -161,10 +161,7 @@ public final class ToolStatBuilder {
 
     /** Full strength at level I, then half as much from every repeated component. */
     public static float traitPotency(int level) {
-        if (level <= 0) {
-            return 0.0F;
-        }
-        return 2.0F - (float) Math.pow(0.5D, level - 1);
+        return ToolTraitTuning.potency(level);
     }
 
     public static ToolStatProfile profileForTooltip(ItemStack stack, ToolKind toolKind, ToolConstructionData construction) {
@@ -318,17 +315,17 @@ public final class ToolStatBuilder {
         applyTraitDebug(stats, ToolTrait.STEADY, "+handling, +repair");
         int steady = stats.traitLevel(ToolTrait.STEADY);
         if (steady > 0) {
-            float potency = traitPotency(steady);
-            stats.multiplyMiningSpeed(1.0F + 0.25F * potency);
-            stats.addAttackSpeed(0.35F * potency);
+            float potency = ToolTraitTuning.potency(steady);
+            stats.multiplyMiningSpeed(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.STEADY_MINING_BONUS, steady));
+            stats.addAttackSpeed(ToolTraitTuning.STEADY_ATTACK_SPEED_BONUS * potency);
         }
 
         applyTraitDebug(stats, ToolTrait.SWIFT, "+speed, -durability");
         int swift = stats.traitLevel(ToolTrait.SWIFT);
         if (swift > 0) {
-            float potency = traitPotency(swift);
-            stats.addAttackSpeed(0.75F * potency);
-            stats.multiplyMiningSpeed(1.0F + 0.60F * potency);
+            float potency = ToolTraitTuning.potency(swift);
+            stats.addAttackSpeed(ToolTraitTuning.SWIFT_ATTACK_SPEED_BONUS * potency);
+            stats.multiplyMiningSpeed(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.SWIFT_MINING_BONUS, swift));
         }
 
         applyTraitDebug(stats, ToolTrait.KINDLED, "+fireproof, +nether");
@@ -365,7 +362,7 @@ public final class ToolStatBuilder {
         applyTraitDebug(stats, ToolTrait.ADAMANT, "+mining, +armor penetration");
         int adamant = stats.traitLevel(ToolTrait.ADAMANT);
         if (adamant > 0) {
-            stats.multiplyMiningSpeed(1.0F + 0.35F * traitPotency(adamant));
+            stats.multiplyMiningSpeed(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.ADAMANT_MINING_BONUS, adamant));
         }
 
         applyTraitDebug(stats, ToolTrait.FORTUNATE, "+luck");
@@ -377,34 +374,31 @@ public final class ToolStatBuilder {
         applyTraitDebug(stats, ToolTrait.KEEN, "+damage");
         int keen = stats.traitLevel(ToolTrait.KEEN);
         if (keen > 0) {
-            float potency = traitPotency(keen);
-            stats.multiplyMiningSpeed(1.0F + 0.50F * potency);
-            stats.multiplyPhysicalDamage(1.0F + 0.35F * potency);
+            stats.multiplyMiningSpeed(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.KEEN_MINING_BONUS, keen));
+            stats.multiplyPhysicalDamage(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.KEEN_PHYSICAL_DAMAGE_BONUS, keen));
         }
 
         applyTraitDebug(stats, ToolTrait.FORCEFUL, "+output, +wear");
         int forceful = stats.traitLevel(ToolTrait.FORCEFUL);
         if (forceful > 0) {
-            float potency = traitPotency(forceful);
-            stats.multiplyMiningSpeed(1.0F + 0.60F * potency);
-            stats.multiplyPhysicalDamage(1.0F + 0.60F * potency);
+            stats.multiplyMiningSpeed(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.FORCEFUL_MINING_BONUS, forceful));
+            stats.multiplyPhysicalDamage(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.FORCEFUL_PHYSICAL_DAMAGE_BONUS, forceful));
         }
 
         applyTraitDebug(stats, ToolTrait.JAGGED, "+damage, -durability");
         int jagged = stats.traitLevel(ToolTrait.JAGGED);
         if (jagged > 0) {
-            float potency = traitPotency(jagged);
-            stats.multiplyMiningSpeed(1.0F + 0.35F * potency);
-            stats.multiplyPhysicalDamage(1.0F + 0.35F * potency);
+            stats.multiplyMiningSpeed(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.JAGGED_MINING_BONUS, jagged));
+            stats.multiplyPhysicalDamage(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.JAGGED_PHYSICAL_DAMAGE_BONUS, jagged));
         }
 
         applyTraitDebug(stats, ToolTrait.FOCUSED, "+control, +enchanting");
         int focused = stats.traitLevel(ToolTrait.FOCUSED);
         if (focused > 0) {
             stats.addAffinities(AFFINITY_ENCHANT_CONTROL, AFFINITY_ENCHANTING, AFFINITY_RESONANCE);
-            float potency = traitPotency(focused);
-            stats.addAttackSpeed(0.55F * potency);
-            stats.multiplyMiningSpeed(1.0F + 0.30F * potency);
+            float potency = ToolTraitTuning.potency(focused);
+            stats.addAttackSpeed(ToolTraitTuning.FOCUSED_ATTACK_SPEED_BONUS * potency);
+            stats.multiplyMiningSpeed(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.FOCUSED_MINING_BONUS, focused));
         }
 
         applyTraitDebug(stats, ToolTrait.NETHER_FORGED, "+durability, +damage, +fireproof");
@@ -412,9 +406,8 @@ public final class ToolStatBuilder {
         if (netherForged > 0) {
             stats.fireResistant = true;
             stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
-            float potency = traitPotency(netherForged);
-            stats.multiplyDurability(1.0F + potency);
-            stats.multiplyPhysicalDamage(1.0F + 0.30F * potency);
+            stats.multiplyDurability(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.NETHER_FORGED_DURABILITY_BONUS, netherForged));
+            stats.multiplyPhysicalDamage(ToolTraitTuning.scaledMultiplier(ToolTraitTuning.NETHER_FORGED_PHYSICAL_DAMAGE_BONUS, netherForged));
         }
     }
 
@@ -635,10 +628,6 @@ public final class ToolStatBuilder {
         if (level > 0) {
             stats.addDebug("Trait: " + ToolTrait.fallbackName(trait.id()) + " " + level + " (" + note + ")");
         }
-    }
-
-    private static float multiplier(float perLevel, int level) {
-        return (float) Math.pow(perLevel, level);
     }
 
     private static String line(String label, ResourceLocation material, String note) {

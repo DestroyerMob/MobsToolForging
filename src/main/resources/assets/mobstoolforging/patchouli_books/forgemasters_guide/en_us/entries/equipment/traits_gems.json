@@ -12,22 +12,22 @@
     {
       "type": "patchouli:text",
       "title": "Diamond and Emerald",
-      "text": "$(bold)Adamant — diamond$()$(li)×1.35 suitable-block mining speed$(li)Attacks ignore 30% of armour$(p)$(bold)Fortunate — emerald$()$(li)Fortune operates 2 effective levels higher$(li)Looting operates 2 effective levels higher$(li)May operate above the enchantment's normal maximum"
+      "text": "$(bold)Adamant — diamond$()$(li)×1.75 suitable-block mining speed$(li)Attacks bypass 30% of armour mitigation$(li)No condition or wear penalty$(p)$(bold)Fortunate — emerald$()$(li)Fortune and Looting gain 2 effective levels$(li)Works from level zero$(li)May exceed the enchantment's normal maximum$(p)Diamond owns general mining speed; emerald owns resource yield."
     },
     {
       "type": "patchouli:text",
       "title": "Amethyst and Sapphire",
-      "text": "$(bold)Resonant — amethyst$()$(li)The highest-level installed non-curse enchantment operates 2 effective levels higher$(p)$(bold)Focused — sapphire$()$(li)×1.30 mining speed$(li)+0.55 attack speed$(li)Ignores airborne and underwater mining penalties$(li)Crossbows gain effective Quick Charge II$(p)Repeated components use the normal diminishing trait scaling."
+      "text": "$(bold)Resonant — amethyst$()$(li)The strongest installed non-curse enchantment gains 2 effective levels$(p)$(bold)Focused — sapphire$()$(li)×1.15 mining speed$(li)+0.55 attack speed$(li)Ignores airborne and underwater mining penalties$(li)Crossbows gain effective Quick Charge II$(p)Repeated components use the normal diminishing trait scaling."
     },
     {
       "type": "patchouli:text",
       "title": "Ruby and Topaz",
-      "text": "$(bold)Keen — ruby$()$(li)×1.50 suitable-block mining speed$(li)×1.35 physical base damage$(p)$(bold)Forceful — topaz$()$(li)×1.60 suitable-block mining speed$(li)×1.60 physical base damage$(li)×1.50 durability wear"
+      "text": "$(bold)Keen — ruby$()$(li)×1.15 suitable-block mining speed$(li)×1.35 physical damage$(li)Reliable combat material$(p)$(bold)Forceful — topaz$()$(li)×1.30 suitable-block mining speed$(li)×1.60 physical damage$(li)×1.50 durability wear$(p)Ruby and topaz remain usable tool heads, but neither outruns diamond at general mining."
     },
     {
       "type": "patchouli:text",
       "title": "Flint",
-      "text": "$(bold)Jagged — flint$()$(li)×1.35 suitable-block mining speed$(li)×1.35 physical base damage$(li)×2 durability wear$(p)Jagged makes crude flint a real high-output early construction rather than simply a disposable prerequisite."
+      "text": "$(bold)Jagged — flint$()$(li)×1.20 suitable-block mining speed$(li)×1.35 physical damage$(li)×2 durability wear$(p)Jagged is an accessible early hybrid: useful output, deliberately poor longevity, and no claim on diamond's late-game mining role."
     }
   ]
 }

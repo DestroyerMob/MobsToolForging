@@ -12,7 +12,7 @@
     {
       "type": "patchouli:text",
       "title": "Nether-Forged",
-      "text": "$(li)Tool is fireproof$(li)×2 durability$(li)×1.30 physical base damage$(li)Eligible heads gain diamond harvest tier$(p)Nether-Treated and Echoing have been removed from the standard trait roster until a complete, visible treatment process exists for them."
+      "text": "$(bold)Level I$()$(li)Tool is fireproof$(li)×2 durability$(li)×1.30 physical damage$(li)Eligible heads gain diamond harvest tier$(p)Repeated Nether-Forged components use normal diminishing trait scaling; the finished-tool tooltip shows their exact values.$(p)Nether-Treated and Echoing remain outside the standard roster until they have complete visible treatment processes."
     }
   ]
 }

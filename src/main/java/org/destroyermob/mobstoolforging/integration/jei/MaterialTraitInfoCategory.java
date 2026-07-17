@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import org.destroyermob.mobstoolforging.world.ToolTrait;
+import org.destroyermob.mobstoolforging.world.ToolTraitDescriptions;
 import org.destroyermob.mobstoolforging.world.ToolTraitRegistry;
 
 public class MaterialTraitInfoCategory implements IRecipeCategory<MaterialTraitInfoRecipe> {
@@ -118,14 +119,7 @@ public class MaterialTraitInfoCategory implements IRecipeCategory<MaterialTraitI
     }
 
     private static Component traitEffect(ResourceLocation traitId) {
-        for (ToolTrait trait : ToolTrait.values()) {
-            if (trait.id().equals(traitId)) {
-                return Component.translatable("jei.mobstoolforging.material_traits.effect." + trait.id().getPath());
-            }
-        }
-        return ToolTraitRegistry.definition(traitId)
-                .map(definition -> (Component) definition.description())
-                .orElseGet(Component::empty);
+        return ToolTraitDescriptions.description(traitId, 1);
     }
 
     private static String trim(Font font, Component text, int width) {

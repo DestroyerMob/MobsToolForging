@@ -65,7 +65,7 @@ public record ToolEffectiveStats(
             chargeTicks = OptionalInt.of(crossbowChargeTicks(enchantments));
             int tensioned = ToolStatBuilder.traitLevel(stack, ToolTrait.TENSIONED);
             projectileDamageMultiplier = profile.physicalDamageMultiplier()
-                    * (1.0D + 0.30D * ToolStatBuilder.traitPotency(tensioned));
+                    * ToolTraitTuning.scaledMultiplier(ToolTraitTuning.TENSIONED_PROJECTILE_DAMAGE_BONUS, tensioned);
         }
 
         int maxDurability = stack.getMaxDamage();
