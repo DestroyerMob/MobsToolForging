@@ -93,6 +93,7 @@ public final class CrossbowAssembly {
         );
         ItemStack crossbow = new ItemStack(ModItems.CROSSBOW.get());
         crossbow.set(ModDataComponents.TOOL_CONSTRUCTION.get(), construction);
+        ToolTypeRegistry.toolType(TOOL_TYPE).ifPresent(definition -> ToolStatBuilder.applyPassiveProfile(crossbow, definition, construction));
         crossbow.set(ModDataComponents.TOOL_ASSEMBLY_PARTS.get(), ToolAssemblyParts.from(List.of(body, limbs, string)));
         CompositeAffixCompatibility.syncCompatibilityMirror(crossbow);
         return crossbow;

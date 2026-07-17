@@ -7,22 +7,27 @@
     {
       "type": "patchouli:text",
       "title": "Gem Coatings",
-      "text": "Gem traits come from $(bold)lapidary-coated parts$(), not from forging raw gems against a pattern.$(p)Ruby and sapphire accept the pack's common gem tags.$(p)This allows compatible gems from another mod to resolve to the correct MTF material identity."
+      "text": "A coated part retains both materials.$(p)The visible gem contributes its trait, and the metal core contributes its own trait. For example, a diamond coating over a gold core supplies both Adamant and Gilded.$(p)The same material always supplies the same trait in every eligible component slot."
     },
     {
       "type": "patchouli:text",
       "title": "Diamond and Emerald",
-      "text": "$(bold)Stabilized — diamond$()$(li)×1.08 durability$(li)×1.01 mining speed$(p)$(bold)Fortunate — emerald$()$(li)Luck affinity$(li)Trade affinity$(li)Fortune affinity$(p)MTF applies no direct loot or Fortune increase."
+      "text": "$(bold)Adamant — diamond$()$(li)×1.35 suitable-block mining speed$(li)Attacks ignore 30% of armour$(p)$(bold)Fortunate — emerald$()$(li)Fortune operates 2 effective levels higher$(li)Looting operates 2 effective levels higher$(li)May operate above the enchantment's normal maximum"
     },
     {
       "type": "patchouli:text",
-      "title": "Ruby and Sapphire",
-      "text": "$(bold)Keen — ruby$()$(li)+0.15 attack damage$(li)Support slot also grants Fortunate$(p)$(bold)Focused — sapphire$()$(li)+0.03 attack speed$(li)Enchanting/resonance affinity$(li)Support slot also grants Resonant$(li)Resonant adds ×1.005 mining speed"
+      "title": "Amethyst and Sapphire",
+      "text": "$(bold)Resonant — amethyst$()$(li)The highest-level installed non-curse enchantment operates 2 effective levels higher$(p)$(bold)Focused — sapphire$()$(li)×1.30 mining speed$(li)+0.55 attack speed$(li)Ignores airborne and underwater mining penalties$(li)Crossbows gain effective Quick Charge II$(p)Repeated components use the normal diminishing trait scaling."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Ruby and Topaz",
+      "text": "$(bold)Keen — ruby$()$(li)×1.50 suitable-block mining speed$(li)×1.35 physical base damage$(p)$(bold)Forceful — topaz$()$(li)×1.60 suitable-block mining speed$(li)×1.60 physical base damage$(li)×1.50 durability wear"
     },
     {
       "type": "patchouli:text",
       "title": "Flint",
-      "text": "$(bold)Jagged — flint$()$(li)+0.10 attack damage$(li)×0.96 durability$(p)Jagged belongs to crude flint construction.$(p)The hidden legacy Flint Shard item is $(bold)not$() required to obtain this trait."
+      "text": "$(bold)Jagged — flint$()$(li)×1.35 suitable-block mining speed$(li)×1.35 physical base damage$(li)×2 durability wear$(p)Jagged makes crude flint a real high-output early construction rather than simply a disposable prerequisite."
     }
   ]
 }

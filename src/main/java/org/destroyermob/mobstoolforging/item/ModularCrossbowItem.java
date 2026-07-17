@@ -1,8 +1,10 @@
 package org.destroyermob.mobstoolforging.item;
 
 import java.util.List;
-import net.minecraft.ChatFormatting;
+import java.util.function.Consumer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -10,11 +12,21 @@ import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.CrossbowAssembly;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
+import org.destroyermob.mobstoolforging.world.ToolTooltipBuilder;
+import org.destroyermob.mobstoolforging.world.ToolTraitEffects;
+import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 
 /** A vanilla-behaving crossbow whose construction is retained as MTF components. */
 public class ModularCrossbowItem extends CrossbowItem {
     public ModularCrossbowItem(Properties properties) {
         super(properties);
+    }
+
+    @Override
+    public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T entity, Consumer<Item> onBroken) {
+        return CrossbowAssembly.isCrossbow(stack.get(ModDataComponents.TOOL_CONSTRUCTION.get()))
+                ? ToolTraitEffects.adjustDurabilityDamage(stack, amount, entity.getRandom())
+                : super.damageItem(stack, amount, entity, onBroken);
     }
 
     @Override
@@ -33,8 +45,7 @@ public class ModularCrossbowItem extends CrossbowItem {
         if (!CrossbowAssembly.isCrossbow(construction)) {
             return;
         }
-        tooltip.add(Component.translatable("tooltip.mobstoolforging.crossbow_limbs", MaterialCatalog.displayName(construction.headMaterial())).withStyle(ChatFormatting.DARK_GRAY));
-        tooltip.add(Component.translatable("tooltip.mobstoolforging.crossbow_body").withStyle(ChatFormatting.DARK_GRAY));
-        construction.guardMaterial().ifPresent(material -> tooltip.add(Component.translatable("tooltip.mobstoolforging.crossbow_string", MaterialCatalog.displayName(material)).withStyle(ChatFormatting.DARK_GRAY)));
+        ToolTypeRegistry.toolType(CrossbowAssembly.TOOL_TYPE)
+                .ifPresent(definition -> tooltip.addAll(ToolTooltipBuilder.tooltip(stack, definition, context, flag)));
     }
 }

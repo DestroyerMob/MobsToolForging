@@ -7,7 +7,7 @@ Mobs Tool Forging does not use wood or stone as tool-head materials. Wood remain
 1. Gather sticks and vanilla flint.
 2. Sneak-right-click flint onto the top of a sturdy block to place a knapping workpiece.
 3. Look at the placed flint with an item tagged `mobstoolforging:knapping_tools`; vanilla flint is included by default.
-4. Sneak-scroll to choose the target part, or use the **Previous Knapping Target** and **Next Knapping Target** controls. Both controls are controller-bindable and exposed by controller-support mods such as Controlify.
+4. Sneak-scroll to choose the target part, or use the **Previous Knapping Target** and **Next Knapping Target** controls without sneaking. Both controls are controller-bindable and exposed by controller-support mods such as Controlify; their default keyboard fallbacks are F6 and F7.
 5. Right-click the placed flint four times with the knapping tool to turn one flint into one flint part.
 6. Take the knapped flint part to a Toolmaker's Station.
 7. Add the required stick handle, and for swords add a flint sword guard.

@@ -11,6 +11,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -23,12 +24,20 @@ public final class ToolTooltipBuilder {
     }
 
     public static List<Component> tooltip(ItemStack stack, ToolKind toolKind, TooltipFlag flag) {
+        return tooltip(stack, toolKind, Item.TooltipContext.EMPTY, flag);
+    }
+
+    public static List<Component> tooltip(ItemStack stack, ToolKind toolKind, Item.TooltipContext context, TooltipFlag flag) {
         return ToolTypeRegistry.toolType(toolKind)
-                .map(definition -> tooltip(stack, definition, flag))
+                .map(definition -> tooltip(stack, definition, context, flag))
                 .orElseGet(List::of);
     }
 
     public static List<Component> tooltip(ItemStack stack, ToolTypeDefinition definition, TooltipFlag flag) {
+        return tooltip(stack, definition, Item.TooltipContext.EMPTY, flag);
+    }
+
+    public static List<Component> tooltip(ItemStack stack, ToolTypeDefinition definition, Item.TooltipContext context, TooltipFlag flag) {
         ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
         if (construction == null) {
             return List.of();
@@ -37,6 +46,7 @@ public final class ToolTooltipBuilder {
         List<Component> lines = new ArrayList<>();
         lines.add(qualityLine(construction.qualityLevel()));
         construction.treatment().ifPresent(treatment -> lines.add(treatmentLine(treatment)));
+        addEffectiveStats(lines, ToolEffectiveStats.resolve(stack, definition, construction, profile, context), CrossbowAssembly.isCrossbow(construction), flag);
 
         if (flag.hasShiftDown()) {
             addConstructionTooltip(lines, stack, definition, construction);
@@ -64,6 +74,77 @@ public final class ToolTooltipBuilder {
     private static Component treatmentLine(ResourceLocation treatment) {
         return Component.translatable("tooltip.mobstoolforging.part_treatment", MaterialCatalog.displayName(treatment))
                 .withStyle(ChatFormatting.DARK_GRAY);
+    }
+
+    private static void addEffectiveStats(List<Component> lines, ToolEffectiveStats stats, boolean crossbow, TooltipFlag flag) {
+        addBlankIfNeeded(lines);
+        lines.add(Component.translatable("tooltip.mobstoolforging.effective_stats").withStyle(ChatFormatting.GRAY));
+        if (crossbow) {
+            stats.crossbowChargeTicks().ifPresent(ticks -> lines.add(effectiveLine(
+                    "tooltip.mobstoolforging.effective_charge_time",
+                    decimal(ticks / 20.0D),
+                    Integer.toString(ticks)
+            )));
+            lines.add(effectiveLine(
+                    "tooltip.mobstoolforging.effective_projectile_damage",
+                    decimal(stats.projectileDamageMultiplier())
+            ));
+        } else {
+            if (differs(stats.baseAttackDamage(), stats.effectiveAttackDamage())) {
+                lines.add(effectiveLine(
+                        "tooltip.mobstoolforging.effective_attack_damage_with_base",
+                        decimal(stats.effectiveAttackDamage()),
+                        decimal(stats.baseAttackDamage())
+                ));
+            } else {
+                lines.add(effectiveLine(
+                        "tooltip.mobstoolforging.effective_attack_damage",
+                        decimal(stats.effectiveAttackDamage())
+                ));
+            }
+            lines.add(effectiveLine(
+                    "tooltip.mobstoolforging.effective_attack_speed",
+                    decimal(stats.attackSpeed())
+            ));
+            if (stats.effectiveMiningSpeed().isPresent()) {
+                double effectiveMining = stats.effectiveMiningSpeed().getAsDouble();
+                double baseMining = stats.baseMiningSpeed().orElse(effectiveMining);
+                lines.add(differs(baseMining, effectiveMining)
+                        ? effectiveLine(
+                        "tooltip.mobstoolforging.effective_mining_speed_with_base",
+                        decimal(effectiveMining),
+                        decimal(baseMining)
+                )
+                        : effectiveLine(
+                        "tooltip.mobstoolforging.effective_mining_speed",
+                        decimal(effectiveMining)
+                ));
+            }
+        }
+        if (stats.maxDurability() > 0) {
+            lines.add(effectiveLine(
+                    "tooltip.mobstoolforging.effective_durability",
+                    Integer.toString(stats.remainingDurability()),
+                    Integer.toString(stats.maxDurability())
+            ));
+        }
+        if (differs(1.0D, stats.currentOutputMultiplier())) {
+            lines.add(effectiveLine(
+                    "tooltip.mobstoolforging.effective_current_output",
+                    decimal(stats.currentOutputMultiplier())
+            ));
+        }
+        if (flag.hasShiftDown()) {
+            lines.add(Component.translatable("tooltip.mobstoolforging.effective_scope").withStyle(ChatFormatting.DARK_GRAY));
+        }
+    }
+
+    private static Component effectiveLine(String key, Object... values) {
+        return Component.translatable(key, values).withStyle(ChatFormatting.DARK_GREEN);
+    }
+
+    private static boolean differs(double left, double right) {
+        return Math.abs(left - right) > 0.0001D;
     }
 
     private static void addNormalTooltip(List<Component> lines, ToolStatProfile profile) {
@@ -126,6 +207,7 @@ public final class ToolTooltipBuilder {
         lines.add(rawLine("tooltip.mobstoolforging.stat.max_damage", Integer.toString(profile.maxDamage())));
         lines.add(rawLine("tooltip.mobstoolforging.stat.durability_multiplier", decimal(profile.durabilityMultiplier())));
         lines.add(rawLine("tooltip.mobstoolforging.stat.mining_speed_multiplier", decimal(profile.miningSpeedMultiplier())));
+        lines.add(rawLine("tooltip.mobstoolforging.stat.physical_damage_multiplier", decimal(profile.physicalDamageMultiplier())));
         lines.add(rawLine("tooltip.mobstoolforging.stat.attack_damage_bonus", decimal(profile.attackDamageBonus())));
         lines.add(rawLine("tooltip.mobstoolforging.stat.attack_speed_bonus", decimal(profile.attackSpeedBonus())));
         lines.add(rawLine("tooltip.mobstoolforging.stat.fire_resistant", Boolean.toString(profile.fireResistant())));
@@ -222,7 +304,7 @@ public final class ToolTooltipBuilder {
                 .append(Component.literal(": " + value).withStyle(ChatFormatting.GRAY));
     }
 
-    private static String decimal(float value) {
+    private static String decimal(double value) {
         return String.format(Locale.ROOT, "%.2f", value);
     }
 

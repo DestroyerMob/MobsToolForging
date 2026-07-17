@@ -6,8 +6,6 @@ import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 
 public final class ToolRepairing {
-    private static final float MATERIAL_REPAIR_FRACTION = 0.25F;
-
     private ToolRepairing() {
     }
 
@@ -57,7 +55,7 @@ public final class ToolRepairing {
 
         ItemStack repaired = stack.copyWithCount(1);
         int maxDamage = Math.max(1, repaired.getMaxDamage());
-        int damageAfterRepair = Math.max(0, repaired.getDamageValue() - Math.max(1, Math.round(maxDamage * MATERIAL_REPAIR_FRACTION)));
+        int damageAfterRepair = Math.max(0, repaired.getDamageValue() - Math.max(1, Math.round(maxDamage * ToolTraitEffects.repairFraction(repaired))));
         boolean wasBroken = Boolean.TRUE.equals(repaired.get(ModDataComponents.TOOL_BROKEN.get()));
         if (wasBroken) {
             repaired.remove(ModDataComponents.TOOL_BROKEN.get());

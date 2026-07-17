@@ -22,13 +22,12 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,17 +40,16 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.client.event.GatherSkippedAttributeTooltipsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.AnvilUpdateEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.destroyermob.mobstoolforging.client.MobsToolForgingClient;
@@ -59,6 +57,7 @@ import org.destroyermob.mobstoolforging.command.ModCommands;
 import org.destroyermob.mobstoolforging.data.ModDataGenerators;
 import org.destroyermob.mobstoolforging.integration.CarryOnCompatibility;
 import org.destroyermob.mobstoolforging.item.ModularToolItem;
+import org.destroyermob.mobstoolforging.item.ModularCrossbowItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.network.ModNetworking;
 import org.destroyermob.mobstoolforging.integration.everycomp.MobsToolForgingEveryCompat;
@@ -104,10 +103,9 @@ import org.destroyermob.mobstoolforging.world.ToolMaterialDefinition;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
 import org.destroyermob.mobstoolforging.world.ToolPartPolishing;
 import org.destroyermob.mobstoolforging.world.ToolPartWear;
-import org.destroyermob.mobstoolforging.world.ToolTrait;
+import org.destroyermob.mobstoolforging.world.ToolTraitEffects;
 import org.destroyermob.mobstoolforging.world.ToolTraitReloadListener;
 import org.destroyermob.mobstoolforging.world.ToolTooltipBuilder;
-import org.destroyermob.mobstoolforging.world.ToolTypeDefinition;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolTypeReloadListener;
 import org.destroyermob.mobstoolforging.world.VanillaToolConverter;
@@ -165,11 +163,15 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(this::blockHeatedCrafting);
         NeoForge.EVENT_BUS.addListener(this::blockVanillaModularEquipmentAnvilUse);
         NeoForge.EVENT_BUS.addListener(this::addExternalModularToolTooltip);
+        NeoForge.EVENT_BUS.addListener(this::hideReplacedToolAttributeTooltips);
         NeoForge.EVENT_BUS.addListener(this::addHeatTooltip);
         NeoForge.EVENT_BUS.addListener(this::addCrucibleTooltip);
         NeoForge.EVENT_BUS.addListener(this::convertHostileMobEquipment);
-        NeoForge.EVENT_BUS.addListener(this::boostGildedBlockExperience);
-        NeoForge.EVENT_BUS.addListener(this::boostGildedMobExperience);
+        NeoForge.EVENT_BUS.addListener(ToolTraitEffects::modifyBreakSpeed);
+        NeoForge.EVENT_BUS.addListener(ToolTraitEffects::modifyEnchantmentLevels);
+        NeoForge.EVENT_BUS.addListener(ToolTraitEffects::modifyIncomingDamage);
+        NeoForge.EVENT_BUS.addListener(ToolTraitEffects::applyPostDamageEffects);
+        NeoForge.EVENT_BUS.addListener(ToolTraitEffects::smeltBlockDrops);
         NeoForge.EVENT_BUS.addListener(ModCommands::register);
 
         if (FMLEnvironment.dist.isClient()) {
@@ -287,27 +289,6 @@ public class MobsToolForging {
         if (isCopperProgressionBlock(event.getTargetBlock()) && event.getEntity().getMainHandItem().is(ItemTags.PICKAXES)) {
             event.setCanHarvest(true);
         }
-    }
-
-    private void boostGildedBlockExperience(BlockDropsEvent event) {
-        int experience = event.getDroppedExperience();
-        if (experience <= 0 || !(event.getBreaker() instanceof Player) || !hasTrait(event.getTool(), ToolTrait.GILDED) || isWeaponLike(event.getTool())) {
-            return;
-        }
-        event.setDroppedExperience(boostExperience(experience));
-    }
-
-    private void boostGildedMobExperience(LivingExperienceDropEvent event) {
-        int experience = event.getDroppedExperience();
-        Player player = event.getAttackingPlayer();
-        if (experience <= 0 || player == null) {
-            return;
-        }
-        ItemStack weapon = player.getMainHandItem();
-        if (!hasTrait(weapon, ToolTrait.GILDED) || !isWeaponLike(weapon)) {
-            return;
-        }
-        event.setDroppedExperience(boostExperience(experience));
     }
 
     private void convertHostileMobEquipment(EntityJoinLevelEvent event) {
@@ -507,13 +488,15 @@ public class MobsToolForging {
     private void addExternalModularToolTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
         ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
-        if (construction != null && !(stack.getItem() instanceof ModularToolItem)) {
+        if (construction != null
+                && !(stack.getItem() instanceof ModularToolItem)
+                && !(stack.getItem() instanceof ModularCrossbowItem)) {
             ToolTypeRegistry.toolType(construction.toolType()).ifPresent(definition -> {
                 List<Component> toolDetails = new ArrayList<>();
                 if (Boolean.TRUE.equals(stack.get(ModDataComponents.TOOL_BROKEN.get()))) {
                     toolDetails.add(Component.translatable("tooltip.mobstoolforging.broken_tool").withStyle(ChatFormatting.RED));
                 }
-                toolDetails.addAll(ToolTooltipBuilder.tooltip(stack, definition, event.getFlags()));
+                toolDetails.addAll(ToolTooltipBuilder.tooltip(stack, definition, event.getContext(), event.getFlags()));
                 ExternalToolTooltipOrder.insertBeforeEnchantments(
                         stack,
                         event.getToolTip(),
@@ -562,6 +545,17 @@ public class MobsToolForging {
         }
     }
 
+    private void hideReplacedToolAttributeTooltips(GatherSkippedAttributeTooltipsEvent event) {
+        if (event.getStack().get(ModDataComponents.TOOL_CONSTRUCTION.get()) == null) {
+            return;
+        }
+        event.getStack().forEachModifier(EquipmentSlot.MAINHAND, (attribute, modifier) -> {
+            if (Attributes.ATTACK_DAMAGE.equals(attribute) || Attributes.ATTACK_SPEED.equals(attribute)) {
+                event.skipId(modifier.id());
+            }
+        });
+    }
+
     private void addCrucibleTooltip(ItemTooltipEvent event) {
         CrucibleContents contents = event.getItemStack().get(ModDataComponents.CRUCIBLE_CONTENTS.get());
         if (contents == null || contents.isEmpty()) {
@@ -580,32 +574,6 @@ public class MobsToolForging {
     private static boolean isQuenching(ItemEntity itemEntity) {
         BlockState state = itemEntity.level().getBlockState(itemEntity.blockPosition());
         return itemEntity.isInWater() || state.is(Blocks.WATER_CAULDRON);
-    }
-
-    private static boolean hasTrait(ItemStack stack, ToolTrait trait) {
-        ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
-        if (construction != null) {
-            return ToolTypeRegistry.toolType(construction.toolType())
-                    .map(definition -> ToolStatBuilder.build(definition, construction).traits().contains(trait.id()))
-                    .orElse(false);
-        }
-        return ToolStatBuilder.profile(stack)
-                .map(profile -> profile.traits().contains(trait.id()))
-                .orElse(false);
-    }
-
-    private static boolean isWeaponLike(ItemStack stack) {
-        ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
-        if (construction != null) {
-            return ToolTypeRegistry.toolType(construction.toolType())
-                    .map(ToolTypeDefinition::swordLike)
-                    .orElse(false);
-        }
-        return stack.getItem() instanceof SwordItem;
-    }
-
-    private static int boostExperience(int experience) {
-        return experience + Math.max(1, (int) Math.ceil(experience * 0.25D));
     }
 
     private static boolean isCopperProgressionBlock(BlockState state) {

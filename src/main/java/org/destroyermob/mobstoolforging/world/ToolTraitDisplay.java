@@ -13,7 +13,7 @@ public final class ToolTraitDisplay {
 
     public static List<ResourceLocation> resolve(List<ResourceLocation> rawTraits) {
         Set<ResourceLocation> unique = new LinkedHashSet<>(rawTraits);
-        if (unique.contains(ToolTrait.NETHER_TREATED.id()) || unique.contains(ToolTrait.NETHER_FORGED.id())) {
+        if (unique.contains(ToolTrait.NETHER_FORGED.id())) {
             unique.remove(ToolTrait.KINDLED.id());
         }
         List<ResourceLocation> suppressed = unique.stream()

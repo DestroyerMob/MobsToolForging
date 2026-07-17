@@ -47,21 +47,25 @@ import org.destroyermob.mobstoolforging.registry.ModTags;
 import org.destroyermob.mobstoolforging.world.KnappingFlintBlockEntity;
 import org.destroyermob.mobstoolforging.world.ToolWorkstationBlock;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
+import org.lwjgl.glfw.GLFW;
 
 public final class MobsToolForgingClient {
     private static final String KEY_CATEGORY = "key.categories.mobstoolforging";
+    private static final int KNAPPING_ACTION_GRACE_TICKS = 8;
     private static final KeyMapping PREVIOUS_KNAPPING_TARGET = new KeyMapping(
             "key.mobstoolforging.knapping_previous",
             InputConstants.Type.KEYSYM,
-            InputConstants.UNKNOWN.getValue(),
+            GLFW.GLFW_KEY_F6,
             KEY_CATEGORY
     );
     private static final KeyMapping NEXT_KNAPPING_TARGET = new KeyMapping(
             "key.mobstoolforging.knapping_next",
             InputConstants.Type.KEYSYM,
-            InputConstants.UNKNOWN.getValue(),
+            GLFW.GLFW_KEY_F7,
             KEY_CATEGORY
     );
+    private static int pendingKnappingDelta;
+    private static int pendingKnappingTicks;
 
     private MobsToolForgingClient() {
     }
@@ -201,22 +205,51 @@ public final class MobsToolForgingClient {
             return;
         }
         int delta = scrollDelta > 0.0D ? 1 : -1;
-        if (cycleKnappingTarget(delta)) {
+        if (cycleKnappingTarget(delta, true)) {
             event.setCanceled(true);
         }
     }
 
     private static void handleKnappingKeys(ClientTickEvent.Post event) {
+        applyPendingKnappingAction();
         while (PREVIOUS_KNAPPING_TARGET.consumeClick()) {
-            cycleKnappingTarget(-1);
+            requestKnappingAction(-1);
         }
         while (NEXT_KNAPPING_TARGET.consumeClick()) {
-            cycleKnappingTarget(1);
+            requestKnappingAction(1);
         }
     }
 
-    private static boolean cycleKnappingTarget(int delta) {
-        KnappingLookTarget target = knappingLookTarget(true);
+    private static void requestKnappingAction(int delta) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.screen == null) {
+            cycleKnappingTarget(delta, false);
+            return;
+        }
+        pendingKnappingDelta = delta;
+        pendingKnappingTicks = KNAPPING_ACTION_GRACE_TICKS;
+    }
+
+    private static void applyPendingKnappingAction() {
+        if (pendingKnappingDelta == 0) {
+            return;
+        }
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.screen == null) {
+            cycleKnappingTarget(pendingKnappingDelta, false);
+            clearPendingKnappingAction();
+        } else if (--pendingKnappingTicks <= 0) {
+            clearPendingKnappingAction();
+        }
+    }
+
+    private static void clearPendingKnappingAction() {
+        pendingKnappingDelta = 0;
+        pendingKnappingTicks = 0;
+    }
+
+    private static boolean cycleKnappingTarget(int delta, boolean requireSneaking) {
+        KnappingLookTarget target = knappingLookTarget(requireSneaking);
         if (target == null) {
             return false;
         }

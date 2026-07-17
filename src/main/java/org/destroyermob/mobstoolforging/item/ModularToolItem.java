@@ -24,6 +24,7 @@ import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolStatBuilder;
+import org.destroyermob.mobstoolforging.world.ToolTraitEffects;
 import org.destroyermob.mobstoolforging.world.ToolTooltipBuilder;
 
 public interface ModularToolItem extends IItemExtension {
@@ -59,6 +60,10 @@ public interface ModularToolItem extends IItemExtension {
     default <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T entity, Consumer<Item> onBroken) {
         if (amount <= 0 || isBrokenTool(stack) || stack.get(ModDataComponents.TOOL_CONSTRUCTION.get()) == null || !stack.isDamageableItem()) {
             return isBrokenTool(stack) ? 0 : amount;
+        }
+        amount = ToolTraitEffects.adjustDurabilityDamage(stack, amount, entity.getRandom());
+        if (amount <= 0) {
+            return 0;
         }
         int maxDamage = stack.getMaxDamage();
         if (maxDamage <= 0 || stack.getDamageValue() + amount < maxDamage) {
@@ -129,7 +134,7 @@ public interface ModularToolItem extends IItemExtension {
                 .orElseGet(() -> toolKind().toolName(data.headMaterial()));
     }
 
-    default void appendModularTooltip(ItemStack stack, List<Component> tooltip, TooltipFlag flag) {
+    default void appendModularTooltip(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         if (isBrokenTool(stack)) {
             tooltip.add(Component.translatable("tooltip.mobstoolforging.broken_tool").withStyle(ChatFormatting.RED));
         }
@@ -137,7 +142,7 @@ public interface ModularToolItem extends IItemExtension {
         if (data == null) {
             return;
         }
-        tooltip.addAll(ToolTooltipBuilder.tooltip(stack, toolKind(), flag));
+        tooltip.addAll(ToolTooltipBuilder.tooltip(stack, toolKind(), context, flag));
     }
 
     default void modularInventoryTick(ItemStack stack, Level level) {

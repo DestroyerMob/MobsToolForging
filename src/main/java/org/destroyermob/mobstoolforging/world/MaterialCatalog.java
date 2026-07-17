@@ -108,9 +108,10 @@ public final class MaterialCatalog {
     private static final List<ResourceLocation> STARTER_MATERIALS = List.of(
             IRON, GOLD, COPPER, DIAMOND, EMERALD, AMETHYST, RUBY, SAPPHIRE, TOPAZ
     );
-    private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(OAK, DARK_OAK, BLAZE, BREEZE);
+    private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(OAK, BLAZE, BREEZE);
     private static final List<ResourceLocation> GUARD_MATERIALS = STARTER_MATERIALS;
-    private static final List<ResourceLocation> TREATMENT_MATERIALS = List.of(NETHERITE, NETHER, SCULK);
+    private static final List<ResourceLocation> TREATMENT_MATERIALS = List.of(NETHERITE);
+    private static final List<ResourceLocation> CROSSBOW_STRING_MATERIALS = List.of(SPIDER_SILK, PLANT_FIBER, BLAZE_THREAD);
 
     static {
         register(IRON, MaterialCategory.METAL, Items.IRON_INGOT, Tiers.IRON, HeatLevel.LOW);
@@ -242,6 +243,10 @@ public final class MaterialCatalog {
 
     public static List<ResourceLocation> handleMaterialIds() {
         return HANDLE_MATERIALS;
+    }
+
+    public static List<ResourceLocation> crossbowStringMaterialIds() {
+        return CROSSBOW_STRING_MATERIALS;
     }
 
     public static List<ResourceLocation> visualMaterialIds(String materialFrom) {

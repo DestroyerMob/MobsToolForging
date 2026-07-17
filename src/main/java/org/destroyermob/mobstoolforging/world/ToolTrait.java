@@ -15,22 +15,20 @@ import org.destroyermob.mobstoolforging.MobsToolForging;
 
 public enum ToolTrait {
     STEADY("steady", ChatFormatting.DARK_GREEN, "handling"),
-    STURDY("sturdy", ChatFormatting.BLUE, "handling"),
     SWIFT("swift", ChatFormatting.AQUA, "handling"),
     KINDLED("kindled", ChatFormatting.GOLD, "handling"),
     REINFORCED("reinforced", ChatFormatting.GRAY, "structure"),
     RESONANT("resonant", ChatFormatting.LIGHT_PURPLE, "affinity"),
-    CONDUCTIVE("conductive", ChatFormatting.YELLOW, "affinity"),
+    WORK_HARDENED("work_hardened", ChatFormatting.GOLD, "structure"),
     GILDED("gilded", ChatFormatting.GOLD, "affinity"),
-    STABILIZED("stabilized", ChatFormatting.AQUA, "structure"),
+    ADAMANT("adamant", ChatFormatting.AQUA, "edge"),
     NETHER_FORGED("nether_forged", ChatFormatting.DARK_RED, "structure"),
     FORTUNATE("fortunate", ChatFormatting.GREEN, "affinity"),
     KEEN("keen", ChatFormatting.RED, "edge"),
+    FORCEFUL("forceful", ChatFormatting.YELLOW, "edge"),
     JAGGED("jagged", ChatFormatting.DARK_GRAY, "edge"),
-    SURE_GRIP("sure_grip", ChatFormatting.DARK_GREEN, "handling"),
+    TENSIONED("tensioned", ChatFormatting.DARK_GREEN, "handling"),
     FOCUSED("focused", ChatFormatting.LIGHT_PURPLE, "affinity"),
-    NETHER_TREATED("nether_treated", ChatFormatting.RED, "treatment"),
-    ECHOING("echoing", ChatFormatting.DARK_AQUA, "treatment"),
     WORKMANSHIP_GOOD("workmanship_good", ChatFormatting.GREEN, "quality"),
     WORKMANSHIP_ROUGH("workmanship_rough", ChatFormatting.RED, "quality");
 

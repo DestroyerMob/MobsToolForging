@@ -1,0 +1,18 @@
+{
+  "name": "Traits: Treatments",
+  "icon": "minecraft:netherite_ingot",
+  "category": "mobstoolforging:equipment",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Netherite Treatment",
+      "text": "When the crucible system is enabled, melt netherite and dip an untreated primary tool part into it.$(p)The treated part keeps its original material and gains $(bold)Nether-Forged$(). This is a physical treatment with its own visible overlay, not a loose assembly catalyst."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Nether-Forged",
+      "text": "$(li)Tool is fireproof$(li)×2 durability$(li)×1.30 physical base damage$(li)Eligible heads gain diamond harvest tier$(p)Nether-Treated and Echoing have been removed from the standard trait roster until a complete, visible treatment process exists for them."
+    }
+  ]
+}

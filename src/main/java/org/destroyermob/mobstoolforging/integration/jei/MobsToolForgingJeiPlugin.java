@@ -485,6 +485,7 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         materials.addAll(MaterialCatalog.visualMaterialIds("guardMaterial"));
         materials.addAll(MaterialCatalog.visualMaterialIds("handleMaterial"));
         materials.addAll(MaterialCatalog.visualMaterialIds("treatment"));
+        materials.addAll(MaterialCatalog.crossbowStringMaterialIds());
         materials.add(MaterialCatalog.FLINT);
         ToolTypeRegistry.statRules().stream()
                 .filter(rule -> !rule.traits().isEmpty())
@@ -519,6 +520,9 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     }
 
     private static net.minecraft.network.chat.Component primaryTraitSource(ResourceLocation materialId) {
+        if (MaterialCatalog.crossbowStringMaterialIds().contains(materialId)) {
+            return traitSource("string");
+        }
         if (MaterialCatalog.visualMaterialIds("handleMaterial").contains(materialId)) {
             return traitSource("handle");
         }

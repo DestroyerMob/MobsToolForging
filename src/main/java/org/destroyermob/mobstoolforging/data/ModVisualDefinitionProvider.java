@@ -63,17 +63,10 @@ public class ModVisualDefinitionProvider implements DataProvider {
         futures.add(DataProvider.saveStable(output, example(
                 ToolKind.PICKAXE,
                 MaterialCatalog.DIAMOND,
-                MaterialCatalog.DARK_OAK,
+                MaterialCatalog.OAK,
                 null,
                 null
         ), examples.json(modLoc("diamond_pickaxe"))));
-        futures.add(DataProvider.saveStable(output, example(
-                ToolKind.SWORD,
-                MaterialCatalog.IRON,
-                MaterialCatalog.BLAZE,
-                MaterialCatalog.IRON,
-                MaterialCatalog.NETHER
-        ), examples.json(modLoc("nether_treated_iron_sword"))));
     }
 
     private JsonObject toolVisual(ToolKind toolKind) {
@@ -240,11 +233,9 @@ public class ModVisualDefinitionProvider implements DataProvider {
                 new MaterialVisualSpec(MaterialCatalog.DARK_OAK, "wood", "wood_grain", false, 0, palette(0xFF17100B, 0xFF24180F, 0xFF3A2818, 0xFF5A3D22, 0xFF7D5732, 0xFFA77A4A)),
                 new MaterialVisualSpec(MaterialCatalog.BLAZE, "nether", "heat_cracks", true, 7, palette(0xFF4A1604, 0xFF7C2705, 0xFFB84307, 0xFFF07412, 0xFFFFB12E, 0xFFFFF0A4)),
                 new MaterialVisualSpec(MaterialCatalog.BREEZE, "crystal", "facets", false, 0, palette(0xFF5B6170, 0xFF7D879A, 0xFFA3B2C7, 0xFFC3D7E8, 0xFFE4F5FF, 0xFFFFFFFF)),
-                new MaterialVisualSpec(MaterialCatalog.NETHER, "nether", "heat_cracks", true, 8, palette(0xFF160503, 0xFF2A0904, 0xFF4D1309, 0xFF8A260D, 0xFFFF6A1A, 0xFFFFD06A)),
-                new MaterialVisualSpec(MaterialCatalog.SCULK, "sculk", "veins", true, 8, palette(0xFF05090A, 0xFF071417, 0xFF0A2428, 0xFF0E3D45, 0xFF0C8395, 0xFF4AF5FF))
-                , new MaterialVisualSpec(MaterialCatalog.SPIDER_SILK, "fiber", "fine_threads", false, 0, palette(0xFF4B4B4B, 0xFF6B6B6B, 0xFF929292, 0xFFB6B6B6, 0xFFD4D4D4, 0xFFF2F2F2))
-                , new MaterialVisualSpec(MaterialCatalog.PLANT_FIBER, "fiber", "fine_threads", false, 0, palette(0xFF3E481E, 0xFF59652A, 0xFF77853A, 0xFF98A94F, 0xFFBDCF6A, 0xFFE0F59A))
-                , new MaterialVisualSpec(MaterialCatalog.BLAZE_THREAD, "fiber", "fine_threads", true, 7, palette(0xFF4A1604, 0xFF7C2705, 0xFFB84307, 0xFFF07412, 0xFFFFB12E, 0xFFFFF0A4))
+                new MaterialVisualSpec(MaterialCatalog.SPIDER_SILK, "fiber", "fine_threads", false, 0, palette(0xFF4B4B4B, 0xFF6B6B6B, 0xFF929292, 0xFFB6B6B6, 0xFFD4D4D4, 0xFFF2F2F2)),
+                new MaterialVisualSpec(MaterialCatalog.PLANT_FIBER, "fiber", "fine_threads", false, 0, palette(0xFF3E481E, 0xFF59652A, 0xFF77853A, 0xFF98A94F, 0xFFBDCF6A, 0xFFE0F59A)),
+                new MaterialVisualSpec(MaterialCatalog.BLAZE_THREAD, "fiber", "fine_threads", true, 7, palette(0xFF4A1604, 0xFF7C2705, 0xFFB84307, 0xFFF07412, 0xFFFFB12E, 0xFFFFF0A4))
         );
     }
 

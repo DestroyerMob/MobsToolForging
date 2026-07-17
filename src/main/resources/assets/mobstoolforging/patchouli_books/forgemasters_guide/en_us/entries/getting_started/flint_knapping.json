@@ -7,7 +7,7 @@
     {
       "type": "patchouli:text",
       "title": "Flint Knapping",
-      "text": "$(bold)To begin:$()$(li)Place flint on a suitable block$(li)Hold a knapping tool and look at the flint$(li)Sneak-scroll, or use the Previous/Next Knapping Target controls, to select a part$(li)Use the flint four times to finish it$(p)The target controls can be bound to a controller through Controlify."
+      "text": "$(bold)To begin:$()$(li)Place flint on a suitable block$(li)Hold a knapping tool and look at the flint$(li)Sneak-scroll, or use the Previous/Next Knapping Target controls without sneaking$(li)Use the flint four times to finish it$(p)The target controls default to F6/F7 and can be bound through Controlify or Steam Input."
     },
     {
       "type": "patchouli:text",

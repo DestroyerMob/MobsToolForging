@@ -45,7 +45,7 @@ public class ModularSwordItem extends SwordItem implements ModularToolItem {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-        appendModularTooltip(stack, tooltip, flag);
+        appendModularTooltip(stack, context, tooltip, flag);
     }
 
     @Override

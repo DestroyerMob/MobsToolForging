@@ -6,13 +6,13 @@
   "pages": [
     {
       "type": "patchouli:text",
-      "title": "Affinity Is Metadata",
-      "text": "MTF records affinities such as:$(li)Enchanting$(li)Resonance$(li)Fortune$(li)Fire$(li)Echo$(p)Affinity is metadata. MTF does not turn it into stronger enchantments or extra loot by itself. Without another integration, only the numeric effects printed here apply."
+      "title": "Traits and Enchantments",
+      "text": "Material traits are inherent construction effects and do not consume enchantment capacity.$(p)Static trait bonuses modify the tool's physical base stats first; enchantments then evaluate that completed base. Conditional traits such as Work-Hardened remain separate output multipliers.$(p)Enchantments remain flexible, while a material trait is fixed until disassembly."
     },
     {
       "type": "patchouli:text",
       "title": "Better Enchanting",
-      "text": "Better Enchanting reads construction materials through its own rules.$(p)$(bold)Each gold component:$()$(br)+1 enchantment capacity$(p)This is separate from:$(li)Conductive affinity$(li)Gilded's XP bonus$(p)The three mechanics are not interchangeable."
+      "text": "Better Enchanting reads every gold material in the construction, including a metal core below a gem coating.$(p)$(bold)Each gold component:$()$(br)+1 enchantment capacity$(p)Tools retain their normal base capacity. Gold provides flexibility rather than a separate XP or raw-stat bonus."
     },
     {
       "type": "patchouli:text",

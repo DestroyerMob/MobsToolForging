@@ -50,21 +50,23 @@ public final class ToolStatBuilder {
         MutableStats stats = new MutableStats(
                 baseMaxDamage(definition, construction, headTier),
                 definition.baseAttackDamageBonus(construction.headMaterial()),
-                definition.baseAttackSpeedBonus(construction.headMaterial())
+                definition.baseAttackSpeedBonus(construction.headMaterial()),
+                headTier.getAttackDamageBonus()
         );
 
         applyMaterialTraits(stats, definition, construction);
         ToolTypeRegistry.applyStatModifiers(definition, construction, stats);
-        applyTraitEffects(stats);
         applyQuality(stats, construction);
+        applyTraitEffects(stats);
 
         int maxDamage = Math.max(1, Math.round(stats.baseMaxDamage * stats.durabilityMultiplier));
         return new ToolStatProfile(
                 maxDamage,
-                stats.attackDamageBonus,
+                stats.effectiveAttackDamageBonus(),
                 stats.attackSpeedBonus,
                 stats.miningSpeedMultiplier,
                 stats.durabilityMultiplier,
+                stats.physicalDamageMultiplier,
                 List.copyOf(stats.affinities),
                 stats.fireResistant,
                 List.copyOf(stats.traits),
@@ -78,6 +80,19 @@ public final class ToolStatBuilder {
 
     public static void apply(ItemStack stack, ToolTypeDefinition definition, ToolConstructionData construction) {
         apply(stack, definition, construction, true);
+    }
+
+    /** Applies construction durability, traits, and fire resistance without replacing a custom item's tool or attribute components. */
+    public static void applyPassiveProfile(ItemStack stack, ToolTypeDefinition definition, ToolConstructionData construction) {
+        ToolStatProfile profile = build(definition, construction);
+        stack.set(DataComponents.MAX_DAMAGE, profile.maxDamage());
+        stack.set(DataComponents.DAMAGE, 0);
+        stack.set(ModDataComponents.TOOL_STAT_PROFILE.get(), profile);
+        if (profile.fireResistant()) {
+            stack.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
+        } else {
+            stack.remove(DataComponents.FIRE_RESISTANT);
+        }
     }
 
     public static boolean refreshIfOutdated(ItemStack stack, ToolKind toolKind, ToolConstructionData construction) {
@@ -128,6 +143,28 @@ public final class ToolStatBuilder {
 
     public static Optional<ToolStatProfile> profile(ItemStack stack) {
         return Optional.ofNullable(stack.get(ModDataComponents.TOOL_STAT_PROFILE.get()));
+    }
+
+    public static int traitLevel(ItemStack stack, ToolTrait trait) {
+        ToolConstructionData construction = stack.get(ModDataComponents.TOOL_CONSTRUCTION.get());
+        List<ResourceLocation> traits = construction == null
+                ? profile(stack).map(ToolStatProfile::traits).orElseGet(List::of)
+                : ToolTypeRegistry.toolType(construction.toolType())
+                .map(definition -> build(definition, construction).traits())
+                .orElseGet(List::of);
+        return (int) traits.stream().filter(trait.id()::equals).count();
+    }
+
+    public static boolean hasTrait(ItemStack stack, ToolTrait trait) {
+        return traitLevel(stack, trait) > 0;
+    }
+
+    /** Full strength at level I, then half as much from every repeated component. */
+    public static float traitPotency(int level) {
+        if (level <= 0) {
+            return 0.0F;
+        }
+        return 2.0F - (float) Math.pow(0.5D, level - 1);
     }
 
     public static ToolStatProfile profileForTooltip(ItemStack stack, ToolKind toolKind, ToolConstructionData construction) {
@@ -220,10 +257,13 @@ public final class ToolStatBuilder {
     }
 
     private static Optional<ToolTrait> primaryMaterialTrait(ResourceLocation material) {
-        if (MaterialCatalog.OAK.equals(material) || MaterialCatalog.DARK_OAK.equals(material)) {
+        if (MaterialCatalog.OAK.equals(material)
+                || MaterialCatalog.DARK_OAK.equals(material)
+                || MaterialCatalog.WOOD.equals(material)
+                || MaterialCatalog.PLANT_FIBER.equals(material)) {
             return Optional.of(ToolTrait.STEADY);
         }
-        if (MaterialCatalog.BLAZE.equals(material)) {
+        if (MaterialCatalog.BLAZE.equals(material) || MaterialCatalog.BLAZE_THREAD.equals(material)) {
             return Optional.of(ToolTrait.KINDLED);
         }
         if (MaterialCatalog.BREEZE.equals(material)) {
@@ -233,19 +273,19 @@ public final class ToolStatBuilder {
             return Optional.of(ToolTrait.REINFORCED);
         }
         if (MaterialCatalog.COPPER.equals(material)) {
-            return Optional.of(ToolTrait.CONDUCTIVE);
+            return Optional.of(ToolTrait.WORK_HARDENED);
         }
         if (MaterialCatalog.GOLD.equals(material)) {
             return Optional.of(ToolTrait.GILDED);
         }
         if (MaterialCatalog.DIAMOND.equals(material)) {
-            return Optional.of(ToolTrait.STABILIZED);
+            return Optional.of(ToolTrait.ADAMANT);
         }
         if (MaterialCatalog.EMERALD.equals(material)) {
             return Optional.of(ToolTrait.FORTUNATE);
         }
         if (MaterialCatalog.AMETHYST.equals(material)) {
-            return Optional.of(ToolTrait.FOCUSED);
+            return Optional.of(ToolTrait.RESONANT);
         }
         if (MaterialCatalog.RUBY.equals(material)) {
             return Optional.of(ToolTrait.KEEN);
@@ -254,62 +294,41 @@ public final class ToolStatBuilder {
             return Optional.of(ToolTrait.FOCUSED);
         }
         if (MaterialCatalog.TOPAZ.equals(material)) {
-            return Optional.of(ToolTrait.KEEN);
+            return Optional.of(ToolTrait.FORCEFUL);
         }
         if (MaterialCatalog.NETHERITE.equals(material)) {
             return Optional.of(ToolTrait.NETHER_FORGED);
         }
-        if (MaterialCatalog.NETHER.equals(material)) {
-            return Optional.of(ToolTrait.NETHER_TREATED);
-        }
-        if (MaterialCatalog.SCULK.equals(material)) {
-            return Optional.of(ToolTrait.ECHOING);
-        }
         if (MaterialCatalog.FLINT.equals(material)) {
             return Optional.of(ToolTrait.JAGGED);
+        }
+        if (MaterialCatalog.SPIDER_SILK.equals(material)) {
+            return Optional.of(ToolTrait.TENSIONED);
         }
         return Optional.empty();
     }
 
     private static List<ToolTrait> secondaryMaterialTraits(ResourceLocation material, TraitSlot slot) {
-        if (!slot.isSupportSlot()) {
-            return List.of();
-        }
-        if (MaterialCatalog.GOLD.equals(material)) {
-            return List.of(ToolTrait.CONDUCTIVE);
-        }
-        if (MaterialCatalog.COPPER.equals(material)
-                || MaterialCatalog.AMETHYST.equals(material)
-                || MaterialCatalog.SAPPHIRE.equals(material)) {
-            return List.of(ToolTrait.RESONANT);
-        }
-        if (MaterialCatalog.RUBY.equals(material) || MaterialCatalog.TOPAZ.equals(material)) {
-            return List.of(ToolTrait.FORTUNATE);
-        }
+        // Material identity no longer changes with the slot. Every component supplies
+        // the same primary trait and repeated components increase its level.
         return List.of();
     }
 
     private static void applyTraitEffects(MutableStats stats) {
-        applyTraitDebug(stats, ToolTrait.STEADY, "steady handling");
+        applyTraitDebug(stats, ToolTrait.STEADY, "+handling, +repair");
         int steady = stats.traitLevel(ToolTrait.STEADY);
         if (steady > 0) {
-            stats.multiplyDurability(multiplier(1.02F, steady));
-        }
-
-        applyTraitDebug(stats, ToolTrait.STURDY, "+durability, -speed");
-        int sturdy = stats.traitLevel(ToolTrait.STURDY);
-        if (sturdy > 0) {
-            stats.multiplyDurability(multiplier(1.08F, sturdy));
-            stats.multiplyMiningSpeed(multiplier(0.98F, sturdy));
-            stats.addAttackSpeed(-0.05F * sturdy);
+            float potency = traitPotency(steady);
+            stats.multiplyMiningSpeed(1.0F + 0.25F * potency);
+            stats.addAttackSpeed(0.35F * potency);
         }
 
         applyTraitDebug(stats, ToolTrait.SWIFT, "+speed, -durability");
         int swift = stats.traitLevel(ToolTrait.SWIFT);
         if (swift > 0) {
-            stats.addAttackSpeed(0.12F * swift);
-            stats.multiplyMiningSpeed(multiplier(1.02F, swift));
-            stats.multiplyDurability(multiplier(0.94F, swift));
+            float potency = traitPotency(swift);
+            stats.addAttackSpeed(0.75F * potency);
+            stats.multiplyMiningSpeed(1.0F + 0.60F * potency);
         }
 
         applyTraitDebug(stats, ToolTrait.KINDLED, "+fireproof, +nether");
@@ -317,40 +336,36 @@ public final class ToolStatBuilder {
         if (kindled > 0) {
             stats.fireResistant = true;
             stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
-            stats.multiplyDurability(multiplier(0.97F, kindled));
         }
 
-        applyTraitDebug(stats, ToolTrait.REINFORCED, "+durability");
+        applyTraitDebug(stats, ToolTrait.REINFORCED, "75% wear prevention, stronger repairs");
         int reinforced = stats.traitLevel(ToolTrait.REINFORCED);
         if (reinforced > 0) {
-            stats.multiplyDurability(multiplier(1.06F, reinforced));
+            stats.addAffinities(AFFINITY_ENCHANTING);
         }
 
-        applyTraitDebug(stats, ToolTrait.CONDUCTIVE, "+enchanting");
-        int conductive = stats.traitLevel(ToolTrait.CONDUCTIVE);
-        if (conductive > 0) {
-            stats.addAffinities(AFFINITY_ENCHANTING, AFFINITY_RESONANCE);
-            stats.multiplyDurability(multiplier(0.99F, conductive));
+        applyTraitDebug(stats, ToolTrait.WORK_HARDENED, "+output as condition falls");
+        int workHardened = stats.traitLevel(ToolTrait.WORK_HARDENED);
+        if (workHardened > 0) {
+            stats.addAffinities(AFFINITY_RESONANCE);
         }
 
         applyTraitDebug(stats, ToolTrait.RESONANT, "+resonance");
         int resonant = stats.traitLevel(ToolTrait.RESONANT);
         if (resonant > 0) {
             stats.addAffinities(AFFINITY_RESONANCE, AFFINITY_ENCHANTING);
-            stats.multiplyMiningSpeed(multiplier(1.005F, resonant));
         }
 
-        applyTraitDebug(stats, ToolTrait.GILDED, "+experience, +trade");
+        applyTraitDebug(stats, ToolTrait.GILDED, "+enchantment capacity");
         int gilded = stats.traitLevel(ToolTrait.GILDED);
         if (gilded > 0) {
             stats.addAffinities(AFFINITY_ENCHANTING, AFFINITY_TRADE);
         }
 
-        applyTraitDebug(stats, ToolTrait.STABILIZED, "+stability");
-        int stabilized = stats.traitLevel(ToolTrait.STABILIZED);
-        if (stabilized > 0) {
-            stats.multiplyDurability(multiplier(1.08F, stabilized));
-            stats.multiplyMiningSpeed(multiplier(1.01F, stabilized));
+        applyTraitDebug(stats, ToolTrait.ADAMANT, "+mining, +armor penetration");
+        int adamant = stats.traitLevel(ToolTrait.ADAMANT);
+        if (adamant > 0) {
+            stats.multiplyMiningSpeed(1.0F + 0.35F * traitPotency(adamant));
         }
 
         applyTraitDebug(stats, ToolTrait.FORTUNATE, "+luck");
@@ -362,28 +377,34 @@ public final class ToolStatBuilder {
         applyTraitDebug(stats, ToolTrait.KEEN, "+damage");
         int keen = stats.traitLevel(ToolTrait.KEEN);
         if (keen > 0) {
-            stats.addAttackDamage(0.15F * keen);
+            float potency = traitPotency(keen);
+            stats.multiplyMiningSpeed(1.0F + 0.50F * potency);
+            stats.multiplyPhysicalDamage(1.0F + 0.35F * potency);
+        }
+
+        applyTraitDebug(stats, ToolTrait.FORCEFUL, "+output, +wear");
+        int forceful = stats.traitLevel(ToolTrait.FORCEFUL);
+        if (forceful > 0) {
+            float potency = traitPotency(forceful);
+            stats.multiplyMiningSpeed(1.0F + 0.60F * potency);
+            stats.multiplyPhysicalDamage(1.0F + 0.60F * potency);
         }
 
         applyTraitDebug(stats, ToolTrait.JAGGED, "+damage, -durability");
         int jagged = stats.traitLevel(ToolTrait.JAGGED);
         if (jagged > 0) {
-            stats.addAttackDamage(0.10F * jagged);
-            stats.multiplyDurability(multiplier(0.96F, jagged));
-        }
-
-        applyTraitDebug(stats, ToolTrait.SURE_GRIP, "+control");
-        int sureGrip = stats.traitLevel(ToolTrait.SURE_GRIP);
-        if (sureGrip > 0) {
-            stats.addAttackSpeed(0.05F * sureGrip);
-            stats.multiplyMiningSpeed(multiplier(1.01F, sureGrip));
+            float potency = traitPotency(jagged);
+            stats.multiplyMiningSpeed(1.0F + 0.35F * potency);
+            stats.multiplyPhysicalDamage(1.0F + 0.35F * potency);
         }
 
         applyTraitDebug(stats, ToolTrait.FOCUSED, "+control, +enchanting");
         int focused = stats.traitLevel(ToolTrait.FOCUSED);
         if (focused > 0) {
             stats.addAffinities(AFFINITY_ENCHANT_CONTROL, AFFINITY_ENCHANTING, AFFINITY_RESONANCE);
-            stats.addAttackSpeed(0.03F * focused);
+            float potency = traitPotency(focused);
+            stats.addAttackSpeed(0.55F * potency);
+            stats.multiplyMiningSpeed(1.0F + 0.30F * potency);
         }
 
         applyTraitDebug(stats, ToolTrait.NETHER_FORGED, "+durability, +damage, +fireproof");
@@ -391,21 +412,9 @@ public final class ToolStatBuilder {
         if (netherForged > 0) {
             stats.fireResistant = true;
             stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
-            stats.multiplyDurability(multiplier(1.12F, netherForged));
-            stats.addAttackDamage(0.45F * netherForged);
-            stats.addAttackSpeed(-0.02F * netherForged);
-        }
-
-        applyTraitDebug(stats, ToolTrait.NETHER_TREATED, "+nether");
-        int netherTreated = stats.traitLevel(ToolTrait.NETHER_TREATED);
-        if (netherTreated > 0) {
-            stats.addAffinities(AFFINITY_FIRE, AFFINITY_NETHER);
-        }
-
-        applyTraitDebug(stats, ToolTrait.ECHOING, "+echo");
-        int echoing = stats.traitLevel(ToolTrait.ECHOING);
-        if (echoing > 0) {
-            stats.addAffinities(AFFINITY_SCULK, AFFINITY_SILENCE, AFFINITY_ECHO);
+            float potency = traitPotency(netherForged);
+            stats.multiplyDurability(1.0F + potency);
+            stats.multiplyPhysicalDamage(1.0F + 0.30F * potency);
         }
     }
 
@@ -670,15 +679,18 @@ public final class ToolStatBuilder {
         private float attackSpeedBonus;
         private float miningSpeedMultiplier = 1.0F;
         private float durabilityMultiplier = 1.0F;
+        private float physicalDamageMultiplier = 1.0F;
+        private final float tierAttackDamageBonus;
         private boolean fireResistant;
         private final Set<ResourceLocation> affinities = new LinkedHashSet<>();
         private final List<ResourceLocation> traits = new ArrayList<>();
         private final List<String> debugLines = new ArrayList<>();
 
-        private MutableStats(int baseMaxDamage, float attackDamageBonus, float attackSpeedBonus) {
+        private MutableStats(int baseMaxDamage, float attackDamageBonus, float attackSpeedBonus, float tierAttackDamageBonus) {
             this.baseMaxDamage = baseMaxDamage;
             this.attackDamageBonus = attackDamageBonus;
             this.attackSpeedBonus = attackSpeedBonus;
+            this.tierAttackDamageBonus = tierAttackDamageBonus;
         }
 
         public void addAffinities(ResourceLocation... values) {
@@ -719,6 +731,10 @@ public final class ToolStatBuilder {
             miningSpeedMultiplier *= multiplier;
         }
 
+        public void multiplyPhysicalDamage(float multiplier) {
+            physicalDamageMultiplier *= multiplier;
+        }
+
         public void addAttackDamage(float value) {
             attackDamageBonus += value;
         }
@@ -729,6 +745,11 @@ public final class ToolStatBuilder {
 
         public void setFireResistant() {
             fireResistant = true;
+        }
+
+        private float effectiveAttackDamageBonus() {
+            float totalBaseDamage = Math.max(0.0F, 1.0F + tierAttackDamageBonus + attackDamageBonus);
+            return totalBaseDamage * physicalDamageMultiplier - 1.0F - tierAttackDamageBonus;
         }
     }
 }

@@ -1,6 +1,6 @@
 {
   "type": "mobstoolforging:tool_visual_example",
-  "handle_material": "mobstoolforging:dark_oak",
+  "handle_material": "mobstoolforging:oak",
   "head_material": "mobstoolforging:diamond",
   "quality": 100,
   "tool_type": "mobstoolforging:pickaxe"
