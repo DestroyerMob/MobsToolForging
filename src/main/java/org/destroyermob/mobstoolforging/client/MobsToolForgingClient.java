@@ -190,6 +190,22 @@ public final class MobsToolForgingClient {
         event.register(NEXT_KNAPPING_TARGET);
     }
 
+    public static KeyMapping previousKnappingKey() {
+        return PREVIOUS_KNAPPING_TARGET;
+    }
+
+    public static KeyMapping nextKnappingKey() {
+        return NEXT_KNAPPING_TARGET;
+    }
+
+    public static boolean hasKnappingTarget() {
+        return knappingLookTarget(false) != null;
+    }
+
+    public static boolean cycleKnappingTargetFromController(int delta) {
+        return cycleKnappingTarget(delta, false);
+    }
+
     private static void registerShaders(RegisterShadersEvent event) {
         HeatRenderTypes.registerShader(event);
     }

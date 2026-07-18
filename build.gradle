@@ -102,6 +102,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly files('../BeyondControls/build/finalJars/controlify-3.0.1+beyond.22+1.21.1-neoforge.jar')
     annotationProcessor "net.fabricmc:sponge-mixin:0.15.2+mixin.0.8.7"
     compileOnly 'mezz.jei:jei-1.21.1-neoforge:19.27.0.340'
     compileOnly 'maven.modrinth:emi:1.1.24+1.21.1+neoforge'

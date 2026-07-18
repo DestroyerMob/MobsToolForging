@@ -6,7 +6,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.StonecutterBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -15,6 +14,7 @@ import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.AshBlock;
 import org.destroyermob.mobstoolforging.world.CrucibleBlock;
 import org.destroyermob.mobstoolforging.world.CrudeAnvilBlock;
+import org.destroyermob.mobstoolforging.world.DiamondSawBlock;
 import org.destroyermob.mobstoolforging.world.DryingRackBlock;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlock;
 import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlock;
@@ -44,9 +44,9 @@ public final class ModBlocks {
             "lapidary_table",
             () -> new LapidaryTableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONECUTTER).noOcclusion())
     );
-    public static final DeferredBlock<StonecutterBlock> DIAMOND_SAW = BLOCKS.register(
+    public static final DeferredBlock<DiamondSawBlock> DIAMOND_SAW = BLOCKS.register(
             "diamond_saw",
-            () -> new StonecutterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONECUTTER).noOcclusion())
+            () -> new DiamondSawBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONECUTTER).noOcclusion())
     );
     public static final DeferredBlock<SawmillBlock> SAWMILL = registerSawmill("sawmill", Blocks.OAK_PLANKS);
     public static final DeferredBlock<SawmillBlock> SPRUCE_SAWMILL = registerSawmill("spruce_sawmill", Blocks.SPRUCE_PLANKS);
