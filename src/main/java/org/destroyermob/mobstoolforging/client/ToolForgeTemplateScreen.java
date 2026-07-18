@@ -48,6 +48,27 @@ public class ToolForgeTemplateScreen extends Screen {
     }
 
     @Override
+    protected void init() {
+        super.init();
+        Layout layout = layout();
+        ControllerFocusButton first = null;
+        for (int index = 0; index < templates.size(); index++) {
+            int selectedIndex = index;
+            ForgeTemplateDefinition template = templates.get(index);
+            ControllerFocusButton button = addRenderableWidget(new ControllerFocusButton(
+                    recipeLeft(layout, index), recipeTop(layout, index), RECIPE_WIDTH, RECIPE_HEIGHT,
+                    template.displayName(), () -> selectTemplate(selectedIndex)
+            ));
+            if (first == null) {
+                first = button;
+            }
+        }
+        if (first != null) {
+            setInitialFocus(first);
+        }
+    }
+
+    @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         Layout layout = layout();
         graphics.blit(BACKGROUND, layout.left(), layout.top(), 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
@@ -58,6 +79,7 @@ public class ToolForgeTemplateScreen extends Screen {
         int shownIndex = hovered >= 0 ? hovered : previewIndex;
         ForgeTemplateDefinition hoveredTemplate = null;
         if (templates.isEmpty()) {
+            super.render(graphics, mouseX, mouseY, partialTick);
             return;
         }
         for (int i = 0; i < templates.size(); i++) {
@@ -73,6 +95,7 @@ public class ToolForgeTemplateScreen extends Screen {
 
         ItemStack shownStack = previewStack(templates.get(Math.min(shownIndex, templates.size() - 1)));
         graphics.renderItem(shownStack, layout.left() + OUTPUT_LEFT, layout.top() + OUTPUT_TOP);
+        super.render(graphics, mouseX, mouseY, partialTick);
 
         if (hoveredTemplate != null) {
             graphics.renderTooltip(font, hoveredTemplate.displayName(), mouseX, mouseY);
@@ -89,15 +112,23 @@ public class ToolForgeTemplateScreen extends Screen {
             Layout layout = layout();
             for (int i = 0; i < templates.size(); i++) {
                 if (contains(mouseX, mouseY, recipeLeft(layout, i), recipeTop(layout, i), RECIPE_WIDTH, RECIPE_HEIGHT)) {
-                    previewIndex = i;
-                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
-                    PacketDistributor.sendToServer(new SetForgeTemplatePayload(forgePos, templates.get(i).id()));
-                    onClose();
+                    selectTemplate(i);
                     return true;
                 }
             }
         }
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    private void selectTemplate(int index) {
+        if (index < 0 || index >= templates.size()) {
+            return;
+        }
+        previewIndex = index;
+        Minecraft.getInstance().getSoundManager().play(
+                SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
+        PacketDistributor.sendToServer(new SetForgeTemplatePayload(forgePos, templates.get(index).id()));
+        onClose();
     }
 
     @Override

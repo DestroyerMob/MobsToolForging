@@ -2,6 +2,7 @@ package org.destroyermob.mobstoolforging.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -42,6 +43,12 @@ public class PatternCreationStationScreen extends AbstractContainerScreen<Patter
         menu.registerUpdateListener(this::containerChanged);
         this.titleLabelY--;
         containerChanged();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        rebuildPatternControls(false);
     }
 
     @Override
@@ -130,9 +137,8 @@ public class PatternCreationStationScreen extends AbstractContainerScreen<Patter
                 int relativeIndex = index - startIndex;
                 double relativeMouseX = mouseX - (double)(recipesLeft + relativeIndex % RECIPES_COLUMNS * RECIPE_WIDTH);
                 double relativeMouseY = mouseY - (double)(recipesTop + relativeIndex / RECIPES_COLUMNS * RECIPE_HEIGHT);
-                if (relativeMouseX >= 0.0 && relativeMouseY >= 0.0 && relativeMouseX < RECIPE_WIDTH && relativeMouseY < RECIPE_HEIGHT && menu.clickMenuButton(minecraft.player, index)) {
-                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
-                    minecraft.gameMode.handleInventoryButtonClick(menu.containerId, index);
+                if (relativeMouseX >= 0.0 && relativeMouseY >= 0.0 && relativeMouseX < RECIPE_WIDTH && relativeMouseY < RECIPE_HEIGHT) {
+                    selectPattern(index);
                     return true;
                 }
             }
@@ -155,6 +161,7 @@ public class PatternCreationStationScreen extends AbstractContainerScreen<Patter
             scrollOffs = ((float)mouseY - (float)top - 7.5F) / ((float)(bottom - top) - SCROLLER_HEIGHT);
             scrollOffs = Mth.clamp(scrollOffs, 0.0F, 1.0F);
             startIndex = (int)((double)(scrollOffs * (float)getOffscreenRows()) + 0.5) * RECIPES_COLUMNS;
+            rebuildPatternControls(false);
             return true;
         }
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
@@ -167,6 +174,7 @@ public class PatternCreationStationScreen extends AbstractContainerScreen<Patter
             float scrollAmount = (float)scrollY / (float)offscreenRows;
             scrollOffs = Mth.clamp(scrollOffs - scrollAmount, 0.0F, 1.0F);
             startIndex = (int)((double)(scrollOffs * (float)offscreenRows) + 0.5) * RECIPES_COLUMNS;
+            rebuildPatternControls(false);
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
@@ -186,5 +194,66 @@ public class PatternCreationStationScreen extends AbstractContainerScreen<Patter
             scrollOffs = 0.0F;
             startIndex = 0;
         }
+        if (this.minecraft != null) {
+            rebuildPatternControls(false);
+        }
+    }
+
+    private void rebuildPatternControls(boolean focusFirst) {
+        this.clearWidgets();
+        if (!displayPatterns) {
+            return;
+        }
+        int recipesLeft = leftPos + RECIPES_X;
+        int recipesTop = topPos + RECIPES_Y;
+        int lastVisibleIndex = Math.min(startIndex + VISIBLE_RECIPES, menu.getNumPatterns());
+        ControllerFocusButton first = null;
+        for (int index = startIndex; index < lastVisibleIndex; index++) {
+            int selectedIndex = index;
+            int relativeIndex = index - startIndex;
+            ItemStack display = menu.getPatternDisplayStack(index);
+            ControllerFocusButton button = addRenderableWidget(new ControllerFocusButton(
+                    recipesLeft + relativeIndex % RECIPES_COLUMNS * RECIPE_WIDTH,
+                    recipesTop + relativeIndex / RECIPES_COLUMNS * RECIPE_HEIGHT,
+                    RECIPE_WIDTH, RECIPE_HEIGHT,
+                    display.isEmpty() ? Component.translatable("screen.mobstoolforging.pattern") : display.getHoverName(),
+                    () -> selectPattern(selectedIndex)
+            ));
+            if (first == null) {
+                first = button;
+            }
+        }
+        if (isScrollBarActive()) {
+            addRenderableWidget(Button.builder(Component.literal("▲"), button -> scrollRows(-1))
+                    .bounds(leftPos + imageWidth + 4, topPos + 20, 20, 18).build());
+            addRenderableWidget(Button.builder(Component.literal("▼"), button -> scrollRows(1))
+                    .bounds(leftPos + imageWidth + 4, topPos + 42, 20, 18).build());
+        }
+        if (focusFirst && first != null) {
+            setInitialFocus(first);
+        }
+    }
+
+    private void selectPattern(int index) {
+        if (minecraft == null || minecraft.player == null || minecraft.gameMode == null
+                || index < 0 || index >= menu.getNumPatterns()
+                || !menu.clickMenuButton(minecraft.player, index)) {
+            return;
+        }
+        Minecraft.getInstance().getSoundManager().play(
+                SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
+        minecraft.gameMode.handleInventoryButtonClick(menu.containerId, index);
+    }
+
+    private void scrollRows(int rows) {
+        int offscreenRows = getOffscreenRows();
+        if (offscreenRows <= 0) {
+            return;
+        }
+        int currentRow = startIndex / RECIPES_COLUMNS;
+        int nextRow = Mth.clamp(currentRow + rows, 0, offscreenRows);
+        startIndex = nextRow * RECIPES_COLUMNS;
+        scrollOffs = nextRow / (float) offscreenRows;
+        rebuildPatternControls(true);
     }
 }
