@@ -43,6 +43,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         );
         tag(ModTags.Items.MATERIALS).addTag(ModTags.Items.MATERIALS_METALS).addTag(ModTags.Items.MATERIALS_GEMS);
         tag(ModTags.Items.MATERIALS_METALS)
+                .add(ModItems.STEEL_INGOT.get(), ModItems.BRONZE_INGOT.get())
                 .addTag(Tags.Items.INGOTS_IRON)
                 .addTag(Tags.Items.INGOTS_GOLD)
                 .addTag(Tags.Items.INGOTS_COPPER);

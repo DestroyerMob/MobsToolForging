@@ -2,20 +2,20 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "H": {
-      "item": "mobstoolforging:lava_heating_forge"
+    "B": {
+      "item": "minecraft:polished_blackstone_bricks"
     },
-    "L": {
-      "item": "minecraft:lava_bucket"
+    "F": {
+      "item": "minecraft:blast_furnace"
     },
-    "O": {
-      "item": "minecraft:obsidian"
+    "I": {
+      "item": "minecraft:iron_ingot"
     }
   },
   "pattern": [
-    "OLO",
-    "OHO",
-    "OOO"
+    "BIB",
+    "BFB",
+    "BBB"
   ],
   "result": {
     "count": 1,

@@ -50,6 +50,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private static final String LOOSE_WORK_RECIPE_TAG = "LooseWorkRecipe";
     private static final String ABRASIVE_STACK_TAG = "AbrasiveStack";
     private static final String BENCH_STACKS_TAG = "BenchStacks";
+    private static final String REFORGE_STACK_TAG = "ReforgeStack";
     private static final int MAX_BENCH_STACKS = 9;
     private static final int MAX_LINKED_PATTERN_RACKS = 8;
     private static final int TIMED_HIT_QUALITY_BONUS = 9;
@@ -74,6 +75,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     private ItemStack directOutputStack = ItemStack.EMPTY;
     private ItemStack abrasiveStack = ItemStack.EMPTY;
     private final List<ItemStack> benchStacks = new ArrayList<>();
+    private ItemStack reforgeStack = ItemStack.EMPTY;
     private int materialCount;
     private int hitCount;
     private int qualityScore = ForgingQuality.DEFAULT_SCORE;
@@ -216,7 +218,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean isEmpty() {
-        return directOutputStack.isEmpty() && abrasiveStack.isEmpty() && benchStacks.isEmpty() && templateId == null && materialId == null && materialItemId == null && materialHeatData == null && startingHeatLevel == HeatLevel.NONE && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
+        return directOutputStack.isEmpty() && abrasiveStack.isEmpty() && benchStacks.isEmpty() && reforgeStack.isEmpty() && templateId == null && materialId == null && materialItemId == null && materialHeatData == null && startingHeatLevel == HeatLevel.NONE && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
     }
 
     public boolean isComplete() {
@@ -241,11 +243,11 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public boolean canChangeTemplate() {
-        return directOutputStack.isEmpty() && benchStacks.isEmpty() && materialId == null && materialItemId == null && materialHeatData == null && startingHeatLevel == HeatLevel.NONE && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
+        return directOutputStack.isEmpty() && benchStacks.isEmpty() && reforgeStack.isEmpty() && materialId == null && materialItemId == null && materialHeatData == null && startingHeatLevel == HeatLevel.NONE && looseWorkRecipeId == null && materialCount == 0 && hitCount == 0;
     }
 
     public boolean hasPlacedWork() {
-        return !abrasiveStack.isEmpty() || !benchStacks.isEmpty() || materialId != null || materialItemId != null || materialHeatData != null || startingHeatLevel != HeatLevel.NONE || looseWorkRecipeId != null || materialCount > 0 || hitCount > 0;
+        return !abrasiveStack.isEmpty() || !benchStacks.isEmpty() || !reforgeStack.isEmpty() || materialId != null || materialItemId != null || materialHeatData != null || startingHeatLevel != HeatLevel.NONE || looseWorkRecipeId != null || materialCount > 0 || hitCount > 0;
     }
 
     public boolean selectTemplate(ForgeTemplateDefinition template) {
@@ -349,6 +351,52 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 && !isComplete();
     }
 
+    public boolean isReforgeCandidate(ItemStack stack) {
+        if (!workstationKind().isSmithingAnvilLike() || stack.isEmpty() || !reforgeStack.isEmpty() || hasPlacedWork()) {
+            return false;
+        }
+        ForgeTemplateDefinition template = template();
+        ResourceLocation partMaterial = reforgeMaterial(stack);
+        String partType = reforgePartType(stack);
+        if (template == null || partMaterial == null || partType == null || reforgePartIsCoated(stack)
+                || !template.partType().equals(partType) || !template.allowsMaterial(partMaterial)) {
+            return false;
+        }
+        if (MaterialCatalog.definition(partMaterial).filter(material -> material.category() == MaterialCategory.METAL).isEmpty()) {
+            return false;
+        }
+        ItemStack expected = template.outputStack(partMaterial, reforgeQuality(stack));
+        return !expected.isEmpty() && expected.is(stack.getItem());
+    }
+
+    public boolean canPlaceReforgePart(ItemStack stack) {
+        if (!isReforgeCandidate(stack) || level == null) {
+            return false;
+        }
+        ResourceLocation partMaterial = reforgeMaterial(stack);
+        ToolMaterialDefinition material = partMaterial == null ? null : MaterialCatalog.definition(partMaterial).orElse(null);
+        return material != null && WorkpieceHeat.isForgeReady(stack, level, WorkshopHeat.minimumForgeTemperature(material, template()));
+    }
+
+    public boolean placeReforgePart(ItemStack stack) {
+        if (!canPlaceReforgePart(stack)) {
+            return false;
+        }
+        ItemStack placed = stack.copyWithCount(1);
+        ResourceLocation partMaterial = reforgeMaterial(placed);
+        ToolMaterialDefinition material = MaterialCatalog.definition(partMaterial).orElseThrow();
+        reforgeStack = freezeStationStackHeat(placed);
+        materialId = partMaterial;
+        materialItemId = BuiltInRegistries.ITEM.getKey(placed.getItem());
+        captureStartingHeat(placed, material);
+        captureMaterialHeat(placed);
+        initializeQuality(material);
+        materialCount = template().requiredMaterials();
+        stack.shrink(1);
+        sync();
+        return true;
+    }
+
     public boolean hammer(boolean precisionTool) {
         if (!canHammer()) {
             return false;
@@ -370,8 +418,13 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (isComplete() && lapidaryCoatingWork().isPresent()) {
             return resumeStationStackHeat(lapidaryCoatingOutput());
         }
+        if (isComplete() && !reforgeStack.isEmpty()) {
+            return applyMaterialHeat(reforgedOutput());
+        }
         ForgeTemplateDefinition template = template();
-        return isComplete() && template != null && materialId != null ? applyMaterialHeat(template.outputStack(materialId, completedQualityScore())) : ItemStack.EMPTY;
+        return isComplete() && template != null && materialId != null
+                ? applyMaterialHeat(withForgedMetallurgy(template.outputStack(materialId, completedQualityScore()), materialId))
+                : ItemStack.EMPTY;
     }
 
     public boolean hasDirectOutput() {
@@ -385,6 +438,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
         if (isComplete()) {
             return outputStack();
         }
+        if (!reforgeStack.isEmpty()) {
+            return applyMaterialHeat(reforgeStack.copy());
+        }
         if (hasLapidaryCoatingBase() && (materialCount <= 0 || materialItemId == null)) {
             return lapidaryCoatingBaseStack();
         }
@@ -395,10 +451,75 @@ public class ToolForgeBlockEntity extends BlockEntity {
     }
 
     public ItemStack materialDropStack() {
+        if (!reforgeStack.isEmpty()) {
+            return resumeStationStackHeat(reforgeStack.copy());
+        }
         if (materialCount <= 0 || materialItemId == null) {
             return ItemStack.EMPTY;
         }
         return applyMaterialHeat(new ItemStack(BuiltInRegistries.ITEM.get(materialItemId), materialCount));
+    }
+
+    private ItemStack reforgedOutput() {
+        ForgeTemplateDefinition template = template();
+        if (template == null || materialId == null || reforgeStack.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack output = template.outputStack(materialId, completedQualityScore());
+        if (output.isEmpty()) {
+            return output;
+        }
+        ToolExternalComponents.copyCompatibleExternalComponents(reforgeStack, output);
+        MetallurgyData data = reforgeStack.get(ModDataComponents.METALLURGY.get());
+        output.set(ModDataComponents.METALLURGY.get(), (data == null ? MetallurgyData.forged(materialId) : data).reforged());
+        output.remove(ModDataComponents.TOOL_PART_WEAR.get());
+        return output;
+    }
+
+    private static ItemStack withForgedMetallurgy(ItemStack stack, ResourceLocation material) {
+        if (!stack.isEmpty() && (stack.get(ModDataComponents.TOOL_PART.get()) != null || stack.get(ModDataComponents.ARMOR_PART.get()) != null)
+                && stack.get(ModDataComponents.METALLURGY.get()) == null) {
+            stack.set(ModDataComponents.METALLURGY.get(), MetallurgyData.forged(material));
+        }
+        return stack;
+    }
+
+    @Nullable
+    private static ResourceLocation reforgeMaterial(ItemStack stack) {
+        ToolPartData tool = stack.get(ModDataComponents.TOOL_PART.get());
+        if (tool != null) {
+            return tool.materialId();
+        }
+        ArmorPartData armor = stack.get(ModDataComponents.ARMOR_PART.get());
+        return armor == null ? null : armor.materialId();
+    }
+
+    @Nullable
+    private static String reforgePartType(ItemStack stack) {
+        ToolPartData tool = stack.get(ModDataComponents.TOOL_PART.get());
+        if (tool != null) {
+            return tool.partType();
+        }
+        ArmorPartData armor = stack.get(ModDataComponents.ARMOR_PART.get());
+        return armor == null ? null : armor.partType();
+    }
+
+    private static int reforgeQuality(ItemStack stack) {
+        ToolPartData tool = stack.get(ModDataComponents.TOOL_PART.get());
+        if (tool != null) {
+            return tool.quality();
+        }
+        ArmorPartData armor = stack.get(ModDataComponents.ARMOR_PART.get());
+        return armor == null ? ForgingQuality.DEFAULT_SCORE : armor.quality();
+    }
+
+    private static boolean reforgePartIsCoated(ItemStack stack) {
+        ToolPartData tool = stack.get(ModDataComponents.TOOL_PART.get());
+        if (tool != null) {
+            return tool.isCoated();
+        }
+        ArmorPartData armor = stack.get(ModDataComponents.ARMOR_PART.get());
+        return armor != null && armor.isCoated();
     }
 
     public ItemStack removeOutput() {
@@ -822,6 +943,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
         startingHeatLevel = HeatLevel.NONE;
         looseWorkRecipeId = null;
         directOutputStack = ItemStack.EMPTY;
+        reforgeStack = ItemStack.EMPTY;
         benchStacks.clear();
         materialCount = 0;
         hitCount = 0;
@@ -978,10 +1100,12 @@ public class ToolForgeBlockEntity extends BlockEntity {
         ToolPartData toolPartData = output.get(ModDataComponents.TOOL_PART.get());
         if (toolPartData != null) {
             output.set(ModDataComponents.TOOL_PART.get(), toolPartData.withQuality(quality));
+            withForgedMetallurgy(output, toolPartData.materialId());
         }
         ArmorPartData partData = output.get(ModDataComponents.ARMOR_PART.get());
         if (partData != null) {
             output.set(ModDataComponents.ARMOR_PART.get(), partData.withQuality(quality));
+            withForgedMetallurgy(output, partData.materialId());
         }
         ArmorConstructionData armorData = output.get(ModDataComponents.ARMOR_CONSTRUCTION.get());
         if (armorData != null) {
@@ -1545,6 +1669,9 @@ public class ToolForgeBlockEntity extends BlockEntity {
             }
             tag.put(BENCH_STACKS_TAG, stacks);
         }
+        if (!reforgeStack.isEmpty()) {
+            tag.put(REFORGE_STACK_TAG, reforgeStack.saveOptional(registries));
+        }
         tag.putInt(MATERIAL_COUNT_TAG, materialCount);
         tag.putInt(HIT_COUNT_TAG, hitCount);
         tag.putFloat(DISPLAY_ROTATION_TAG, displayRotationDegrees);
@@ -1595,6 +1722,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
                 }
             }
         }
+        reforgeStack = tag.contains(REFORGE_STACK_TAG) ? ItemStack.parseOptional(registries, tag.getCompound(REFORGE_STACK_TAG)) : ItemStack.EMPTY;
         materialCount = tag.getInt(MATERIAL_COUNT_TAG);
         hitCount = tag.getInt(HIT_COUNT_TAG);
         displayRotationDegrees = tag.getFloat(DISPLAY_ROTATION_TAG);

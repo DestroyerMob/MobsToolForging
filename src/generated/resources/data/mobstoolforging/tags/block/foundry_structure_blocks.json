@@ -1,0 +1,13 @@
+{
+  "values": [
+    "minecraft:blackstone",
+    "minecraft:polished_blackstone",
+    "minecraft:polished_blackstone_bricks",
+    "minecraft:cracked_polished_blackstone_bricks",
+    "minecraft:chiseled_polished_blackstone",
+    "minecraft:gilded_blackstone",
+    "mobstoolforging:foundry_fuel_tank",
+    "mobstoolforging:foundry_glass",
+    "mobstoolforging:foundry_drain"
+  ]
+}

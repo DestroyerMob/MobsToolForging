@@ -11,6 +11,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.item.FireStickItem;
+import org.destroyermob.mobstoolforging.item.CastingMoldItem;
 import org.destroyermob.mobstoolforging.item.LeatherStationBlockItem;
 import org.destroyermob.mobstoolforging.item.LapidaryTableBlockItem;
 import org.destroyermob.mobstoolforging.item.ModularArmorPartItem;
@@ -194,6 +195,15 @@ public final class ModItems {
             "foundry_forge",
             () -> new BlockItem(ModBlocks.FOUNDRY_FORGE.get(), new Item.Properties())
     );
+    public static final DeferredItem<BlockItem> FOUNDRY_FUEL_TANK = ITEMS.register(
+            "foundry_fuel_tank",
+            () -> new BlockItem(ModBlocks.FOUNDRY_FUEL_TANK.get(), new Item.Properties())
+    );
+    public static final DeferredItem<BlockItem> FOUNDRY_GLASS = blockItem("foundry_glass", ModBlocks.FOUNDRY_GLASS);
+    public static final DeferredItem<BlockItem> FOUNDRY_DRAIN = blockItem("foundry_drain", ModBlocks.FOUNDRY_DRAIN);
+    public static final DeferredItem<BlockItem> FOUNDRY_FAUCET = blockItem("foundry_faucet", ModBlocks.FOUNDRY_FAUCET);
+    public static final DeferredItem<BlockItem> FOUNDRY_CASTING_TABLE = blockItem("foundry_casting_table", ModBlocks.FOUNDRY_CASTING_TABLE);
+    public static final DeferredItem<BlockItem> FOUNDRY_CASTING_BASIN = blockItem("foundry_casting_basin", ModBlocks.FOUNDRY_CASTING_BASIN);
     public static final DeferredItem<BlockItem> ASH = blockItem("ash", ModBlocks.ASH);
     public static final DeferredItem<Item> SMITHING_HAMMER = ITEMS.register(
             "smithing_hammer",
@@ -225,6 +235,14 @@ public final class ModItems {
     );
     public static final DeferredItem<Item> DIAMOND_POWDER = ITEMS.register(
             "diamond_powder",
+            () -> new Item(new Item.Properties())
+    );
+    public static final DeferredItem<Item> STEEL_INGOT = ITEMS.register(
+            "steel_ingot",
+            () -> new Item(new Item.Properties())
+    );
+    public static final DeferredItem<Item> BRONZE_INGOT = ITEMS.register(
+            "bronze_ingot",
             () -> new Item(new Item.Properties())
     );
     public static final DeferredItem<Item> PATTERN_BOARD = ITEMS.register(
@@ -326,6 +344,10 @@ public final class ModItems {
     public static final DeferredItem<ToolTemplateItem> TEMPLATE_PATTERN = ITEMS.register(
             "template_pattern",
             () -> new ToolTemplateItem(new Item.Properties())
+    );
+    public static final DeferredItem<CastingMoldItem> CASTING_MOLD = ITEMS.register(
+            "casting_mold",
+            () -> new CastingMoldItem(new Item.Properties().stacksTo(1).fireResistant())
     );
     public static final DeferredItem<ModularToolPartItem> SWORD_BLADE = ITEMS.register(
             "sword_blade",

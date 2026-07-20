@@ -18,6 +18,7 @@ public final class ModTags {
         public static final TagKey<Block> SAWMILLS = blockTag("workstations/sawmills");
         public static final TagKey<Block> LEATHER_STATIONS = blockTag("workstations/leather_stations");
         public static final TagKey<Block> DRYING_RACKS = blockTag("workstations/drying_racks");
+        public static final TagKey<Block> FOUNDRY_STRUCTURE_BLOCKS = blockTag("foundry_structure_blocks");
         public static final TagKey<Block> CARRY_ON_BLOCK_BLACKLIST = TagKey.create(
                 Registries.BLOCK,
                 ResourceLocation.fromNamespaceAndPath("carryon", "block_blacklist")

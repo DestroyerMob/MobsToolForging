@@ -21,6 +21,7 @@ import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorStatsCatalog;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.MetallurgyTooltips;
 
 public class ModularBootsItem extends ArmorItem implements ModularArmorItem {
     public ModularBootsItem(Holder<ArmorMaterial> material, Properties properties) {
@@ -125,6 +126,9 @@ public class ModularBootsItem extends ArmorItem implements ModularArmorItem {
                 "tooltip.mobstoolforging.coating_base",
                 MaterialCatalog.displayName(base)
         ).withStyle(ChatFormatting.DARK_GRAY)));
+        if (flag.hasShiftDown()) {
+            MetallurgyTooltips.appendToolParts(tooltip, stack);
+        }
     }
 
     @Override

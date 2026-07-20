@@ -32,7 +32,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
-import org.destroyermob.mobstoolforging.registry.ModItems;
 
 public class FoundryForgeBlock extends BaseEntityBlock {
     public static final MapCodec<FoundryForgeBlock> CODEC = simpleCodec(FoundryForgeBlock::new);
@@ -71,26 +70,10 @@ public class FoundryForgeBlock extends BaseEntityBlock {
             return;
         }
         if (random.nextFloat() < 0.55F) {
-            level.addParticle(
-                    ParticleTypes.FLAME,
-                    pos.getX() + 0.5D + (random.nextDouble() - 0.5D) * 0.24D,
-                    pos.getY() + 0.42D,
-                    pos.getZ() + 0.5D + (random.nextDouble() - 0.5D) * 0.24D,
-                    0.0D,
-                    0.02D,
-                    0.0D
-            );
+            level.addParticle(ParticleTypes.FLAME, pos.getX() + 0.5D, pos.getY() + 0.42D, pos.getZ() + 0.5D, 0.0D, 0.02D, 0.0D);
         }
         if (random.nextFloat() < 0.35F) {
-            level.addParticle(
-                    ParticleTypes.LAVA,
-                    pos.getX() + 0.5D + (random.nextDouble() - 0.5D) * 0.18D,
-                    pos.getY() + 0.55D,
-                    pos.getZ() + 0.5D + (random.nextDouble() - 0.5D) * 0.18D,
-                    0.0D,
-                    0.0D,
-                    0.0D
-            );
+            level.addParticle(ParticleTypes.LAVA, pos.getX() + 0.5D, pos.getY() + 0.55D, pos.getZ() + 0.5D, 0.0D, 0.0D, 0.0D);
         }
     }
 
@@ -104,32 +87,41 @@ public class FoundryForgeBlock extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof FoundryForgeBlockEntity forge)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand) && !canHandleItem(stack, forge)) {
-            return EmptyMainHandInteractions.itemResult(useWithoutItem(state, level, pos, player, hitResult), level);
-        }
         if (stack.is(Items.LAVA_BUCKET)) {
-            if (level.isClientSide) {
-                return ItemInteractionResult.SUCCESS;
+            if (!level.isClientSide) {
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_lava_use_tank"));
             }
-            forge.acceptLavaFuel();
-            consumeLavaBucket(player, hand, stack);
-            level.playSound(null, pos, SoundEvents.BUCKET_EMPTY_LAVA, SoundSource.BLOCKS, 0.8F, 1.0F);
-            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_lava_added"));
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+        if (!FoundryForgeBlockEntity.isMeltable(stack)) {
+            if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand)) {
+                return EmptyMainHandInteractions.itemResult(useWithoutItem(state, level, pos, player, hitResult), level);
+            }
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        if (!forge.refreshStructure()) {
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_unformed"));
             return ItemInteractionResult.CONSUME;
         }
-        if (stack.is(ModItems.CRUCIBLE.get())) {
-            if (level.isClientSide) {
-                return ItemInteractionResult.SUCCESS;
-            }
-            if (forge.acceptCrucible(stack)) {
-                level.playSound(null, pos, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 0.55F, 0.9F);
-                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_crucible_added"));
-            } else {
-                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_crucible_busy"));
-            }
-            return ItemInteractionResult.CONSUME;
+        int accepted = forge.acceptSolid(stack);
+        if (accepted <= 0) {
+            DebugFeedback.actionBar(player, Component.translatable(
+                    "message.mobstoolforging.foundry_input_full",
+                    forge.moltenAmountMb() + forge.solidReservedMb(),
+                    forge.fluidCapacityMb()
+            ));
+        } else {
+            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.55F, 0.75F);
+            DebugFeedback.actionBar(player, Component.translatable(
+                    "message.mobstoolforging.foundry_input_added",
+                    accepted,
+                    forge.solidItemCount()
+            ));
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return ItemInteractionResult.CONSUME;
     }
 
     @Override
@@ -137,31 +129,34 @@ public class FoundryForgeBlock extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof FoundryForgeBlockEntity forge)) {
             return InteractionResult.PASS;
         }
-        if (EmptyMainHandInteractions.shouldDeferToOffhand(player, stack -> canHandleItem(stack, forge))) {
-            return InteractionResult.PASS;
-        }
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
-        if (forge.hasCrucible()) {
-            ItemStack crucible = forge.removeCrucible();
-            if (!player.getInventory().add(crucible)) {
-                player.drop(crucible, false);
-            }
-            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.5F, 1.0F);
+        if (!forge.refreshStructure()) {
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_unformed"));
             return InteractionResult.CONSUME;
         }
-        DebugFeedback.actionBar(player, Component.translatable(forge.isLit() ? "message.mobstoolforging.foundry_lit" : "message.mobstoolforging.foundry_status"));
+        DebugFeedback.actionBar(player, Component.translatable(
+                forge.isLit() && forge.hasSufficientTemperature()
+                        ? "message.mobstoolforging.foundry_lit"
+                        : "message.mobstoolforging.foundry_status",
+                forge.structureWidth(),
+                forge.structureDepth(),
+                forge.structureHeight(),
+                forge.solidItemCount(),
+                forge.moltenAmountMb(),
+                forge.fluidCapacityMb(),
+                forge.connectedFuelMb(),
+                String.format(java.util.Locale.ROOT, "%.0f°C", forge.activeFuelTemperatureC()),
+                String.format(java.util.Locale.ROOT, "%.0f°C", forge.currentMeltingPointC())
+        ));
         return InteractionResult.CONSUME;
     }
 
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof FoundryForgeBlockEntity forge) {
-            ItemStack crucible = forge.crucibleDropStack();
-            if (!crucible.isEmpty()) {
-                Block.popResource(level, pos, crucible);
-            }
+            forge.solidRenderStacks().forEach(stack -> Block.popResource(level, pos, stack));
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }
@@ -179,24 +174,5 @@ public class FoundryForgeBlock extends BaseEntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
-    }
-
-    private static boolean canHandleItem(ItemStack stack, FoundryForgeBlockEntity forge) {
-        return stack.is(Items.LAVA_BUCKET) || forge.canAcceptCrucible(stack);
-    }
-
-    private static void consumeLavaBucket(Player player, InteractionHand hand, ItemStack stack) {
-        if (player.getAbilities().instabuild) {
-            return;
-        }
-        if (stack.getCount() == 1) {
-            player.setItemInHand(hand, new ItemStack(Items.BUCKET));
-            return;
-        }
-        stack.shrink(1);
-        ItemStack bucket = new ItemStack(Items.BUCKET);
-        if (!player.getInventory().add(bucket)) {
-            player.drop(bucket, false);
-        }
     }
 }

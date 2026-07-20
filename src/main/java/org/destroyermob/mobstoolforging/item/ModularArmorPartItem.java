@@ -10,6 +10,9 @@ import net.minecraft.world.item.TooltipFlag;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.Metallurgy;
+import org.destroyermob.mobstoolforging.world.MetallurgyTooltips;
+import org.destroyermob.mobstoolforging.world.ForgingQuality;
 import org.destroyermob.mobstoolforging.world.ToolStackNames;
 
 public class ModularArmorPartItem extends Item {
@@ -69,10 +72,16 @@ public class ModularArmorPartItem extends Item {
                     "tooltip.mobstoolforging.coating_base",
                     MaterialCatalog.displayName(baseMaterial)
             ).withStyle(ChatFormatting.DARK_GRAY)));
+            int effectiveQuality = Metallurgy.adjustedQuality(stack, data.quality());
             tooltip.add(Component.translatable("tooltip.mobstoolforging.quality")
                     .withStyle(ChatFormatting.DARK_GRAY)
                     .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
-                    .append(data.qualityLevel().displayName()));
+                    .append(ForgingQuality.fromScore(effectiveQuality).displayName()));
+            if (flag.hasShiftDown()) {
+                tooltip.add(Component.translatable("tooltip.mobstoolforging.workmanship_score", effectiveQuality, data.quality())
+                        .withStyle(ChatFormatting.DARK_GRAY));
+            }
+            MetallurgyTooltips.appendPart(tooltip, stack, flag.hasShiftDown());
         }
     }
 }

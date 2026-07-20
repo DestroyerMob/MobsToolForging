@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_lava_bucket": {
+    "has_blast_furnace": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:lava_bucket"
+            "items": "minecraft:blast_furnace"
           }
         ]
       },
@@ -21,7 +21,7 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_lava_bucket"
+      "has_blast_furnace"
     ]
   ],
   "rewards": {

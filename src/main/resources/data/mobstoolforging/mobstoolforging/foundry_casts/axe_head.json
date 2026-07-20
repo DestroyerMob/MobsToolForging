@@ -1,0 +1,6 @@
+{
+  "input": { "item": "mobstoolforging:axe_head" },
+  "template": "mobstoolforging:axe_head",
+  "gold_amount": 180,
+  "amount": 180
+}

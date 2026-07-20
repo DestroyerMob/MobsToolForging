@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
@@ -17,6 +18,10 @@ import org.destroyermob.mobstoolforging.world.CrudeAnvilBlock;
 import org.destroyermob.mobstoolforging.world.DiamondSawBlock;
 import org.destroyermob.mobstoolforging.world.DryingRackBlock;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlock;
+import org.destroyermob.mobstoolforging.world.FoundryCastingBlock;
+import org.destroyermob.mobstoolforging.world.FoundryDrainBlock;
+import org.destroyermob.mobstoolforging.world.FoundryFaucetBlock;
+import org.destroyermob.mobstoolforging.world.FoundryFuelTankBlock;
 import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.KnappingFlintBlock;
@@ -189,7 +194,31 @@ public final class ModBlocks {
     );
     public static final DeferredBlock<FoundryForgeBlock> FOUNDRY_FORGE = BLOCKS.register(
             "foundry_forge",
-            () -> new FoundryForgeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).noOcclusion())
+            () -> new FoundryForgeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE_BRICKS).noOcclusion())
+    );
+    public static final DeferredBlock<FoundryFuelTankBlock> FOUNDRY_FUEL_TANK = BLOCKS.register(
+            "foundry_fuel_tank",
+            () -> new FoundryFuelTankBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).strength(2.0F, 6.0F).noOcclusion())
+    );
+    public static final DeferredBlock<TransparentBlock> FOUNDRY_GLASS = BLOCKS.register(
+            "foundry_glass",
+            () -> new TransparentBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS).strength(2.0F, 6.0F).noOcclusion())
+    );
+    public static final DeferredBlock<FoundryDrainBlock> FOUNDRY_DRAIN = BLOCKS.register(
+            "foundry_drain",
+            () -> new FoundryDrainBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE_BRICKS).noOcclusion())
+    );
+    public static final DeferredBlock<FoundryFaucetBlock> FOUNDRY_FAUCET = BLOCKS.register(
+            "foundry_faucet",
+            () -> new FoundryFaucetBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BARS).strength(2.0F, 5.0F).noOcclusion())
+    );
+    public static final DeferredBlock<FoundryCastingBlock> FOUNDRY_CASTING_TABLE = BLOCKS.register(
+            "foundry_casting_table",
+            () -> new FoundryCastingBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE).noOcclusion())
+    );
+    public static final DeferredBlock<FoundryCastingBlock> FOUNDRY_CASTING_BASIN = BLOCKS.register(
+            "foundry_casting_basin",
+            () -> new FoundryCastingBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.POLISHED_BLACKSTONE).noOcclusion())
     );
     public static final DeferredBlock<KnappingFlintBlock> KNAPPING_FLINT = BLOCKS.register(
             "knapping_flint",

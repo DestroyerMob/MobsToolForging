@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "active=false,facing=east": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 90
+    },
+    "active=false,facing=north": {
+      "model": "mobstoolforging:block/foundry_faucet"
+    },
+    "active=false,facing=south": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 180
+    },
+    "active=false,facing=west": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 270
+    },
+    "active=true,facing=east": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 90
+    },
+    "active=true,facing=north": {
+      "model": "mobstoolforging:block/foundry_faucet"
+    },
+    "active=true,facing=south": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 180
+    },
+    "active=true,facing=west": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 270
+    }
+  }
+}

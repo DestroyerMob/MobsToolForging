@@ -188,17 +188,17 @@ public final class MobsToolForgingConfig {
         builder.pop();
         builder.push("casting");
         ENABLE_CRUCIBLE = builder
-                .comment("Reserved for future molten metal handling. This pass does not implement crucibles.")
-                .define("enableCrucible", false);
+                .comment("Enables the scalable blackstone foundry multiblock. Existing crucibles remain loadable for world compatibility.")
+                .define("enableCrucible", true);
         ENABLE_CASTING = builder
-                .comment("Reserved for future casting systems. This pass does not implement casting.")
-                .define("enableCasting", false);
+                .comment("Enables foundry drains, faucets, casting tables, and casting basins.")
+                .define("enableCasting", true);
         ENABLE_INGOT_CASTING = builder
-                .comment("Reserved for future ingot casting.")
-                .define("enableIngotCasting", false);
+                .comment("Enables casting ingots on the Casting Table.")
+                .define("enableIngotCasting", true);
         ENABLE_BLOCK_CASTING = builder
-                .comment("Reserved for future block casting.")
-                .define("enableBlockCasting", false);
+                .comment("Enables casting storage blocks in the Casting Basin.")
+                .define("enableBlockCasting", true);
         ENABLE_TOOL_HEAD_CASTING = builder
                 .comment("Reserved for future rough cast tool heads that still need finishing.")
                 .define("enableToolHeadCasting", false);

@@ -1,0 +1,33 @@
+{
+  "name": "Metallurgy and Reforging",
+  "icon": "mobstoolforging:steel_ingot",
+  "category": "mobstoolforging:workshop",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Casting versus Forging",
+      "text": "A metal part poured into a reusable Gold Cast begins with $(bold)Crude workmanship$() and $(bold)casting porosity$(). Polishing improves its finish but cannot repair its workmanship.$(p)Hold $(bold)Shift$() over a part to inspect its manufacture, effective score, heat treatment, defects, and alloy composition. Assembled equipment retains these records for every component."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Reforging a Part",
+      "text": "Only $(bold)uncoated, workable metal parts$() can be reforged. Handles, strings, leather, gems, casts, coatings, and assembled equipment cannot.$(p)Heat the part, select its matching pattern on a Smithing Anvil, place the hot part, then hammer it as normal. Reforging keeps its material and alloy composition, removes casting porosity, resets heat treatment, and replaces its workmanship with the new hammering result."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Hardening and Tempering",
+      "text": "Quench a part from $(bold)60–89% heat$() to harden it. Quenching at $(bold)90% or hotter$() leaves it brittle.$(p)To temper a hardened or brittle part, reheat it to $(bold)30–65%$(), then let it cool completely. Tempered work gains a small effective-quality bonus; casting porosity is a small penalty, while brittleness is severe."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Alloys",
+      "text": "Exact-ratio alloys react automatically inside the foundry with a sound and flame burst. Excess inputs remain in their own molten layers.$(p)$(bold)Steel:$() 90 mB iron + 10 mB carbon → 90 mB steel. Coal and charcoal each provide 10 mB carbon.$(p)$(bold)Bronze:$() 270 mB copper + 90 mB tin → 360 mB bronze. Tin uses the common $(italic)c:ingots/tin$() tag for mod compatibility. Alloy recipes are datapack-controlled."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Metal Recovery",
+      "text": "Drop or insert an uncoated metal tool or armour part into a formed foundry to recycle it. It melts back into its recorded material.$(p)Recovery is intentionally below 100%. Better workmanship returns more metal, while worn parts return less. This makes casting useful for blanks and bulk production without replacing careful forging."
+    }
+  ]
+}

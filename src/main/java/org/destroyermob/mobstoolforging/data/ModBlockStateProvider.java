@@ -106,6 +106,29 @@ public class ModBlockStateProvider extends BlockStateProvider {
         heatingForgeBlock(lavaHeatingForge, lavaHeatingForgeModel);
         simpleBlockItem(lavaHeatingForge, lavaHeatingForgeModel);
 
+        ModelFile foundryFuelTankModel = models().cubeAll("foundry_fuel_tank", mcLoc("block/glass"))
+                .renderType("translucent");
+        simpleBlockWithItem(ModBlocks.FOUNDRY_FUEL_TANK.get(), foundryFuelTankModel);
+
+        ModelFile foundryGlassModel = new ModelFile.UncheckedModelFile(modLoc("block/foundry_glass"));
+        simpleBlockWithItem(ModBlocks.FOUNDRY_GLASS.get(), foundryGlassModel);
+
+        ModelFile foundryDrainModel = models().cubeAll("foundry_drain", mcLoc("block/polished_blackstone_bricks"));
+        horizontalBlock(ModBlocks.FOUNDRY_DRAIN.get(), foundryDrainModel);
+        simpleBlockItem(ModBlocks.FOUNDRY_DRAIN.get(), foundryDrainModel);
+
+        ModelFile foundryFaucetModel = new ModelFile.UncheckedModelFile(modLoc("block/foundry_faucet"));
+        getVariantBuilder(ModBlocks.FOUNDRY_FAUCET.get()).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(foundryFaucetModel)
+                .rotationY(horizontalRotation(state.getValue(org.destroyermob.mobstoolforging.world.FoundryFaucetBlock.FACING)))
+                .build());
+        simpleBlockItem(ModBlocks.FOUNDRY_FAUCET.get(), foundryFaucetModel);
+
+        ModelFile foundryCastingTableModel = new ModelFile.UncheckedModelFile(modLoc("block/foundry_casting_table"));
+        simpleBlockWithItem(ModBlocks.FOUNDRY_CASTING_TABLE.get(), foundryCastingTableModel);
+        ModelFile foundryCastingBasinModel = new ModelFile.UncheckedModelFile(modLoc("block/foundry_casting_basin"));
+        simpleBlockWithItem(ModBlocks.FOUNDRY_CASTING_BASIN.get(), foundryCastingBasinModel);
+
         ashBlock();
 
         ModelFile invisibleGroundModel = models().getBuilder("block/invisible_ground")
@@ -120,6 +143,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
         itemModels().withExistingParent("blaze_thread", mcLoc("item/generated")).texture("layer0", modLoc("item/blaze_thread"));
         itemModels().withExistingParent("fire_stick", mcLoc("item/handheld")).texture("layer0", mcLoc("item/stick"));
         itemModels().withExistingParent("diamond_powder", mcLoc("item/generated")).texture("layer0", modLoc("item/diamond_powder"));
+        itemModels().withExistingParent("steel_ingot", mcLoc("item/generated")).texture("layer0", mcLoc("item/iron_ingot"));
+        itemModels().withExistingParent("bronze_ingot", mcLoc("item/generated")).texture("layer0", mcLoc("item/copper_ingot"));
         cookingKnifeHeadModel();
         modularHelmetModel();
         modularChestplateModel();
@@ -145,6 +170,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         patternModel(ModItems.CROSSBOW_BODY_PATTERN.getId().getPath());
         patternModel(ModItems.CROSSBOW_LIMBS_PATTERN.getId().getPath());
         patternModel(ModItems.TEMPLATE_PATTERN.getId().getPath());
+        castingMoldModel();
         armorPartModel(ModItems.HELMET_CHAINMAIL.getId().getPath(), mcLoc("item/chainmail_helmet"));
         armorPartModel(ModItems.HELMET_PLATE.getId().getPath(), mcLoc("item/iron_helmet"));
         armorPartModel(ModItems.CHESTPLATE_CHAINMAIL.getId().getPath(), mcLoc("item/chainmail_chestplate"));
@@ -303,6 +329,14 @@ public class ModBlockStateProvider extends BlockStateProvider {
     private void patternModel(String name) {
         ResourceLocation texture = textureExists(modLoc("item/pattern_board")) ? modLoc("item/pattern_board") : mcLoc("block/oak_planks");
         ItemModelBuilder builder = itemModels().withExistingParent(name, mcLoc("item/generated"))
+                .texture("layer0", texture)
+                .texture("board", texture);
+        builder.customLoader(PatternCutoutModelBuilder::new).end();
+    }
+
+    private void castingMoldModel() {
+        ResourceLocation texture = mcLoc("block/gold_block");
+        ItemModelBuilder builder = itemModels().withExistingParent(ModItems.CASTING_MOLD.getId().getPath(), mcLoc("item/generated"))
                 .texture("layer0", texture)
                 .texture("board", texture);
         builder.customLoader(PatternCutoutModelBuilder::new).end();

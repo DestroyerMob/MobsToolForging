@@ -32,7 +32,9 @@ import org.destroyermob.mobstoolforging.registry.ModTags;
 import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorRepairing;
 import org.destroyermob.mobstoolforging.world.CrossbowAssembly;
+import org.destroyermob.mobstoolforging.world.ForgingQuality;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.MetallurgyData;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipe;
 import org.destroyermob.mobstoolforging.world.StationWorkRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.ToolForgeBlockEntity;
@@ -48,6 +50,7 @@ import org.destroyermob.mobstoolforging.world.ToolTraitTuning;
 import org.destroyermob.mobstoolforging.world.ToolTypeRegistry;
 import org.destroyermob.mobstoolforging.world.VanillaToolConverter;
 import org.destroyermob.mobstoolforging.world.WorkstationKind;
+import org.destroyermob.mobstoolforging.world.WorkpieceHeat;
 
 @GameTestHolder(MobsToolForging.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -85,6 +88,43 @@ public final class StationWorkGameTests {
         helper.assertTrue(forge.hammerLooseWork(recipe), "Station work rejected its fifth hit");
         helper.assertTrue(forge.isComplete(), "Station work was not complete after its fifth hit");
         helper.assertTrue(forge.outputStack().is(ModItems.CROSSBOW_LIMBS.get()), "Fifth hit did not produce crossbow limbs");
+        helper.succeed();
+    }
+
+    @GameTest(template = "station_work_completion", timeoutTicks = 20)
+    public static void heatedMetalPartCanBeReforged(GameTestHelper helper) {
+        helper.setBlock(STATION_POS, ModBlocks.TOOL_FORGE.get());
+        ToolForgeBlockEntity forge = helper.getBlockEntity(STATION_POS);
+        var template = ToolTypeRegistry.template("pickaxe_head").orElseThrow();
+        helper.assertTrue(forge.selectTemplate(template), "Pickaxe-head pattern could not be selected for reforging");
+
+        ItemStack part = ModItems.PICKAXE_HEAD.get().createPart(MaterialCatalog.IRON, ForgingQuality.CRUDE.score());
+        part.set(ModDataComponents.METALLURGY.get(), MetallurgyData.cast(MaterialCatalog.IRON, 180));
+        WorkpieceHeat.setTemperature(part, helper.getLevel(), 0.85F, true);
+        helper.assertTrue(forge.placeReforgePart(part), "Heated cast part could not be placed for reforging");
+        for (int hit = 0; hit < template.requiredHits(); hit++) {
+            helper.assertTrue(forge.hammer(true), "Reforging rejected hammer hit " + (hit + 1));
+        }
+
+        ItemStack output = forge.outputStack();
+        MetallurgyData metallurgy = output.get(ModDataComponents.METALLURGY.get());
+        helper.assertTrue(output.is(ModItems.PICKAXE_HEAD.get()), "Reforging changed the selected part type");
+        helper.assertTrue(metallurgy != null && metallurgy.origin() == MetallurgyData.Origin.REFORGED, "Reforged part did not record its manufacture method");
+        helper.assertTrue(metallurgy != null && metallurgy.castDefect() == MetallurgyData.CastDefect.NONE, "Reforging did not remove the casting defect");
+        helper.succeed();
+    }
+
+    @GameTest(template = "station_work_completion", timeoutTicks = 20)
+    public static void heatTreatmentTracksHardeningTemperingAndBrittleness(GameTestHelper helper) {
+        MetallurgyData forged = MetallurgyData.forged(MaterialCatalog.IRON);
+        helper.assertTrue(forged.quenched(0.75F).heatTreatment() == MetallurgyData.HeatTreatment.HARDENED,
+                "A controlled quench did not harden the part");
+        helper.assertTrue(forged.quenched(0.95F).heatTreatment() == MetallurgyData.HeatTreatment.BRITTLE,
+                "A white-hot quench did not make the part brittle");
+        MetallurgyData tempered = forged.quenched(0.75F).heated(0.45F).cooled();
+        helper.assertTrue(tempered.heatTreatment() == MetallurgyData.HeatTreatment.TEMPERED,
+                "Reheating and cooling a hardened part did not temper it");
+        helper.assertTrue(tempered.qualityAdjustment() > 0, "Tempering did not improve effective quality");
         helper.succeed();
     }
 

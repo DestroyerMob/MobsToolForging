@@ -8,6 +8,12 @@
     "mobstoolforging:heating_forge",
     "mobstoolforging:lava_heating_forge",
     "mobstoolforging:crucible",
-    "mobstoolforging:foundry_forge"
+    "mobstoolforging:foundry_forge",
+    "mobstoolforging:foundry_fuel_tank",
+    "mobstoolforging:foundry_glass",
+    "mobstoolforging:foundry_drain",
+    "mobstoolforging:foundry_faucet",
+    "mobstoolforging:foundry_casting_table",
+    "mobstoolforging:foundry_casting_basin"
   ]
 }

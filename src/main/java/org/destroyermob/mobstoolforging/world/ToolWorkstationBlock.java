@@ -163,6 +163,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         if (stationWorkRecipe != null && forge.canPlaceLooseWork(stationWorkRecipe, stack)) {
             return placeStationWork(stack, stationWorkRecipe, forge, level, pos, player);
         }
+        if (kind.isSmithingAnvilLike() && forge.isReforgeCandidate(stack)) {
+            return placeReforgePart(stack, forge, level, pos, player);
+        }
         if (MaterialCatalog.isMaterial(stack)) {
             return placeMaterial(stack, forge, level, pos, player);
         }
@@ -318,6 +321,9 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
         StationWorkRecipe stationWorkRecipe = StationWorkRecipeRegistry.findStartRecipe(kind, forge.templateId(), stack).orElse(null);
         if (stationWorkRecipe != null) {
             return forge.canPlaceLooseWork(stationWorkRecipe, stack);
+        }
+        if (kind.isSmithingAnvilLike() && forge.isReforgeCandidate(stack)) {
+            return true;
         }
         if (MaterialCatalog.isMaterial(stack)) {
             return canPlaceMaterial(stack, forge, level);
@@ -480,6 +486,26 @@ public abstract class ToolWorkstationBlock extends BaseEntityBlock {
             return ItemInteractionResult.CONSUME;
         }
         DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.materials_full"));
+        return ItemInteractionResult.CONSUME;
+    }
+
+    private ItemInteractionResult placeReforgePart(ItemStack stack, ToolForgeBlockEntity forge, Level level, BlockPos pos, Player player) {
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        if (!forge.canPlaceReforgePart(stack)) {
+            ForgeTemplateDefinition template = forge.template();
+            DebugFeedback.actionBar(player, template == null
+                    ? Component.translatable("message.mobstoolforging.select_template")
+                    : metalNeedsHeatMessage(template, stack, level));
+            return ItemInteractionResult.CONSUME;
+        }
+        var item = stack.getItem();
+        if (forge.placeReforgePart(stationInputStack(stack, player, 1))) {
+            level.playSound(null, pos, kind.placeSound(), SoundSource.BLOCKS, 0.8F, 0.85F + level.random.nextFloat() * 0.12F);
+            player.awardStat(Stats.ITEM_USED.get(item));
+            DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.reforge_part_placed"));
+        }
         return ItemInteractionResult.CONSUME;
     }
 

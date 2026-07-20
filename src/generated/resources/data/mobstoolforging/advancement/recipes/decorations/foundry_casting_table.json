@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_foundry_drain": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mobstoolforging:foundry_drain"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "mobstoolforging:foundry_casting_table"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_foundry_drain"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "mobstoolforging:foundry_casting_table"
+    ]
+  }
+}

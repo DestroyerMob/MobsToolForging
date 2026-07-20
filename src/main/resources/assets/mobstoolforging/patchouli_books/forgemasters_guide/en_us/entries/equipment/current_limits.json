@@ -12,7 +12,7 @@
     {
       "type": "patchouli:text",
       "title": "Reserved Systems",
-      "text": "$(bold)Reserved scaffolding:$()$(li)Crucible$(li)Foundry$(li)Casting$(li)Screwdriver$(p)Their normal recipes and viewer entries are hidden while disabled.$(p)A configuration or datapack that enables these systems should provide matching guide information."
+      "text": "$(bold)Reserved scaffolding:$()$(li)Bloomery$(li)Tool-head casting$(li)Screwdriver$(p)Their normal recipes and viewer entries are hidden while disabled.$(p)The scalable Blackstone Foundry now supports ordered molten layers, wall drains and faucets, and ingot or storage-block casting; see Heat and Quenching in the Workshop chapter."
     }
   ]
 }

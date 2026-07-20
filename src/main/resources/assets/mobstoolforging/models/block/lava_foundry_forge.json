@@ -3,10 +3,10 @@
 	"credit": "Made with Blockbench",
 	"render_type": "minecraft:cutout",
 	"textures": {
-		"0": "minecraft:block/deepslate_tiles",
+		"0": "minecraft:block/polished_blackstone_bricks",
 		"1": "minecraft:block/polished_blackstone",
 		"2": "minecraft:block/iron_bars",
-		"particle": "minecraft:block/deepslate_tiles"
+		"particle": "minecraft:block/polished_blackstone_bricks"
 	},
 	"elements": [
 		{
@@ -275,4 +275,3 @@
     }
   }
 }
-

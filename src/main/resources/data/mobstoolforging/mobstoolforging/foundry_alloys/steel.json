@@ -1,0 +1,8 @@
+{
+  "result": "mobstoolforging:steel",
+  "inputs": {
+    "mobstoolforging:iron": 90,
+    "mobstoolforging:carbon": 10
+  },
+  "output_amount": 90
+}

@@ -10,7 +10,6 @@
     "mobstoolforging:gem_cutters_knife",
     "mobstoolforging:gem_cutters_blade",
     "mobstoolforging:gem_cutters_blade_pattern",
-    "mobstoolforging:crucible",
-    "mobstoolforging:foundry_forge"
+    "mobstoolforging:crucible"
   ]
 }

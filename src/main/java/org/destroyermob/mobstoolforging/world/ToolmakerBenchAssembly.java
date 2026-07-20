@@ -500,18 +500,18 @@ public final class ToolmakerBenchAssembly {
             if (!MobsToolForgingConfig.ENABLE_QUALITY.get()) {
                 return ArmorPartData.DEFAULT_QUALITY;
             }
-            List<ArmorPartData> partData = parts.stacks().stream()
-                    .map(stack -> stack.get(ModDataComponents.ARMOR_PART.get()))
-                    .filter(java.util.Objects::nonNull)
+            List<ItemStack> partStacks = parts.stacks().stream()
+                    .filter(stack -> stack.get(ModDataComponents.ARMOR_PART.get()) != null)
                     .toList();
-            if (partData.isEmpty()) {
+            if (partStacks.isEmpty()) {
                 return ArmorPartData.DEFAULT_QUALITY;
             }
             float total = 0.0F;
-            for (ArmorPartData data : partData) {
-                total += data.quality();
+            for (ItemStack stack : partStacks) {
+                ArmorPartData data = stack.get(ModDataComponents.ARMOR_PART.get());
+                total += Metallurgy.adjustedQuality(stack, data.quality());
             }
-            return ForgingQuality.clampScore(Math.round(total / partData.size()));
+            return ForgingQuality.clampScore(Math.round(total / partStacks.size()));
         }
     }
 
@@ -654,7 +654,16 @@ public final class ToolmakerBenchAssembly {
                     .map(stack -> stack.get(ModDataComponents.TOOL_PART.get()))
                     .filter(java.util.Objects::nonNull)
                     .toList();
-            return definition.assembledQuality(primary, requiredData);
+            int baseQuality = definition.assembledQuality(primary, requiredData);
+            List<ItemStack> metalParts = new ArrayList<>();
+            metalParts.add(part);
+            metalParts.addAll(requiredParts.values());
+            int adjustment = Math.round((float) metalParts.stream()
+                    .filter(stack -> stack.get(ModDataComponents.METALLURGY.get()) != null)
+                    .mapToInt(stack -> stack.get(ModDataComponents.METALLURGY.get()).qualityAdjustment())
+                    .average()
+                    .orElse(0.0D));
+            return ForgingQuality.clampScore(baseQuality + adjustment);
         }
 
         private List<ItemStack> enchantmentSources() {

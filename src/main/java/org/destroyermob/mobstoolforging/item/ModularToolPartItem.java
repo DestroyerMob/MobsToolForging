@@ -10,6 +10,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.Metallurgy;
+import org.destroyermob.mobstoolforging.world.MetallurgyTooltips;
+import org.destroyermob.mobstoolforging.world.ForgingQuality;
 import org.destroyermob.mobstoolforging.world.ToolKind;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
 import org.destroyermob.mobstoolforging.world.ToolPartWear;
@@ -71,10 +74,15 @@ public class ModularToolPartItem extends Item {
         super.appendHoverText(stack, context, tooltip, flag);
         ToolPartData data = stack.get(ModDataComponents.TOOL_PART.get());
         if (data != null) {
+            int effectiveQuality = Metallurgy.adjustedQuality(stack, data.effectiveQuality());
             tooltip.add(Component.translatable("tooltip.mobstoolforging.quality")
                     .withStyle(ChatFormatting.DARK_GRAY)
                     .append(Component.literal(": ").withStyle(ChatFormatting.DARK_GRAY))
-                    .append(data.effectiveQualityLevel().displayName()));
+                    .append(ForgingQuality.fromScore(effectiveQuality).displayName()));
+            if (flag.hasShiftDown()) {
+                tooltip.add(Component.translatable("tooltip.mobstoolforging.workmanship_score", effectiveQuality, data.quality())
+                        .withStyle(ChatFormatting.DARK_GRAY));
+            }
             if (data.finishAffectsQuality()) {
                 tooltip.add(Component.translatable(data.isCoated() ? "tooltip.mobstoolforging.core_finish" : "tooltip.mobstoolforging.finish")
                         .withStyle(ChatFormatting.DARK_GRAY)
@@ -88,6 +96,7 @@ public class ModularToolPartItem extends Item {
             if (data.treatment().isPresent()) {
                 tooltip.add(Component.translatable("tooltip.mobstoolforging.part_treatment", MaterialCatalog.displayName(data.treatment().get())).withStyle(ChatFormatting.DARK_GRAY));
             }
+            MetallurgyTooltips.appendPart(tooltip, stack, flag.hasShiftDown());
         }
         int remainingDurability = ToolPartWear.remainingDurabilityPercent(stack);
         if (remainingDurability < 100) {

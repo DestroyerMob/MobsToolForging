@@ -13,6 +13,21 @@
       "type": "patchouli:text",
       "title": "Quenching",
       "text": "Use a $(bold)water cauldron$() to cool a hot workpiece quickly.$(p)Quenching:$(li)Removes stored heat$(li)Makes the part safe to carry$(li)Allows use where hot parts are rejected$(p)It does $(bold)not$() reroll material or quality."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Blackstone Foundry",
+      "text": "The Foundry Forge is a $(bold)multiblock controller$(), not a complete forge by itself.$(p)Place it in the lowest straight wall of a rectangular foundry. Build the interior floor and four wall faces from valid Blackstone blocks. Wall corners are optional. $(bold)Foundry Glass$() may replace straight wall blocks. Replace another wall block with a $(bold)Foundry Fuel Tank$(), fill that tank with lava, and leave the top and interior empty.$(p)A tank always stores four lava buckets, independent of foundry size. Right-click the controller with nuggets, ingots, or metal blocks to load them directly. Each interior block stores 1,000 mB. No Crucible is required."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Reading the Foundry",
+      "text": "Foundry Glass is the foundry's physical contents display—Jade is optional.$(p)Molten materials appear as separate tinted bands in drain order. Their height shows the stored volume, and the top band is the visible surface. Solid inputs remain visible above the fluid until they melt.$(p)Different colours mean the materials have not alloyed. A successful ratio reaction produces a sound and a brief flame burst, then replaces its input bands with the new alloy colour."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Draining and Casting",
+      "text": "Replace a wall block with a $(bold)Foundry Drain$(), then attach a $(bold)Foundry Faucet$() to its outside face. Put a Casting Table or Casting Basin directly below the faucet and toggle it by hand or redstone.$(p)Fluids retain their insertion order and the faucet always pours the $(bold)bottom layer$() first. A table cools 90 mB into one ingot; a basin cools 810 mB into one storage block. Right-click the cooled cast to collect it."
     }
   ]
 }

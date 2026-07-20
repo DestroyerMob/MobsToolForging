@@ -14,6 +14,7 @@ import org.destroyermob.mobstoolforging.world.ArmorConstructionData;
 import org.destroyermob.mobstoolforging.world.ArmorPartData;
 import org.destroyermob.mobstoolforging.world.CrucibleContents;
 import org.destroyermob.mobstoolforging.world.HeatedWorkpieceData;
+import org.destroyermob.mobstoolforging.world.MetallurgyData;
 import org.destroyermob.mobstoolforging.world.ToolAssemblyParts;
 import org.destroyermob.mobstoolforging.world.ToolConstructionData;
 import org.destroyermob.mobstoolforging.world.ToolPartData;
@@ -78,6 +79,11 @@ public final class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<HeatedWorkpieceData>> HEATED_WORKPIECE = DATA_COMPONENTS.registerComponentType(
             "heated_workpiece",
             builder -> builder.persistent(HeatedWorkpieceData.CODEC).networkSynchronized(HeatedWorkpieceData.STREAM_CODEC).cacheEncoding()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<MetallurgyData>> METALLURGY = DATA_COMPONENTS.registerComponentType(
+            "metallurgy",
+            builder -> builder.persistent(MetallurgyData.CODEC).networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(MetallurgyData.CODEC)).cacheEncoding()
     );
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<CrucibleContents>> CRUCIBLE_CONTENTS = DATA_COMPONENTS.registerComponentType(

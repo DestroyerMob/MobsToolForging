@@ -9,6 +9,9 @@ import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.world.CrucibleBlockEntity;
 import org.destroyermob.mobstoolforging.world.DryingRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlockEntity;
+import org.destroyermob.mobstoolforging.world.FoundryCastingBlockEntity;
+import org.destroyermob.mobstoolforging.world.FoundryFuelTankBlockEntity;
+import org.destroyermob.mobstoolforging.world.FoundryFaucetBlockEntity;
 import org.destroyermob.mobstoolforging.world.GroundToolAssemblyBlockEntity;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.KnappingFlintBlockEntity;
@@ -42,6 +45,18 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FoundryForgeBlockEntity>> FOUNDRY_FORGE = BLOCK_ENTITIES.register(
             "foundry_forge",
             () -> BlockEntityType.Builder.of(FoundryForgeBlockEntity::new, ModBlocks.FOUNDRY_FORGE.get()).build(null)
+    );
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FoundryFuelTankBlockEntity>> FOUNDRY_FUEL_TANK = BLOCK_ENTITIES.register(
+            "foundry_fuel_tank",
+            () -> BlockEntityType.Builder.of(FoundryFuelTankBlockEntity::new, ModBlocks.FOUNDRY_FUEL_TANK.get()).build(null)
+    );
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FoundryCastingBlockEntity>> FOUNDRY_CASTING = BLOCK_ENTITIES.register(
+            "foundry_casting",
+            () -> BlockEntityType.Builder.of(FoundryCastingBlockEntity::new, ModBlocks.FOUNDRY_CASTING_TABLE.get(), ModBlocks.FOUNDRY_CASTING_BASIN.get()).build(null)
+    );
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FoundryFaucetBlockEntity>> FOUNDRY_FAUCET = BLOCK_ENTITIES.register(
+            "foundry_faucet",
+            () -> BlockEntityType.Builder.of(FoundryFaucetBlockEntity::new, ModBlocks.FOUNDRY_FAUCET.get()).build(null)
     );
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PatternCreationStationBlockEntity>> PATTERN_CREATION_STATION = BLOCK_ENTITIES.register(
             "pattern_creation_station",

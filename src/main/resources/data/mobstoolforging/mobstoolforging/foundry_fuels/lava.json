@@ -1,0 +1,6 @@
+{
+  "fluid": "minecraft:lava",
+  "temperature_c": 2000,
+  "amount": 1000,
+  "burn_ticks": 2400
+}

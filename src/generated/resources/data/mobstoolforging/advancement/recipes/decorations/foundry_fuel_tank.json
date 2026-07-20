@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_foundry_forge": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mobstoolforging:foundry_forge"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "mobstoolforging:foundry_fuel_tank"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_foundry_forge"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "mobstoolforging:foundry_fuel_tank"
+    ]
+  }
+}

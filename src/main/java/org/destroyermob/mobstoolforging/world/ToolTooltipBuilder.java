@@ -50,6 +50,7 @@ public final class ToolTooltipBuilder {
 
         if (flag.hasShiftDown()) {
             addConstructionTooltip(lines, stack, definition, construction);
+            MetallurgyTooltips.appendToolParts(lines, stack);
             addDetailedTraits(lines, profile);
             addEnchantmentHeading(lines, stack);
         } else {

@@ -54,6 +54,13 @@
     "mobstoolforging:cherry_drying_rack",
     "mobstoolforging:bamboo_drying_rack",
     "mobstoolforging:crimson_drying_rack",
-    "mobstoolforging:warped_drying_rack"
+    "mobstoolforging:warped_drying_rack",
+    "mobstoolforging:foundry_forge",
+    "mobstoolforging:foundry_fuel_tank",
+    "mobstoolforging:foundry_glass",
+    "mobstoolforging:foundry_drain",
+    "mobstoolforging:foundry_faucet",
+    "mobstoolforging:foundry_casting_table",
+    "mobstoolforging:foundry_casting_basin"
   ]
 }

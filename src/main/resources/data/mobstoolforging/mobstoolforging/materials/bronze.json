@@ -1,0 +1,17 @@
+{
+  "category": "metal",
+  "display_item": "mobstoolforging:bronze_ingot",
+  "items": ["mobstoolforging:bronze_ingot"],
+  "tags": ["c:ingots/bronze"],
+  "translation_key": "material.mobstoolforging.bronze",
+  "minimum_forge_heat": "low",
+  "tier": {
+    "base": "iron",
+    "max_damage": 320,
+    "mining_speed": 6.5,
+    "attack_damage_bonus": 2.0,
+    "enchantment_value": 18,
+    "repair_item": "mobstoolforging:bronze_ingot"
+  },
+  "visual_slots": ["headMaterial", "guardMaterial"]
+}

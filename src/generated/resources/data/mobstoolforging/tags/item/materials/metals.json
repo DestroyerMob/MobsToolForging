@@ -1,5 +1,7 @@
 {
   "values": [
+    "mobstoolforging:steel_ingot",
+    "mobstoolforging:bronze_ingot",
     "#c:ingots/iron",
     "#c:ingots/gold",
     "#c:ingots/copper"

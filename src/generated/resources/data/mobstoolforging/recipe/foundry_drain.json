@@ -3,19 +3,19 @@
   "category": "misc",
   "key": {
     "B": {
-      "item": "minecraft:iron_block"
+      "item": "minecraft:polished_blackstone_bricks"
     },
     "I": {
       "item": "minecraft:iron_ingot"
     }
   },
   "pattern": [
-    "I I",
-    "I I",
-    " B "
+    "BIB",
+    "B B",
+    "BBB"
   ],
   "result": {
     "count": 1,
-    "id": "mobstoolforging:crucible"
+    "id": "mobstoolforging:foundry_drain"
   }
 }

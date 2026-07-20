@@ -83,6 +83,11 @@ import org.destroyermob.mobstoolforging.world.DryingRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.ExternalToolTooltipOrder;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
+import org.destroyermob.mobstoolforging.world.FoundryCastReloadListener;
+import org.destroyermob.mobstoolforging.world.FoundryAlloyReloadListener;
+import org.destroyermob.mobstoolforging.world.FoundryMeltingReloadListener;
+import org.destroyermob.mobstoolforging.world.FoundryMeltingPointReloadListener;
+import org.destroyermob.mobstoolforging.world.FoundryFuelReloadListener;
 import org.destroyermob.mobstoolforging.world.FlintKnappingEvents;
 import org.destroyermob.mobstoolforging.world.FlintToolStacks;
 import org.destroyermob.mobstoolforging.world.GroundAssemblyRecipeReloadListener;
@@ -90,6 +95,7 @@ import org.destroyermob.mobstoolforging.world.HeatingRecipeReloadListener;
 import org.destroyermob.mobstoolforging.world.LeatherStationAssemblyEvents;
 import org.destroyermob.mobstoolforging.world.LapidaryTableAssemblyEvents;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
+import org.destroyermob.mobstoolforging.world.MetallurgyTooltips;
 import org.destroyermob.mobstoolforging.world.MaterialDefinitionReloadListener;
 import org.destroyermob.mobstoolforging.world.PatternRackSelection;
 import org.destroyermob.mobstoolforging.world.SawmillAssemblyEvents;
@@ -270,6 +276,11 @@ public class MobsToolForging {
                 (forge, side) -> forge.fluidHandler(side)
         );
         event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                ModBlockEntities.FOUNDRY_FUEL_TANK.get(),
+                (tank, side) -> tank.fluidHandler()
+        );
+        event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 ModBlockEntities.DRYING_RACK.get(),
                 (rack, side) -> rack.itemHandler(side)
@@ -368,6 +379,24 @@ public class MobsToolForging {
         if (!MobsToolForgingConfig.ENABLE_CRUCIBLE.get()) {
             disabledRecipes.add(modRecipe("crucible"));
             disabledRecipes.add(modRecipe("foundry_forge"));
+            disabledRecipes.add(modRecipe("foundry_fuel_tank"));
+            disabledRecipes.add(modRecipe("foundry_glass"));
+            disabledRecipes.add(modRecipe("foundry_drain"));
+            disabledRecipes.add(modRecipe("foundry_faucet"));
+            disabledRecipes.add(modRecipe("foundry_casting_table"));
+            disabledRecipes.add(modRecipe("foundry_casting_basin"));
+        } else if (!MobsToolForgingConfig.ENABLE_CASTING.get()) {
+            disabledRecipes.add(modRecipe("foundry_drain"));
+            disabledRecipes.add(modRecipe("foundry_faucet"));
+            disabledRecipes.add(modRecipe("foundry_casting_table"));
+            disabledRecipes.add(modRecipe("foundry_casting_basin"));
+        } else {
+            if (!MobsToolForgingConfig.ENABLE_INGOT_CASTING.get()) {
+                disabledRecipes.add(modRecipe("foundry_casting_table"));
+            }
+            if (!MobsToolForgingConfig.ENABLE_BLOCK_CASTING.get()) {
+                disabledRecipes.add(modRecipe("foundry_casting_basin"));
+            }
         }
         return disabledRecipes;
     }
@@ -380,6 +409,11 @@ public class MobsToolForging {
         event.addListener(new ToolStatRuleReloadListener());
         event.addListener(new StationWorkRecipeReloadListener());
         event.addListener(new HeatingRecipeReloadListener());
+        event.addListener(new FoundryMeltingReloadListener());
+        event.addListener(new FoundryMeltingPointReloadListener());
+        event.addListener(new FoundryFuelReloadListener());
+        event.addListener(new FoundryAlloyReloadListener());
+        event.addListener(new FoundryCastReloadListener());
         event.addListener(new DryingRecipeReloadListener());
         event.addListener(new GroundAssemblyRecipeReloadListener());
     }
@@ -409,7 +443,7 @@ public class MobsToolForging {
         }
         if (WorkpieceHeat.hasHeat(stack) && isQuenching(itemEntity)) {
             float temperature = WorkpieceHeat.temperature(stack, itemEntity.level());
-            if (WorkpieceHeat.quench(stack)) {
+            if (WorkpieceHeat.quench(stack, temperature)) {
                 itemEntity.setItem(stack);
                 playQuenchEffects(itemEntity.level(), itemEntity.blockPosition(), temperature);
             }
@@ -433,7 +467,7 @@ public class MobsToolForging {
             return;
         }
         float temperature = WorkpieceHeat.temperature(stack, event.getLevel());
-        WorkpieceHeat.quench(stack);
+        WorkpieceHeat.quench(stack, temperature);
         event.getEntity().setItemInHand(event.getHand(), stack);
         playQuenchEffects(event.getLevel(), event.getPos(), temperature);
     }
@@ -539,6 +573,7 @@ public class MobsToolForging {
                 MaterialCatalog.displayName(baseMaterial)
         ).withStyle(ChatFormatting.DARK_GRAY)));
         part.treatment().ifPresent(treatment -> event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.part_treatment", MaterialCatalog.displayName(treatment)).withStyle(ChatFormatting.DARK_GRAY)));
+        MetallurgyTooltips.appendPart(event.getToolTip(), stack, event.getFlags().hasShiftDown());
         int remainingDurability = ToolPartWear.remainingDurabilityPercent(stack);
         if (remainingDurability < 100) {
             event.getToolTip().add(Component.translatable("tooltip.mobstoolforging.part_durability", remainingDurability).withStyle(ChatFormatting.DARK_GRAY));

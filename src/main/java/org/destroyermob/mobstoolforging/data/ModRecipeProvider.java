@@ -65,23 +65,65 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_heating_forge", has(ModBlocks.HEATING_FORGE.get()))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.CRUCIBLE)
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.FOUNDRY_FORGE)
+                .define('F', Items.BLAST_FURNACE)
                 .define('I', Items.IRON_INGOT)
-                .define('B', Items.IRON_BLOCK)
-                .pattern("I I")
-                .pattern("I I")
-                .pattern(" B ")
-                .unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
+                .define('B', Items.POLISHED_BLACKSTONE_BRICKS)
+                .pattern("BIB")
+                .pattern("BFB")
+                .pattern("BBB")
+                .unlockedBy("has_blast_furnace", has(Items.BLAST_FURNACE))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.FOUNDRY_FORGE)
-                .define('H', ModBlocks.LAVA_HEATING_FORGE.get())
-                .define('O', Items.OBSIDIAN)
-                .define('L', Items.LAVA_BUCKET)
-                .pattern("OLO")
-                .pattern("OHO")
-                .pattern("OOO")
-                .unlockedBy("has_lava_bucket", has(Items.LAVA_BUCKET))
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.FOUNDRY_FUEL_TANK)
+                .define('B', Items.POLISHED_BLACKSTONE_BRICKS)
+                .define('G', Items.GLASS)
+                .pattern("BGB")
+                .pattern("G G")
+                .pattern("BGB")
+                .unlockedBy("has_foundry_forge", has(ModBlocks.FOUNDRY_FORGE.get()))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.FOUNDRY_GLASS, 4)
+                .define('B', Items.POLISHED_BLACKSTONE_BRICKS)
+                .define('G', Items.GLASS)
+                .pattern("BGB")
+                .pattern("GGG")
+                .pattern("BGB")
+                .unlockedBy("has_foundry_forge", has(ModBlocks.FOUNDRY_FORGE.get()))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.FOUNDRY_DRAIN)
+                .define('B', Items.POLISHED_BLACKSTONE_BRICKS)
+                .define('I', Items.IRON_INGOT)
+                .pattern("BIB")
+                .pattern("B B")
+                .pattern("BBB")
+                .unlockedBy("has_foundry_forge", has(ModBlocks.FOUNDRY_FORGE.get()))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.FOUNDRY_FAUCET)
+                .define('I', Items.IRON_INGOT)
+                .define('N', Items.IRON_NUGGET)
+                .pattern("II ")
+                .pattern(" NN")
+                .unlockedBy("has_foundry_drain", has(ModBlocks.FOUNDRY_DRAIN.get()))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.FOUNDRY_CASTING_TABLE)
+                .define('B', Items.POLISHED_BLACKSTONE_BRICKS)
+                .define('I', Items.IRON_INGOT)
+                .pattern("IBI")
+                .pattern(" B ")
+                .unlockedBy("has_foundry_drain", has(ModBlocks.FOUNDRY_DRAIN.get()))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.FOUNDRY_CASTING_BASIN)
+                .define('B', Items.POLISHED_BLACKSTONE_BRICKS)
+                .pattern("B B")
+                .pattern("B B")
+                .pattern("BBB")
+                .unlockedBy("has_foundry_drain", has(ModBlocks.FOUNDRY_DRAIN.get()))
                 .save(output);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.PATTERN_BOARD, 4)

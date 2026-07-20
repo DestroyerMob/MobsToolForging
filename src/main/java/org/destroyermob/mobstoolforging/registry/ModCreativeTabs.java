@@ -63,8 +63,13 @@ public final class ModCreativeTabs {
         ModItems.DRYING_RACK_ITEMS.forEach(item -> output.accept(item.get()));
         output.accept(ModItems.HEATING_FORGE.get());
         output.accept(ModItems.LAVA_HEATING_FORGE.get());
-        output.accept(ModItems.CRUCIBLE.get());
         output.accept(ModItems.FOUNDRY_FORGE.get());
+        output.accept(ModItems.FOUNDRY_FUEL_TANK.get());
+        output.accept(ModItems.FOUNDRY_GLASS.get());
+        output.accept(ModItems.FOUNDRY_DRAIN.get());
+        output.accept(ModItems.FOUNDRY_FAUCET.get());
+        output.accept(ModItems.FOUNDRY_CASTING_TABLE.get());
+        output.accept(ModItems.FOUNDRY_CASTING_BASIN.get());
     }
 
     private static void acceptStationTools(CreativeModeTab.Output output) {
@@ -95,6 +100,9 @@ public final class ModCreativeTabs {
                 .map(ModCreativeTabs::templatePattern)
                 .forEach(output::accept);
         output.accept(ModItems.TEMPLATE_PATTERN.get());
+        for (org.destroyermob.mobstoolforging.world.ForgeTemplate template : org.destroyermob.mobstoolforging.world.ForgeTemplate.values()) {
+            output.accept(org.destroyermob.mobstoolforging.item.CastingMoldItem.create(template.registryId()));
+        }
     }
 
     private static void acceptParts(CreativeModeTab.Output output) {
@@ -120,6 +128,8 @@ public final class ModCreativeTabs {
     }
 
     private static void acceptMaterials(CreativeModeTab.Output output) {
+        output.accept(ModItems.STEEL_INGOT.get());
+        output.accept(ModItems.BRONZE_INGOT.get());
         output.accept(ModItems.PATTERN_BOARD.get());
         output.accept(ModItems.FLINT_SHARD.get());
         output.accept(ModItems.PLANT_FIBER.get());

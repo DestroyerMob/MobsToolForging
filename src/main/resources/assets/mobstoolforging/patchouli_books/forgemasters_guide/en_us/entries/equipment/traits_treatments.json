@@ -7,7 +7,7 @@
     {
       "type": "patchouli:text",
       "title": "Netherite Treatment",
-      "text": "When the crucible system is enabled, melt netherite and dip an untreated primary tool part into it.$(p)The treated part keeps its original material and gains $(bold)Nether-Forged$(). This is a physical treatment with its own visible overlay, not a loose assembly catalyst."
+      "text": "The Blackstone Foundry can melt netherite directly into its internal fluid store. Applying that metal to a tool part will become available through the foundry's casting and draining equipment.$(p)The treated part will keep its original material and gain $(bold)Nether-Forged$()."
     },
     {
       "type": "patchouli:text",

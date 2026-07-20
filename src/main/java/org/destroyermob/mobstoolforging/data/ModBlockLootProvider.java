@@ -41,6 +41,12 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.LAVA_HEATING_FORGE.get());
         dropSelf(ModBlocks.CRUCIBLE.get());
         dropSelf(ModBlocks.FOUNDRY_FORGE.get());
+        dropSelf(ModBlocks.FOUNDRY_FUEL_TANK.get());
+        dropSelf(ModBlocks.FOUNDRY_GLASS.get());
+        dropSelf(ModBlocks.FOUNDRY_DRAIN.get());
+        dropSelf(ModBlocks.FOUNDRY_FAUCET.get());
+        dropSelf(ModBlocks.FOUNDRY_CASTING_TABLE.get());
+        dropSelf(ModBlocks.FOUNDRY_CASTING_BASIN.get());
         add(ModBlocks.KNAPPING_FLINT.get(), noDrop());
         add(ModBlocks.GROUND_TOOL_ASSEMBLY.get(), noDrop());
         add(ModBlocks.ASH.get(), this::createAshDrops);
@@ -58,6 +64,12 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
                 ModBlocks.LAVA_HEATING_FORGE.get(),
                 ModBlocks.CRUCIBLE.get(),
                 ModBlocks.FOUNDRY_FORGE.get(),
+                ModBlocks.FOUNDRY_FUEL_TANK.get(),
+                ModBlocks.FOUNDRY_GLASS.get(),
+                ModBlocks.FOUNDRY_DRAIN.get(),
+                ModBlocks.FOUNDRY_FAUCET.get(),
+                ModBlocks.FOUNDRY_CASTING_TABLE.get(),
+                ModBlocks.FOUNDRY_CASTING_BASIN.get(),
                 ModBlocks.KNAPPING_FLINT.get(),
                 ModBlocks.GROUND_TOOL_ASSEMBLY.get(),
                 ModBlocks.ASH.get()

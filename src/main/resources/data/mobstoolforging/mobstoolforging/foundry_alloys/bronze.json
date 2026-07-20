@@ -1,0 +1,8 @@
+{
+  "result": "mobstoolforging:bronze",
+  "inputs": {
+    "mobstoolforging:copper": 270,
+    "c:tin": 90
+  },
+  "output_amount": 360
+}

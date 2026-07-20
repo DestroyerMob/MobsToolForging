@@ -28,6 +28,7 @@ public final class WorkpieceHeat {
             stack.remove(ModDataComponents.HEATED_WORKPIECE.get());
             return;
         }
+        Metallurgy.heat(stack, appliedTemperature);
         int coolingTicks = MobsToolForgingConfig.COOLING_TICKS.get();
         stack.set(
                 ModDataComponents.HEATED_WORKPIECE.get(),
@@ -119,9 +120,14 @@ public final class WorkpieceHeat {
     }
 
     public static boolean quench(ItemStack stack) {
+        return quench(stack, storedTemperature(stack));
+    }
+
+    public static boolean quench(ItemStack stack, float temperature) {
         if (!hasHeat(stack)) {
             return false;
         }
+        Metallurgy.quench(stack, temperature);
         stack.remove(ModDataComponents.HEATED_WORKPIECE.get());
         return true;
     }
@@ -129,6 +135,7 @@ public final class WorkpieceHeat {
     public static void clearIfCooled(ItemStack stack, Level level) {
         HeatedWorkpieceData data = stack.get(ModDataComponents.HEATED_WORKPIECE.get());
         if (data != null && data.temperatureAt(level.getGameTime(), MobsToolForgingConfig.COOLING_TICKS.get()) <= 0.0F) {
+            Metallurgy.finishCooling(stack);
             stack.remove(ModDataComponents.HEATED_WORKPIECE.get());
         }
     }

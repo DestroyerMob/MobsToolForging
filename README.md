@@ -59,7 +59,7 @@ The common config controls progression and unfinished systems:
 - Vanilla material tool recipes are disabled by default so the forging loop owns tool progression.
 - Starter flint progression, Crude Anvil availability, pattern racks/input requirements, copper harvest rules, start-of-job heat, timing quality, optional lapidary tools/abrasives, part-first enchanting, and loot conversion are configurable.
 - `debugTemplateSelector=false` keeps the old template selector screen disabled during normal play.
-- Bloomery, crucible, and casting switches are present but reserved for future work and default to off.
+- The blackstone foundry stores solid metals and ordered, material-tinted molten layers directly. It draws datapack-defined fuel fluids from glass-walled, four-bucket tanks whose capacity is independent of foundry size; only molten-metal capacity scales with the interior. Fluid temperatures and centralized material melting points use Celsius, with gameplay lava set to 2,000°C so it remains hot enough for every built-in material. A wall drain and faucet pour the bottom layer into casting receivers.
 
 ## Player Progression
 
@@ -88,7 +88,7 @@ Minecraft Beyond removes direct vanilla armour and MoreWeapons recipes, injects 
 - Bridge support is data-driven. MoreWeapons currently supplies bridge data for great swords, katanas, battle axes, knives, and machetes; other non-vanilla families still need bridge data from their owning mods.
 - Some equipment and workstation art is still provisional despite the hand-authored part-sprite pipeline.
 - Early progression uses placed flint knapping, Toolmaker's Station assembly, Pattern Boards, campfire low heat, and the Crude Anvil before the copper Tool Forge upgrade. Plant Fiber is not required for starter flint tools. See `docs/PROGRESSION.md`.
-- Bloomery, crucible, and casting progression are scaffolded in config/data but are not the active production path yet.
+- The scalable blackstone foundry is the active high-heat melting and casting path, with direct solid input, wall-mounted fluid-fuel tanks, temperature-gated melting, ordered molten layers, alloys, reusable part casts, ingot casting, and storage-block casting.
 
 ## License
 

@@ -107,6 +107,9 @@ public final class MobsToolForgingClient {
         event.registerBlockEntityRenderer(ModBlockEntities.LAVA_HEATING_FORGE.get(), HeatingForgeRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.CRUCIBLE.get(), CrucibleRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.FOUNDRY_FORGE.get(), FoundryForgeRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.FOUNDRY_FUEL_TANK.get(), FoundryFuelTankRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.FOUNDRY_CASTING.get(), FoundryCastingRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.FOUNDRY_FAUCET.get(), FoundryFaucetRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.KNAPPING_FLINT.get(), KnappingFlintRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.GROUND_TOOL_ASSEMBLY.get(), GroundToolAssemblyRenderer::new);
     }

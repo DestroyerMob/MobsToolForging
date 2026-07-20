@@ -1,0 +1,11 @@
+{
+  "item_textures": {
+    "boots": "mobstoolforging:item/armor/boots",
+    "chestplate": "mobstoolforging:item/armor/chestplate",
+    "helmet": "mobstoolforging:item/armor/helmet",
+    "leggings": "mobstoolforging:item/armor/leggings"
+  },
+  "material": "mobstoolforging:steel",
+  "texture": "minecraft:block/iron_block",
+  "tint_item_textures": true
+}

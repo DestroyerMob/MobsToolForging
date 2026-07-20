@@ -29,6 +29,10 @@ public final class MaterialCatalog {
     public static final ResourceLocation IRON = materialId("iron");
     public static final ResourceLocation GOLD = materialId("gold");
     public static final ResourceLocation COPPER = materialId("copper");
+    public static final ResourceLocation STEEL = materialId("steel");
+    public static final ResourceLocation BRONZE = materialId("bronze");
+    public static final ResourceLocation CARBON = materialId("carbon");
+    public static final ResourceLocation TIN = ResourceLocation.fromNamespaceAndPath("c", "tin");
     public static final ResourceLocation NETHERITE = materialId("netherite");
     public static final ResourceLocation DIAMOND = materialId("diamond");
     public static final ResourceLocation EMERALD = materialId("emerald");
@@ -106,7 +110,7 @@ public final class MaterialCatalog {
     private static final Map<ResourceLocation, LinkedList<TagKey<Item>>> MATERIAL_DISPLAY_TAGS = new LinkedHashMap<>();
     private static final Map<Item, ResourceLocation> CUSTOM_HANDLE_MATERIALS = new LinkedHashMap<>();
     private static final List<ResourceLocation> STARTER_MATERIALS = List.of(
-            IRON, GOLD, COPPER, DIAMOND, EMERALD, AMETHYST, RUBY, SAPPHIRE, TOPAZ
+            IRON, STEEL, BRONZE, GOLD, COPPER, DIAMOND, EMERALD, AMETHYST, RUBY, SAPPHIRE, TOPAZ
     );
     private static final List<ResourceLocation> HANDLE_MATERIALS = List.of(OAK, BLAZE, BREEZE);
     private static final List<ResourceLocation> GUARD_MATERIALS = STARTER_MATERIALS;

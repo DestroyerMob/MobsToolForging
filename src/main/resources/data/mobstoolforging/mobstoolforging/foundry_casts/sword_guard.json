@@ -1,0 +1,6 @@
+{
+  "input": { "item": "mobstoolforging:sword_guard" },
+  "template": "mobstoolforging:sword_guard",
+  "gold_amount": 180,
+  "amount": 90
+}

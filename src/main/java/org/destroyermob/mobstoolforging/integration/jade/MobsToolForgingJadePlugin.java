@@ -15,11 +15,18 @@ import org.destroyermob.mobstoolforging.world.CampfireWorkpieceHeating;
 import org.destroyermob.mobstoolforging.world.DryingRackBlock;
 import org.destroyermob.mobstoolforging.world.DryingRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
+import org.destroyermob.mobstoolforging.world.FoundryForgeBlock;
+import org.destroyermob.mobstoolforging.world.FoundryForgeBlockEntity;
+import org.destroyermob.mobstoolforging.world.FoundryAccess;
+import org.destroyermob.mobstoolforging.world.FoundryDrainBlock;
+import org.destroyermob.mobstoolforging.world.FoundryFuelTankBlock;
+import org.destroyermob.mobstoolforging.world.FoundryFuelTankBlockEntity;
 import org.destroyermob.mobstoolforging.world.HeatingRecipe;
 import org.destroyermob.mobstoolforging.world.HeatingRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlock;
 import org.destroyermob.mobstoolforging.world.HeatingForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.LavaHeatingForgeBlockEntity;
+import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.world.HeatingSource;
 import org.destroyermob.mobstoolforging.world.PatternRackBlock;
 import org.destroyermob.mobstoolforging.world.PatternRackBlockEntity;
@@ -42,6 +49,9 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
     private static final CampfireHeatingProvider CAMPFIRE_HEATING_PROVIDER = new CampfireHeatingProvider();
     private static final PatternRackProvider PATTERN_RACK_PROVIDER = new PatternRackProvider();
     private static final DryingRackProvider DRYING_RACK_PROVIDER = new DryingRackProvider();
+    private static final FoundryFuelTankProvider FOUNDRY_FUEL_TANK_PROVIDER = new FoundryFuelTankProvider();
+    private static final FoundryContentsProvider FOUNDRY_CONTENTS_PROVIDER = new FoundryContentsProvider();
+    private static final FoundryDrainProvider FOUNDRY_DRAIN_PROVIDER = new FoundryDrainProvider();
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
@@ -50,6 +60,9 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(CAMPFIRE_HEATING_PROVIDER, CampfireBlock.class);
         registration.registerBlockComponent(PATTERN_RACK_PROVIDER, PatternRackBlock.class);
         registration.registerBlockComponent(DRYING_RACK_PROVIDER, DryingRackBlock.class);
+        registration.registerBlockComponent(FOUNDRY_FUEL_TANK_PROVIDER, FoundryFuelTankBlock.class);
+        registration.registerBlockComponent(FOUNDRY_CONTENTS_PROVIDER, FoundryForgeBlock.class);
+        registration.registerBlockComponent(FOUNDRY_DRAIN_PROVIDER, FoundryDrainBlock.class);
     }
 
     private static final class WorkstationProvider implements IBlockComponentProvider {
@@ -215,12 +228,128 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
         }
     }
 
+    private static final class FoundryFuelTankProvider implements IBlockComponentProvider {
+        private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "foundry_fuel_tank");
+
+        @Override
+        public ResourceLocation getUid() {
+            return UID;
+        }
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            if (accessor.getBlockEntity() instanceof FoundryFuelTankBlockEntity tank) {
+                int percent = Math.round(tank.fluidAmountMb() * 100.0F / tank.capacityMb());
+                Component fluidName = tank.fluidStack().isEmpty()
+                        ? Component.translatable("message.mobstoolforging.foundry_tank_empty")
+                        : tank.fluidStack().getHoverName();
+                tooltip.add(Component.translatable(
+                        "jade.mobstoolforging.foundry_fuel",
+                        fluidName,
+                        tank.fluidAmountMb(),
+                        tank.capacityMb(),
+                        percent
+                ).withStyle(ChatFormatting.GRAY));
+                if (!tank.fluidStack().isEmpty()) {
+                    tooltip.add(Component.translatable(
+                            "jade.mobstoolforging.foundry_fuel_temperature",
+                            formatFoundryTemperature(tank.fuelTemperatureC())
+                    ).withStyle(ChatFormatting.GRAY));
+                }
+            }
+        }
+    }
+
+    private static final class FoundryContentsProvider implements IBlockComponentProvider {
+        private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "foundry_contents");
+
+        @Override
+        public ResourceLocation getUid() {
+            return UID;
+        }
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            if (!(accessor.getBlockEntity() instanceof FoundryForgeBlockEntity foundry)) {
+                return;
+            }
+            if (foundry.isFormed()) {
+                tooltip.add(volumeLine("jade.mobstoolforging.foundry_molten", foundry.moltenAmountMb(), foundry.fluidCapacityMb()));
+                java.util.List<FoundryForgeBlockEntity.MoltenLayer> layers = foundry.moltenLayers();
+                for (int index = 0; index < layers.size(); index++) {
+                    FoundryForgeBlockEntity.MoltenLayer layer = layers.get(index);
+                    String key = index == 0
+                            ? "jade.mobstoolforging.foundry_next_layer"
+                            : "jade.mobstoolforging.foundry_layer";
+                    tooltip.add(Component.translatable(key, MaterialCatalog.displayName(layer.material()), layer.amountMb()).withStyle(ChatFormatting.GRAY));
+                }
+                int solids = foundry.solidItemCount();
+                if (solids > 0) {
+                    tooltip.add(Component.translatable("jade.mobstoolforging.foundry_solids", solids).withStyle(ChatFormatting.GRAY));
+                    java.util.List<ItemStack> inputs = foundry.solidRenderStacks();
+                    if (!inputs.isEmpty()) {
+                        tooltip.add(Component.translatable(
+                                "jade.mobstoolforging.foundry_melting",
+                                inputs.getFirst().getHoverName(),
+                                Math.round(foundry.meltProgressFraction() * 100.0F)
+                        ).withStyle(ChatFormatting.GRAY));
+                        tooltip.add(Component.translatable(
+                                foundry.hasSufficientTemperature()
+                                        ? "jade.mobstoolforging.foundry_temperature_ready"
+                                        : "jade.mobstoolforging.foundry_temperature_low",
+                                formatFoundryTemperature(foundry.activeFuelTemperatureC()),
+                                formatFoundryTemperature(foundry.currentMeltingPointC())
+                        ).withStyle(foundry.hasSufficientTemperature() ? ChatFormatting.GRAY : ChatFormatting.RED));
+                    }
+                }
+                tooltip.add(Component.translatable(
+                        "jade.mobstoolforging.foundry_connected_fuel",
+                        foundry.connectedFuelMb(),
+                        foundry.connectedTankCount()
+                ).withStyle(ChatFormatting.GRAY));
+            } else {
+                tooltip.add(Component.translatable("jade.mobstoolforging.foundry_molten_unformed", foundry.moltenAmountMb()).withStyle(ChatFormatting.GRAY));
+            }
+        }
+    }
+
+    private static final class FoundryDrainProvider implements IBlockComponentProvider {
+        private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "foundry_drain");
+
+        @Override
+        public ResourceLocation getUid() {
+            return UID;
+        }
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            FoundryAccess.findController(accessor.getLevel(), accessor.getPosition()).ifPresent(foundry ->
+                    foundry.bottomMoltenLayer().ifPresentOrElse(
+                            layer -> tooltip.add(Component.translatable(
+                                    "jade.mobstoolforging.foundry_next_layer",
+                                    MaterialCatalog.displayName(layer.material()),
+                                    layer.amountMb()
+                            ).withStyle(ChatFormatting.GRAY)),
+                            () -> tooltip.add(Component.translatable("jade.mobstoolforging.foundry_next_empty").withStyle(ChatFormatting.GRAY))
+                    ));
+        }
+    }
+
     private static Component line(String key, Component value) {
         return Component.translatable(key, value).withStyle(ChatFormatting.GRAY);
     }
 
     private static Component progressLine(int current, int required) {
         return Component.translatable("jade.mobstoolforging.progress", current, required, Math.round(required <= 0 ? 0.0F : current * 100.0F / required)).withStyle(ChatFormatting.GRAY);
+    }
+
+    private static Component volumeLine(String key, int amountMb, int capacityMb) {
+        int percent = Math.round(capacityMb <= 0 ? 0.0F : amountMb * 100.0F / capacityMb);
+        return Component.translatable(key, amountMb, capacityMb, percent).withStyle(ChatFormatting.GRAY);
+    }
+
+    private static String formatFoundryTemperature(float temperature) {
+        return String.format(java.util.Locale.ROOT, "%.0f°C", temperature);
     }
 
     private static void addWorkpieceHeatLine(ITooltip tooltip, int slot, ItemStack workpiece, float temperature, String statusKey, Component timeRemaining) {

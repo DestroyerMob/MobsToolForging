@@ -218,6 +218,8 @@ public class ModVisualDefinitionProvider implements DataProvider {
     private static List<MaterialVisualSpec> materialSpecs() {
         return List.of(
                 new MaterialVisualSpec(MaterialCatalog.IRON, "metal", "fine_scratches", false, 0, palette(0xFF3E4650, 0xFF59636F, 0xFF77828E, 0xFF9CA6B1, 0xFFC7D0D8, 0xFFF2F6F8)),
+                new MaterialVisualSpec(MaterialCatalog.STEEL, "metal", "fine_scratches", false, 0, palette(0xFF303A43, 0xFF52616E, 0xFF788896, 0xFFA5B2BD, 0xFFD2DAE0, 0xFFF8FAFC)),
+                new MaterialVisualSpec(MaterialCatalog.BRONZE, "metal", "fine_scratches", false, 0, palette(0xFF49250E, 0xFF743B16, 0xFFA75A22, 0xFFD17D35, 0xFFF0AA62, 0xFFFFD89B)),
                 new MaterialVisualSpec(MaterialCatalog.GOLD, "metal", "fine_scratches", false, 0, palette(0xFF6D4A06, 0xFF9A6B0D, 0xFFD59A1B, 0xFFFFC943, 0xFFFFE37D, 0xFFFFF2B2)),
                 new MaterialVisualSpec(MaterialCatalog.COPPER, "metal", "fine_scratches", false, 0, palette(0xFF4A2A12, 0xFF7A431D, 0xFFB46A2E, 0xFFD58A43, 0xFFFFB16A, 0xFFFFD8A0)),
                 new MaterialVisualSpec(MaterialCatalog.NETHERITE, "metal", "fine_scratches", false, 0, palette(0xFF1E1B20, 0xFF312B33, 0xFF4A414B, 0xFF675E68, 0xFF8C818D, 0xFFB0A6B2)),
@@ -243,6 +245,8 @@ public class ModVisualDefinitionProvider implements DataProvider {
         return List.of(
                 tintedLeatherArmor(MaterialCatalog.LEATHER, ResourceLocation.withDefaultNamespace("item/leather")),
                 vanillaArmor(MaterialCatalog.IRON, ResourceLocation.withDefaultNamespace("block/iron_block"), "iron"),
+                tintedLeatherArmor(MaterialCatalog.STEEL, ResourceLocation.withDefaultNamespace("block/iron_block")),
+                tintedLeatherArmor(MaterialCatalog.BRONZE, ResourceLocation.withDefaultNamespace("block/copper_block")),
                 vanillaArmor(MaterialCatalog.GOLD, ResourceLocation.withDefaultNamespace("block/gold_block"), "golden"),
                 tintedLeatherArmor(MaterialCatalog.COPPER, ResourceLocation.withDefaultNamespace("block/copper_block")),
                 vanillaArmor(MaterialCatalog.NETHERITE, ResourceLocation.withDefaultNamespace("block/netherite_block"), "netherite"),

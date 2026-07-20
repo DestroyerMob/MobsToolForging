@@ -1,0 +1,17 @@
+{
+  "category": "metal",
+  "display_item": "mobstoolforging:steel_ingot",
+  "items": ["mobstoolforging:steel_ingot"],
+  "tags": ["c:ingots/steel"],
+  "translation_key": "material.mobstoolforging.steel",
+  "minimum_forge_heat": "high",
+  "tier": {
+    "base": "diamond",
+    "max_damage": 1850,
+    "mining_speed": 8.5,
+    "attack_damage_bonus": 3.0,
+    "enchantment_value": 12,
+    "repair_item": "mobstoolforging:steel_ingot"
+  },
+  "visual_slots": ["headMaterial", "guardMaterial"]
+}

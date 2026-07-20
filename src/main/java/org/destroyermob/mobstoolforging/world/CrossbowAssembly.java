@@ -78,7 +78,8 @@ public final class CrossbowAssembly {
             return ItemStack.EMPTY;
         }
 
-        int quality = Math.round((bodyData.effectiveQuality() + limbData.effectiveQuality()) / 2.0F);
+        int quality = Math.round((Metallurgy.adjustedQuality(body, bodyData.effectiveQuality())
+                + Metallurgy.adjustedQuality(limbs, limbData.effectiveQuality())) / 2.0F);
         ToolConstructionData construction = new ToolConstructionData(
                 TOOL_TYPE,
                 limbData.materialId(),
