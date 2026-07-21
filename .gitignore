@@ -3,6 +3,8 @@
 build/
 run/
 run-data/
+run-smoke-client/
+run-smoke-server/
 logs/
 crash-reports/
 src/generated/resources/.cache/

@@ -49,6 +49,18 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
+        smokeServer {
+            server()
+            gameDirectory = project.file('run-smoke-server')
+            programArguments.addAll '--nogui', '--port', '25585'
+        }
+
+        smokeClient {
+            client()
+            gameDirectory = project.file('run-smoke-client')
+            programArguments.addAll '--quickPlayMultiplayer', '127.0.0.1:25585'
+        }
+
         gameTestServer {
             type = 'gameTestServer'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id

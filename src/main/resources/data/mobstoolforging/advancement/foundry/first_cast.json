@@ -1,0 +1,33 @@
+{
+  "parent": "mobstoolforging:foundry/root",
+  "criteria": {
+    "has_cast": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mobstoolforging:casting_mold"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.mobstoolforging.foundry.first_cast.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "mobstoolforging:casting_mold"
+    },
+    "title": {
+      "translate": "advancement.mobstoolforging.foundry.first_cast.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_cast"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

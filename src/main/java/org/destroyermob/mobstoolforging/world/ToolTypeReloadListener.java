@@ -3,42 +3,56 @@ package org.destroyermob.mobstoolforging.world;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 
-public class ToolTypeReloadListener extends SimpleJsonResourceReloadListener {
+public class ToolTypeReloadListener extends ConditionalJsonResourceReloadListener {
     private static final Gson GSON = new Gson();
 
-    public ToolTypeReloadListener() {
-        super(GSON, "mobstoolforging/tool_types");
+    public ToolTypeReloadListener(ICondition.IContext conditionContext, HolderLookup.Provider registryLookup) {
+        super(GSON, "mobstoolforging/tool_types", conditionContext, registryLookup);
     }
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> toolTypes, ResourceManager resourceManager, ProfilerFiller profiler) {
-        ToolTypeRegistry.resetDatapackToolTypes();
-        int loaded = 0;
+        List<ToolTypeDefinition> parsed = new ArrayList<>();
+        Map<ResourceLocation, JsonElement> accepted = new LinkedHashMap<>();
         for (Map.Entry<ResourceLocation, JsonElement> entry : toolTypes.entrySet()) {
             try {
-                if (ToolTypeRegistry.registerDatapackToolType(parse(entry.getKey(), GsonHelper.convertToJsonObject(entry.getValue(), "tool type")))) {
-                    loaded++;
+                if (!conditionsMatch(entry.getValue())) {
+                    continue;
                 }
+                parsed.add(parse(entry.getKey(), GsonHelper.convertToJsonObject(entry.getValue(), "tool type")));
+                accepted.put(entry.getKey(), entry.getValue());
             } catch (RuntimeException exception) {
                 MobsToolForging.LOGGER.warn("Skipping invalid tool type {}.", entry.getKey(), exception);
             }
         }
+        int loaded = ToolTypeRegistry.replaceDatapackToolTypes(parsed);
+        GameplayRegistrySyncStore.capture(GameplayRegistrySyncStore.Section.TOOL_TYPES, accepted);
         MobsToolForging.LOGGER.info("Loaded {} datapack tool type definition(s).", loaded);
+    }
+
+    static void applySynchronizedData(Map<ResourceLocation, JsonElement> toolTypes) {
+        List<ToolTypeDefinition> parsed = toolTypes.entrySet().stream()
+                .map(entry -> parse(entry.getKey(), GsonHelper.convertToJsonObject(entry.getValue(), "tool type")))
+                .toList();
+        ToolTypeRegistry.replaceDatapackToolTypes(parsed);
     }
 
     private static ToolTypeDefinition parse(ResourceLocation id, JsonObject json) {

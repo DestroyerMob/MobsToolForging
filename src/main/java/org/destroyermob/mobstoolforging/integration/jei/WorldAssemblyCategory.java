@@ -55,7 +55,10 @@ public class WorldAssemblyCategory implements IRecipeCategory<WorldAssemblyJeiRe
 
     @Override
     public ResourceLocation getRegistryName(WorldAssemblyJeiRecipe recipe) {
-        return recipe.id();
+        // These displays are generated from world interactions rather than the
+        // vanilla recipe manager. The leading slash marks them as synthetic to
+        // recipe viewers such as EMI's JEI compatibility layer.
+        return ResourceLocation.fromNamespaceAndPath(recipe.id().getNamespace(), "/" + recipe.id().getPath());
     }
 
     @Override

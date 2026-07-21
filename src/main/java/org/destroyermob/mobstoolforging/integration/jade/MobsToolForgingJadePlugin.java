@@ -17,8 +17,13 @@ import org.destroyermob.mobstoolforging.world.DryingRackBlockEntity;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlock;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlockEntity;
+import org.destroyermob.mobstoolforging.world.FoundryFeedback;
 import org.destroyermob.mobstoolforging.world.FoundryAccess;
+import org.destroyermob.mobstoolforging.world.FoundryCastingBlock;
+import org.destroyermob.mobstoolforging.world.FoundryCastingBlockEntity;
 import org.destroyermob.mobstoolforging.world.FoundryDrainBlock;
+import org.destroyermob.mobstoolforging.world.FoundryFaucetBlock;
+import org.destroyermob.mobstoolforging.world.FoundryFaucetBlockEntity;
 import org.destroyermob.mobstoolforging.world.FoundryFuelTankBlock;
 import org.destroyermob.mobstoolforging.world.FoundryFuelTankBlockEntity;
 import org.destroyermob.mobstoolforging.world.HeatingRecipe;
@@ -52,6 +57,8 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
     private static final FoundryFuelTankProvider FOUNDRY_FUEL_TANK_PROVIDER = new FoundryFuelTankProvider();
     private static final FoundryContentsProvider FOUNDRY_CONTENTS_PROVIDER = new FoundryContentsProvider();
     private static final FoundryDrainProvider FOUNDRY_DRAIN_PROVIDER = new FoundryDrainProvider();
+    private static final FoundryCastingProvider FOUNDRY_CASTING_PROVIDER = new FoundryCastingProvider();
+    private static final FoundryFaucetProvider FOUNDRY_FAUCET_PROVIDER = new FoundryFaucetProvider();
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
@@ -63,6 +70,8 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(FOUNDRY_FUEL_TANK_PROVIDER, FoundryFuelTankBlock.class);
         registration.registerBlockComponent(FOUNDRY_CONTENTS_PROVIDER, FoundryForgeBlock.class);
         registration.registerBlockComponent(FOUNDRY_DRAIN_PROVIDER, FoundryDrainBlock.class);
+        registration.registerBlockComponent(FOUNDRY_CASTING_PROVIDER, FoundryCastingBlock.class);
+        registration.registerBlockComponent(FOUNDRY_FAUCET_PROVIDER, FoundryFaucetBlock.class);
     }
 
     private static final class WorkstationProvider implements IBlockComponentProvider {
@@ -274,6 +283,20 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
                 return;
             }
             if (foundry.isFormed()) {
+                FoundryForgeBlockEntity.ConnectedFuelStatus fuel = foundry.connectedFuelStatus();
+                tooltip.add(Component.translatable(
+                        "jade.mobstoolforging.foundry_dimensions",
+                        foundry.structureWidth(),
+                        foundry.structureDepth(),
+                        foundry.structureHeight()
+                ).withStyle(ChatFormatting.GRAY));
+                tooltip.add(FoundryFeedback.operatingStatus(foundry, fuel));
+                if (foundry.isStoked()) {
+                    tooltip.add(Component.translatable(
+                            "jade.mobstoolforging.foundry_stoked",
+                            secondsLeft(foundry.stokeTicksRemaining())
+                    ).withStyle(ChatFormatting.GOLD));
+                }
                 tooltip.add(volumeLine("jade.mobstoolforging.foundry_molten", foundry.moltenAmountMb(), foundry.fluidCapacityMb()));
                 java.util.List<FoundryForgeBlockEntity.MoltenLayer> layers = foundry.moltenLayers();
                 for (int index = 0; index < layers.size(); index++) {
@@ -304,11 +327,87 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
                 }
                 tooltip.add(Component.translatable(
                         "jade.mobstoolforging.foundry_connected_fuel",
-                        foundry.connectedFuelMb(),
-                        foundry.connectedTankCount()
+                        fuel.amountMb(),
+                        fuel.tankCount()
                 ).withStyle(ChatFormatting.GRAY));
             } else {
-                tooltip.add(Component.translatable("jade.mobstoolforging.foundry_molten_unformed", foundry.moltenAmountMb()).withStyle(ChatFormatting.GRAY));
+                tooltip.add(FoundryFeedback.structureDiagnostic(foundry).copy().withStyle(ChatFormatting.RED));
+                if (foundry.moltenAmountMb() > 0) {
+                    tooltip.add(Component.translatable("jade.mobstoolforging.foundry_molten_unformed", foundry.moltenAmountMb()).withStyle(ChatFormatting.GRAY));
+                }
+            }
+        }
+    }
+
+    private static final class FoundryCastingProvider implements IBlockComponentProvider {
+        private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "foundry_casting");
+
+        @Override
+        public ResourceLocation getUid() {
+            return UID;
+        }
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            if (!(accessor.getBlockEntity() instanceof FoundryCastingBlockEntity casting)) {
+                return;
+            }
+            ItemStack output = casting.output();
+            if (!output.isEmpty()) {
+                tooltip.add(Component.translatable("jade.mobstoolforging.foundry_casting_ready", output.getHoverName())
+                        .withStyle(ChatFormatting.GREEN));
+                return;
+            }
+            if (casting.coolingTicks() > 0) {
+                ItemStack preview = casting.previewOutput();
+                tooltip.add(Component.translatable(
+                        "jade.mobstoolforging.foundry_casting_cooling",
+                        preview.isEmpty() ? Component.translatable("jade.mobstoolforging.foundry_casting_product") : preview.getHoverName(),
+                        secondsLeft(casting.coolingTicks())
+                ).withStyle(ChatFormatting.GOLD));
+                return;
+            }
+            if (casting.amountMb() > 0) {
+                tooltip.add(Component.translatable(
+                        "jade.mobstoolforging.foundry_casting_filling",
+                        casting.material().map(MaterialCatalog::displayName).orElse(Component.empty()),
+                        casting.amountMb(),
+                        casting.capacityMb()
+                ).withStyle(ChatFormatting.GRAY));
+                return;
+            }
+            ItemStack form = casting.form();
+            if (!form.isEmpty()) {
+                tooltip.add(Component.translatable("jade.mobstoolforging.foundry_casting_form", form.getHoverName())
+                        .withStyle(ChatFormatting.GRAY));
+            } else {
+                tooltip.add(Component.translatable(FoundryCastingBlockEntity.isBasin(accessor.getBlockState())
+                        ? "jade.mobstoolforging.foundry_casting_empty_basin"
+                        : "jade.mobstoolforging.foundry_casting_empty_table").withStyle(ChatFormatting.GRAY));
+            }
+        }
+    }
+
+    private static final class FoundryFaucetProvider implements IBlockComponentProvider {
+        private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "foundry_faucet");
+
+        @Override
+        public ResourceLocation getUid() {
+            return UID;
+        }
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            boolean active = accessor.getBlockState().getValue(FoundryFaucetBlock.ACTIVE);
+            Component state = Component.translatable(active
+                    ? "jade.mobstoolforging.foundry_faucet_open"
+                    : "jade.mobstoolforging.foundry_faucet_closed");
+            tooltip.add(state.copy().withStyle(active ? ChatFormatting.GOLD : ChatFormatting.GRAY));
+            if (accessor.getBlockEntity() instanceof FoundryFaucetBlockEntity faucet) {
+                faucet.pouringMaterial().ifPresent(material -> tooltip.add(Component.translatable(
+                        "jade.mobstoolforging.foundry_faucet_pouring",
+                        MaterialCatalog.displayName(material)
+                ).withStyle(ChatFormatting.GRAY)));
             }
         }
     }

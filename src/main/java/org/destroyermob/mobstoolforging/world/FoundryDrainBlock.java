@@ -48,7 +48,7 @@ public class FoundryDrainBlock extends Block {
                     .orElse(Component.translatable("message.mobstoolforging.foundry_drain_empty"));
             DebugFeedback.actionBar(player, Component.translatable(
                     "message.mobstoolforging.foundry_drain_status",
-                    forge.bottomMoltenMaterial().map(forge::moltenAmount).orElse(0),
+                    forge.bottomMoltenLayer().map(FoundryForgeBlockEntity.MoltenLayer::amountMb).orElse(0),
                     material
             ));
         }, () -> DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_drain_unconnected")));

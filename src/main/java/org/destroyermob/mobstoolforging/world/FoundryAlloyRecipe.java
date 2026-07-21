@@ -33,6 +33,13 @@ public record FoundryAlloyRecipe(
         if (outputAmountMb <= 0) {
             throw new IllegalArgumentException("Foundry alloy output amount must be positive");
         }
+        long inputVolumeMb = inputs.values().stream().mapToLong(Integer::longValue).sum();
+        if (outputAmountMb > inputVolumeMb) {
+            throw new IllegalArgumentException(
+                    "Foundry alloy output cannot exceed its total input volume ("
+                            + outputAmountMb + " > " + inputVolumeMb + " mB)"
+            );
+        }
     }
 
     public int craftableBatches(ToIntFunction<ResourceLocation> availableAmount) {

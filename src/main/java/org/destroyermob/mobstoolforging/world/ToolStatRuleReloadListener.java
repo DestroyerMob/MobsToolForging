@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -26,16 +27,27 @@ public class ToolStatRuleReloadListener extends SimpleJsonResourceReloadListener
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> rules, ResourceManager resourceManager, ProfilerFiller profiler) {
         ToolTypeRegistry.resetDatapackStatModifiers();
+        Map<ResourceLocation, JsonElement> accepted = new LinkedHashMap<>();
         int loaded = 0;
         for (Map.Entry<ResourceLocation, JsonElement> entry : rules.entrySet()) {
             try {
                 ToolTypeRegistry.registerDatapackStatModifier(parse(entry.getKey(), GsonHelper.convertToJsonObject(entry.getValue(), "tool stat rule")));
+                accepted.put(entry.getKey(), entry.getValue());
                 loaded++;
             } catch (RuntimeException exception) {
                 MobsToolForging.LOGGER.warn("Skipping invalid tool stat rule {}.", entry.getKey(), exception);
             }
         }
+        GameplayRegistrySyncStore.capture(GameplayRegistrySyncStore.Section.STAT_RULES, accepted);
         MobsToolForging.LOGGER.info("Loaded {} datapack tool stat rule(s).", loaded);
+    }
+
+    static void applySynchronizedData(Map<ResourceLocation, JsonElement> rules) {
+        List<ToolStatRule> parsed = rules.entrySet().stream()
+                .map(entry -> parse(entry.getKey(), GsonHelper.convertToJsonObject(entry.getValue(), "tool stat rule")))
+                .toList();
+        ToolTypeRegistry.resetDatapackStatModifiers();
+        parsed.forEach(ToolTypeRegistry::registerDatapackStatModifier);
     }
 
     private static ToolStatRule parse(ResourceLocation id, JsonObject json) {

@@ -60,6 +60,8 @@ import org.destroyermob.mobstoolforging.item.ModularToolItem;
 import org.destroyermob.mobstoolforging.item.ModularCrossbowItem;
 import org.destroyermob.mobstoolforging.item.ModularToolPartItem;
 import org.destroyermob.mobstoolforging.network.ModNetworking;
+import org.destroyermob.mobstoolforging.network.FoundryRegistrySync;
+import org.destroyermob.mobstoolforging.network.GameplayRegistrySync;
 import org.destroyermob.mobstoolforging.integration.everycomp.MobsToolForgingEveryCompat;
 import org.destroyermob.mobstoolforging.integration.everycomp.EveryCompatDropFallback;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
@@ -84,6 +86,7 @@ import org.destroyermob.mobstoolforging.world.ExternalToolTooltipOrder;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateReloadListener;
 import org.destroyermob.mobstoolforging.world.FoundryCastReloadListener;
+import org.destroyermob.mobstoolforging.world.FoundryBlockDrops;
 import org.destroyermob.mobstoolforging.world.FoundryAlloyReloadListener;
 import org.destroyermob.mobstoolforging.world.FoundryMeltingReloadListener;
 import org.destroyermob.mobstoolforging.world.FoundryMeltingPointReloadListener;
@@ -148,6 +151,7 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::placeGroundAssembly);
         NeoForge.EVENT_BUS.addListener(FlintKnappingEvents::dropPlantFiber);
         NeoForge.EVENT_BUS.addListener(EveryCompatDropFallback::addMissingSelfDrop);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, FoundryBlockDrops::finalizeBlockDrops);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, LeatherStationAssemblyEvents::assembleInWorld);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, DiamondSawAssemblyEvents::assembleInWorld);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, LapidaryTableAssemblyEvents::assembleInWorld);
@@ -163,6 +167,8 @@ public class MobsToolForging {
         NeoForge.EVENT_BUS.addListener(PatternRackSelection::playerChangedDimension);
         NeoForge.EVENT_BUS.addListener(this::quenchInWaterCauldron);
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
+        NeoForge.EVENT_BUS.addListener(FoundryRegistrySync::onDatapackSync);
+        NeoForge.EVENT_BUS.addListener(GameplayRegistrySync::onDatapackSync);
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::blacklistStationsFromCarryOn);
         NeoForge.EVENT_BUS.addListener(this::coolPlayerWorkpieces);
         NeoForge.EVENT_BUS.addListener(this::coolDroppedWorkpieces);
@@ -404,8 +410,8 @@ public class MobsToolForging {
     private void addReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new MaterialDefinitionReloadListener());
         event.addListener(new ToolTraitReloadListener());
-        event.addListener(new ToolTypeReloadListener());
-        event.addListener(new ForgeTemplateReloadListener());
+        event.addListener(new ToolTypeReloadListener(event.getConditionContext(), event.getRegistryAccess()));
+        event.addListener(new ForgeTemplateReloadListener(event.getConditionContext(), event.getRegistryAccess()));
         event.addListener(new ToolStatRuleReloadListener());
         event.addListener(new StationWorkRecipeReloadListener());
         event.addListener(new HeatingRecipeReloadListener());

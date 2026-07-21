@@ -29,15 +29,25 @@ public class StationWorkRecipeReloadListener extends SimpleJsonResourceReloadLis
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> recipes, ResourceManager resourceManager, ProfilerFiller profiler) {
         Map<ResourceLocation, StationWorkRecipe> loaded = new LinkedHashMap<>();
+        Map<ResourceLocation, JsonElement> accepted = new LinkedHashMap<>();
         recipes.forEach((id, element) -> {
             try {
                 loaded.put(id, parse(id, GsonHelper.convertToJsonObject(element, "station work recipe")));
+                accepted.put(id, element);
             } catch (RuntimeException exception) {
                 MobsToolForging.LOGGER.warn("Skipping invalid station work recipe {}.", id, exception);
             }
         });
         StationWorkRecipeRegistry.replace(loaded);
+        GameplayRegistrySyncStore.capture(GameplayRegistrySyncStore.Section.STATION_WORK, accepted);
         MobsToolForging.LOGGER.info("Loaded {} station work recipe(s).", loaded.size());
+    }
+
+    static void applySynchronizedData(Map<ResourceLocation, JsonElement> recipes) {
+        Map<ResourceLocation, StationWorkRecipe> loaded = new LinkedHashMap<>();
+        recipes.forEach((id, element) -> loaded.put(id, parse(id,
+                GsonHelper.convertToJsonObject(element, "station work recipe"))));
+        StationWorkRecipeRegistry.replace(loaded);
     }
 
     private static StationWorkRecipe parse(ResourceLocation id, JsonObject json) {

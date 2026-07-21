@@ -11,6 +11,31 @@
     },
     {
       "type": "patchouli:text",
+      "title": "Building a Foundry",
+      "text": "Place the $(bold)Foundry Forge$() in the lowest wall layer, facing away from the interior. Behind it, build a 1–9 block wide, 1–9 block deep blackstone floor with four straight blackstone wall faces.$(p)The interior must be empty, the top must remain open, and walls may be 1–8 blocks high. Corners are optional. Foundry Glass, Fuel Tanks, and Drains can replace tagged wall blocks.$(p)Use the controller to receive the exact coordinates of the first construction problem."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Fuel and Melting",
+      "text": "Replace a wall block with a $(bold)Foundry Fuel Tank$(), then fill it with a registered fluid such as lava. Add metal by using it on the controller or dropping it into the interior.$(p)Each interior block holds $(bold)1,000 mB$(). The foundry reserves space for queued solids and only burns fuel hot enough for the next item. Look up Foundry Melting and Foundry Fuels in JEI or EMI for exact amounts, temperatures, and times."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Raw Ore Processing",
+      "text": "Raw iron, gold, and copper produce $(bold)two ingots$() of molten metal per item. A raw storage block produces 1,620 mB, so it requires at least two interior blocks of free capacity.$(p)Processed ingots and metal storage blocks melt at their original volume. This makes the foundry valuable at the mine while preventing repeated casting and remelting from multiplying metal."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Stoking the Foundry",
+      "text": "Use $(bold)Blaze Powder$() on a formed Foundry Forge to stoke it for one minute of active processing. A stoked foundry melts at $(bold)twice the speed$() and burns fuel twice as quickly, so throughput improves without changing fuel efficiency.$(p)Up to four minutes can be stored. The boost only counts down while metal is actually melting, and the controller or Jade shows the remaining time."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Draining and Casting",
+      "text": "Install a $(bold)Foundry Drain$() in a wall, attach a Faucet to its outside face, and place a Casting Table or Basin directly below.$(p)An empty table pours ingots; an empty basin pours storage blocks. To make a reusable Gold Cast, place a finished part on a table and pour gold over it. Put that cast back on the table to pour crude metal parts.$(p)The bottom molten layer always pours first. Use the faucet or Jade tooltip to learn why a pour is stalled."
+    },
+    {
+      "type": "patchouli:text",
       "title": "Reforging a Part",
       "text": "Only $(bold)uncoated, workable metal parts$() can be reforged. Handles, strings, leather, gems, casts, coatings, and assembled equipment cannot.$(p)Heat the part, select its matching pattern on a Smithing Anvil, place the hot part, then hammer it as normal. Reforging keeps its material and alloy composition, removes casting porosity, resets heat treatment, and replaces its workmanship with the new hammering result."
     },
@@ -28,6 +53,11 @@
       "type": "patchouli:text",
       "title": "Metal Recovery",
       "text": "Drop or insert an uncoated metal tool or armour part into a formed foundry to recycle it. It melts back into its recorded material.$(p)Recovery is intentionally below 100%. Better workmanship returns more metal, while worn parts return less. This makes casting useful for blanks and bulk production without replacing careful forging."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Foundry Progression",
+      "text": "The Foundry Engineering advancement tree follows the intended route: build the controller, create a reusable gold cast, master bronze and steel, stoke the furnace with blaze powder, then complete netherite metallurgy.$(p)Bronze is the accessible bulk alloy, steel rewards carbon management, and netherite remains the late-game goal because one ingot still requires four scraps and four gold ingots."
     }
   ]
 }

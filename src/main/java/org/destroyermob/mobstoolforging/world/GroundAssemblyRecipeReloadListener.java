@@ -21,14 +21,24 @@ public class GroundAssemblyRecipeReloadListener extends SimpleJsonResourceReload
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> recipes, ResourceManager resourceManager, ProfilerFiller profiler) {
         Map<ResourceLocation, GroundAssemblyRecipe> loaded = new LinkedHashMap<>();
+        Map<ResourceLocation, JsonElement> accepted = new LinkedHashMap<>();
         recipes.forEach((id, element) -> {
             try {
                 loaded.put(id, GroundAssemblyRecipe.fromJson(id, GsonHelper.convertToJsonObject(element, "ground assembly recipe")));
+                accepted.put(id, element);
             } catch (RuntimeException exception) {
                 MobsToolForging.LOGGER.warn("Skipping invalid ground assembly recipe {}.", id, exception);
             }
         });
         GroundAssemblyRecipeRegistry.replace(loaded);
+        GameplayRegistrySyncStore.capture(GameplayRegistrySyncStore.Section.GROUND_ASSEMBLY, accepted);
         MobsToolForging.LOGGER.info("Loaded {} ground assembly recipe(s).", loaded.size());
+    }
+
+    static void applySynchronizedData(Map<ResourceLocation, JsonElement> recipes) {
+        Map<ResourceLocation, GroundAssemblyRecipe> loaded = new LinkedHashMap<>();
+        recipes.forEach((id, element) -> loaded.put(id, GroundAssemblyRecipe.fromJson(id,
+                GsonHelper.convertToJsonObject(element, "ground assembly recipe"))));
+        GroundAssemblyRecipeRegistry.replace(loaded);
     }
 }

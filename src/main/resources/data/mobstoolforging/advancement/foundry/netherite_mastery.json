@@ -1,0 +1,38 @@
+{
+  "parent": "mobstoolforging:foundry/steel_age",
+  "criteria": {
+    "foundry_netherite": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mobstoolforging:casting_mold"
+          },
+          {
+            "items": "minecraft:netherite_ingot"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.mobstoolforging.foundry.netherite_mastery.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:netherite_ingot"
+    },
+    "title": {
+      "translate": "advancement.mobstoolforging.foundry.netherite_mastery.title"
+    }
+  },
+  "requirements": [
+    [
+      "foundry_netherite"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

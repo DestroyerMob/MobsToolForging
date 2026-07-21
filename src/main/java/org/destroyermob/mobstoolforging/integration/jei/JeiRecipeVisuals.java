@@ -71,7 +71,7 @@ final class JeiRecipeVisuals {
         guiGraphics.fill(x + 4, y + 3, x + 6, y + 6, HEAT_HOT);
     }
 
-    private static void drawSmallText(GuiGraphics guiGraphics, Component text, int x, int y) {
+    static void drawSmallText(GuiGraphics guiGraphics, Component text, int x, int y) {
         Font font = Minecraft.getInstance().font;
         guiGraphics.drawString(font, text, x, y, TEXT, false);
     }

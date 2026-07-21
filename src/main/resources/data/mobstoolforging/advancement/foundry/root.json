@@ -1,0 +1,35 @@
+{
+  "criteria": {
+    "has_foundry_forge": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mobstoolforging:foundry_forge"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
+    "description": {
+      "translate": "advancement.mobstoolforging.foundry.root.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "mobstoolforging:foundry_forge"
+    },
+    "show_toast": false,
+    "title": {
+      "translate": "advancement.mobstoolforging.foundry.root.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_foundry_forge"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

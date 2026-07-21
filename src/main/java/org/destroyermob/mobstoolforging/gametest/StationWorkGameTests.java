@@ -20,6 +20,7 @@ import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.item.crafting.SmithingTrimRecipe;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import org.destroyermob.mobstoolforging.MobsToolForging;
@@ -60,8 +61,27 @@ public final class StationWorkGameTests {
             "crossbow_limbs_iron"
     );
     private static final BlockPos STATION_POS = new BlockPos(1, 1, 1);
+    private static final ResourceLocation FARMERS_DELIGHT_KNIFE = ResourceLocation.fromNamespaceAndPath("farmersdelight", "cooking_knife");
+    private static final ResourceLocation FARMERS_DELIGHT_KNIFE_TEMPLATE = ResourceLocation.fromNamespaceAndPath("farmersdelight", "cooking_knife_head");
 
     private StationWorkGameTests() {
+    }
+
+    @GameTest(template = "station_work_completion", timeoutTicks = 20)
+    public static void optionalToolTypesAndTemplatesHonorModConditions(GameTestHelper helper) {
+        boolean farmersDelightLoaded = ModList.get().isLoaded("farmersdelight");
+        boolean knifeTypeLoaded = ToolTypeRegistry.toolType(FARMERS_DELIGHT_KNIFE).isPresent();
+        boolean knifeTemplateLoaded = ToolTypeRegistry.template(FARMERS_DELIGHT_KNIFE_TEMPLATE).isPresent();
+
+        helper.assertTrue(
+                knifeTypeLoaded == farmersDelightLoaded,
+                "Farmer's Delight cooking-knife tool type did not match its mod_loaded condition"
+        );
+        helper.assertTrue(
+                knifeTemplateLoaded == knifeTypeLoaded,
+                "Cooking-knife forge template was left dangling from its tool type"
+        );
+        helper.succeed();
     }
 
     @GameTest(template = "station_work_completion", timeoutTicks = 20)

@@ -34,7 +34,9 @@ public final class ToolTypeRegistry {
     public static final ResourceLocation BOOTS_CHAINMAIL_TEMPLATE = modLoc(ArmorPartData.BOOTS_CHAINMAIL);
     public static final ResourceLocation BOOTS_PLATE_TEMPLATE = modLoc(ArmorPartData.BOOTS_PLATE);
     private static final Map<ResourceLocation, ToolTypeDefinition> TOOL_TYPES = new LinkedHashMap<>();
-    private static final Map<ResourceLocation, ForgeTemplateDefinition> TEMPLATES = new LinkedHashMap<>();
+    private static final Map<ResourceLocation, ForgeTemplateDefinition> BUILT_IN_TEMPLATES = new LinkedHashMap<>();
+    private static final Map<ResourceLocation, ForgeTemplateDefinition> JAVA_TEMPLATES = new LinkedHashMap<>();
+    private static final Map<ResourceLocation, ForgeTemplateDefinition> DATAPACK_TEMPLATES = new LinkedHashMap<>();
     private static final List<ToolStatModifier> STAT_MODIFIERS = new ArrayList<>();
     private static final List<ToolStatModifier> DATAPACK_STAT_MODIFIERS = new ArrayList<>();
     private static final Set<ResourceLocation> DATAPACK_TOOL_TYPES = new LinkedHashSet<>();
@@ -60,24 +62,23 @@ public final class ToolTypeRegistry {
 
     public static synchronized void resetTemplatesToBuiltIns() {
         bootstrap();
-        TEMPLATES.clear();
-        registerBuiltInTemplates();
+        DATAPACK_TEMPLATES.clear();
     }
 
     private static void registerBuiltInTemplates() {
-        registerTemplate(ForgeTemplate.SWORD_BLADE.definition());
-        registerTemplate(ForgeTemplate.SWORD_GUARD.definition());
-        registerTemplate(ForgeTemplate.SHOVEL_HEAD.definition());
-        registerTemplate(ForgeTemplate.PICKAXE_HEAD.definition());
-        registerTemplate(ForgeTemplate.AXE_HEAD.definition());
-        registerTemplate(ForgeTemplate.HOE_HEAD.definition());
-        registerTemplate(crossbowTemplate(
+        registerBuiltInTemplate(ForgeTemplate.SWORD_BLADE.definition());
+        registerBuiltInTemplate(ForgeTemplate.SWORD_GUARD.definition());
+        registerBuiltInTemplate(ForgeTemplate.SHOVEL_HEAD.definition());
+        registerBuiltInTemplate(ForgeTemplate.PICKAXE_HEAD.definition());
+        registerBuiltInTemplate(ForgeTemplate.AXE_HEAD.definition());
+        registerBuiltInTemplate(ForgeTemplate.HOE_HEAD.definition());
+        registerBuiltInTemplate(crossbowTemplate(
                 CROSSBOW_BODY_TEMPLATE,
                 ToolPartData.CROSSBOW_BODY,
                 ModItems.CROSSBOW_BODY.getId(),
                 Set.of(MaterialCatalog.WOOD)
         ));
-        registerTemplate(crossbowTemplate(
+        registerBuiltInTemplate(crossbowTemplate(
                 CROSSBOW_LIMBS_TEMPLATE,
                 ToolPartData.CROSSBOW_LIMBS,
                 ModItems.CROSSBOW_LIMBS.getId(),
@@ -136,7 +137,7 @@ public final class ToolTypeRegistry {
     }
 
     private static void registerArmorTemplate(ResourceLocation templateId, ResourceLocation armorType, String partType, int requiredMaterials, ResourceLocation outputItem, Set<ResourceLocation> allowedMaterials) {
-        registerTemplate(new ForgeTemplateDefinition(
+        registerBuiltInTemplate(new ForgeTemplateDefinition(
                 templateId,
                 armorType,
                 partType,
@@ -172,6 +173,7 @@ public final class ToolTypeRegistry {
 
     public static synchronized void registerToolType(ToolTypeDefinition definition) {
         bootstrap();
+        DATAPACK_TOOL_TYPES.remove(definition.id());
         TOOL_TYPES.put(definition.id(), definition);
     }
 
@@ -192,8 +194,37 @@ public final class ToolTypeRegistry {
         DATAPACK_TOOL_TYPES.clear();
     }
 
+    public static synchronized int replaceDatapackToolTypes(Collection<ToolTypeDefinition> definitions) {
+        bootstrap();
+        Map<ResourceLocation, ToolTypeDefinition> replacement = new LinkedHashMap<>(TOOL_TYPES);
+        DATAPACK_TOOL_TYPES.forEach(replacement::remove);
+        LinkedHashSet<ResourceLocation> replacementIds = new LinkedHashSet<>();
+        for (ToolTypeDefinition definition : definitions) {
+            if (replacement.containsKey(definition.id())) {
+                MobsToolForging.LOGGER.warn("Skipping datapack tool type {} because a Java or built-in tool type already uses that id.", definition.id());
+                continue;
+            }
+            replacement.put(definition.id(), definition);
+            replacementIds.add(definition.id());
+        }
+        TOOL_TYPES.clear();
+        TOOL_TYPES.putAll(replacement);
+        DATAPACK_TOOL_TYPES.clear();
+        DATAPACK_TOOL_TYPES.addAll(replacementIds);
+        return replacementIds.size();
+    }
+
     public static synchronized void registerTemplate(ForgeTemplateDefinition definition) {
-        TEMPLATES.put(definition.id(), definition);
+        bootstrap();
+        JAVA_TEMPLATES.put(definition.id(), definition);
+    }
+
+    public static synchronized void replaceDatapackTemplates(Collection<ForgeTemplateDefinition> definitions) {
+        bootstrap();
+        Map<ResourceLocation, ForgeTemplateDefinition> replacement = new LinkedHashMap<>();
+        definitions.forEach(definition -> replacement.put(definition.id(), definition));
+        DATAPACK_TEMPLATES.clear();
+        DATAPACK_TEMPLATES.putAll(replacement);
     }
 
     public static synchronized void registerStatModifier(ToolStatModifier modifier) {
@@ -219,7 +250,7 @@ public final class ToolTypeRegistry {
         return List.copyOf(rules);
     }
 
-    public static Optional<ToolTypeDefinition> toolType(ResourceLocation id) {
+    public static synchronized Optional<ToolTypeDefinition> toolType(ResourceLocation id) {
         bootstrap();
         return Optional.ofNullable(TOOL_TYPES.get(id));
     }
@@ -228,14 +259,21 @@ public final class ToolTypeRegistry {
         return toolType(ToolConstructionData.toolType(toolKind));
     }
 
-    public static Collection<ToolTypeDefinition> toolTypes() {
+    public static synchronized Collection<ToolTypeDefinition> toolTypes() {
         bootstrap();
         return List.copyOf(TOOL_TYPES.values());
     }
 
-    public static Optional<ForgeTemplateDefinition> template(ResourceLocation id) {
+    public static synchronized Optional<ForgeTemplateDefinition> template(ResourceLocation id) {
         bootstrap();
-        return Optional.ofNullable(TEMPLATES.get(id));
+        ForgeTemplateDefinition datapack = DATAPACK_TEMPLATES.get(id);
+        return datapack == null ? baseTemplate(id) : Optional.of(datapack);
+    }
+
+    static synchronized Optional<ForgeTemplateDefinition> baseTemplate(ResourceLocation id) {
+        bootstrap();
+        ForgeTemplateDefinition javaTemplate = JAVA_TEMPLATES.get(id);
+        return Optional.ofNullable(javaTemplate == null ? BUILT_IN_TEMPLATES.get(id) : javaTemplate);
     }
 
     public static Optional<ForgeTemplateDefinition> template(String id) {
@@ -245,9 +283,12 @@ public final class ToolTypeRegistry {
         return template(location);
     }
 
-    public static List<ForgeTemplateDefinition> templates() {
+    public static synchronized List<ForgeTemplateDefinition> templates() {
         bootstrap();
-        return TEMPLATES.values().stream()
+        Map<ResourceLocation, ForgeTemplateDefinition> merged = new LinkedHashMap<>(BUILT_IN_TEMPLATES);
+        merged.putAll(JAVA_TEMPLATES);
+        merged.putAll(DATAPACK_TEMPLATES);
+        return merged.values().stream()
                 .sorted(Comparator.comparing(template -> template.id().toString()))
                 .toList();
     }
@@ -308,6 +349,10 @@ public final class ToolTypeRegistry {
                 })
                 .build();
         TOOL_TYPES.put(CROSSBOW_TOOL_TYPE, definition);
+    }
+
+    private static void registerBuiltInTemplate(ForgeTemplateDefinition definition) {
+        BUILT_IN_TEMPLATES.put(definition.id(), definition);
     }
 
     private static ResourceLocation modLoc(String path) {

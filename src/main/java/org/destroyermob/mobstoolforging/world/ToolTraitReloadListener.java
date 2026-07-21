@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -27,16 +28,27 @@ public class ToolTraitReloadListener extends SimpleJsonResourceReloadListener {
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> traits, ResourceManager resourceManager, ProfilerFiller profiler) {
         ToolTraitRegistry.resetDatapackTraits();
+        Map<ResourceLocation, JsonElement> accepted = new LinkedHashMap<>();
         int loaded = 0;
         for (Map.Entry<ResourceLocation, JsonElement> entry : traits.entrySet()) {
             try {
                 ToolTraitRegistry.registerDatapackTrait(parse(entry.getKey(), GsonHelper.convertToJsonObject(entry.getValue(), "tool trait")));
+                accepted.put(entry.getKey(), entry.getValue());
                 loaded++;
             } catch (RuntimeException exception) {
                 MobsToolForging.LOGGER.warn("Skipping invalid tool trait {}.", entry.getKey(), exception);
             }
         }
+        GameplayRegistrySyncStore.capture(GameplayRegistrySyncStore.Section.TRAITS, accepted);
         MobsToolForging.LOGGER.info("Loaded {} datapack tool trait definition(s).", loaded);
+    }
+
+    static void applySynchronizedData(Map<ResourceLocation, JsonElement> traits) {
+        List<ToolTraitDefinition> parsed = traits.entrySet().stream()
+                .map(entry -> parse(entry.getKey(), GsonHelper.convertToJsonObject(entry.getValue(), "tool trait")))
+                .toList();
+        ToolTraitRegistry.resetDatapackTraits();
+        parsed.forEach(ToolTraitRegistry::registerDatapackTrait);
     }
 
     private static ToolTraitDefinition parse(ResourceLocation id, JsonObject json) {

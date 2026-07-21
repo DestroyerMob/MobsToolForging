@@ -65,7 +65,7 @@ final class ShapedWorldInteractionEmiRecipe implements EmiRecipe {
 
     @Override
     public ResourceLocation getId() {
-        return recipe.id();
+        return ResourceLocation.fromNamespaceAndPath(recipe.id().getNamespace(), "/" + recipe.id().getPath());
     }
 
     @Override

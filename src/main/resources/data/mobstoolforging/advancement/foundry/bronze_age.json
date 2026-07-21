@@ -1,0 +1,33 @@
+{
+  "parent": "mobstoolforging:foundry/first_cast",
+  "criteria": {
+    "has_bronze": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mobstoolforging:bronze_ingot"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.mobstoolforging.foundry.bronze_age.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "mobstoolforging:bronze_ingot"
+    },
+    "title": {
+      "translate": "advancement.mobstoolforging.foundry.bronze_age.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_bronze"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

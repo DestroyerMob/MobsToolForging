@@ -1,5 +1,7 @@
 package org.destroyermob.mobstoolforging.world;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -27,34 +29,52 @@ public class FoundryCastingBlockEntity extends BlockEntity {
     public static final int COOLING_TICKS = 60;
     private static final String MATERIAL_TAG = "Material";
     private static final String AMOUNT_TAG = "Amount";
+    private static final String CAPACITY_TAG = "Capacity";
     private static final String COOLING_TAG = "Cooling";
     private static final String OUTPUT_TAG = "Output";
+    private static final String PENDING_OUTPUT_TAG = "PendingOutput";
     private static final String FORM_TAG = "Form";
+    private static final String CONSUME_FORM_TAG = "ConsumeForm";
+    private static final String UNRESOLVED_LEGACY_TAG = "UnresolvedLegacyJob";
 
     @Nullable
     private ResourceLocation material;
     private int amountMb;
+    private int castingCapacityMb;
     private int coolingTicks;
     private ItemStack output = ItemStack.EMPTY;
+    private ItemStack pendingOutput = ItemStack.EMPTY;
     private ItemStack form = ItemStack.EMPTY;
+    private boolean consumeForm;
+    private boolean unresolvedLegacyJob;
 
     public FoundryCastingBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.FOUNDRY_CASTING.get(), pos, state);
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, FoundryCastingBlockEntity casting) {
-        if (casting.amountMb < casting.capacityMb() || !casting.output.isEmpty()) {
+        if (casting.unresolvedLegacyJob) {
+            casting.tryResolveLegacyJob();
+        }
+        if (casting.amountMb <= 0
+                || casting.castingCapacityMb <= 0
+                || casting.amountMb < casting.castingCapacityMb
+                || !casting.output.isEmpty()
+                || casting.pendingOutput.isEmpty()) {
             return;
         }
         casting.coolingTicks++;
         if (casting.coolingTicks >= COOLING_TICKS && casting.material != null) {
-            casting.output = casting.completedOutput(casting.material);
-            if (!casting.output.isEmpty() && !(casting.form.getItem() instanceof CastingMoldItem)) {
+            casting.output = casting.pendingOutput.copy();
+            if (casting.consumeForm) {
                 casting.form = ItemStack.EMPTY;
             }
             casting.material = null;
             casting.amountMb = 0;
+            casting.castingCapacityMb = 0;
             casting.coolingTicks = 0;
+            casting.pendingOutput = ItemStack.EMPTY;
+            casting.consumeForm = false;
             level.playSound(null, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS, 0.35F, 1.6F);
         }
         casting.sync();
@@ -73,6 +93,13 @@ public class FoundryCastingBlockEntity extends BlockEntity {
     }
 
     public int capacityMb() {
+        if (castingCapacityMb > 0) {
+            return castingCapacityMb;
+        }
+        return liveCapacityMb();
+    }
+
+    private int liveCapacityMb() {
         if (isBasin(getBlockState())) {
             return FoundryForgeBlockEntity.BLOCK_MB;
         }
@@ -90,7 +117,7 @@ public class FoundryCastingBlockEntity extends BlockEntity {
     }
 
     public float fillFraction() {
-        return amountMb / (float) capacityMb();
+        return Math.min(1.0F, amountMb / (float) capacityMb());
     }
 
     public Optional<ResourceLocation> material() {
@@ -110,7 +137,10 @@ public class FoundryCastingBlockEntity extends BlockEntity {
     }
 
     public ItemStack previewOutput() {
-        return material == null ? ItemStack.EMPTY : completedOutput(material).copy();
+        if (!pendingOutput.isEmpty()) {
+            return pendingOutput.copy();
+        }
+        return material == null ? ItemStack.EMPTY : completedOutput(material, capacityMb()).copy();
     }
 
     public boolean canInsertForm(ItemStack stack) {
@@ -119,7 +149,9 @@ public class FoundryCastingBlockEntity extends BlockEntity {
                 && output.isEmpty()
                 && material == null
                 && amountMb == 0
+                && castingCapacityMb == 0
                 && coolingTicks == 0
+                && pendingOutput.isEmpty()
                 && (FoundryCastRegistry.findForInput(stack).isPresent() || FoundryCastRegistry.findForCast(stack).isPresent());
     }
 
@@ -139,14 +171,37 @@ public class FoundryCastingBlockEntity extends BlockEntity {
         if (material != null && !material.equals(offeredMaterial)) {
             return 0;
         }
+        if (castingCapacityMb > 0) {
+            return pendingOutput.isEmpty() ? 0 : Math.max(0, castingCapacityMb - amountMb);
+        }
         if (!canProduce(offeredMaterial)) {
             return 0;
         }
-        return capacityMb() - amountMb;
+        return liveCapacityMb();
     }
 
     public int receive(ResourceLocation offeredMaterial, int offeredMb) {
-        int accepted = Math.min(Math.max(0, offeredMb), remainingCapacity(offeredMaterial));
+        if (offeredMaterial == null || offeredMb <= 0 || !output.isEmpty() || coolingTicks > 0) {
+            return 0;
+        }
+        if (material != null && !material.equals(offeredMaterial)) {
+            return 0;
+        }
+        if (castingCapacityMb <= 0) {
+            if (!canProduce(offeredMaterial)) {
+                return 0;
+            }
+            int capacityMb = liveCapacityMb();
+            ItemStack plannedOutput = completedOutput(offeredMaterial, capacityMb);
+            if (plannedOutput.isEmpty()) {
+                return 0;
+            }
+            castingCapacityMb = capacityMb;
+            pendingOutput = plannedOutput;
+            consumeForm = !(form.getItem() instanceof CastingMoldItem);
+            unresolvedLegacyJob = false;
+        }
+        int accepted = Math.min(offeredMb, Math.max(0, castingCapacityMb - amountMb));
         if (accepted <= 0) {
             return 0;
         }
@@ -170,7 +225,8 @@ public class FoundryCastingBlockEntity extends BlockEntity {
     }
 
     public boolean takeForm(Player player) {
-        if (form.isEmpty() || !output.isEmpty() || amountMb > 0 || coolingTicks > 0) {
+        if (form.isEmpty() || !output.isEmpty() || amountMb > 0 || castingCapacityMb > 0
+                || coolingTicks > 0 || !pendingOutput.isEmpty()) {
             return false;
         }
         ItemStack taken = form;
@@ -184,15 +240,38 @@ public class FoundryCastingBlockEntity extends BlockEntity {
 
     public void dropContents() {
         if (level != null) {
-            if (!output.isEmpty()) {
-                Block.popResource(level, worldPosition, output);
-                output = ItemStack.EMPTY;
-            }
-            if (!form.isEmpty()) {
-                Block.popResource(level, worldPosition, form);
-                form = ItemStack.EMPTY;
-            }
+            takeFallbackItems().forEach(stack -> Block.popResource(level, worldPosition, stack));
         }
+    }
+
+    CompoundTag savePortableState(HolderLookup.Provider registries) {
+        if (material == null
+                && amountMb == 0
+                && castingCapacityMb == 0
+                && coolingTicks == 0
+                && output.isEmpty()
+                && pendingOutput.isEmpty()
+                && form.isEmpty()
+                && !consumeForm) {
+            return new CompoundTag();
+        }
+        return saveWithoutMetadata(registries);
+    }
+
+    List<ItemStack> takeFallbackItems() {
+        List<ItemStack> recovered = new ArrayList<>(2);
+        if (!output.isEmpty()) {
+            recovered.add(output);
+            output = ItemStack.EMPTY;
+        }
+        if (!form.isEmpty()) {
+            recovered.add(form);
+            form = ItemStack.EMPTY;
+        }
+        if (!recovered.isEmpty()) {
+            setChanged();
+        }
+        return recovered;
     }
 
     private boolean canProduce(ResourceLocation offeredMaterial) {
@@ -213,7 +292,7 @@ public class FoundryCastingBlockEntity extends BlockEntity {
         return form.isEmpty() && FoundryCastingOutputs.output(offeredMaterial, false).isPresent();
     }
 
-    private ItemStack completedOutput(ResourceLocation pouredMaterial) {
+    private ItemStack completedOutput(ResourceLocation pouredMaterial, int castAmountMb) {
         Optional<FoundryCastRecipe> castRecipe = FoundryCastRegistry.findForCast(form);
         if (castRecipe.isPresent()) {
             return ToolTypeRegistry.template(castRecipe.get().template())
@@ -222,7 +301,7 @@ public class FoundryCastingBlockEntity extends BlockEntity {
                         ItemStack castPart = template.outputStack(pouredMaterial, ForgingQuality.CRUDE.score());
                         if (!castPart.isEmpty() && (castPart.get(ModDataComponents.TOOL_PART.get()) != null
                                 || castPart.get(ModDataComponents.ARMOR_PART.get()) != null)) {
-                            castPart.set(ModDataComponents.METALLURGY.get(), MetallurgyData.cast(pouredMaterial, capacityMb()));
+                            castPart.set(ModDataComponents.METALLURGY.get(), MetallurgyData.cast(pouredMaterial, castAmountMb));
                         }
                         return castPart;
                     })
@@ -232,7 +311,29 @@ public class FoundryCastingBlockEntity extends BlockEntity {
         if (creationRecipe.isPresent() && MaterialCatalog.GOLD.equals(pouredMaterial)) {
             return CastingMoldItem.create(creationRecipe.get().template());
         }
+        if (!form.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
         return FoundryCastingOutputs.output(pouredMaterial, isBasin(getBlockState())).orElse(ItemStack.EMPTY);
+    }
+
+    private void tryResolveLegacyJob() {
+        if (material == null || amountMb <= 0 || !canProduce(material)) {
+            return;
+        }
+        int liveCapacity = liveCapacityMb();
+        if (amountMb > liveCapacity) {
+            return;
+        }
+        ItemStack resolvedOutput = completedOutput(material, liveCapacity);
+        if (resolvedOutput.isEmpty()) {
+            return;
+        }
+        castingCapacityMb = liveCapacity;
+        pendingOutput = resolvedOutput;
+        consumeForm = !(form.getItem() instanceof CastingMoldItem);
+        unresolvedLegacyJob = false;
+        sync();
     }
 
     public static boolean isBasin(BlockState state) {
@@ -254,13 +355,19 @@ public class FoundryCastingBlockEntity extends BlockEntity {
             tag.putString(MATERIAL_TAG, material.toString());
         }
         tag.putInt(AMOUNT_TAG, amountMb);
+        tag.putInt(CAPACITY_TAG, castingCapacityMb);
         tag.putInt(COOLING_TAG, coolingTicks);
         if (!output.isEmpty()) {
             tag.put(OUTPUT_TAG, output.saveOptional(registries));
         }
+        if (!pendingOutput.isEmpty()) {
+            tag.put(PENDING_OUTPUT_TAG, pendingOutput.saveOptional(registries));
+        }
         if (!form.isEmpty()) {
             tag.put(FORM_TAG, form.saveOptional(registries));
         }
+        tag.putBoolean(CONSUME_FORM_TAG, consumeForm);
+        tag.putBoolean(UNRESOLVED_LEGACY_TAG, unresolvedLegacyJob);
     }
 
     @Override
@@ -268,11 +375,26 @@ public class FoundryCastingBlockEntity extends BlockEntity {
         super.loadAdditional(tag, registries);
         form = ItemStack.parseOptional(registries, tag.getCompound(FORM_TAG));
         material = ResourceLocation.tryParse(tag.getString(MATERIAL_TAG));
-        amountMb = Math.max(0, Math.min(capacityMb(), tag.getInt(AMOUNT_TAG)));
+        amountMb = Math.max(0, tag.getInt(AMOUNT_TAG));
+        castingCapacityMb = Math.max(0, tag.getInt(CAPACITY_TAG));
         coolingTicks = Math.max(0, Math.min(COOLING_TICKS, tag.getInt(COOLING_TAG)));
         output = ItemStack.parseOptional(registries, tag.getCompound(OUTPUT_TAG));
+        pendingOutput = ItemStack.parseOptional(registries, tag.getCompound(PENDING_OUTPUT_TAG));
+        consumeForm = tag.getBoolean(CONSUME_FORM_TAG);
+        unresolvedLegacyJob = tag.getBoolean(UNRESOLVED_LEGACY_TAG);
         if (amountMb == 0) {
             material = null;
+            castingCapacityMb = 0;
+            coolingTicks = 0;
+            pendingOutput = ItemStack.EMPTY;
+            consumeForm = false;
+            unresolvedLegacyJob = false;
+        } else if (castingCapacityMb == 0) {
+            // Migrate casts saved before process snapshots existed. Never reduce a saved amount.
+            castingCapacityMb = amountMb;
+            pendingOutput = ItemStack.EMPTY;
+            consumeForm = false;
+            unresolvedLegacyJob = true;
         }
     }
 

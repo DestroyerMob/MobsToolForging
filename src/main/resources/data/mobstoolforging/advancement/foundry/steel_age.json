@@ -1,0 +1,33 @@
+{
+  "parent": "mobstoolforging:foundry/first_cast",
+  "criteria": {
+    "has_steel": {
+      "conditions": {
+        "items": [
+          {
+            "items": "mobstoolforging:steel_ingot"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.mobstoolforging.foundry.steel_age.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "mobstoolforging:steel_ingot"
+    },
+    "title": {
+      "translate": "advancement.mobstoolforging.foundry.steel_age.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_steel"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

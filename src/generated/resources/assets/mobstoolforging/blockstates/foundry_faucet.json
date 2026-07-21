@@ -1,32 +1,62 @@
 {
   "variants": {
-    "active=false,facing=east": {
+    "active=false,facing=east,powered=false": {
       "model": "mobstoolforging:block/foundry_faucet",
       "y": 90
     },
-    "active=false,facing=north": {
+    "active=false,facing=east,powered=true": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 90
+    },
+    "active=false,facing=north,powered=false": {
       "model": "mobstoolforging:block/foundry_faucet"
     },
-    "active=false,facing=south": {
+    "active=false,facing=north,powered=true": {
+      "model": "mobstoolforging:block/foundry_faucet"
+    },
+    "active=false,facing=south,powered=false": {
       "model": "mobstoolforging:block/foundry_faucet",
       "y": 180
     },
-    "active=false,facing=west": {
+    "active=false,facing=south,powered=true": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 180
+    },
+    "active=false,facing=west,powered=false": {
       "model": "mobstoolforging:block/foundry_faucet",
       "y": 270
     },
-    "active=true,facing=east": {
+    "active=false,facing=west,powered=true": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 270
+    },
+    "active=true,facing=east,powered=false": {
       "model": "mobstoolforging:block/foundry_faucet",
       "y": 90
     },
-    "active=true,facing=north": {
+    "active=true,facing=east,powered=true": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 90
+    },
+    "active=true,facing=north,powered=false": {
       "model": "mobstoolforging:block/foundry_faucet"
     },
-    "active=true,facing=south": {
+    "active=true,facing=north,powered=true": {
+      "model": "mobstoolforging:block/foundry_faucet"
+    },
+    "active=true,facing=south,powered=false": {
       "model": "mobstoolforging:block/foundry_faucet",
       "y": 180
     },
-    "active=true,facing=west": {
+    "active=true,facing=south,powered=true": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 180
+    },
+    "active=true,facing=west,powered=false": {
+      "model": "mobstoolforging:block/foundry_faucet",
+      "y": 270
+    },
+    "active=true,facing=west,powered=true": {
       "model": "mobstoolforging:block/foundry_faucet",
       "y": 270
     }

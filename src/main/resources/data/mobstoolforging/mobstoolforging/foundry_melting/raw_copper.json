@@ -1,0 +1,8 @@
+{
+  "input": {
+    "tag": "c:raw_materials/copper"
+  },
+  "material": "mobstoolforging:copper",
+  "amount": 180,
+  "ticks": 480
+}

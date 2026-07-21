@@ -25,15 +25,25 @@ public class HeatingRecipeReloadListener extends SimpleJsonResourceReloadListene
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> recipes, ResourceManager resourceManager, ProfilerFiller profiler) {
         Map<ResourceLocation, HeatingRecipe> loaded = new LinkedHashMap<>();
+        Map<ResourceLocation, JsonElement> accepted = new LinkedHashMap<>();
         recipes.forEach((id, element) -> {
             try {
                 loaded.put(id, parse(id, GsonHelper.convertToJsonObject(element, "heating recipe")));
+                accepted.put(id, element);
             } catch (RuntimeException exception) {
                 MobsToolForging.LOGGER.warn("Skipping invalid heating recipe {}.", id, exception);
             }
         });
         HeatingRecipeRegistry.replace(loaded);
+        GameplayRegistrySyncStore.capture(GameplayRegistrySyncStore.Section.HEATING, accepted);
         MobsToolForging.LOGGER.info("Loaded {} heating recipe(s).", loaded.size());
+    }
+
+    static void applySynchronizedData(Map<ResourceLocation, JsonElement> recipes) {
+        Map<ResourceLocation, HeatingRecipe> loaded = new LinkedHashMap<>();
+        recipes.forEach((id, element) -> loaded.put(id, parse(id,
+                GsonHelper.convertToJsonObject(element, "heating recipe"))));
+        HeatingRecipeRegistry.replace(loaded);
     }
 
     private static HeatingRecipe parse(ResourceLocation id, JsonObject json) {

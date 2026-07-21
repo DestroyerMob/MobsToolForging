@@ -19,7 +19,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 
-public class FoundryFuelTankBlock extends BaseEntityBlock {
+public class FoundryFuelTankBlock extends StatefulFoundryBlock {
     public static final MapCodec<FoundryFuelTankBlock> CODEC = simpleCodec(FoundryFuelTankBlock::new);
 
     public FoundryFuelTankBlock(BlockBehaviour.Properties properties) {

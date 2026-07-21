@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -36,8 +37,10 @@ public class FoundryFaucetBlock extends BaseEntityBlock {
     public static final MapCodec<FoundryFaucetBlock> CODEC = simpleCodec(FoundryFaucetBlock::new);
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
+    public static final BooleanProperty POWERED = BooleanProperty.create("powered");
     private static final int POUR_RATE_MB = 10;
     private static final int POUR_INTERVAL = 4;
+    private static final int STALLED_RETRY_INTERVAL = 40;
     private static final VoxelShape BODY_SHAPE = Block.box(5.0D, 7.0D, 5.0D, 11.0D, 13.0D, 11.0D);
     private static final VoxelShape NORTH_SHAPE = Shapes.or(BODY_SHAPE, Block.box(7.0D, 9.0D, 0.0D, 9.0D, 11.0D, 5.0D));
     private static final VoxelShape SOUTH_SHAPE = Shapes.or(BODY_SHAPE, Block.box(7.0D, 9.0D, 11.0D, 9.0D, 11.0D, 16.0D));
@@ -46,7 +49,10 @@ public class FoundryFaucetBlock extends BaseEntityBlock {
 
     public FoundryFaucetBlock(BlockBehaviour.Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(ACTIVE, false));
+        registerDefaultState(stateDefinition.any()
+                .setValue(FACING, Direction.NORTH)
+                .setValue(ACTIVE, false)
+                .setValue(POWERED, false));
     }
 
     @Override
@@ -72,29 +78,91 @@ public class FoundryFaucetBlock extends BaseEntityBlock {
         if (!face.getAxis().isHorizontal()) {
             return null;
         }
-        return defaultBlockState().setValue(FACING, face).setValue(ACTIVE, context.getLevel().hasNeighborSignal(context.getClickedPos()));
+        boolean powered = context.getLevel().hasNeighborSignal(context.getClickedPos());
+        return defaultBlockState()
+                .setValue(FACING, face)
+                .setValue(ACTIVE, powered)
+                .setValue(POWERED, powered);
+    }
+
+    @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        if (!level.isClientSide && !state.is(oldState.getBlock()) && state.getValue(ACTIVE)) {
+            level.scheduleTick(pos, this, 1);
+        }
+        super.onPlace(state, level, pos, oldState, movedByPiston);
     }
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!level.isClientSide) {
-            boolean active = !state.getValue(ACTIVE);
+            // A powered faucet is level-controlled; manual clicks cannot leave
+            // it latched off while the redstone signal is still present.
+            boolean active = state.getValue(POWERED) || !state.getValue(ACTIVE);
             level.setBlock(pos, state.setValue(ACTIVE, active), Block.UPDATE_ALL);
             if (active) {
                 level.scheduleTick(pos, this, 1);
+                DebugFeedback.actionBar(player, activationStatus(level, pos, state));
             } else if (level.getBlockEntity(pos) instanceof FoundryFaucetBlockEntity faucet) {
                 faucet.setPouringMaterial(null);
+                DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_faucet.closed"));
             }
             level.playSound(null, pos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.35F, active ? 0.7F : 0.55F);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
+    private static Component activationStatus(Level level, BlockPos pos, BlockState state) {
+        Direction facing = state.getValue(FACING);
+        BlockPos drainPos = pos.relative(facing.getOpposite());
+        if (!level.getBlockState(drainPos).is(ModBlocks.FOUNDRY_DRAIN.get())) {
+            return Component.translatable("message.mobstoolforging.foundry_faucet.needs_drain");
+        }
+        if (!(level.getBlockEntity(pos.below()) instanceof FoundryCastingBlockEntity receiver)) {
+            return Component.translatable("message.mobstoolforging.foundry_faucet.needs_receiver");
+        }
+        FoundryForgeBlockEntity foundry = FoundryAccess.findController(level, drainPos).orElse(null);
+        if (foundry == null) {
+            return Component.translatable("message.mobstoolforging.foundry_faucet.unconnected");
+        }
+        ResourceLocation material = foundry.bottomMoltenMaterial().orElse(null);
+        if (material == null) {
+            return Component.translatable("message.mobstoolforging.foundry_faucet.no_molten");
+        }
+        if (!receiver.output().isEmpty()) {
+            return Component.translatable("message.mobstoolforging.foundry_faucet.take_output");
+        }
+        if (receiver.coolingTicks() > 0) {
+            return Component.translatable("message.mobstoolforging.foundry_faucet.cooling");
+        }
+        if (receiver.remainingCapacity(material) <= 0) {
+            return Component.translatable("message.mobstoolforging.foundry_faucet.receiver_blocked");
+        }
+        return Component.translatable(
+                "message.mobstoolforging.foundry_faucet.opened",
+                MaterialCatalog.displayName(material)
+        );
+    }
+
     @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
-        if (!level.isClientSide && level.hasNeighborSignal(pos) && !state.getValue(ACTIVE)) {
-            level.setBlock(pos, state.setValue(ACTIVE, true), Block.UPDATE_ALL);
+        if (level.isClientSide) {
+            return;
+        }
+        boolean powered = level.hasNeighborSignal(pos);
+        if (powered == state.getValue(POWERED)) {
+            if (powered && (neighborPos.equals(pos.below())
+                    || neighborPos.equals(pos.relative(state.getValue(FACING).getOpposite())))) {
+                level.scheduleTick(pos, this, 1);
+            }
+            return;
+        }
+        BlockState nextState = state.setValue(POWERED, powered).setValue(ACTIVE, powered);
+        level.setBlock(pos, nextState, Block.UPDATE_ALL);
+        if (powered) {
             level.scheduleTick(pos, this, 1);
+        } else {
+            clearPouringMaterial(level, pos);
         }
     }
 
@@ -106,6 +174,11 @@ public class FoundryFaucetBlock extends BaseEntityBlock {
         }
         ResourceLocation material = pour(level, pos, state);
         if (material == null) {
+            if (state.getValue(POWERED) && level.hasNeighborSignal(pos)) {
+                clearPouringMaterial(level, pos);
+                level.scheduleTick(pos, this, STALLED_RETRY_INTERVAL);
+                return;
+            }
             stopPouring(level, pos, state);
             return;
         }
@@ -135,6 +208,11 @@ public class FoundryFaucetBlock extends BaseEntityBlock {
         BlockState drainState = level.getBlockState(drainPos);
         if (!drainState.is(ModBlocks.FOUNDRY_DRAIN.get())
                 || !(level.getBlockEntity(pos.below()) instanceof FoundryCastingBlockEntity receiver)) {
+            return null;
+        }
+        if (!receiver.output().isEmpty()
+                || receiver.coolingTicks() > 0
+                || receiver.amountMb() >= receiver.capacityMb()) {
             return null;
         }
         return FoundryAccess.findController(level, drainPos).flatMap(forge -> forge.bottomMoltenMaterial().flatMap(material -> {
@@ -174,6 +252,6 @@ public class FoundryFaucetBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, ACTIVE);
+        builder.add(FACING, ACTIVE, POWERED);
     }
 }

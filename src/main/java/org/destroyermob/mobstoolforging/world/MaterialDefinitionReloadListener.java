@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -36,17 +37,29 @@ public class MaterialDefinitionReloadListener extends SimpleJsonResourceReloadLi
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> materials, ResourceManager resourceManager, ProfilerFiller profiler) {
         MaterialCatalog.resetDatapackMaterials();
+        Map<ResourceLocation, JsonElement> accepted = new LinkedHashMap<>();
         int loaded = 0;
         for (Map.Entry<ResourceLocation, JsonElement> entry : materials.entrySet()) {
             try {
                 MaterialEntry material = parse(entry.getKey(), GsonHelper.convertToJsonObject(entry.getValue(), "material definition"));
                 MaterialCatalog.registerDatapackMaterial(material.definition(), material.sourceItems(), material.sourceTags(), material.visualSlots(), material.handleItems());
+                accepted.put(entry.getKey(), entry.getValue());
                 loaded++;
             } catch (RuntimeException exception) {
                 MobsToolForging.LOGGER.warn("Skipping invalid material definition {}.", entry.getKey(), exception);
             }
         }
+        GameplayRegistrySyncStore.capture(GameplayRegistrySyncStore.Section.MATERIALS, accepted);
         MobsToolForging.LOGGER.info("Loaded {} datapack material definition(s).", loaded);
+    }
+
+    static void applySynchronizedData(Map<ResourceLocation, JsonElement> materials) {
+        List<MaterialEntry> parsed = materials.entrySet().stream()
+                .map(entry -> parse(entry.getKey(), GsonHelper.convertToJsonObject(entry.getValue(), "material definition")))
+                .toList();
+        MaterialCatalog.resetDatapackMaterials();
+        parsed.forEach(material -> MaterialCatalog.registerDatapackMaterial(
+                material.definition(), material.sourceItems(), material.sourceTags(), material.visualSlots(), material.handleItems()));
     }
 
     private static MaterialEntry parse(ResourceLocation id, JsonObject json) {

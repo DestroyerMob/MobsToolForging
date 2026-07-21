@@ -27,15 +27,25 @@ public class DryingRecipeReloadListener extends SimpleJsonResourceReloadListener
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> recipes, ResourceManager resourceManager, ProfilerFiller profiler) {
         Map<ResourceLocation, DryingRecipe> loaded = new LinkedHashMap<>();
+        Map<ResourceLocation, JsonElement> accepted = new LinkedHashMap<>();
         recipes.forEach((id, element) -> {
             try {
                 loaded.put(id, parse(id, GsonHelper.convertToJsonObject(element, "drying recipe")));
+                accepted.put(id, element);
             } catch (RuntimeException exception) {
                 MobsToolForging.LOGGER.warn("Skipping invalid drying recipe {}.", id, exception);
             }
         });
         DryingRecipeRegistry.replace(loaded);
+        GameplayRegistrySyncStore.capture(GameplayRegistrySyncStore.Section.DRYING, accepted);
         MobsToolForging.LOGGER.info("Loaded {} drying recipe(s).", loaded.size());
+    }
+
+    static void applySynchronizedData(Map<ResourceLocation, JsonElement> recipes) {
+        Map<ResourceLocation, DryingRecipe> loaded = new LinkedHashMap<>();
+        recipes.forEach((id, element) -> loaded.put(id, parse(id,
+                GsonHelper.convertToJsonObject(element, "drying recipe"))));
+        DryingRecipeRegistry.replace(loaded);
     }
 
     private static DryingRecipe parse(ResourceLocation id, JsonObject json) {

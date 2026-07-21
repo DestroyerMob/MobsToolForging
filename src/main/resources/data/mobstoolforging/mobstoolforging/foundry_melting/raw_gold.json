@@ -1,0 +1,8 @@
+{
+  "input": {
+    "tag": "c:raw_materials/gold"
+  },
+  "material": "mobstoolforging:gold",
+  "amount": 180,
+  "ticks": 440
+}

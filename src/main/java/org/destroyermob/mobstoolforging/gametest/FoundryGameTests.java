@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
@@ -19,10 +20,13 @@ import org.destroyermob.mobstoolforging.registry.ModBlocks;
 import org.destroyermob.mobstoolforging.registry.ModDataComponents;
 import org.destroyermob.mobstoolforging.registry.ModItems;
 import org.destroyermob.mobstoolforging.registry.ModTags;
+import org.destroyermob.mobstoolforging.item.CastingMoldItem;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.FoundryAlloyRecipe;
 import org.destroyermob.mobstoolforging.world.FoundryAlloyRegistry;
 import org.destroyermob.mobstoolforging.world.FoundryCastingBlockEntity;
+import org.destroyermob.mobstoolforging.world.FoundryCastRecipe;
+import org.destroyermob.mobstoolforging.world.FoundryCastRegistry;
 import org.destroyermob.mobstoolforging.world.FoundryDrainBlock;
 import org.destroyermob.mobstoolforging.world.FoundryFaucetBlock;
 import org.destroyermob.mobstoolforging.world.FoundryFaucetBlockEntity;
@@ -77,6 +81,36 @@ public final class FoundryGameTests {
     }
 
     @GameTest(template = "station_work_completion", timeoutTicks = 20)
+    public static void blazePowderStokingDoublesThroughputAndFuelBurn(GameTestHelper helper) {
+        buildMinimalFoundry(helper);
+        FoundryForgeBlockEntity forge = helper.getBlockEntity(CONTROLLER_POS);
+        FoundryFuelTankBlockEntity tank = helper.getBlockEntity(new BlockPos(0, 1, 1));
+        helper.assertTrue(forge.refreshStructure(), "Stoking test foundry did not form");
+        helper.assertTrue(tank.acceptLavaBucket(), "Stoking test tank rejected lava");
+        helper.assertTrue(forge.acceptSolid(new ItemStack(Items.IRON_INGOT)) == 1,
+                "Stoking test foundry rejected iron");
+        helper.assertTrue(forge.stoke(), "Formed foundry rejected blaze-powder stoking");
+        helper.assertTrue(forge.stokeTicksRemaining() == FoundryForgeBlockEntity.STOKE_TICKS_PER_BLAZE_POWDER,
+                "One stoke did not add the configured boost time");
+
+        for (int tick = 0; tick < 199; tick++) {
+            FoundryForgeBlockEntity.serverTick(helper.getLevel(), forge.getBlockPos(), forge.getBlockState(), forge);
+        }
+        helper.assertTrue(forge.solidItemCount() == 1, "Stoked iron melted before half its normal duration");
+        FoundryForgeBlockEntity.serverTick(helper.getLevel(), forge.getBlockPos(), forge.getBlockState(), forge);
+        helper.assertTrue(forge.solidItemCount() == 0, "Stoked iron did not melt in half its normal duration");
+        helper.assertTrue(forge.moltenAmount(MaterialCatalog.IRON) == FoundryForgeBlockEntity.INGOT_MB,
+                "Stoked melting changed the metal yield");
+        helper.assertTrue(forge.stokeTicksRemaining()
+                        == FoundryForgeBlockEntity.STOKE_TICKS_PER_BLAZE_POWDER - 200,
+                "Stoke time did not count only active processing ticks");
+        int remainingBurnTicks = forge.saveWithoutMetadata(helper.getLevel().registryAccess()).getInt("BurnTime");
+        helper.assertTrue(remainingBurnTicks <= 2002 && remainingBurnTicks >= 2000,
+                "Stoked melting did not consume fuel at twice the normal rate");
+        helper.succeed();
+    }
+
+    @GameTest(template = "station_work_completion", timeoutTicks = 20)
     public static void brokenOrForeignFoundryWallPreventsHeating(GameTestHelper helper) {
         buildMinimalFoundry(helper);
         FoundryForgeBlockEntity forge = helper.getBlockEntity(CONTROLLER_POS);
@@ -103,6 +137,28 @@ public final class FoundryGameTests {
                 "Replacing a wall with Foundry Glass changed the interior dimensions");
         helper.assertTrue(forge.addMoltenLayer(MaterialCatalog.IRON, 90) == 90, "Glass-wall foundry could not hold molten metal");
         helper.assertTrue(forge.moltenVisualFraction() == 0.09F, "Glass-wall foundry did not expose the correct visual fill fraction");
+        helper.succeed();
+    }
+
+    @GameTest(template = "station_work_completion", timeoutTicks = 20)
+    public static void shrinkingFoundryPausesWithoutTruncatingContents(GameTestHelper helper) {
+        buildMinimalFoundry(helper);
+        setSecondWallLayer(helper, true);
+        FoundryForgeBlockEntity forge = helper.getBlockEntity(CONTROLLER_POS);
+        helper.assertTrue(forge.refreshStructure(), "Two-high shrink test foundry did not form");
+        helper.assertTrue(forge.fluidCapacityMb() == 2000, "Two-high shrink test foundry had the wrong capacity");
+        helper.assertTrue(forge.addMoltenLayer(MaterialCatalog.IRON, 1500) == 1500,
+                "Could not fill the two-high shrink test foundry");
+
+        setSecondWallLayer(helper, false);
+        helper.assertFalse(forge.refreshStructure(), "Over-capacity foundry remained formed after shrinking");
+        helper.assertTrue(forge.moltenAmount(MaterialCatalog.IRON) == 1500,
+                "Shrinking the foundry truncated its molten contents");
+
+        setSecondWallLayer(helper, true);
+        helper.assertTrue(forge.refreshStructure(), "Foundry did not reform after sufficient capacity was restored");
+        helper.assertTrue(forge.moltenAmount(MaterialCatalog.IRON) == 1500,
+                "Reforming the foundry changed its preserved contents");
         helper.succeed();
     }
 
@@ -160,6 +216,156 @@ public final class FoundryGameTests {
         helper.assertTrue(FoundryFuelRegistry.find(new FluidStack(Fluids.LAVA, 1000))
                         .map(FoundryFuelRecipe::temperatureC).orElse(0.0F) == 2000.0F,
                 "Lava did not use its configured 2,000°C foundry temperature");
+        helper.succeed();
+    }
+
+    @GameTest(template = "station_work_completion", timeoutTicks = 20)
+    public static void netheriteAlloyRequiresVanillaUpgradeIngredients(GameTestHelper helper) {
+        FoundryMeltingRecipe scrap = FoundryMeltingRegistry.find(new ItemStack(Items.NETHERITE_SCRAP)).orElseThrow();
+        FoundryAlloyRecipe netherite = FoundryAlloyRegistry.recipes().stream()
+                .filter(recipe -> MaterialCatalog.NETHERITE.equals(recipe.result()))
+                .findFirst()
+                .orElseThrow();
+        helper.assertTrue(MaterialCatalog.NETHERITE_SCRAP.equals(scrap.material()),
+                "Netherite scrap still melted directly into castable netherite");
+        helper.assertTrue(scrap.amountMb() == 90, "Netherite scrap had an unexpected molten volume");
+        helper.assertTrue(netherite.inputs().getOrDefault(MaterialCatalog.NETHERITE_SCRAP, 0) == 360,
+                "Netherite alloy did not require four scraps");
+        helper.assertTrue(netherite.inputs().getOrDefault(MaterialCatalog.GOLD, 0) == 360,
+                "Netherite alloy did not require four gold ingots");
+        helper.assertTrue(netherite.outputAmountMb() == 90, "Netherite alloy did not produce exactly one ingot");
+
+        Map<ResourceLocation, FoundryMeltingRecipe> previous = FoundryMeltingRegistry.snapshot();
+        try {
+            FoundryMeltingRegistry.replace(Map.of());
+            helper.assertTrue(FoundryMeltingRegistry.find(new ItemStack(Items.NETHERITE_SCRAP)).isEmpty(),
+                    "Java fallback still converted scrap directly into netherite");
+        } finally {
+            FoundryMeltingRegistry.replace(previous);
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "station_work_completion", timeoutTicks = 20)
+    public static void activeMeltingUsesSavedRecipeSnapshotAfterReload(GameTestHelper helper) {
+        Map<ResourceLocation, FoundryMeltingRecipe> previousMelting = FoundryMeltingRegistry.snapshot();
+        Map<ResourceLocation, FoundryMeltingPoint> previousPoints = FoundryMeltingPointRegistry.snapshot();
+        ResourceLocation recipeId = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "gametest_saved_melt");
+        ResourceLocation material = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "gametest_saved_material");
+        ResourceLocation pointId = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "gametest_saved_point");
+        FoundryMeltingRecipe original = new FoundryMeltingRecipe(
+                recipeId,
+                FoundryMeltingRecipe.Input.item(ResourceLocation.withDefaultNamespace("iron_ingot")),
+                material,
+                140,
+                3
+        );
+        FoundryMeltingRecipe replacement = new FoundryMeltingRecipe(
+                recipeId,
+                FoundryMeltingRecipe.Input.item(ResourceLocation.withDefaultNamespace("iron_ingot")),
+                MaterialCatalog.GOLD,
+                300,
+                100
+        );
+        try {
+            FoundryMeltingRegistry.replace(Map.of(recipeId, original));
+            FoundryMeltingPointRegistry.replace(Map.of(pointId, new FoundryMeltingPoint(pointId, material, 1000.0F)));
+            buildMinimalFoundry(helper);
+            FoundryForgeBlockEntity forge = helper.getBlockEntity(CONTROLLER_POS);
+            FoundryFuelTankBlockEntity tank = helper.getBlockEntity(new BlockPos(0, 1, 1));
+            helper.assertTrue(forge.refreshStructure(), "Saved-process test foundry did not form");
+            helper.assertTrue(tank.acceptLavaBucket(), "Saved-process test tank rejected lava");
+            helper.assertTrue(forge.acceptSolid(new ItemStack(Items.IRON_INGOT)) == 1,
+                    "Saved-process test foundry rejected its input");
+            FoundryForgeBlockEntity.serverTick(helper.getLevel(), forge.getBlockPos(), forge.getBlockState(), forge);
+            CompoundTag saved = forge.saveWithoutMetadata(helper.getLevel().registryAccess());
+
+            FoundryMeltingRegistry.replace(Map.of(recipeId, replacement));
+            forge.loadWithComponents(saved, helper.getLevel().registryAccess());
+            for (int tick = 0; tick < 4; tick++) {
+                FoundryForgeBlockEntity.serverTick(helper.getLevel(), forge.getBlockPos(), forge.getBlockState(), forge);
+            }
+            helper.assertTrue(forge.solidItemCount() == 0, "Saved melting input did not complete");
+            helper.assertTrue(forge.moltenAmount(material) == 140,
+                    "Active melting job changed material or amount after recipe reload");
+            helper.assertTrue(forge.moltenAmount(MaterialCatalog.GOLD) == 0,
+                    "Replacement melting recipe affected an already accepted input");
+        } finally {
+            FoundryMeltingRegistry.replace(previousMelting);
+            FoundryMeltingPointRegistry.replace(previousPoints);
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "station_work_completion", timeoutTicks = 20)
+    public static void savedMoltenLayersDoNotReactDuringLoad(GameTestHelper helper) {
+        Map<ResourceLocation, FoundryAlloyRecipe> previousAlloys = FoundryAlloyRegistry.snapshot();
+        ResourceLocation alloy = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "gametest_load_alloy");
+        ResourceLocation recipeId = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "gametest_load_reaction");
+        try {
+            FoundryAlloyRegistry.replace(Map.of());
+            buildMinimalFoundry(helper);
+            FoundryForgeBlockEntity forge = helper.getBlockEntity(CONTROLLER_POS);
+            helper.assertTrue(forge.refreshStructure(), "Load-reaction test foundry did not form");
+            helper.assertTrue(forge.addMoltenLayer(MaterialCatalog.IRON, 90) == 90, "Could not add saved iron layer");
+            helper.assertTrue(forge.addMoltenLayer(MaterialCatalog.COPPER, 90) == 90, "Could not add saved copper layer");
+            CompoundTag saved = forge.saveWithoutMetadata(helper.getLevel().registryAccess());
+            FoundryAlloyRegistry.replace(Map.of(recipeId, new FoundryAlloyRecipe(
+                    recipeId,
+                    alloy,
+                    Map.of(MaterialCatalog.IRON, 90, MaterialCatalog.COPPER, 90),
+                    180
+            )));
+            forge.loadWithComponents(saved, helper.getLevel().registryAccess());
+            helper.assertTrue(forge.moltenAmount(MaterialCatalog.IRON) == 90, "Loading consumed saved molten iron");
+            helper.assertTrue(forge.moltenAmount(MaterialCatalog.COPPER) == 90, "Loading consumed saved molten copper");
+            helper.assertTrue(forge.moltenAmount(alloy) == 0, "A newly added alloy recipe reacted during chunk load");
+        } finally {
+            FoundryAlloyRegistry.replace(previousAlloys);
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "station_work_completion", timeoutTicks = 20)
+    public static void activeCastingUsesSavedCapacityAndOutputAfterReload(GameTestHelper helper) {
+        Map<ResourceLocation, FoundryCastRecipe> previousCasts = FoundryCastRegistry.recipes().stream()
+                .collect(java.util.stream.Collectors.toMap(FoundryCastRecipe::id, recipe -> recipe));
+        BlockPos tablePos = new BlockPos(0, 0, 0);
+        ResourceLocation template = ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, "pickaxe_head");
+        try {
+            helper.setBlock(tablePos, ModBlocks.FOUNDRY_CASTING_TABLE.get());
+            FoundryCastingBlockEntity table = helper.getBlockEntity(tablePos);
+            ItemStack mold = CastingMoldItem.create(template);
+            helper.assertTrue(table.insertForm(mold), "Casting snapshot test rejected its reusable mold");
+            helper.assertTrue(table.receive(MaterialCatalog.COPPER, 180) == 180,
+                    "Casting snapshot test rejected its recipe-defined amount");
+            FoundryCastingBlockEntity.serverTick(helper.getLevel(), tablePos, table.getBlockState(), table);
+            CompoundTag saved = table.saveWithoutMetadata(helper.getLevel().registryAccess());
+
+            FoundryCastRegistry.replace(Map.of());
+            table.loadWithComponents(saved, helper.getLevel().registryAccess());
+            helper.assertTrue(table.amountMb() == 180, "Saved casting liquid was clamped by the reloaded registry");
+            helper.assertTrue(table.capacityMb() == 180, "Saved casting capacity was replaced by a live fallback");
+            for (int tick = 1; tick < FoundryCastingBlockEntity.COOLING_TICKS; tick++) {
+                FoundryCastingBlockEntity.serverTick(helper.getLevel(), tablePos, table.getBlockState(), table);
+            }
+            ToolPartData output = table.output().get(ModDataComponents.TOOL_PART.get());
+            helper.assertTrue(output != null && output.partType().equals(ToolPartData.PICKAXE_HEAD),
+                    "Saved casting output was lost when its datapack recipe disappeared");
+            helper.assertTrue(output != null && output.materialId().equals(MaterialCatalog.COPPER),
+                    "Saved casting output changed material after reload");
+
+            CompoundTag invalid = saved.copy();
+            invalid.remove("PendingOutput");
+            table.loadWithComponents(invalid, helper.getLevel().registryAccess());
+            for (int tick = 0; tick < FoundryCastingBlockEntity.COOLING_TICKS + 5; tick++) {
+                FoundryCastingBlockEntity.serverTick(helper.getLevel(), tablePos, table.getBlockState(), table);
+            }
+            helper.assertTrue(table.amountMb() == 180 && table.output().isEmpty(),
+                    "Casting liquid was deleted when its saved output was invalid");
+        } finally {
+            FoundryCastRegistry.replace(previousCasts);
+        }
         helper.succeed();
     }
 
@@ -382,6 +588,17 @@ public final class FoundryGameTests {
         }
         helper.setBlock(CONTROLLER_POS, ModBlocks.FOUNDRY_FORGE.get());
         helper.setBlock(new BlockPos(0, 1, 1), ModBlocks.FOUNDRY_FUEL_TANK.get());
+    }
+
+    private static void setSecondWallLayer(GameTestHelper helper, boolean present) {
+        for (int x = 0; x < 3; x++) {
+            for (int z = 0; z < 3; z++) {
+                boolean wallFace = (x == 1) != (z == 1);
+                helper.setBlock(new BlockPos(x, 2, z), present && wallFace
+                        ? Blocks.POLISHED_BLACKSTONE_BRICKS
+                        : Blocks.AIR);
+            }
+        }
     }
 
     private static void assertTestStructureBlocks(GameTestHelper helper) {

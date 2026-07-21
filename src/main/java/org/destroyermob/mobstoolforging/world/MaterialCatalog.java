@@ -33,6 +33,7 @@ public final class MaterialCatalog {
     public static final ResourceLocation BRONZE = materialId("bronze");
     public static final ResourceLocation CARBON = materialId("carbon");
     public static final ResourceLocation TIN = ResourceLocation.fromNamespaceAndPath("c", "tin");
+    public static final ResourceLocation NETHERITE_SCRAP = materialId("netherite_scrap");
     public static final ResourceLocation NETHERITE = materialId("netherite");
     public static final ResourceLocation DIAMOND = materialId("diamond");
     public static final ResourceLocation EMERALD = materialId("emerald");
@@ -154,6 +155,7 @@ public final class MaterialCatalog {
         );
         registerVirtual(LEATHER, MaterialCategory.ORGANIC, Items.LEATHER, Tiers.WOOD);
         registerVirtual(FLINT, MaterialCategory.GEM, Items.FLINT, CrudeFlintTiers.FLINT);
+        registerVirtual(NETHERITE_SCRAP, MaterialCategory.METAL, Items.NETHERITE_SCRAP, Tiers.IRON);
         registerVirtual(WOOD, MaterialCategory.ORGANIC, Items.OAK_PLANKS, Tiers.WOOD);
         registerVirtual(OAK, MaterialCategory.ORGANIC, Items.OAK_PLANKS, Tiers.WOOD);
         registerVirtual(SPIDER_SILK, MaterialCategory.ORGANIC, Items.STRING, Tiers.WOOD);
@@ -228,7 +230,11 @@ public final class MaterialCatalog {
     }
 
     public static boolean isNormalForgingMaterial(ResourceLocation materialId) {
-        if (NETHERITE.equals(materialId) || LEATHER.equals(materialId)) {
+        if (NETHERITE.equals(materialId)
+                || NETHERITE_SCRAP.equals(materialId)
+                || CARBON.equals(materialId)
+                || TIN.equals(materialId)
+                || LEATHER.equals(materialId)) {
             return false;
         }
         return definition(materialId)

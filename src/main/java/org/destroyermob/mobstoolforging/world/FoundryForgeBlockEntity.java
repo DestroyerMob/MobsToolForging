@@ -3,6 +3,7 @@ package org.destroyermob.mobstoolforging.world;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -31,17 +32,24 @@ public class FoundryForgeBlockEntity extends BlockEntity {
     public static final int INGOT_MB = 90;
     public static final int BLOCK_MB = INGOT_MB * 9;
     public static final int DEFAULT_MELT_TICKS = 400;
+    public static final int STOKE_TICKS_PER_BLAZE_POWDER = 1200;
+    public static final int MAX_STOKE_TICKS = STOKE_TICKS_PER_BLAZE_POWDER * 4;
     private static final String SOLID_INPUTS_TAG = "SolidInputs";
     private static final String MOLTEN_FLUIDS_TAG = "MoltenFluids";
     private static final String STACK_TAG = "Stack";
+    private static final String MELT_PLAN_TAG = "MeltPlan";
+    private static final String RECIPE_TAG = "Recipe";
     private static final String MATERIAL_TAG = "Material";
     private static final String AMOUNT_TAG = "Amount";
+    private static final String TICKS_TAG = "Ticks";
+    private static final String TEMPERATURE_C_TAG = "TemperatureC";
     private static final String LEGACY_CRUCIBLE_TAG = "Crucible";
     private static final String BURN_TIME_TAG = "BurnTime";
     private static final String FUEL_TEMPERATURE_C_TAG = "FuelTemperatureC";
     private static final String LEGACY_FUEL_TEMPERATURE_TAG = "FuelTemperature";
     private static final String ACTIVE_FUEL_TAG = "ActiveFuel";
     private static final String MELT_PROGRESS_TAG = "HeatProgress";
+    private static final String STOKE_TICKS_TAG = "StokeTicks";
     private static final String FORMED_TAG = "Formed";
     private static final String INTERIOR_MIN_X_TAG = "InteriorMinX";
     private static final String INTERIOR_MIN_Y_TAG = "InteriorMinY";
@@ -52,15 +60,20 @@ public class FoundryForgeBlockEntity extends BlockEntity {
     private static final String STRUCTURE_WIDTH_TAG = "StructureWidth";
     private static final String STRUCTURE_DEPTH_TAG = "StructureDepth";
     private static final String STRUCTURE_HEIGHT_TAG = "StructureHeight";
+    private static final String CLIENT_SOLID_COUNT_TAG = "ClientSolidCount";
+    private static final String CLIENT_LIT_TAG = "ClientLit";
     private static final int FLUID_CAPACITY_MB_PER_INTERIOR_BLOCK = 1000;
+    private static final int CLIENT_SYNC_INTERVAL_TICKS = 10;
+    private static final int MAX_CLIENT_SOLID_STACKS = 16;
 
-    private final List<ItemStack> solidInputs = new ArrayList<>();
+    private final List<QueuedSolid> solidInputs = new ArrayList<>();
     private final List<MoltenLayer> moltenLayers = new ArrayList<>();
     private int burnTime;
     private float activeFuelTemperatureC;
     @Nullable
     private ResourceLocation activeFuel;
     private int meltProgress;
+    private int stokeTicks;
     private boolean formed;
     private BlockPos interiorMin = BlockPos.ZERO;
     private BlockPos interiorMax = BlockPos.ZERO;
@@ -68,6 +81,13 @@ public class FoundryForgeBlockEntity extends BlockEntity {
     private int structureDepth;
     private int structureHeight;
     private int structureCheckTicks;
+    private int unresolvedPlanRetryTicks;
+    private int syncedSolidItemCount = -1;
+    private boolean clientSyncPending;
+    private long lastClientSyncGameTime = Long.MIN_VALUE;
+    @Nullable
+    private FoundryStructure.Diagnosis cachedClientDiagnosis;
+    private long cachedClientDiagnosisGameTime = Long.MIN_VALUE;
 
     public FoundryForgeBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.FOUNDRY_FORGE.get(), pos, blockState);
@@ -85,8 +105,20 @@ public class FoundryForgeBlockEntity extends BlockEntity {
             changed = true;
             sync = true;
         }
+        if (forge.formed && forge.currentMeltPlan().filter(plan -> !plan.processable()).isPresent()) {
+            if (forge.unresolvedPlanRetryTicks-- <= 0) {
+                forge.unresolvedPlanRetryTicks = 20;
+                if (forge.retryUnresolvedHead()) {
+                    changed = true;
+                    sync = true;
+                }
+            }
+        } else {
+            forge.unresolvedPlanRetryTicks = 0;
+        }
+        boolean stoked = forge.stokeTicks > 0;
         if (forge.burnTime > 0) {
-            forge.burnTime--;
+            forge.burnTime = Math.max(0, forge.burnTime - (stoked ? 2 : 1));
             if (forge.burnTime == 0) {
                 forge.activeFuelTemperatureC = 0.0F;
                 forge.activeFuel = null;
@@ -95,7 +127,7 @@ public class FoundryForgeBlockEntity extends BlockEntity {
             changed = true;
         }
 
-        if (forge.formed && !forge.solidInputs.isEmpty()) {
+        if (forge.formed && forge.currentMeltPlan().filter(MeltPlan::processable).isPresent()) {
             float requiredTemperatureC = forge.currentRequiredTemperatureC();
             if (forge.burnTime <= 0) {
                 FoundryFuelTankBlockEntity.FuelUse fuel = forge.drawFuel(requiredTemperatureC);
@@ -108,13 +140,22 @@ public class FoundryForgeBlockEntity extends BlockEntity {
                 }
             }
             if (forge.burnTime > 0 && forge.activeFuelTemperatureC >= requiredTemperatureC) {
-                forge.meltProgress++;
+                forge.meltProgress += stoked ? 2 : 1;
+                if (stoked) {
+                    forge.stokeTicks--;
+                    if (forge.stokeTicks == 0) {
+                        sync = true;
+                    }
+                }
                 changed = true;
-                sync = level.getGameTime() % 10L == 0L;
-                int requiredTicks = forge.currentMeltingRecipe().map(FoundryMeltingRecipe::ticks).orElse(DEFAULT_MELT_TICKS);
+                sync |= level.getGameTime() % 10L == 0L;
+                int requiredTicks = forge.currentMeltTicks();
                 if (forge.meltProgress >= requiredTicks) {
-                    forge.meltNextItem();
-                    forge.meltProgress = 0;
+                    if (forge.meltNextItem()) {
+                        forge.meltProgress = 0;
+                    } else {
+                        forge.meltProgress = requiredTicks;
+                    }
                     sync = true;
                 }
             }
@@ -130,10 +171,28 @@ public class FoundryForgeBlockEntity extends BlockEntity {
                 forge.sync();
             }
         }
+        forge.flushClientSync();
     }
 
     public boolean isLit() {
         return formed && burnTime > 0;
+    }
+
+    public boolean isStoked() {
+        return stokeTicks > 0;
+    }
+
+    public int stokeTicksRemaining() {
+        return stokeTicks;
+    }
+
+    public boolean stoke() {
+        if (!formed || stokeTicks >= MAX_STOKE_TICKS) {
+            return false;
+        }
+        stokeTicks = Math.min(MAX_STOKE_TICKS, stokeTicks + STOKE_TICKS_PER_BLAZE_POWDER);
+        sync();
+        return true;
     }
 
     public float activeFuelTemperatureC() {
@@ -169,11 +228,43 @@ public class FoundryForgeBlockEntity extends BlockEntity {
     }
 
     public int solidItemCount() {
-        return solidInputs.stream().mapToInt(ItemStack::getCount).sum();
+        if (level != null && level.isClientSide && syncedSolidItemCount >= 0) {
+            return syncedSolidItemCount;
+        }
+        return solidInputs.stream().map(QueuedSolid::stack).mapToInt(ItemStack::getCount).sum();
     }
 
     public List<ItemStack> solidRenderStacks() {
-        return solidInputs.stream().map(ItemStack::copy).toList();
+        return solidInputs.stream().map(QueuedSolid::stack).map(ItemStack::copy).toList();
+    }
+
+    CompoundTag savePortableState(HolderLookup.Provider registries) {
+        if (solidInputs.isEmpty() && moltenLayers.isEmpty()) {
+            return new CompoundTag();
+        }
+        CompoundTag tag = saveWithoutMetadata(registries);
+        tag.remove(FORMED_TAG);
+        tag.remove(INTERIOR_MIN_X_TAG);
+        tag.remove(INTERIOR_MIN_Y_TAG);
+        tag.remove(INTERIOR_MIN_Z_TAG);
+        tag.remove(INTERIOR_MAX_X_TAG);
+        tag.remove(INTERIOR_MAX_Y_TAG);
+        tag.remove(INTERIOR_MAX_Z_TAG);
+        tag.remove(STRUCTURE_WIDTH_TAG);
+        tag.remove(STRUCTURE_DEPTH_TAG);
+        tag.remove(STRUCTURE_HEIGHT_TAG);
+        return tag;
+    }
+
+    List<ItemStack> takeFallbackItems() {
+        if (solidInputs.isEmpty()) {
+            return List.of();
+        }
+        List<ItemStack> recovered = solidRenderStacks();
+        solidInputs.clear();
+        meltProgress = 0;
+        setChanged();
+        return recovered;
     }
 
     public List<MoltenLayer> moltenLayers() {
@@ -217,12 +308,12 @@ public class FoundryForgeBlockEntity extends BlockEntity {
     }
 
     public float meltProgressFraction() {
-        int requiredTicks = currentMeltingRecipe().map(FoundryMeltingRecipe::ticks).orElse(DEFAULT_MELT_TICKS);
+        int requiredTicks = currentMeltTicks();
         return Math.min(1.0F, meltProgress / (float) requiredTicks);
     }
 
     public int connectedTankCount() {
-        return connectedTanks().size();
+        return connectedFuelStatus().tankCount();
     }
 
     public int connectedFuelBuckets() {
@@ -230,7 +321,20 @@ public class FoundryForgeBlockEntity extends BlockEntity {
     }
 
     public int connectedFuelMb() {
-        return connectedTanks().stream().mapToInt(FoundryFuelTankBlockEntity::fluidAmountMb).sum();
+        return connectedFuelStatus().amountMb();
+    }
+
+    /** Collects the HUD-facing tank state in one shell scan. */
+    public ConnectedFuelStatus connectedFuelStatus() {
+        int tankCount = 0;
+        int amountMb = 0;
+        float hottestTemperatureC = 0.0F;
+        for (FoundryFuelTankBlockEntity tank : connectedTanks()) {
+            tankCount++;
+            amountMb += tank.fluidAmountMb();
+            hottestTemperatureC = Math.max(hottestTemperatureC, tank.fuelTemperatureC());
+        }
+        return new ConnectedFuelStatus(tankCount, amountMb, hottestTemperatureC);
     }
 
     public static boolean isMeltable(ItemStack stack) {
@@ -244,25 +348,26 @@ public class FoundryForgeBlockEntity extends BlockEntity {
     }
 
     private int acceptSolidInFormedFoundry(ItemStack offered) {
-        Optional<FoundryMeltingRecipe> recipe = FoundryMeltingRegistry.find(offered);
-        int amountPerItem = recipe.map(FoundryMeltingRecipe::amountMb).orElseGet(() -> recyclingYieldMb(offered));
-        if (!formed || offered.isEmpty() || amountPerItem <= 0) {
+        MeltPlan meltPlan = snapshotMeltPlan(offered);
+        if (!formed || offered.isEmpty() || !meltPlan.processable()) {
             return 0;
         }
         int reservedMb = moltenAmountMb() + solidReservedMb();
-        int accepted = Math.min(offered.getCount(), Math.max(0, fluidCapacityMb() - reservedMb) / amountPerItem);
+        int accepted = Math.min(offered.getCount(), Math.max(0, fluidCapacityMb() - reservedMb) / meltPlan.amountMb());
         if (accepted <= 0) {
             return 0;
         }
         ItemStack inserted = offered.split(accepted);
-        for (ItemStack stored : solidInputs) {
-            if (ItemStack.isSameItemSameComponents(stored, inserted) && stored.getCount() + inserted.getCount() <= stored.getMaxStackSize()) {
-                stored.grow(inserted.getCount());
+        for (QueuedSolid stored : solidInputs) {
+            if (stored.meltPlan().equals(meltPlan)
+                    && ItemStack.isSameItemSameComponents(stored.stack(), inserted)
+                    && stored.stack().getCount() + inserted.getCount() <= stored.stack().getMaxStackSize()) {
+                stored.stack().grow(inserted.getCount());
                 sync();
                 return accepted;
             }
         }
-        solidInputs.add(inserted);
+        solidInputs.add(new QueuedSolid(inserted, meltPlan));
         sync();
         return accepted;
     }
@@ -331,8 +436,9 @@ public class FoundryForgeBlockEntity extends BlockEntity {
         if (level == null) {
             return formed;
         }
-        FoundryStructure structure = FoundryStructure.find(level, worldPosition, getBlockState());
-        boolean nextFormed = structure.formed();
+        FoundryStructure.Diagnosis diagnosis = structureDiagnosis();
+        FoundryStructure structure = diagnosis.structure();
+        boolean nextFormed = diagnosis.formed();
         BlockPos nextMin = nextFormed ? structure.interiorMin() : BlockPos.ZERO;
         BlockPos nextMax = nextFormed ? structure.interiorMax() : BlockPos.ZERO;
         int nextWidth = nextFormed ? structure.width() : 0;
@@ -353,7 +459,34 @@ public class FoundryForgeBlockEntity extends BlockEntity {
         if (changed) {
             sync();
         }
+        FoundryAccess.updateController(this);
         return formed;
+    }
+
+    public FoundryStructure.Diagnosis structureDiagnosis() {
+        if (level == null) {
+            return formed
+                    ? FoundryStructure.Diagnosis.success(new FoundryStructure(true, interiorMin, interiorMax,
+                            structureWidth, structureDepth, structureHeight))
+                    : FoundryStructure.Diagnosis.failure(FoundryStructure.Failure.INVALID_CONTROLLER, worldPosition);
+        }
+        long gameTime = level.getGameTime();
+        if (level.isClientSide && cachedClientDiagnosis != null
+                && gameTime >= cachedClientDiagnosisGameTime
+                && gameTime - cachedClientDiagnosisGameTime < 20L) {
+            return cachedClientDiagnosis;
+        }
+        FoundryStructure.Diagnosis diagnosis = FoundryStructure.diagnose(level, worldPosition, getBlockState());
+        FoundryStructure structure = diagnosis.structure();
+        int capacityMb = structure.interiorVolume() * FLUID_CAPACITY_MB_PER_INTERIOR_BLOCK;
+        if (diagnosis.formed() && moltenAmountMb() + solidReservedMb() > capacityMb) {
+            diagnosis = diagnosis.withFailure(FoundryStructure.Failure.CONTENTS_EXCEED_CAPACITY, worldPosition);
+        }
+        if (level.isClientSide) {
+            cachedClientDiagnosis = diagnosis;
+            cachedClientDiagnosisGameTime = gameTime;
+        }
+        return diagnosis;
     }
 
     public float interiorMinRenderX() {
@@ -376,6 +509,20 @@ public class FoundryForgeBlockEntity extends BlockEntity {
         return structureHeight;
     }
 
+    public AABB renderBoundingBox() {
+        if (!formed) {
+            return new AABB(worldPosition);
+        }
+        return new AABB(
+                Math.min(worldPosition.getX(), interiorMin.getX()),
+                Math.min(worldPosition.getY(), interiorMin.getY()),
+                Math.min(worldPosition.getZ(), interiorMin.getZ()),
+                Math.max(worldPosition.getX() + 1, interiorMax.getX() + 1),
+                Math.max(worldPosition.getY() + 1, interiorMax.getY() + 1),
+                Math.max(worldPosition.getZ() + 1, interiorMax.getZ() + 1)
+        );
+    }
+
     public boolean containsShellPosition(BlockPos pos) {
         if (!formed || pos.getY() < interiorMin.getY() || pos.getY() > interiorMax.getY()) {
             return false;
@@ -385,6 +532,26 @@ public class FoundryForgeBlockEntity extends BlockEntity {
         boolean zFace = (pos.getZ() == interiorMin.getZ() - 1 || pos.getZ() == interiorMax.getZ() + 1)
                 && pos.getX() >= interiorMin.getX() && pos.getX() <= interiorMax.getX();
         return xFace || zFace;
+    }
+
+    void forEachShellPosition(Consumer<BlockPos> consumer) {
+        if (!formed) {
+            return;
+        }
+        int minX = interiorMin.getX() - 1;
+        int maxX = interiorMax.getX() + 1;
+        int minZ = interiorMin.getZ() - 1;
+        int maxZ = interiorMax.getZ() + 1;
+        for (int y = interiorMin.getY(); y <= interiorMax.getY(); y++) {
+            for (int x = interiorMin.getX(); x <= interiorMax.getX(); x++) {
+                consumer.accept(new BlockPos(x, y, minZ));
+                consumer.accept(new BlockPos(x, y, maxZ));
+            }
+            for (int z = interiorMin.getZ(); z <= interiorMax.getZ(); z++) {
+                consumer.accept(new BlockPos(minX, y, z));
+                consumer.accept(new BlockPos(maxX, y, z));
+            }
+        }
     }
 
     private List<FoundryFuelTankBlockEntity> connectedTanks() {
@@ -419,46 +586,87 @@ public class FoundryForgeBlockEntity extends BlockEntity {
         return null;
     }
 
-    private void meltNextItem() {
+    private boolean meltNextItem() {
         if (solidInputs.isEmpty()) {
-            return;
+            return false;
         }
-        ItemStack input = solidInputs.getFirst();
-        Optional<FoundryMeltingRecipe> recipe = FoundryMeltingRegistry.find(input);
-        ResourceLocation material = recipe.map(FoundryMeltingRecipe::material).orElseGet(() -> recyclingMaterial(input).orElse(null));
-        int amount = recipe.map(FoundryMeltingRecipe::amountMb).orElseGet(() -> recyclingYieldMb(input));
-        if (material == null || amount <= 0) {
-            solidInputs.removeFirst();
-            return;
+        QueuedSolid queued = solidInputs.getFirst();
+        MeltPlan meltPlan = queued.meltPlan();
+        if (!meltPlan.processable()
+                || meltPlan.amountMb() > Math.max(0, fluidCapacityMb() - moltenAmountMb())) {
+            return false;
         }
+        ItemStack input = queued.stack();
         input.shrink(1);
         if (input.isEmpty()) {
             solidInputs.removeFirst();
         }
-        appendMolten(material, amount);
+        appendMolten(meltPlan.material(), meltPlan.amountMb());
+        if (level != null && !level.isClientSide) {
+            level.playSound(null, worldPosition, SoundEvents.BLASTFURNACE_FIRE_CRACKLE,
+                    SoundSource.BLOCKS, 0.7F, isStoked() ? 1.2F : 0.9F);
+            if (level instanceof ServerLevel serverLevel) {
+                serverLevel.sendParticles(ParticleTypes.LAVA,
+                        worldPosition.getX() + 0.5D, worldPosition.getY() + 0.7D, worldPosition.getZ() + 0.5D,
+                        isStoked() ? 5 : 3, 0.2D, 0.08D, 0.2D, 0.0D);
+            }
+        }
+        return true;
     }
 
-    private Optional<FoundryMeltingRecipe> currentMeltingRecipe() {
-        return solidInputs.isEmpty() ? Optional.empty() : FoundryMeltingRegistry.find(solidInputs.getFirst());
+    private Optional<MeltPlan> currentMeltPlan() {
+        return solidInputs.isEmpty() ? Optional.empty() : Optional.of(solidInputs.getFirst().meltPlan());
+    }
+
+    private boolean retryUnresolvedHead() {
+        if (solidInputs.isEmpty() || solidInputs.getFirst().meltPlan().processable()) {
+            return false;
+        }
+        QueuedSolid queued = solidInputs.getFirst();
+        MeltPlan resolved = snapshotMeltPlan(queued.stack());
+        if (!resolved.processable()) {
+            return false;
+        }
+        solidInputs.set(0, new QueuedSolid(queued.stack(), resolved));
+        meltProgress = 0;
+        refreshStructure();
+        return true;
+    }
+
+    private int currentMeltTicks() {
+        return currentMeltPlan().map(MeltPlan::ticks).orElse(DEFAULT_MELT_TICKS);
     }
 
     private float currentRequiredTemperatureC() {
-        if (solidInputs.isEmpty()) {
-            return 0.0F;
-        }
-        ResourceLocation material = currentMeltingRecipe().map(FoundryMeltingRecipe::material)
-                .orElseGet(() -> recyclingMaterial(solidInputs.getFirst()).orElse(null));
-        return material == null ? FoundryMeltingPointRegistry.DEFAULT_MELTING_POINT_C
-                : FoundryMeltingPointRegistry.celsius(material);
+        return currentMeltPlan().map(MeltPlan::temperatureC).orElse(0.0F);
     }
 
     public int solidReservedMb() {
         int reserved = 0;
-        for (ItemStack stack : solidInputs) {
-            int amount = FoundryMeltingRegistry.find(stack).map(FoundryMeltingRecipe::amountMb).orElseGet(() -> recyclingYieldMb(stack));
-            reserved += stack.getCount() * amount;
+        for (QueuedSolid queued : solidInputs) {
+            reserved += queued.stack().getCount() * queued.meltPlan().amountMb();
         }
         return reserved;
+    }
+
+    private static MeltPlan snapshotMeltPlan(ItemStack stack) {
+        Optional<FoundryMeltingRecipe> recipe = FoundryMeltingRegistry.find(stack);
+        if (recipe.isPresent()) {
+            FoundryMeltingRecipe found = recipe.get();
+            return new MeltPlan(
+                    found.id(),
+                    found.material(),
+                    found.amountMb(),
+                    found.ticks(),
+                    FoundryMeltingPointRegistry.celsius(found.material())
+            );
+        }
+        ResourceLocation material = recyclingMaterial(stack).orElse(null);
+        int amountMb = recyclingYieldMb(stack);
+        if (material == null || amountMb <= 0) {
+            return MeltPlan.unprocessable();
+        }
+        return new MeltPlan(null, material, amountMb, DEFAULT_MELT_TICKS, FoundryMeltingPointRegistry.celsius(material));
     }
 
     private void appendMolten(ResourceLocation material, int amountMb) {
@@ -573,18 +781,40 @@ public class FoundryForgeBlockEntity extends BlockEntity {
     public void sync() {
         setChanged();
         if (level != null && !level.isClientSide) {
-            BlockState state = getBlockState();
-            level.sendBlockUpdated(worldPosition, state, state, Block.UPDATE_ALL);
+            clientSyncPending = true;
+            flushClientSync();
         }
+    }
+
+    private void flushClientSync() {
+        if (!clientSyncPending || level == null || level.isClientSide) {
+            return;
+        }
+        long gameTime = level.getGameTime();
+        if (lastClientSyncGameTime != Long.MIN_VALUE
+                && gameTime - lastClientSyncGameTime < CLIENT_SYNC_INTERVAL_TICKS) {
+            return;
+        }
+        clientSyncPending = false;
+        lastClientSyncGameTime = gameTime;
+        BlockState state = getBlockState();
+        level.sendBlockUpdated(worldPosition, state, state, Block.UPDATE_CLIENTS);
+    }
+
+    @Override
+    public void setRemoved() {
+        FoundryAccess.removeController(this);
+        super.setRemoved();
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         ListTag inputs = new ListTag();
-        for (ItemStack stack : solidInputs) {
+        for (QueuedSolid queued : solidInputs) {
             CompoundTag entry = new CompoundTag();
-            entry.put(STACK_TAG, stack.saveOptional(registries));
+            entry.put(STACK_TAG, queued.stack().saveOptional(registries));
+            entry.put(MELT_PLAN_TAG, queued.meltPlan().save());
             inputs.add(entry);
         }
         tag.put(SOLID_INPUTS_TAG, inputs);
@@ -603,6 +833,7 @@ public class FoundryForgeBlockEntity extends BlockEntity {
             tag.putString(ACTIVE_FUEL_TAG, activeFuel.toString());
         }
         tag.putInt(MELT_PROGRESS_TAG, meltProgress);
+        tag.putInt(STOKE_TICKS_TAG, stokeTicks);
         tag.putBoolean(FORMED_TAG, formed);
         tag.putInt(INTERIOR_MIN_X_TAG, interiorMin.getX());
         tag.putInt(INTERIOR_MIN_Y_TAG, interiorMin.getY());
@@ -621,9 +852,13 @@ public class FoundryForgeBlockEntity extends BlockEntity {
         solidInputs.clear();
         ListTag inputs = tag.getList(SOLID_INPUTS_TAG, Tag.TAG_COMPOUND);
         for (int index = 0; index < inputs.size(); index++) {
-            ItemStack stack = ItemStack.parseOptional(registries, inputs.getCompound(index).getCompound(STACK_TAG));
+            CompoundTag entry = inputs.getCompound(index);
+            ItemStack stack = ItemStack.parseOptional(registries, entry.getCompound(STACK_TAG));
             if (!stack.isEmpty()) {
-                solidInputs.add(stack);
+                MeltPlan meltPlan = entry.contains(MELT_PLAN_TAG, Tag.TAG_COMPOUND)
+                        ? MeltPlan.load(entry.getCompound(MELT_PLAN_TAG))
+                        : snapshotMeltPlan(stack);
+                solidInputs.add(new QueuedSolid(stack, meltPlan));
             }
         }
 
@@ -634,7 +869,7 @@ public class FoundryForgeBlockEntity extends BlockEntity {
             ResourceLocation material = ResourceLocation.tryParse(entry.getString(MATERIAL_TAG));
             int amount = entry.getInt(AMOUNT_TAG);
             if (material != null && amount > 0) {
-                appendMolten(material, amount);
+                appendRawMolten(material, amount);
             }
         }
 
@@ -658,6 +893,7 @@ public class FoundryForgeBlockEntity extends BlockEntity {
             activeFuel = null;
         }
         meltProgress = Math.max(0, tag.getInt(MELT_PROGRESS_TAG));
+        stokeTicks = Math.max(0, Math.min(MAX_STOKE_TICKS, tag.getInt(STOKE_TICKS_TAG)));
         formed = tag.getBoolean(FORMED_TAG);
         interiorMin = new BlockPos(tag.getInt(INTERIOR_MIN_X_TAG), tag.getInt(INTERIOR_MIN_Y_TAG), tag.getInt(INTERIOR_MIN_Z_TAG));
         interiorMax = new BlockPos(tag.getInt(INTERIOR_MAX_X_TAG), tag.getInt(INTERIOR_MAX_Y_TAG), tag.getInt(INTERIOR_MAX_Z_TAG));
@@ -676,9 +912,65 @@ public class FoundryForgeBlockEntity extends BlockEntity {
             return;
         }
         if (contents.hasItem()) {
-            solidInputs.add(contents.item().copy());
+            ItemStack stack = contents.item().copy();
+            solidInputs.add(new QueuedSolid(stack, snapshotMeltPlan(stack)));
         } else if (contents.hasMoltenMaterial()) {
             contents.moltenMaterial().ifPresent(material -> appendMolten(material, Math.max(1, contents.moltenAmount()) * INGOT_MB));
+        }
+    }
+
+    private record QueuedSolid(ItemStack stack, MeltPlan meltPlan) {
+    }
+
+    private record MeltPlan(
+            @Nullable ResourceLocation recipe,
+            @Nullable ResourceLocation material,
+            int amountMb,
+            int ticks,
+            float temperatureC
+    ) {
+        private MeltPlan {
+            amountMb = Math.max(0, amountMb);
+            ticks = Math.max(1, ticks);
+            temperatureC = Math.max(0.0F, temperatureC);
+        }
+
+        private static MeltPlan unprocessable() {
+            return new MeltPlan(null, null, 0, DEFAULT_MELT_TICKS, 0.0F);
+        }
+
+        private boolean processable() {
+            return material != null && amountMb > 0;
+        }
+
+        private CompoundTag save() {
+            CompoundTag tag = new CompoundTag();
+            if (recipe != null) {
+                tag.putString(RECIPE_TAG, recipe.toString());
+            }
+            if (material != null) {
+                tag.putString(MATERIAL_TAG, material.toString());
+            }
+            tag.putInt(AMOUNT_TAG, amountMb);
+            tag.putInt(TICKS_TAG, ticks);
+            tag.putFloat(TEMPERATURE_C_TAG, temperatureC);
+            return tag;
+        }
+
+        private static MeltPlan load(CompoundTag tag) {
+            ResourceLocation recipe = ResourceLocation.tryParse(tag.getString(RECIPE_TAG));
+            ResourceLocation material = ResourceLocation.tryParse(tag.getString(MATERIAL_TAG));
+            int amountMb = Math.max(0, tag.getInt(AMOUNT_TAG));
+            if (material == null || amountMb <= 0) {
+                return unprocessable();
+            }
+            return new MeltPlan(
+                    recipe,
+                    material,
+                    amountMb,
+                    Math.max(1, tag.getInt(TICKS_TAG)),
+                    Math.max(0.0F, tag.getFloat(TEMPERATURE_C_TAG))
+            );
         }
     }
 
@@ -686,6 +978,9 @@ public class FoundryForgeBlockEntity extends BlockEntity {
         public MoltenLayer {
             amountMb = Math.max(1, amountMb);
         }
+    }
+
+    public record ConnectedFuelStatus(int tankCount, int amountMb, float hottestTemperatureC) {
     }
 
     @Nullable
@@ -696,6 +991,82 @@ public class FoundryForgeBlockEntity extends BlockEntity {
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return saveWithoutMetadata(registries);
+        CompoundTag tag = new CompoundTag();
+        ListTag inputs = new ListTag();
+        for (int index = 0; index < Math.min(MAX_CLIENT_SOLID_STACKS, solidInputs.size()); index++) {
+            QueuedSolid queued = solidInputs.get(index);
+            CompoundTag entry = new CompoundTag();
+            entry.put(STACK_TAG, queued.stack().saveOptional(registries));
+            entry.put(MELT_PLAN_TAG, queued.meltPlan().save());
+            inputs.add(entry);
+        }
+        tag.put(SOLID_INPUTS_TAG, inputs);
+        tag.putInt(CLIENT_SOLID_COUNT_TAG, solidItemCount());
+
+        ListTag fluids = new ListTag();
+        moltenLayers.forEach(layer -> {
+            CompoundTag entry = new CompoundTag();
+            entry.putString(MATERIAL_TAG, layer.material().toString());
+            entry.putInt(AMOUNT_TAG, layer.amountMb());
+            fluids.add(entry);
+        });
+        tag.put(MOLTEN_FLUIDS_TAG, fluids);
+        tag.putBoolean(CLIENT_LIT_TAG, burnTime > 0);
+        tag.putFloat(FUEL_TEMPERATURE_C_TAG, activeFuelTemperatureC);
+        if (activeFuel != null) {
+            tag.putString(ACTIVE_FUEL_TAG, activeFuel.toString());
+        }
+        tag.putInt(MELT_PROGRESS_TAG, meltProgress);
+        tag.putInt(STOKE_TICKS_TAG, stokeTicks);
+        tag.putBoolean(FORMED_TAG, formed);
+        tag.putInt(INTERIOR_MIN_X_TAG, interiorMin.getX());
+        tag.putInt(INTERIOR_MIN_Y_TAG, interiorMin.getY());
+        tag.putInt(INTERIOR_MIN_Z_TAG, interiorMin.getZ());
+        tag.putInt(INTERIOR_MAX_X_TAG, interiorMax.getX());
+        tag.putInt(INTERIOR_MAX_Y_TAG, interiorMax.getY());
+        tag.putInt(INTERIOR_MAX_Z_TAG, interiorMax.getZ());
+        tag.putInt(STRUCTURE_WIDTH_TAG, structureWidth);
+        tag.putInt(STRUCTURE_DEPTH_TAG, structureDepth);
+        tag.putInt(STRUCTURE_HEIGHT_TAG, structureHeight);
+        return tag;
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        solidInputs.clear();
+        ListTag inputs = tag.getList(SOLID_INPUTS_TAG, Tag.TAG_COMPOUND);
+        for (int index = 0; index < inputs.size(); index++) {
+            CompoundTag entry = inputs.getCompound(index);
+            ItemStack stack = ItemStack.parseOptional(registries, entry.getCompound(STACK_TAG));
+            if (!stack.isEmpty()) {
+                MeltPlan meltPlan = entry.contains(MELT_PLAN_TAG, Tag.TAG_COMPOUND)
+                        ? MeltPlan.load(entry.getCompound(MELT_PLAN_TAG))
+                        : MeltPlan.unprocessable();
+                solidInputs.add(new QueuedSolid(stack, meltPlan));
+            }
+        }
+        syncedSolidItemCount = Math.max(0, tag.getInt(CLIENT_SOLID_COUNT_TAG));
+
+        moltenLayers.clear();
+        ListTag fluids = tag.getList(MOLTEN_FLUIDS_TAG, Tag.TAG_COMPOUND);
+        for (int index = 0; index < fluids.size(); index++) {
+            CompoundTag entry = fluids.getCompound(index);
+            ResourceLocation material = ResourceLocation.tryParse(entry.getString(MATERIAL_TAG));
+            int amount = entry.getInt(AMOUNT_TAG);
+            if (material != null && amount > 0) {
+                appendRawMolten(material, amount);
+            }
+        }
+        burnTime = tag.getBoolean(CLIENT_LIT_TAG) ? 1 : 0;
+        activeFuelTemperatureC = Math.max(0.0F, tag.getFloat(FUEL_TEMPERATURE_C_TAG));
+        activeFuel = ResourceLocation.tryParse(tag.getString(ACTIVE_FUEL_TAG));
+        meltProgress = Math.max(0, tag.getInt(MELT_PROGRESS_TAG));
+        stokeTicks = Math.max(0, Math.min(MAX_STOKE_TICKS, tag.getInt(STOKE_TICKS_TAG)));
+        formed = tag.getBoolean(FORMED_TAG);
+        interiorMin = new BlockPos(tag.getInt(INTERIOR_MIN_X_TAG), tag.getInt(INTERIOR_MIN_Y_TAG), tag.getInt(INTERIOR_MIN_Z_TAG));
+        interiorMax = new BlockPos(tag.getInt(INTERIOR_MAX_X_TAG), tag.getInt(INTERIOR_MAX_Y_TAG), tag.getInt(INTERIOR_MAX_Z_TAG));
+        structureWidth = Math.max(0, tag.getInt(STRUCTURE_WIDTH_TAG));
+        structureDepth = Math.max(0, tag.getInt(STRUCTURE_DEPTH_TAG));
+        structureHeight = Math.max(0, tag.getInt(STRUCTURE_HEIGHT_TAG));
     }
 }

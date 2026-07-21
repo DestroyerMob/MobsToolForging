@@ -1,0 +1,8 @@
+{
+  "result": "mobstoolforging:netherite",
+  "inputs": {
+    "mobstoolforging:netherite_scrap": 360,
+    "mobstoolforging:gold": 360
+  },
+  "output_amount": 90
+}

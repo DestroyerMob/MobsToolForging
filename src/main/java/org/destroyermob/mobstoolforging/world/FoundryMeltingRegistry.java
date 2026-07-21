@@ -9,7 +9,6 @@ import java.util.Optional;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 
 public final class FoundryMeltingRegistry {
@@ -45,14 +44,9 @@ public final class FoundryMeltingRegistry {
     }
 
     private static Optional<FoundryMeltingRecipe> fallback(ItemStack stack) {
-        Optional<ResourceLocation> material;
-        if (stack.is(Items.NETHERITE_SCRAP)) {
-            material = Optional.of(MaterialCatalog.NETHERITE);
-        } else {
-            material = MaterialCatalog.resolve(stack)
-                    .filter(definition -> definition.category() == MaterialCategory.METAL)
-                    .map(ToolMaterialDefinition::id);
-        }
+        Optional<ResourceLocation> material = MaterialCatalog.resolve(stack)
+                .filter(definition -> definition.category() == MaterialCategory.METAL)
+                .map(ToolMaterialDefinition::id);
         if (material.isEmpty()) {
             return Optional.empty();
         }

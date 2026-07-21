@@ -9,35 +9,57 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 
-public class ForgeTemplateReloadListener extends SimpleJsonResourceReloadListener {
+public class ForgeTemplateReloadListener extends ConditionalJsonResourceReloadListener {
     private static final Gson GSON = new Gson();
 
-    public ForgeTemplateReloadListener() {
-        super(GSON, "mobstoolforging/forge_templates");
+    public ForgeTemplateReloadListener(ICondition.IContext conditionContext, HolderLookup.Provider registryLookup) {
+        super(GSON, "mobstoolforging/forge_templates", conditionContext, registryLookup);
     }
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> templates, ResourceManager resourceManager, ProfilerFiller profiler) {
-        ToolTypeRegistry.resetTemplatesToBuiltIns();
+        Map<ResourceLocation, ForgeTemplateDefinition> parsed = new LinkedHashMap<>();
+        Map<ResourceLocation, JsonElement> accepted = new LinkedHashMap<>();
         templates.forEach((id, element) -> {
             try {
-                ToolTypeRegistry.registerTemplate(parse(id, GsonHelper.convertToJsonObject(element, "forge template")));
+                if (!conditionsMatch(element)) {
+                    return;
+                }
+                ForgeTemplateDefinition template = parse(id, GsonHelper.convertToJsonObject(element, "forge template"));
+                validateReferences(template);
+                parsed.put(id, template);
+                accepted.put(id, element);
             } catch (RuntimeException exception) {
                 MobsToolForging.LOGGER.warn("Skipping invalid forge template {}.", id, exception);
             }
         });
-        MobsToolForging.LOGGER.info("Loaded {} datapack forge template override(s).", templates.size());
+        ToolTypeRegistry.replaceDatapackTemplates(parsed.values());
+        GameplayRegistrySyncStore.capture(GameplayRegistrySyncStore.Section.FORGE_TEMPLATES, accepted);
+        MobsToolForging.LOGGER.info("Loaded {} datapack forge template override(s).", parsed.size());
+    }
+
+    static void applySynchronizedData(Map<ResourceLocation, JsonElement> templates) {
+        Map<ResourceLocation, ForgeTemplateDefinition> parsed = new LinkedHashMap<>();
+        templates.forEach((id, element) -> {
+            ForgeTemplateDefinition template = parse(id, GsonHelper.convertToJsonObject(element, "forge template"));
+            validateReferences(template);
+            parsed.put(id, template);
+        });
+        ToolTypeRegistry.replaceDatapackTemplates(parsed.values());
     }
 
     private static ForgeTemplateDefinition parse(ResourceLocation id, JsonObject json) {
-        ForgeTemplateDefinition base = ToolTypeRegistry.template(id).orElse(null);
+        ForgeTemplateDefinition base = ToolTypeRegistry.baseTemplate(id).orElse(null);
         ResourceLocation toolType = json.has("tool_type")
                 ? ResourceLocation.parse(GsonHelper.getAsString(json, "tool_type"))
                 : base == null ? ResourceLocation.fromNamespaceAndPath(MobsToolForging.MOD_ID, id.getPath().replace("_head", "").replace("_blade", "")) : base.toolType();
@@ -58,6 +80,33 @@ public class ForgeTemplateReloadListener extends SimpleJsonResourceReloadListene
         boolean patternStationEnabled = GsonHelper.getAsBoolean(json, "pattern_station_enabled", base == null || base.patternStationEnabled());
         int patternStationPaperCost = Math.max(1, GsonHelper.getAsInt(json, "pattern_station_paper_cost", base == null ? 1 : base.patternStationPaperCost()));
         return new ForgeTemplateDefinition(id, toolType, partType, requiredMaterials, requiredHits, translationKey, minimumTemperature, whitelist, blacklist, minimumHammerLevel, materialHammerLevels, outputItem, outputItems, compatibleToolTypes, patternStationEnabled, patternStationPaperCost);
+    }
+
+    private static void validateReferences(ForgeTemplateDefinition template) {
+        if (template.outputItem() != null && BuiltInRegistries.ITEM.get(template.outputItem()) == Items.AIR) {
+            throw new IllegalArgumentException("Unknown output_item " + template.outputItem());
+        }
+        template.outputItems().forEach((materialId, itemId) -> {
+            if (BuiltInRegistries.ITEM.get(itemId) == Items.AIR) {
+                throw new IllegalArgumentException("Unknown output item " + itemId + " for material " + materialId);
+            }
+        });
+
+        var allowedMaterials = MaterialCatalog.starterMaterialIds().stream()
+                .filter(template::allowsMaterial)
+                .toList();
+        if (allowedMaterials.isEmpty()) {
+            throw new IllegalArgumentException("Template does not allow any registered forging material");
+        }
+        for (ResourceLocation materialId : allowedMaterials) {
+            if (template.outputStack(materialId).isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Template cannot produce part_type " + template.partType()
+                                + " for allowed material " + materialId
+                                + " using tool_type " + template.toolType()
+                );
+            }
+        }
     }
 
     private static float minimumTemperature(JsonObject json, ForgeTemplateDefinition base) {

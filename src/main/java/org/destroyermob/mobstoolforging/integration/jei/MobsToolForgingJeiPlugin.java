@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.material.Fluid;
 import org.destroyermob.mobstoolforging.MobsToolForging;
 import org.destroyermob.mobstoolforging.MobsToolForgingConfig;
 import org.destroyermob.mobstoolforging.item.ToolTemplateItem;
@@ -33,6 +34,13 @@ import org.destroyermob.mobstoolforging.world.CrossbowAssembly;
 import org.destroyermob.mobstoolforging.world.DryingRecipe;
 import org.destroyermob.mobstoolforging.world.DryingRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.ForgeTemplateDefinition;
+import org.destroyermob.mobstoolforging.world.FoundryAlloyRegistry;
+import org.destroyermob.mobstoolforging.world.FoundryCastRegistry;
+import org.destroyermob.mobstoolforging.world.FoundryCastingOutputs;
+import org.destroyermob.mobstoolforging.world.FoundryFuelRegistry;
+import org.destroyermob.mobstoolforging.world.FoundryMeltingPointRegistry;
+import org.destroyermob.mobstoolforging.world.FoundryMeltingRecipe;
+import org.destroyermob.mobstoolforging.world.FoundryMeltingRegistry;
 import org.destroyermob.mobstoolforging.world.HeatingDisplayRecipe;
 import org.destroyermob.mobstoolforging.world.HeatingRecipeRegistry;
 import org.destroyermob.mobstoolforging.world.LapidaryAbrasives;
@@ -63,6 +71,10 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
     public static final RecipeType<MaterialTraitInfoRecipe> MATERIAL_TRAITS = RecipeType.create(JEI_NAMESPACE, "material_traits", MaterialTraitInfoRecipe.class);
     public static final RecipeType<WorldAssemblyJeiRecipe> WORLD_ASSEMBLY = RecipeType.create(JEI_NAMESPACE, "world_assembly", WorldAssemblyJeiRecipe.class);
     public static final RecipeType<ToolmakerAssemblyJeiRecipe> TOOLMAKER_ASSEMBLY = RecipeType.create(JEI_NAMESPACE, "toolmaker_assembly", ToolmakerAssemblyJeiRecipe.class);
+    public static final RecipeType<FoundryJeiRecipes.Melting> FOUNDRY_MELTING = RecipeType.create(JEI_NAMESPACE, "foundry_melting", FoundryJeiRecipes.Melting.class);
+    public static final RecipeType<FoundryJeiRecipes.Alloying> FOUNDRY_ALLOYING = RecipeType.create(JEI_NAMESPACE, "foundry_alloying", FoundryJeiRecipes.Alloying.class);
+    public static final RecipeType<FoundryJeiRecipes.Casting> FOUNDRY_CASTING = RecipeType.create(JEI_NAMESPACE, "foundry_casting", FoundryJeiRecipes.Casting.class);
+    public static final RecipeType<FoundryJeiRecipes.Fuel> FOUNDRY_FUEL = RecipeType.create(JEI_NAMESPACE, "foundry_fuel", FoundryJeiRecipes.Fuel.class);
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -84,7 +96,11 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
                 new DryingCategory(guiHelper),
                 new ToolmakerAssemblyCategory(guiHelper),
                 new WorldAssemblyCategory(guiHelper),
-                new MaterialTraitInfoCategory(guiHelper)
+                new MaterialTraitInfoCategory(guiHelper),
+                new FoundryMeltingCategory(guiHelper),
+                new FoundryAlloyingCategory(guiHelper),
+                new FoundryCastingCategory(guiHelper),
+                new FoundryFuelCategory(guiHelper)
         );
     }
 
@@ -99,6 +115,10 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         registration.addRecipes(MATERIAL_TRAITS, materialTraitRecipes());
         registration.addRecipes(TOOLMAKER_ASSEMBLY, toolmakerAssemblyRecipes());
         registration.addRecipes(WORLD_ASSEMBLY, worldAssemblyRecipes());
+        registration.addRecipes(FOUNDRY_MELTING, foundryMeltingRecipes());
+        registration.addRecipes(FOUNDRY_ALLOYING, foundryAlloyingRecipes());
+        registration.addRecipes(FOUNDRY_CASTING, foundryCastingRecipes());
+        registration.addRecipes(FOUNDRY_FUEL, foundryFuelRecipes());
     }
 
     @Override
@@ -114,6 +134,17 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
             public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
                 ResourceLocation template = stack.get(ModDataComponents.FORGE_TEMPLATE.get());
                 return template == null ? "" : template.toString();
+            }
+        });
+        registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.CASTING_MOLD.get(), new ISubtypeInterpreter<>() {
+            @Override
+            public Object getSubtypeData(ItemStack stack, UidContext context) {
+                return ModItems.CASTING_MOLD.get().templateId(stack).orElse(null);
+            }
+
+            @Override
+            public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
+                return ModItems.CASTING_MOLD.get().templateId(stack).map(ResourceLocation::toString).orElse("");
             }
         });
     }
@@ -148,6 +179,191 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(Items.CAMPFIRE, HEATING);
         registration.addRecipeCatalyst(Items.SOUL_CAMPFIRE, HEATING);
         registration.addRecipeCatalyst(ModItems.DRYING_RACK.get(), DRYING);
+        registration.addRecipeCatalyst(ModItems.FOUNDRY_FORGE.get(), FOUNDRY_MELTING, FOUNDRY_ALLOYING, FOUNDRY_FUEL);
+        registration.addRecipeCatalyst(ModItems.FOUNDRY_FUEL_TANK.get(), FOUNDRY_FUEL);
+        registration.addRecipeCatalyst(ModItems.FOUNDRY_DRAIN.get(), FOUNDRY_CASTING);
+        registration.addRecipeCatalyst(ModItems.FOUNDRY_CASTING_TABLE.get(), FOUNDRY_CASTING);
+        registration.addRecipeCatalyst(ModItems.FOUNDRY_CASTING_BASIN.get(), FOUNDRY_CASTING);
+    }
+
+    private static List<FoundryJeiRecipes.Melting> foundryMeltingRecipes() {
+        return FoundryMeltingRegistry.recipes().stream()
+                .sorted(java.util.Comparator.comparing(recipe -> recipe.id().toString()))
+                .map(recipe -> {
+                    List<ItemStack> inputs = foundryInputStacks(recipe.input());
+                    ItemStack display = materialDisplay(recipe.material());
+                    if (inputs.isEmpty() || display.isEmpty()) {
+                        return null;
+                    }
+                    return new FoundryJeiRecipes.Melting(
+                            recipe.id(),
+                            inputs,
+                            display,
+                            MaterialCatalog.displayName(recipe.material()),
+                            recipe.amountMb(),
+                            recipe.ticks(),
+                            FoundryMeltingPointRegistry.celsius(recipe.material())
+                    );
+                })
+                .filter(java.util.Objects::nonNull)
+                .toList();
+    }
+
+    private static List<FoundryJeiRecipes.Alloying> foundryAlloyingRecipes() {
+        return FoundryAlloyRegistry.recipes().stream().map(recipe -> {
+            List<FoundryJeiRecipes.MaterialAmount> inputs = recipe.inputs().entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey(java.util.Comparator.comparing(ResourceLocation::toString)))
+                    .map(entry -> new FoundryJeiRecipes.MaterialAmount(
+                            entry.getKey(),
+                            materialDisplays(entry.getKey()),
+                            MaterialCatalog.displayName(entry.getKey()),
+                            entry.getValue()
+                    ))
+                    .filter(input -> !input.displays().isEmpty())
+                    .toList();
+            ItemStack result = materialDisplay(recipe.result());
+            if (inputs.size() != recipe.inputs().size() || result.isEmpty()) {
+                return null;
+            }
+            return new FoundryJeiRecipes.Alloying(
+                    recipe.id(), inputs, result, MaterialCatalog.displayName(recipe.result()), recipe.outputAmountMb()
+            );
+        }).filter(java.util.Objects::nonNull).toList();
+    }
+
+    private static List<FoundryJeiRecipes.Casting> foundryCastingRecipes() {
+        List<FoundryJeiRecipes.Casting> recipes = new ArrayList<>();
+        FoundryCastRegistry.recipes().stream()
+                .sorted(java.util.Comparator.comparing(recipe -> recipe.id().toString()))
+                .forEach(recipe -> {
+                    ItemStack cast = org.destroyermob.mobstoolforging.item.CastingMoldItem.create(recipe.template());
+                    List<ItemStack> sourceForms = foundryInputStacks(recipe.input());
+                    List<ItemStack> gold = materialDisplays(MaterialCatalog.GOLD);
+                    if (!cast.isEmpty() && !sourceForms.isEmpty() && !gold.isEmpty()) {
+                        recipes.add(new FoundryJeiRecipes.Casting(
+                                recipeId("foundry_casting/create/" + idPath(recipe.id())),
+                                FoundryJeiRecipes.Casting.Kind.CREATE_CAST,
+                                sourceForms,
+                                gold,
+                                MaterialCatalog.displayName(MaterialCatalog.GOLD),
+                                recipe.goldAmountMb(),
+                                cast
+                        ));
+                    }
+                    ToolTypeRegistry.template(recipe.template()).ifPresent(template -> castableMaterials().forEach(material -> {
+                        ItemStack output = template.outputStack(material, org.destroyermob.mobstoolforging.world.ForgingQuality.CRUDE.score());
+                        List<ItemStack> materialDisplays = materialDisplays(material);
+                        if (!cast.isEmpty() && !output.isEmpty() && template.allowsMaterial(material) && !materialDisplays.isEmpty()) {
+                            recipes.add(new FoundryJeiRecipes.Casting(
+                                    recipeId("foundry_casting/part/" + idPath(recipe.template()) + "/" + idPath(material)),
+                                    FoundryJeiRecipes.Casting.Kind.CAST_PART,
+                                    List.of(cast),
+                                    materialDisplays,
+                                    MaterialCatalog.displayName(material),
+                                    recipe.amountMb(),
+                                    output
+                            ));
+                        }
+                    }));
+                });
+
+        for (ResourceLocation material : castableMaterials()) {
+            List<ItemStack> displays = materialDisplays(material);
+            if (displays.isEmpty()) {
+                continue;
+            }
+            FoundryCastingOutputs.output(material, false).ifPresent(output -> recipes.add(new FoundryJeiRecipes.Casting(
+                    recipeId("foundry_casting/ingot/" + idPath(material)),
+                    FoundryJeiRecipes.Casting.Kind.CAST_INGOT,
+                    List.of(), displays, MaterialCatalog.displayName(material),
+                    org.destroyermob.mobstoolforging.world.FoundryForgeBlockEntity.INGOT_MB, output
+            )));
+            FoundryCastingOutputs.output(material, true).ifPresent(output -> recipes.add(new FoundryJeiRecipes.Casting(
+                    recipeId("foundry_casting/block/" + idPath(material)),
+                    FoundryJeiRecipes.Casting.Kind.CAST_BLOCK,
+                    List.of(), displays, MaterialCatalog.displayName(material),
+                    org.destroyermob.mobstoolforging.world.FoundryForgeBlockEntity.BLOCK_MB, output
+            )));
+        }
+        return List.copyOf(recipes);
+    }
+
+    private static List<FoundryJeiRecipes.Fuel> foundryFuelRecipes() {
+        return FoundryFuelRegistry.recipes().stream()
+                .sorted(java.util.Comparator.comparing(recipe -> recipe.id().toString()))
+                .map(recipe -> new FoundryJeiRecipes.Fuel(
+                        recipe.id(), foundryFluids(recipe.input()), recipe.amountMb(), recipe.burnTicks(), recipe.temperatureC()
+                ))
+                .filter(recipe -> !recipe.fluids().isEmpty())
+                .toList();
+    }
+
+    private static List<ResourceLocation> castableMaterials() {
+        LinkedHashSet<ResourceLocation> materials = new LinkedHashSet<>();
+        FoundryMeltingPointRegistry.values().stream()
+                .map(point -> point.material())
+                .filter(MaterialCatalog::isNormalForgingMaterial)
+                .forEach(materials::add);
+        FoundryAlloyRegistry.recipes().stream()
+                .map(recipe -> recipe.result())
+                .filter(MaterialCatalog::isNormalForgingMaterial)
+                .forEach(materials::add);
+        return List.copyOf(materials);
+    }
+
+    private static List<ItemStack> foundryInputStacks(FoundryMeltingRecipe.Input input) {
+        if (input.itemId().isPresent()) {
+            Item item = BuiltInRegistries.ITEM.get(input.itemId().get());
+            return item == Items.AIR ? List.of() : List.of(new ItemStack(item));
+        }
+        if (input.tag().isPresent()) {
+            List<ItemStack> stacks = new ArrayList<>();
+            BuiltInRegistries.ITEM.getTagOrEmpty(input.tag().get()).forEach(holder -> stacks.add(new ItemStack(holder.value())));
+            return stacks;
+        }
+        return List.of();
+    }
+
+    private static List<ItemStack> materialDisplays(ResourceLocation material) {
+        LinkedHashMap<Item, ItemStack> displays = new LinkedHashMap<>();
+        FoundryMeltingRegistry.recipes().stream()
+                .filter(recipe -> recipe.material().equals(material))
+                .flatMap(recipe -> foundryInputStacks(recipe.input()).stream())
+                .forEach(stack -> displays.putIfAbsent(stack.getItem(), stack));
+        ItemStack catalogDisplay = materialDisplay(material);
+        if (!catalogDisplay.isEmpty()) {
+            displays.putIfAbsent(catalogDisplay.getItem(), catalogDisplay);
+        }
+        return List.copyOf(displays.values());
+    }
+
+    private static ItemStack materialDisplay(ResourceLocation material) {
+        try {
+            ItemStack display = MaterialCatalog.displayStack(material);
+            if (!display.isEmpty()) {
+                return display;
+            }
+        } catch (RuntimeException ignored) {
+            // Virtual/tag-only molten materials use a matching melting input below.
+        }
+        return FoundryMeltingRegistry.recipes().stream()
+                .filter(recipe -> recipe.material().equals(material))
+                .flatMap(recipe -> foundryInputStacks(recipe.input()).stream())
+                .findFirst()
+                .orElse(ItemStack.EMPTY);
+    }
+
+    private static List<Fluid> foundryFluids(org.destroyermob.mobstoolforging.world.FoundryFuelRecipe.Input input) {
+        if (input.fluidId().isPresent()) {
+            Fluid fluid = BuiltInRegistries.FLUID.get(input.fluidId().get());
+            return fluid == net.minecraft.world.level.material.Fluids.EMPTY ? List.of() : List.of(fluid);
+        }
+        if (input.tag().isPresent()) {
+            List<Fluid> fluids = new ArrayList<>();
+            BuiltInRegistries.FLUID.getTagOrEmpty(input.tag().get()).forEach(holder -> fluids.add(holder.value()));
+            return fluids;
+        }
+        return List.of();
     }
 
     private static List<ForgeShapingJeiRecipe> forgeShapingRecipes() {
@@ -722,5 +938,17 @@ public class MobsToolForgingJeiPlugin implements IModPlugin {
 
     static ItemStack worldAssemblyIcon() {
         return new ItemStack(Items.CRAFTING_TABLE);
+    }
+
+    static ItemStack foundryForgeIcon() {
+        return new ItemStack(ModItems.FOUNDRY_FORGE.get());
+    }
+
+    static ItemStack castingTableIcon() {
+        return new ItemStack(ModItems.FOUNDRY_CASTING_TABLE.get());
+    }
+
+    static ItemStack fuelTankIcon() {
+        return new ItemStack(ModItems.FOUNDRY_FUEL_TANK.get());
     }
 }

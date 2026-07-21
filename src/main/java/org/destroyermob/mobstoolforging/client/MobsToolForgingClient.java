@@ -272,7 +272,6 @@ public final class MobsToolForgingClient {
         if (target == null) {
             return false;
         }
-        target.knapping().cycleTarget(delta);
         PacketDistributor.sendToServer(new CycleKnappingTargetPayload(target.pos(), delta));
         return true;
     }

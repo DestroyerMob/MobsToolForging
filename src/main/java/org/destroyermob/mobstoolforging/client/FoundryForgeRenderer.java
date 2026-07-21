@@ -17,6 +17,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.AABB;
 import org.destroyermob.mobstoolforging.world.FoundryForgeBlockEntity;
 import org.destroyermob.mobstoolforging.world.MaterialCatalog;
 import org.destroyermob.mobstoolforging.MobsToolForging;
@@ -35,7 +36,12 @@ public class FoundryForgeRenderer implements BlockEntityRenderer<FoundryForgeBlo
 
     @Override
     public boolean shouldRenderOffScreen(FoundryForgeBlockEntity forge) {
-        return forge.isFormed();
+        return false;
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(FoundryForgeBlockEntity forge) {
+        return forge.renderBoundingBox();
     }
 
     @Override
@@ -210,6 +216,9 @@ public class FoundryForgeRenderer implements BlockEntityRenderer<FoundryForgeBlo
         }
         if (MaterialCatalog.NETHERITE.equals(material)) {
             return 0xFF6C5B5E;
+        }
+        if (MaterialCatalog.NETHERITE_SCRAP.equals(material)) {
+            return 0xFF4B3D40;
         }
         if (MaterialCatalog.STEEL.equals(material)) {
             return 0xFFAEB9C4;

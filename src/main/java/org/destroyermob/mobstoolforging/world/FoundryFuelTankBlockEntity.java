@@ -21,12 +21,11 @@ public class FoundryFuelTankBlockEntity extends BlockEntity {
     public static final int BUCKET_MB = 1000;
     public static final int CAPACITY_MB = 4000;
     private static final String LAVA_TAG = "Lava";
-    private static final String FLUID_TAG = "FuelFluid";
-    private static final String AMOUNT_TAG = "FuelAmount";
+    private static final String FLUID_STACK_TAG = "Fuel";
+    private static final String LEGACY_FLUID_TAG = "FuelFluid";
+    private static final String LEGACY_AMOUNT_TAG = "FuelAmount";
 
-    @Nullable
-    private ResourceLocation fluidId;
-    private int fluidAmountMb;
+    private FluidStack contents = FluidStack.EMPTY;
     private final IFluidHandler fluidHandler = new TankFluidHandler();
 
     public FoundryFuelTankBlockEntity(BlockPos pos, BlockState blockState) {
@@ -34,18 +33,19 @@ public class FoundryFuelTankBlockEntity extends BlockEntity {
     }
 
     public int lavaMb() {
-        return fluidAmountMb;
+        return contents.getAmount();
     }
 
     public int fluidAmountMb() {
-        return fluidAmountMb;
+        return contents.getAmount();
     }
 
     public FluidStack fluidStack() {
-        if (fluidId == null || fluidAmountMb <= 0) {
-            return FluidStack.EMPTY;
-        }
-        return new FluidStack(BuiltInRegistries.FLUID.get(fluidId), fluidAmountMb);
+        return contents.copy();
+    }
+
+    CompoundTag savePortableState(HolderLookup.Provider registries) {
+        return contents.isEmpty() ? new CompoundTag() : saveWithoutMetadata(registries);
     }
 
     public IFluidHandler fluidHandler() {
@@ -61,11 +61,11 @@ public class FoundryFuelTankBlockEntity extends BlockEntity {
     }
 
     public float lavaVisualFraction() {
-        return fluidAmountMb / (float) CAPACITY_MB;
+        return contents.getAmount() / (float) CAPACITY_MB;
     }
 
     public int lavaBuckets() {
-        return fluidAmountMb / BUCKET_MB;
+        return contents.getAmount() / BUCKET_MB;
     }
 
     public boolean acceptLavaBucket() {
@@ -101,23 +101,27 @@ public class FoundryFuelTankBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        if (fluidId != null && fluidAmountMb > 0) {
-            tag.putString(FLUID_TAG, fluidId.toString());
-            tag.putInt(AMOUNT_TAG, fluidAmountMb);
+        if (!contents.isEmpty()) {
+            tag.put(FLUID_STACK_TAG, contents.saveOptional(registries));
         }
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        fluidId = ResourceLocation.tryParse(tag.getString(FLUID_TAG));
-        fluidAmountMb = Math.max(0, Math.min(CAPACITY_MB, tag.getInt(AMOUNT_TAG)));
-        if ((fluidId == null || fluidAmountMb == 0) && tag.getInt(LAVA_TAG) > 0) {
-            fluidId = ResourceLocation.withDefaultNamespace("lava");
-            fluidAmountMb = Math.max(0, Math.min(CAPACITY_MB, tag.getInt(LAVA_TAG)));
+        contents = FluidStack.parseOptional(registries, tag.getCompound(FLUID_STACK_TAG));
+        if (contents.isEmpty()) {
+            ResourceLocation legacyFluid = ResourceLocation.tryParse(tag.getString(LEGACY_FLUID_TAG));
+            int legacyAmount = Math.max(0, Math.min(CAPACITY_MB, tag.getInt(LEGACY_AMOUNT_TAG)));
+            if (legacyFluid != null && legacyAmount > 0) {
+                contents = new FluidStack(BuiltInRegistries.FLUID.get(legacyFluid), legacyAmount);
+            }
         }
-        if (fluidAmountMb == 0) {
-            fluidId = null;
+        if (contents.isEmpty() && tag.getInt(LAVA_TAG) > 0) {
+            contents = new FluidStack(Fluids.LAVA, Math.max(0, Math.min(CAPACITY_MB, tag.getInt(LAVA_TAG))));
+        }
+        if (!contents.isEmpty() && contents.getAmount() > CAPACITY_MB) {
+            contents.setAmount(CAPACITY_MB);
         }
     }
 
@@ -161,14 +165,16 @@ public class FoundryFuelTankBlockEntity extends BlockEntity {
             if (resource.isEmpty() || !isFluidValid(0, resource)) {
                 return 0;
             }
-            ResourceLocation offeredId = BuiltInRegistries.FLUID.getKey(resource.getFluid());
-            if (fluidAmountMb > 0 && !offeredId.equals(fluidId)) {
+            if (!contents.isEmpty() && !FluidStack.isSameFluidSameComponents(resource, contents)) {
                 return 0;
             }
-            int accepted = Math.min(resource.getAmount(), CAPACITY_MB - fluidAmountMb);
+            int accepted = Math.min(resource.getAmount(), CAPACITY_MB - contents.getAmount());
             if (accepted > 0 && action.execute()) {
-                fluidId = offeredId;
-                fluidAmountMb += accepted;
+                if (contents.isEmpty()) {
+                    contents = resource.copyWithAmount(accepted);
+                } else {
+                    contents.grow(accepted);
+                }
                 sync();
             }
             return accepted;
@@ -185,16 +191,16 @@ public class FoundryFuelTankBlockEntity extends BlockEntity {
 
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
-            FluidStack contents = fluidStack();
-            if (contents.isEmpty() || maxDrain <= 0) {
+            FluidStack stored = fluidStack();
+            if (stored.isEmpty() || maxDrain <= 0) {
                 return FluidStack.EMPTY;
             }
-            int drainedAmount = Math.min(maxDrain, fluidAmountMb);
-            FluidStack drained = contents.copyWithAmount(drainedAmount);
+            int drainedAmount = Math.min(maxDrain, stored.getAmount());
+            FluidStack drained = stored.copyWithAmount(drainedAmount);
             if (action.execute()) {
-                fluidAmountMb -= drainedAmount;
-                if (fluidAmountMb == 0) {
-                    fluidId = null;
+                FoundryFuelTankBlockEntity.this.contents.shrink(drainedAmount);
+                if (FoundryFuelTankBlockEntity.this.contents.isEmpty()) {
+                    FoundryFuelTankBlockEntity.this.contents = FluidStack.EMPTY;
                 }
                 sync();
             }

@@ -23,7 +23,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
 
-public class FoundryCastingBlock extends BaseEntityBlock {
+public class FoundryCastingBlock extends StatefulFoundryBlock {
     public static final MapCodec<FoundryCastingBlock> CODEC = simpleCodec(FoundryCastingBlock::new);
     private static final VoxelShape TABLE_SHAPE = Shapes.or(
             Block.box(0.0D, 0.0D, 0.0D, 2.0D, 10.0D, 2.0D),
@@ -95,11 +95,4 @@ public class FoundryCastingBlock extends BaseEntityBlock {
         return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof FoundryCastingBlockEntity casting) {
-            casting.dropContents();
-        }
-        super.onRemove(state, level, pos, newState, movedByPiston);
-    }
 }
