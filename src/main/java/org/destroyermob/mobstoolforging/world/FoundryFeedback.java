@@ -39,12 +39,6 @@ public final class FoundryFeedback {
             return structureDiagnostic(foundry).copy().withStyle(ChatFormatting.RED);
         }
         if (foundry.solidItemCount() <= 0) {
-            if (foundry.isStoked()) {
-                return Component.translatable(foundry.moltenAmountMb() > 0
-                                ? "message.mobstoolforging.foundry_operation.stoked_ready_to_pour"
-                                : "message.mobstoolforging.foundry_operation.stoked_idle",
-                        foundry.stokeTicksRemaining() / 20).withStyle(ChatFormatting.GOLD);
-            }
             return Component.translatable(foundry.moltenAmountMb() > 0
                     ? "message.mobstoolforging.foundry_operation.ready_to_pour"
                     : "message.mobstoolforging.foundry_operation.add_metal").withStyle(ChatFormatting.GRAY);
@@ -69,16 +63,10 @@ public final class FoundryFeedback {
         if (!foundry.isLit()) {
             return Component.translatable("message.mobstoolforging.foundry_operation.starting").withStyle(ChatFormatting.GOLD);
         }
-        return foundry.isStoked()
-                ? Component.translatable(
-                        "message.mobstoolforging.foundry_operation.melting_stoked",
-                        Math.round(foundry.meltProgressFraction() * 100.0F),
-                        foundry.stokeTicksRemaining() / 20
-                ).withStyle(ChatFormatting.GOLD)
-                : Component.translatable(
-                        "message.mobstoolforging.foundry_operation.melting",
-                        Math.round(foundry.meltProgressFraction() * 100.0F)
-                ).withStyle(ChatFormatting.GOLD);
+        return Component.translatable(
+                "message.mobstoolforging.foundry_operation.melting",
+                Math.round(foundry.meltProgressFraction() * 100.0F)
+        ).withStyle(ChatFormatting.GOLD);
     }
 
     public static String temperature(float celsius) {

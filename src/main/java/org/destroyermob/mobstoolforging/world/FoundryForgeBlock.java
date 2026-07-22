@@ -6,9 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -35,7 +32,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.destroyermob.mobstoolforging.registry.ModBlockEntities;
-import org.destroyermob.mobstoolforging.MobsToolForging;
 
 public class FoundryForgeBlock extends StatefulFoundryBlock {
     public static final MapCodec<FoundryForgeBlock> CODEC = simpleCodec(FoundryForgeBlock::new);
@@ -79,13 +75,9 @@ public class FoundryForgeBlock extends StatefulFoundryBlock {
         if (random.nextFloat() < 0.35F) {
             level.addParticle(ParticleTypes.LAVA, pos.getX() + 0.5D, pos.getY() + 0.55D, pos.getZ() + 0.5D, 0.0D, 0.0D, 0.0D);
         }
-        if (forge.isStoked() && random.nextFloat() < 0.65F) {
-            level.addParticle(ParticleTypes.LARGE_SMOKE, pos.getX() + 0.5D, pos.getY() + 0.58D,
-                    pos.getZ() + 0.5D, 0.0D, 0.035D, 0.0D);
-        }
-        if (random.nextFloat() < (forge.isStoked() ? 0.08F : 0.03F)) {
+        if (random.nextFloat() < 0.03F) {
             level.playLocalSound(pos, SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.BLOCKS,
-                    forge.isStoked() ? 0.75F : 0.45F, forge.isStoked() ? 1.15F : 0.9F, false);
+                    0.45F, 0.9F, false);
         }
     }
 
@@ -104,40 +96,6 @@ public class FoundryForgeBlock extends StatefulFoundryBlock {
                 DebugFeedback.actionBar(player, Component.translatable("message.mobstoolforging.foundry_lava_use_tank"));
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
-        }
-        if (stack.is(Items.BLAZE_POWDER)) {
-            if (level.isClientSide) {
-                return ItemInteractionResult.SUCCESS;
-            }
-            if (!forge.refreshStructure()) {
-                DebugFeedback.actionBar(player, FoundryFeedback.structureDiagnostic(forge));
-                return ItemInteractionResult.CONSUME;
-            }
-            if (!forge.stoke()) {
-                DebugFeedback.actionBar(player, Component.translatable(
-                        "message.mobstoolforging.foundry_stoke_full",
-                        FoundryForgeBlockEntity.MAX_STOKE_TICKS / 20
-                ));
-                return ItemInteractionResult.CONSUME;
-            }
-            if (!player.getAbilities().instabuild) {
-                stack.shrink(1);
-            }
-            level.playSound(null, pos, SoundEvents.BLAZE_SHOOT, SoundSource.BLOCKS, 0.85F, 0.8F);
-            if (level instanceof ServerLevel serverLevel) {
-                serverLevel.sendParticles(ParticleTypes.FLAME,
-                        pos.getX() + 0.5D, pos.getY() + 0.65D, pos.getZ() + 0.5D,
-                        18, 0.3D, 0.15D, 0.3D, 0.025D);
-                serverLevel.sendParticles(ParticleTypes.LAVA,
-                        pos.getX() + 0.5D, pos.getY() + 0.65D, pos.getZ() + 0.5D,
-                        6, 0.25D, 0.08D, 0.25D, 0.0D);
-            }
-            awardStokingAdvancement(player);
-            DebugFeedback.actionBar(player, Component.translatable(
-                    "message.mobstoolforging.foundry_stoked",
-                    forge.stokeTicksRemaining() / 20
-            ));
-            return ItemInteractionResult.CONSUME;
         }
         if (!FoundryForgeBlockEntity.isMeltable(stack)) {
             if (EmptyMainHandInteractions.shouldFallbackToEmptyHand(player, hand)) {
@@ -195,17 +153,6 @@ public class FoundryForgeBlock extends StatefulFoundryBlock {
                 FoundryFeedback.operatingStatus(forge, fuel)
         ));
         return InteractionResult.CONSUME;
-    }
-
-    private static void awardStokingAdvancement(Player player) {
-        if (!(player instanceof ServerPlayer serverPlayer) || serverPlayer.getServer() == null) {
-            return;
-        }
-        var advancement = serverPlayer.getServer().getAdvancements().get(ResourceLocation.fromNamespaceAndPath(
-                MobsToolForging.MOD_ID, "foundry/stoked"));
-        if (advancement != null) {
-            serverPlayer.getAdvancements().award(advancement, "stoked");
-        }
     }
 
     @Override

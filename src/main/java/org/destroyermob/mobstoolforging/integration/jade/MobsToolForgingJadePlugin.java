@@ -291,12 +291,6 @@ public class MobsToolForgingJadePlugin implements IWailaPlugin {
                         foundry.structureHeight()
                 ).withStyle(ChatFormatting.GRAY));
                 tooltip.add(FoundryFeedback.operatingStatus(foundry, fuel));
-                if (foundry.isStoked()) {
-                    tooltip.add(Component.translatable(
-                            "jade.mobstoolforging.foundry_stoked",
-                            secondsLeft(foundry.stokeTicksRemaining())
-                    ).withStyle(ChatFormatting.GOLD));
-                }
                 tooltip.add(volumeLine("jade.mobstoolforging.foundry_molten", foundry.moltenAmountMb(), foundry.fluidCapacityMb()));
                 java.util.List<FoundryForgeBlockEntity.MoltenLayer> layers = foundry.moltenLayers();
                 for (int index = 0; index < layers.size(); index++) {

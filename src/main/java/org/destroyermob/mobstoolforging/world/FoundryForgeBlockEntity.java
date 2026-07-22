@@ -32,8 +32,6 @@ public class FoundryForgeBlockEntity extends BlockEntity {
     public static final int INGOT_MB = 90;
     public static final int BLOCK_MB = INGOT_MB * 9;
     public static final int DEFAULT_MELT_TICKS = 400;
-    public static final int STOKE_TICKS_PER_BLAZE_POWDER = 1200;
-    public static final int MAX_STOKE_TICKS = STOKE_TICKS_PER_BLAZE_POWDER * 4;
     private static final String SOLID_INPUTS_TAG = "SolidInputs";
     private static final String MOLTEN_FLUIDS_TAG = "MoltenFluids";
     private static final String STACK_TAG = "Stack";
@@ -49,7 +47,6 @@ public class FoundryForgeBlockEntity extends BlockEntity {
     private static final String LEGACY_FUEL_TEMPERATURE_TAG = "FuelTemperature";
     private static final String ACTIVE_FUEL_TAG = "ActiveFuel";
     private static final String MELT_PROGRESS_TAG = "HeatProgress";
-    private static final String STOKE_TICKS_TAG = "StokeTicks";
     private static final String FORMED_TAG = "Formed";
     private static final String INTERIOR_MIN_X_TAG = "InteriorMinX";
     private static final String INTERIOR_MIN_Y_TAG = "InteriorMinY";
@@ -73,7 +70,6 @@ public class FoundryForgeBlockEntity extends BlockEntity {
     @Nullable
     private ResourceLocation activeFuel;
     private int meltProgress;
-    private int stokeTicks;
     private boolean formed;
     private BlockPos interiorMin = BlockPos.ZERO;
     private BlockPos interiorMax = BlockPos.ZERO;
@@ -116,9 +112,8 @@ public class FoundryForgeBlockEntity extends BlockEntity {
         } else {
             forge.unresolvedPlanRetryTicks = 0;
         }
-        boolean stoked = forge.stokeTicks > 0;
         if (forge.burnTime > 0) {
-            forge.burnTime = Math.max(0, forge.burnTime - (stoked ? 2 : 1));
+            forge.burnTime--;
             if (forge.burnTime == 0) {
                 forge.activeFuelTemperatureC = 0.0F;
                 forge.activeFuel = null;
@@ -140,13 +135,7 @@ public class FoundryForgeBlockEntity extends BlockEntity {
                 }
             }
             if (forge.burnTime > 0 && forge.activeFuelTemperatureC >= requiredTemperatureC) {
-                forge.meltProgress += stoked ? 2 : 1;
-                if (stoked) {
-                    forge.stokeTicks--;
-                    if (forge.stokeTicks == 0) {
-                        sync = true;
-                    }
-                }
+                forge.meltProgress++;
                 changed = true;
                 sync |= level.getGameTime() % 10L == 0L;
                 int requiredTicks = forge.currentMeltTicks();
@@ -176,23 +165,6 @@ public class FoundryForgeBlockEntity extends BlockEntity {
 
     public boolean isLit() {
         return formed && burnTime > 0;
-    }
-
-    public boolean isStoked() {
-        return stokeTicks > 0;
-    }
-
-    public int stokeTicksRemaining() {
-        return stokeTicks;
-    }
-
-    public boolean stoke() {
-        if (!formed || stokeTicks >= MAX_STOKE_TICKS) {
-            return false;
-        }
-        stokeTicks = Math.min(MAX_STOKE_TICKS, stokeTicks + STOKE_TICKS_PER_BLAZE_POWDER);
-        sync();
-        return true;
     }
 
     public float activeFuelTemperatureC() {
@@ -604,11 +576,11 @@ public class FoundryForgeBlockEntity extends BlockEntity {
         appendMolten(meltPlan.material(), meltPlan.amountMb());
         if (level != null && !level.isClientSide) {
             level.playSound(null, worldPosition, SoundEvents.BLASTFURNACE_FIRE_CRACKLE,
-                    SoundSource.BLOCKS, 0.7F, isStoked() ? 1.2F : 0.9F);
+                    SoundSource.BLOCKS, 0.7F, 0.9F);
             if (level instanceof ServerLevel serverLevel) {
                 serverLevel.sendParticles(ParticleTypes.LAVA,
                         worldPosition.getX() + 0.5D, worldPosition.getY() + 0.7D, worldPosition.getZ() + 0.5D,
-                        isStoked() ? 5 : 3, 0.2D, 0.08D, 0.2D, 0.0D);
+                        3, 0.2D, 0.08D, 0.2D, 0.0D);
             }
         }
         return true;
@@ -833,7 +805,6 @@ public class FoundryForgeBlockEntity extends BlockEntity {
             tag.putString(ACTIVE_FUEL_TAG, activeFuel.toString());
         }
         tag.putInt(MELT_PROGRESS_TAG, meltProgress);
-        tag.putInt(STOKE_TICKS_TAG, stokeTicks);
         tag.putBoolean(FORMED_TAG, formed);
         tag.putInt(INTERIOR_MIN_X_TAG, interiorMin.getX());
         tag.putInt(INTERIOR_MIN_Y_TAG, interiorMin.getY());
@@ -893,7 +864,6 @@ public class FoundryForgeBlockEntity extends BlockEntity {
             activeFuel = null;
         }
         meltProgress = Math.max(0, tag.getInt(MELT_PROGRESS_TAG));
-        stokeTicks = Math.max(0, Math.min(MAX_STOKE_TICKS, tag.getInt(STOKE_TICKS_TAG)));
         formed = tag.getBoolean(FORMED_TAG);
         interiorMin = new BlockPos(tag.getInt(INTERIOR_MIN_X_TAG), tag.getInt(INTERIOR_MIN_Y_TAG), tag.getInt(INTERIOR_MIN_Z_TAG));
         interiorMax = new BlockPos(tag.getInt(INTERIOR_MAX_X_TAG), tag.getInt(INTERIOR_MAX_Y_TAG), tag.getInt(INTERIOR_MAX_Z_TAG));
@@ -1017,7 +987,6 @@ public class FoundryForgeBlockEntity extends BlockEntity {
             tag.putString(ACTIVE_FUEL_TAG, activeFuel.toString());
         }
         tag.putInt(MELT_PROGRESS_TAG, meltProgress);
-        tag.putInt(STOKE_TICKS_TAG, stokeTicks);
         tag.putBoolean(FORMED_TAG, formed);
         tag.putInt(INTERIOR_MIN_X_TAG, interiorMin.getX());
         tag.putInt(INTERIOR_MIN_Y_TAG, interiorMin.getY());
@@ -1061,7 +1030,6 @@ public class FoundryForgeBlockEntity extends BlockEntity {
         activeFuelTemperatureC = Math.max(0.0F, tag.getFloat(FUEL_TEMPERATURE_C_TAG));
         activeFuel = ResourceLocation.tryParse(tag.getString(ACTIVE_FUEL_TAG));
         meltProgress = Math.max(0, tag.getInt(MELT_PROGRESS_TAG));
-        stokeTicks = Math.max(0, Math.min(MAX_STOKE_TICKS, tag.getInt(STOKE_TICKS_TAG)));
         formed = tag.getBoolean(FORMED_TAG);
         interiorMin = new BlockPos(tag.getInt(INTERIOR_MIN_X_TAG), tag.getInt(INTERIOR_MIN_Y_TAG), tag.getInt(INTERIOR_MIN_Z_TAG));
         interiorMax = new BlockPos(tag.getInt(INTERIOR_MAX_X_TAG), tag.getInt(INTERIOR_MAX_Y_TAG), tag.getInt(INTERIOR_MAX_Z_TAG));

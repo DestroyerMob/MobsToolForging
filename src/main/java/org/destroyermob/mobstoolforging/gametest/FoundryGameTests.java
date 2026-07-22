@@ -81,36 +81,6 @@ public final class FoundryGameTests {
     }
 
     @GameTest(template = "station_work_completion", timeoutTicks = 20)
-    public static void blazePowderStokingDoublesThroughputAndFuelBurn(GameTestHelper helper) {
-        buildMinimalFoundry(helper);
-        FoundryForgeBlockEntity forge = helper.getBlockEntity(CONTROLLER_POS);
-        FoundryFuelTankBlockEntity tank = helper.getBlockEntity(new BlockPos(0, 1, 1));
-        helper.assertTrue(forge.refreshStructure(), "Stoking test foundry did not form");
-        helper.assertTrue(tank.acceptLavaBucket(), "Stoking test tank rejected lava");
-        helper.assertTrue(forge.acceptSolid(new ItemStack(Items.IRON_INGOT)) == 1,
-                "Stoking test foundry rejected iron");
-        helper.assertTrue(forge.stoke(), "Formed foundry rejected blaze-powder stoking");
-        helper.assertTrue(forge.stokeTicksRemaining() == FoundryForgeBlockEntity.STOKE_TICKS_PER_BLAZE_POWDER,
-                "One stoke did not add the configured boost time");
-
-        for (int tick = 0; tick < 199; tick++) {
-            FoundryForgeBlockEntity.serverTick(helper.getLevel(), forge.getBlockPos(), forge.getBlockState(), forge);
-        }
-        helper.assertTrue(forge.solidItemCount() == 1, "Stoked iron melted before half its normal duration");
-        FoundryForgeBlockEntity.serverTick(helper.getLevel(), forge.getBlockPos(), forge.getBlockState(), forge);
-        helper.assertTrue(forge.solidItemCount() == 0, "Stoked iron did not melt in half its normal duration");
-        helper.assertTrue(forge.moltenAmount(MaterialCatalog.IRON) == FoundryForgeBlockEntity.INGOT_MB,
-                "Stoked melting changed the metal yield");
-        helper.assertTrue(forge.stokeTicksRemaining()
-                        == FoundryForgeBlockEntity.STOKE_TICKS_PER_BLAZE_POWDER - 200,
-                "Stoke time did not count only active processing ticks");
-        int remainingBurnTicks = forge.saveWithoutMetadata(helper.getLevel().registryAccess()).getInt("BurnTime");
-        helper.assertTrue(remainingBurnTicks <= 2002 && remainingBurnTicks >= 2000,
-                "Stoked melting did not consume fuel at twice the normal rate");
-        helper.succeed();
-    }
-
-    @GameTest(template = "station_work_completion", timeoutTicks = 20)
     public static void brokenOrForeignFoundryWallPreventsHeating(GameTestHelper helper) {
         buildMinimalFoundry(helper);
         FoundryForgeBlockEntity forge = helper.getBlockEntity(CONTROLLER_POS);

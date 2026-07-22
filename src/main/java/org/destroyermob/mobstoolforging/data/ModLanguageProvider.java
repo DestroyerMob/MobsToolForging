@@ -493,8 +493,6 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.foundry_lava_use_tank", "Add lava to a Foundry Fuel Tank in the foundry wall.");
         add("message.mobstoolforging.foundry_input_added", "%s metal items added; %s solid items are stored.");
         add("message.mobstoolforging.foundry_input_full", "The foundry is full (%s/%s mB reserved).");
-        add("message.mobstoolforging.foundry_stoked", "Foundry stoked for %s seconds: melting speed and fuel use are doubled.");
-        add("message.mobstoolforging.foundry_stoke_full", "The foundry is already stoked to its %s-second limit.");
         add("message.mobstoolforging.foundry_unformed", "Incomplete foundry: build an interior blackstone floor and four blackstone wall faces behind the controller, then leave the top open.");
         add("message.mobstoolforging.foundry_inspect", "Foundry %sx%sx%s: %s solids, %s/%s mB molten, %s mB fuel — %s");
         add("message.mobstoolforging.foundry_structure.complete", "Foundry structure complete.");
@@ -520,9 +518,6 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.foundry_operation.too_cool", "Too cool: fuel reaches %s; this input needs %s.");
         add("message.mobstoolforging.foundry_operation.starting", "Fuel available: melting will begin momentarily.");
         add("message.mobstoolforging.foundry_operation.melting", "Melting: %s%% complete.");
-        add("message.mobstoolforging.foundry_operation.melting_stoked", "Stoked melting: %s%% complete, %ss boost remaining.");
-        add("message.mobstoolforging.foundry_operation.stoked_idle", "Stoked for %ss: add metal to use the boost.");
-        add("message.mobstoolforging.foundry_operation.stoked_ready_to_pour", "Stoked for %ss; molten metal is ready to pour.");
         add("message.mobstoolforging.foundry_faucet.opened", "Faucet opened: pouring %s.");
         add("message.mobstoolforging.foundry_faucet.closed", "Faucet closed.");
         add("message.mobstoolforging.foundry_faucet.needs_drain", "Attach this faucet to the outside face of a Foundry Drain.");
@@ -537,7 +532,6 @@ public class ModLanguageProvider extends LanguageProvider {
         add("message.mobstoolforging.foundry_drain_empty", "empty");
         add("message.mobstoolforging.foundry_drain_status", "Foundry drain: %s mB of %s at the bottom.");
         add("message.mobstoolforging.foundry_drain_unconnected", "This drain is not part of a formed foundry.");
-        add("jade.mobstoolforging.foundry_stoked", "Stoked: 2× speed and fuel use (%s remaining)");
         add("advancement.mobstoolforging.foundry.root.title", "Foundry Engineering");
         add("advancement.mobstoolforging.foundry.root.description", "Build a Foundry Forge and begin large-scale metallurgy.");
         add("advancement.mobstoolforging.foundry.first_cast.title", "Reusable Production");
@@ -546,8 +540,6 @@ public class ModLanguageProvider extends LanguageProvider {
         add("advancement.mobstoolforging.foundry.bronze_age.description", "Alloy copper and tin, then cast a bronze ingot.");
         add("advancement.mobstoolforging.foundry.steel_age.title", "Steel Yourself");
         add("advancement.mobstoolforging.foundry.steel_age.description", "Add carbon to molten iron and cast a steel ingot.");
-        add("advancement.mobstoolforging.foundry.stoked.title", "Fan the Flames");
-        add("advancement.mobstoolforging.foundry.stoked.description", "Use blaze powder to stoke a formed foundry.");
         add("advancement.mobstoolforging.foundry.netherite_mastery.title", "Master of the Foundry");
         add("advancement.mobstoolforging.foundry.netherite_mastery.description", "Reach netherite after mastering reusable casting and steel.");
         add("message.mobstoolforging.reforge_part_placed", "Heated metal part placed for reforging.");

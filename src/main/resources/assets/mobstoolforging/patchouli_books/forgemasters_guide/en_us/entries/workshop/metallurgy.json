@@ -26,11 +26,6 @@
     },
     {
       "type": "patchouli:text",
-      "title": "Stoking the Foundry",
-      "text": "Use $(bold)Blaze Powder$() on a formed Foundry Forge to stoke it for one minute of active processing. A stoked foundry melts at $(bold)twice the speed$() and burns fuel twice as quickly, so throughput improves without changing fuel efficiency.$(p)Up to four minutes can be stored. The boost only counts down while metal is actually melting, and the controller or Jade shows the remaining time."
-    },
-    {
-      "type": "patchouli:text",
       "title": "Draining and Casting",
       "text": "Install a $(bold)Foundry Drain$() in a wall, attach a Faucet to its outside face, and place a Casting Table or Basin directly below.$(p)An empty table pours ingots; an empty basin pours storage blocks. To make a reusable Gold Cast, place a finished part on a table and pour gold over it. Put that cast back on the table to pour crude metal parts.$(p)The bottom molten layer always pours first. Use the faucet or Jade tooltip to learn why a pour is stalled."
     },
@@ -57,7 +52,7 @@
     {
       "type": "patchouli:text",
       "title": "Foundry Progression",
-      "text": "The Foundry Engineering advancement tree follows the intended route: build the controller, create a reusable gold cast, master bronze and steel, stoke the furnace with blaze powder, then complete netherite metallurgy.$(p)Bronze is the accessible bulk alloy, steel rewards carbon management, and netherite remains the late-game goal because one ingot still requires four scraps and four gold ingots."
+      "text": "The Foundry Engineering advancement tree follows the intended route: build the controller, create a reusable gold cast, master bronze and steel, then complete netherite metallurgy.$(p)Bronze is the accessible bulk alloy, steel rewards carbon management, and netherite remains the late-game goal because one ingot still requires four scraps and four gold ingots."
     }
   ]
 }
